@@ -1,0 +1,18 @@
+Still
+Copyright 2026 ANQ
+
+This product includes third-party software and model weights.
+
+FluidAudio
+  https://github.com/FluidInference/FluidAudio
+  Copyright FluidInference contributors
+  Licensed under the Apache License, Version 2.0
+  https://www.apache.org/licenses/LICENSE-2.0
+
+Parakeet TDT 0.6B V3 (Core ML conversion)
+  https://huggingface.co/FluidInference/parakeet-tdt-0.6b-v3-coreml
+  Converted from https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3
+  Copyright NVIDIA Corporation
+  Licensed under the Creative Commons Attribution 4.0 International License
+  https://creativecommons.org/licenses/by/4.0/
+  The weights were not modified beyond conversion to Core ML and quantization.
