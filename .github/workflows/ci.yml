@@ -1,0 +1,57 @@
+name: Build and test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  XCODE_VERSION: "26.6"
+  RESULT_BUNDLE: ${{ github.workspace }}/Artifacts/StillTests.xcresult
+
+jobs:
+  verify:
+    name: Build iOS and macOS, run tests
+    runs-on: macos-26
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Select Xcode
+        run: sudo xcode-select --switch /Applications/Xcode_${XCODE_VERSION}.app
+
+      - name: Generate project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Build iOS
+        run: |
+          xcodebuild build \
+            -project Still.xcodeproj \
+            -scheme Still-iOS \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Test macOS
+        run: |
+          xcodebuild test \
+            -project Still.xcodeproj \
+            -scheme Still-macOS \
+            -destination 'platform=macOS,arch=arm64' \
+            -parallel-testing-enabled NO \
+            -resultBundlePath "$RESULT_BUNDLE" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: still-test-results
+          path: ${{ env.RESULT_BUNDLE }}
+          if-no-files-found: error
