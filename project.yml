@@ -20,6 +20,9 @@ targets:
         CFBundleDisplayName: Still
         NSMicrophoneUsageDescription: Still uses the microphone to transcribe a meeting on this device.
         NSSpeechRecognitionUsageDescription: Still turns speech into text on this device.
+        NSLocalNetworkUsageDescription: Still syncs directly with your other devices on this network when you turn on nearby sync.
+        NSBonjourServices:
+          - _still-sync._tcp
         UIBackgroundModes:
           - audio
         UILaunchScreen: {}
@@ -57,6 +60,7 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: Still
         INFOPLIST_KEY_NSMicrophoneUsageDescription: Still uses the microphone to transcribe a meeting on this device.
         INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: Still turns speech into text on this device.
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Still syncs directly with your other devices on this network when you turn on nearby sync.
         CODE_SIGN_ENTITLEMENTS: Still/Still.entitlements
         ENABLE_APP_SANDBOX: YES
         ENABLE_HARDENED_RUNTIME: YES
