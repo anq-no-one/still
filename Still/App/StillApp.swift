@@ -3,25 +3,34 @@ import SwiftUI
 
 @main
 struct StillApp: App {
-    private let modelContainer: ModelContainer
+    private let library: Library
 
     init() {
+        let container: ModelContainer
         do {
-            modelContainer = try ModelContainer(for: Meeting.self)
+            container = try ModelContainer(for: EncryptedRecording.self)
         } catch {
-            fatalError("Unable to open the local meeting library: \(error.localizedDescription)")
+            fatalError("Unable to open the local Library store.")
         }
+
+        let context = ModelContext(container)
+        library = Library(
+            keyRing: LibraryKeyRing(source: KeychainDeviceKeySource()),
+            makeRepository: { key in
+                MainActor.assumeIsolated {
+                    EncryptedRecordingRepository(context: context, key: key)
+                }
+            }
+        )
     }
 
     var body: some Scene {
         WindowGroup {
-            MeetingLibraryView()
+            LibraryView(library: library)
         }
-        .modelContainer(modelContainer)
 
         #if os(macOS)
         .defaultSize(width: 980, height: 680)
         #endif
     }
 }
-

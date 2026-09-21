@@ -1,6 +1,6 @@
 import Foundation
 
-enum MeetingTitle {
+enum RecordingTitle {
     static func from(transcript: String, date: Date = .now, calendar: Calendar = .current) -> String {
         let words = transcript
             .split(whereSeparator: \Character.isWhitespace)

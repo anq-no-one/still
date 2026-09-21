@@ -14,7 +14,7 @@ final class RecordingWorkflow {
     }
 
     private let session: TranscriptionSession
-    private let library: MeetingLibrary
+    private let library: RecordingLibrary
     private let now: () -> Date
 
     private var startedAt: Date?
@@ -22,7 +22,7 @@ final class RecordingWorkflow {
 
     private(set) var state: State = .idle
 
-    init(session: TranscriptionSession, library: MeetingLibrary, now: @escaping () -> Date = Date.init) {
+    init(session: TranscriptionSession, library: RecordingLibrary, now: @escaping () -> Date = Date.init) {
         self.session = session
         self.library = library
         self.now = now
@@ -74,15 +74,19 @@ final class RecordingWorkflow {
         }
 
         let startedAt = startedAt ?? now()
-        library.add(
-            Meeting(
-                title: MeetingTitle.from(transcript: transcript, date: startedAt),
-                transcript: transcript,
-                createdAt: startedAt,
-                duration: elapsed
+        do {
+            try library.add(
+                Recording(
+                    title: RecordingTitle.from(transcript: transcript, date: startedAt),
+                    transcript: transcript,
+                    createdAt: startedAt,
+                    duration: elapsed
+                )
             )
-        )
-        state = .saved
+            state = .saved
+        } catch {
+            state = .failed(error.localizedDescription)
+        }
     }
 
     func cancel() {

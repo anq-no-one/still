@@ -1,9 +1,9 @@
-import SwiftData
 import SwiftUI
 
-struct RecordingView: View {
+struct CaptureView: View {
+    let library: Library
+
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
     @State private var workflow: RecordingWorkflow?
     @State private var tick = Date.now
 
@@ -14,7 +14,7 @@ struct RecordingView: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text(elapsed.meetingDurationText)
+                Text(elapsed.recordingDurationText)
                     .font(.system(.body, design: .monospaced, weight: .semibold))
             }
 
@@ -46,9 +46,8 @@ struct RecordingView: View {
 
                 Spacer()
 
-                Button("Save meeting", systemImage: "stop.fill") {
-                    workflow?.save()
-                    dismiss()
+                Button("Save recording", systemImage: "stop.fill") {
+                    save()
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(workflow?.canSave != true)
@@ -58,10 +57,7 @@ struct RecordingView: View {
         .frame(minWidth: 420, idealWidth: 560, minHeight: 480)
         .interactiveDismissDisabled(isCapturing)
         .task {
-            let workflow = RecordingWorkflow(
-                session: LiveTranscriber(),
-                library: SwiftDataMeetingLibrary(context: modelContext)
-            )
+            let workflow = RecordingWorkflow(session: LiveTranscriber(), library: library)
             self.workflow = workflow
             await workflow.start()
         }
@@ -92,5 +88,14 @@ struct RecordingView: View {
     private var failureMessage: String? {
         if case .failed(let message) = workflow?.state { return message }
         return nil
+    }
+
+    private func save() {
+        guard let workflow else { return }
+
+        workflow.save()
+        if workflow.state == .saved {
+            dismiss()
+        }
     }
 }

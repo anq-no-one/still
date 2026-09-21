@@ -1,13 +1,11 @@
 import Foundation
-import SwiftData
 
-@Model
-final class Meeting {
-    var id: UUID
+struct Recording: Identifiable, Equatable, Sendable {
+    let id: UUID
     var title: String
     var transcript: String
-    var createdAt: Date
-    var duration: TimeInterval
+    let createdAt: Date
+    let duration: TimeInterval
 
     init(
         id: UUID = UUID(),
@@ -23,4 +21,3 @@ final class Meeting {
         self.duration = duration
     }
 }
-

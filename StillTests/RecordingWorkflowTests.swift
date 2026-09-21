@@ -27,7 +27,7 @@ struct RecordingWorkflowTests {
     @Test
     func savesHeardSpeechIntoLibrary() async throws {
         let session = FakeTranscriptionSession()
-        let library = SpyMeetingLibrary()
+        let library = SpyRecordingLibrary()
         let clock = StubClock(start: Date(timeIntervalSince1970: 1_000))
         let workflow = makeWorkflow(session: session, library: library, clock: clock)
 
@@ -37,26 +37,26 @@ struct RecordingWorkflowTests {
         workflow.save()
 
         #expect(workflow.state == .saved)
-        #expect(library.meetings.count == 1)
-        let meeting = try #require(library.meetings.first)
-        #expect(meeting.transcript == "Ship the private beta on Friday")
-        #expect(meeting.title == "Ship the private beta on Friday")
-        #expect(meeting.createdAt == Date(timeIntervalSince1970: 1_000))
-        #expect(meeting.duration == 90)
+        #expect(library.recordings.count == 1)
+        let recording = try #require(library.recordings.first)
+        #expect(recording.transcript == "Ship the private beta on Friday")
+        #expect(recording.title == "Ship the private beta on Friday")
+        #expect(recording.createdAt == Date(timeIntervalSince1970: 1_000))
+        #expect(recording.duration == 90)
         #expect(session.isRecording == false)
     }
 
     @Test
     func refusesToSaveSilence() async {
         let session = FakeTranscriptionSession()
-        let library = SpyMeetingLibrary()
+        let library = SpyRecordingLibrary()
         let workflow = makeWorkflow(session: session, library: library)
 
         await workflow.start()
         session.transcript = "   "
         workflow.save()
 
-        #expect(library.meetings.isEmpty)
+        #expect(library.recordings.isEmpty)
         #expect(workflow.canSave == false)
         #expect(workflow.state == .failed(RecordingWorkflowError.emptyTranscript.localizedDescription))
     }
@@ -64,14 +64,14 @@ struct RecordingWorkflowTests {
     @Test
     func cancellingKeepsLibraryUnchanged() async {
         let session = FakeTranscriptionSession()
-        let library = SpyMeetingLibrary()
+        let library = SpyRecordingLibrary()
         let workflow = makeWorkflow(session: session, library: library)
 
         await workflow.start()
         session.transcript = "Discarded thought"
         workflow.cancel()
 
-        #expect(library.meetings.isEmpty)
+        #expect(library.recordings.isEmpty)
         #expect(session.isRecording == false)
         #expect(workflow.state == .idle)
     }
@@ -93,7 +93,7 @@ struct RecordingWorkflowTests {
 
     private func makeWorkflow(
         session: FakeTranscriptionSession = FakeTranscriptionSession(),
-        library: SpyMeetingLibrary = SpyMeetingLibrary(),
+        library: SpyRecordingLibrary = SpyRecordingLibrary(),
         clock: StubClock = StubClock(start: Date(timeIntervalSince1970: 0))
     ) -> RecordingWorkflow {
         RecordingWorkflow(session: session, library: library, now: clock.now)
@@ -117,11 +117,11 @@ final class FakeTranscriptionSession: TranscriptionSession {
 }
 
 @MainActor
-final class SpyMeetingLibrary: MeetingLibrary {
-    private(set) var meetings: [Meeting] = []
+final class SpyRecordingLibrary: RecordingLibrary {
+    private(set) var recordings: [Recording] = []
 
-    func add(_ meeting: Meeting) {
-        meetings.append(meeting)
+    func add(_ recording: Recording) throws {
+        recordings.append(recording)
     }
 }
 
