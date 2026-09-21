@@ -120,6 +120,75 @@ final class Library: RecordingLibrary {
         )
     }
 
+    func makeRecoveryCode() throws -> RecoveryCode {
+        guard let key else { throw LibraryError.locked }
+
+        return try keyRing.makeRecoveryCode(for: key)
+    }
+
+    func restore(using code: RecoveryCode) async -> Bool {
+        do {
+            let key = try keyRing.restore(using: code)
+            let repository = services.makeRepository(key)
+            recordings = try repository.load()
+            self.repository = repository
+            self.key = key
+            state = .unlocked
+            return true
+        } catch {
+            state = .failed(error.localizedDescription)
+            return false
+        }
+    }
+
+    /// Rotating re-seals everything under a key a revoked device never held, so
+    /// nothing written afterwards opens with the material it kept.
+    func revokeOtherDevices(reason: String = "Rotate your Still Library key") async throws {
+        guard let oldKey = key, let repository else { throw LibraryError.locked }
+
+        let newKey = try await keyRing.rotate(reason: reason)
+        let oldCipher = LibraryCipher(key: oldKey)
+        let newCipher = LibraryCipher(key: newKey)
+
+        for recording in recordings {
+            for track in tracks(forRecording: recording.id) {
+                try reseal(recording.id, track: track, from: oldCipher, to: newCipher)
+            }
+        }
+
+        let newRepository = services.makeRepository(newKey)
+        for recording in recordings {
+            try newRepository.save(recording)
+        }
+
+        _ = repository
+        self.repository = newRepository
+        key = newKey
+    }
+
+    private func reseal(
+        _ recordingID: UUID,
+        track: AudioTrack,
+        from oldCipher: LibraryCipher,
+        to newCipher: LibraryCipher
+    ) throws {
+        let directory = AudioChunkStore.trackDirectory(
+            forRecording: recordingID,
+            track: track,
+            in: services.audioRoot
+        )
+
+        let manifest = try AudioChunkStore.manifest(in: directory, cipher: oldCipher)
+        try newCipher.seal(try JSONEncoder().encode(manifest))
+            .write(to: AudioChunkStore.manifestURL(in: directory), options: .atomic)
+
+        for index in AudioChunkStore.chunkIndices(forRecording: recordingID, track: track, in: services.audioRoot) {
+            let url = AudioChunkStore.chunkURL(in: directory, index: index)
+            let plaintext = try oldCipher.open(try Data(contentsOf: url))
+            try newCipher.seal(plaintext).write(to: url, options: .atomic)
+        }
+    }
+
     func sealForSync(_ recording: Recording) throws -> Data {
         guard let key else { throw LibraryError.locked }
 

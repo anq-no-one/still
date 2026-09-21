@@ -7,6 +7,7 @@ struct KeychainDeviceKeySource: DeviceKeySource {
     private let service: String
     private let deviceKeyAccount = "library-device-key"
     private let masterKeyAccount = "library-master-key"
+    private let recoveryAccount = "library-recovery"
 
     init(service: String = "com.andrii.still.library") {
         self.service = service
@@ -31,6 +32,21 @@ struct KeychainDeviceKeySource: DeviceKeySource {
 
     func store(wrappedMasterKey: Data) throws {
         try write(wrappedMasterKey, account: masterKeyAccount, accessControl: nil)
+    }
+
+    func recoveryBundle() throws -> RecoveryBundle? {
+        guard let data = try read(account: recoveryAccount, context: nil) else { return nil }
+        return try? JSONDecoder().decode(RecoveryBundle.self, from: data)
+    }
+
+    func store(recoveryBundle: RecoveryBundle) throws {
+        try write(try JSONEncoder().encode(recoveryBundle), account: recoveryAccount, accessControl: nil)
+    }
+
+    func rotateDeviceKey() throws -> SymmetricKey {
+        let key = SymmetricKey(size: .bits256)
+        try writeDeviceKey(key.rawBytes)
+        return key
     }
 
     private func readDeviceKey(context: LAContext) throws -> Data? {

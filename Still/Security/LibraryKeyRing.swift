@@ -5,6 +5,9 @@ protocol DeviceKeySource: Sendable {
     func deviceKey(reason: String) async throws -> SymmetricKey
     func wrappedMasterKey() throws -> Data?
     func store(wrappedMasterKey: Data) throws
+    func recoveryBundle() throws -> RecoveryBundle?
+    func store(recoveryBundle: RecoveryBundle) throws
+    func rotateDeviceKey() throws -> SymmetricKey
 }
 
 struct LibraryKeyRing {
@@ -30,12 +33,46 @@ struct LibraryKeyRing {
         try source.store(wrappedMasterKey: try wrapping.seal(master.rawBytes))
         return master
     }
+
+    /// Writing the code down is the only copy the user gets; Still keeps the
+    /// wrapped key, never the code.
+    func makeRecoveryCode(for master: SymmetricKey) throws -> RecoveryCode {
+        let code = RecoveryCode.generate()
+        var salt = Data(count: 32)
+        salt.withUnsafeMutableBytes { _ = SecRandomCopyBytes(kSecRandomDefault, 32, $0.baseAddress!) }
+
+        try source.store(
+            recoveryBundle: RecoveryBundle(
+                salt: salt,
+                wrappedMasterKey: try LibraryCipher(key: code.derivedKey(salt: salt)).seal(master.rawBytes)
+            )
+        )
+        return code
+    }
+
+    func restore(using code: RecoveryCode) throws -> SymmetricKey {
+        guard let bundle = try source.recoveryBundle() else { throw LibraryKeyError.unrecoverable }
+        guard let bytes = try? LibraryCipher(key: code.derivedKey(salt: bundle.salt)).open(bundle.wrappedMasterKey)
+        else { throw LibraryKeyError.unrecoverable }
+
+        return SymmetricKey(data: bytes)
+    }
+
+    /// Rotation gives a new master key and a device key that a revoked device
+    /// never held, so nothing written afterwards opens with the old material.
+    func rotate(reason: String) async throws -> SymmetricKey {
+        let deviceKey = try source.rotateDeviceKey()
+        let master = SymmetricKey(size: .bits256)
+        try source.store(wrappedMasterKey: try LibraryCipher(key: deviceKey).seal(master.rawBytes))
+        return master
+    }
 }
 
 enum LibraryKeyError: LocalizedError, Equatable {
     case authenticationCancelled
     case authenticationUnavailable
     case unreadableKeyMaterial
+    case unrecoverable
     case keychainFailure(OSStatus)
 
     var errorDescription: String? {
@@ -46,6 +83,8 @@ enum LibraryKeyError: LocalizedError, Equatable {
             "This device cannot authenticate you right now, so the Library stays locked."
         case .unreadableKeyMaterial:
             "Still cannot unlock the Library with the key stored on this device. Your recordings are untouched."
+        case .unrecoverable:
+            "That recovery code does not open this Library, and Still has no other way in. Encryption has no back door."
         case .keychainFailure:
             "Still cannot reach the device keychain, so the Library stays locked."
         }

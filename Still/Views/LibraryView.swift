@@ -13,6 +13,7 @@ struct LibraryView: View {
     @State private var isSettingUpModel = false
     @State private var isShowingPro = false
     @State private var isShowingSync = false
+    @State private var isShowingSecurity = false
     @State private var actionError: String?
     @State private var query = ""
     @State private var evidenceTime: TimeInterval?
@@ -62,6 +63,12 @@ struct LibraryView: View {
                     }
                 }
 
+                ToolbarItem {
+                    Button("Keys and devices", systemImage: "key") {
+                        isShowingSecurity = true
+                    }
+                }
+
                 ToolbarItem(placement: .primaryAction) {
                     Button(coordinator.isRecording ? "Recording" : "Record", systemImage: "record.circle") {
                         isCapturing = true
@@ -99,6 +106,9 @@ struct LibraryView: View {
         }
         .sheet(isPresented: $isShowingSync) {
             SyncSettingsView(engine: sync, entitlements: entitlements)
+        }
+        .sheet(isPresented: $isShowingSecurity) {
+            SecuritySettingsView(library: library)
         }
         .alert("Still could not finish that", isPresented: showsActionError) {
             Button("OK", role: .cancel) { actionError = nil }
