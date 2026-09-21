@@ -213,6 +213,34 @@ enum AudioChunkStore {
         }
     }
 
+    static func chunkIndices(forRecording id: UUID, track: AudioTrack, in root: URL) -> [Int] {
+        let directory = trackDirectory(forRecording: id, track: track, in: root)
+        let urls = (try? chunkURLs(in: directory)) ?? []
+        return urls.compactMap { Int($0.deletingPathExtension().lastPathComponent) }.sorted()
+    }
+
+    static func sealedChunk(forRecording id: UUID, track: AudioTrack, index: Int, in root: URL) throws -> Data {
+        try Data(contentsOf: chunkURL(in: trackDirectory(forRecording: id, track: track, in: root), index: index))
+    }
+
+    static func sealedManifest(forRecording id: UUID, track: AudioTrack, in root: URL) throws -> Data {
+        try Data(contentsOf: manifestURL(in: trackDirectory(forRecording: id, track: track, in: root)))
+    }
+
+    /// Writes are addressed by index, so a repeated or out-of-order delivery
+    /// lands in the same place and changes nothing.
+    static func writeSealed(_ data: Data, forRecording id: UUID, track: AudioTrack, part: AudioChunkPart, in root: URL) throws {
+        let directory = trackDirectory(forRecording: id, track: track, in: root)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+
+        switch part {
+        case .manifest:
+            try data.write(to: manifestURL(in: directory), options: .atomic)
+        case .chunk(let index):
+            try data.write(to: chunkURL(in: directory, index: index), options: .atomic)
+        }
+    }
+
     static func discard(_ directory: URL) throws {
         try FileManager.default.removeItem(at: directory)
     }
@@ -223,7 +251,7 @@ enum AudioChunkStore {
         }
     }
 
-    private static func chunkURLs(in directory: URL) throws -> [URL] {
+    static func chunkURLs(in directory: URL) throws -> [URL] {
         try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
             .filter { $0.pathExtension == chunkExtension }
             .sorted { $0.lastPathComponent < $1.lastPathComponent }
