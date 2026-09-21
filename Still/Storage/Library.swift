@@ -247,8 +247,10 @@ final class Library: RecordingLibrary {
         return try JSONDecoder().decode(Recording.self, from: try LibraryCipher(key: key).open(sealed))
     }
 
+    /// Matched against every stored Recording, tombstones included, so a copy
+    /// that predates a deletion merges into it instead of arriving as new.
     func applyRemote(_ remote: Recording) throws {
-        guard let local = recordings.first(where: { $0.id == remote.id }) else {
+        guard let local = storedRecordings.first(where: { $0.id == remote.id }) else {
             try write(remote)
             return
         }

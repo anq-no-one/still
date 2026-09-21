@@ -76,11 +76,21 @@ enum RecordingMerge {
         }
     }
 
+    /// Union over the pieces rather than the whole strings. Merging is then
+    /// order-independent and repeat-safe, so devices that receive the same
+    /// changes in any order, more than once, still land on one value.
     private static func union(_ first: String, _ second: String) -> String {
         guard first != second else { return first }
         guard !first.isEmpty else { return second }
         guard !second.isEmpty else { return first }
 
-        return [first, second].sorted().joined(separator: separator)
+        let pieces = Set(parts(of: first) + parts(of: second))
+        return pieces.sorted().joined(separator: separator)
+    }
+
+    private static func parts(of text: String) -> [String] {
+        text.components(separatedBy: separator)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
     }
 }
