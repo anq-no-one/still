@@ -8,6 +8,9 @@ struct TranscriptSegment: Identifiable, Codable, Equatable, Sendable {
     let text: String
     let language: String?
     let confidence: Double?
+    /// The recognizer's text is an immutable revision. A correction is stored
+    /// beside it, so Still can always show what was actually heard.
+    var correction: String?
 
     init(
         id: UUID = UUID(),
@@ -16,7 +19,8 @@ struct TranscriptSegment: Identifiable, Codable, Equatable, Sendable {
         end: TimeInterval,
         text: String,
         language: String?,
-        confidence: Double?
+        confidence: Double?,
+        correction: String? = nil
     ) {
         self.id = id
         self.revision = revision
@@ -25,6 +29,15 @@ struct TranscriptSegment: Identifiable, Codable, Equatable, Sendable {
         self.text = text
         self.language = language
         self.confidence = confidence
+        self.correction = correction
+    }
+
+    var displayText: String {
+        correction ?? text
+    }
+
+    var isCorrected: Bool {
+        correction != nil
     }
 
     /// A recognizer that reports no confidence, or low confidence, leaves the
@@ -46,13 +59,14 @@ struct TranscriptSegment: Identifiable, Codable, Equatable, Sendable {
             end: end + seconds,
             text: text,
             language: language,
-            confidence: confidence
+            confidence: confidence,
+            correction: correction
         )
     }
 }
 
 extension Array where Element == TranscriptSegment {
     var plainText: String {
-        map(\.text).joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+        map(\.displayText).joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

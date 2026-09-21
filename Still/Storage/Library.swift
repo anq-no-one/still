@@ -70,10 +70,8 @@ final class Library: RecordingLibrary {
         try write(recording)
     }
 
-    func update(_ note: Note, for recording: Recording) throws {
-        var updated = recording
-        updated.note = note
-        try write(updated)
+    func save(_ recording: Recording) throws {
+        try write(recording)
     }
 
     func rename(_ recording: Recording, to title: String) throws {
