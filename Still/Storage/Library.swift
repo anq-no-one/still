@@ -7,6 +7,7 @@ protocol RecordingLibrary: AnyObject {
     func add(_ recording: Recording) throws
     func capturedAudio(forRecording id: UUID) throws -> (pcm: Data, format: AudioFormat)
     func checkpointStore(forRecording id: UUID) throws -> TranscriptionCheckpointStore
+    func tracks(forRecording id: UUID) -> [AudioTrack]
 }
 
 @MainActor
@@ -69,6 +70,12 @@ final class Library: RecordingLibrary {
         try write(recording)
     }
 
+    func update(_ note: Note, for recording: Recording) throws {
+        var updated = recording
+        updated.note = note
+        try write(updated)
+    }
+
     func rename(_ recording: Recording, to title: String) throws {
         var updated = recording
         updated.title = title
@@ -101,8 +108,8 @@ final class Library: RecordingLibrary {
         )
     }
 
-    func tracks(for recording: Recording) -> [AudioTrack] {
-        AudioChunkStore.tracks(forRecording: recording.id, in: services.audioRoot)
+    func tracks(forRecording id: UUID) -> [AudioTrack] {
+        AudioChunkStore.tracks(forRecording: id, in: services.audioRoot)
     }
 
     func checkpointStore(forRecording id: UUID) throws -> TranscriptionCheckpointStore {

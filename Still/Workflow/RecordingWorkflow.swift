@@ -15,6 +15,7 @@ final class RecordingWorkflow {
 
     private let session: TranscriptionSession
     private let finalTranscription: FinalTranscription
+    private let noteBuilder: GroundedNoteBuilder
     private let recorder: AudioRecorder
     private let library: RecordingLibrary
     private let showsLiveDraft: Bool
@@ -29,6 +30,7 @@ final class RecordingWorkflow {
     init(
         session: TranscriptionSession,
         finalTranscription: FinalTranscription,
+        noteBuilder: GroundedNoteBuilder = GroundedNoteBuilder(),
         recorder: AudioRecorder,
         library: RecordingLibrary,
         showsLiveDraft: Bool,
@@ -36,6 +38,7 @@ final class RecordingWorkflow {
     ) {
         self.session = session
         self.finalTranscription = finalTranscription
+        self.noteBuilder = noteBuilder
         self.recorder = recorder
         self.library = library
         self.showsLiveDraft = showsLiveDraft
@@ -118,6 +121,12 @@ final class RecordingWorkflow {
                 return
             }
 
+            let note = await noteBuilder.note(
+                segments: segments,
+                duration: elapsed,
+                tracks: library.tracks(forRecording: recordingID)
+            )
+
             let startedAt = startedAt ?? now()
             try library.add(
                 Recording(
@@ -125,6 +134,7 @@ final class RecordingWorkflow {
                     title: RecordingTitle.from(transcript: transcript, date: startedAt),
                     transcript: transcript,
                     segments: segments,
+                    note: note,
                     createdAt: startedAt,
                     duration: elapsed
                 )

@@ -38,7 +38,10 @@ struct RecordingDetailView: View {
                         .foregroundStyle(.red)
                 }
 
-                Divider()
+                if let note = recording.note {
+                    noteView(note)
+                    Divider()
+                }
 
                 if recording.segments.isEmpty {
                     Text(recording.transcript)
@@ -59,6 +62,42 @@ struct RecordingDetailView: View {
         .task {
             player.load((try? library.audio(for: recording)) ?? Data())
         }
+    }
+
+    @ViewBuilder
+    private func noteView(_ note: Note) -> some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Picker("Note shape", selection: templateBinding(note)) {
+                ForEach(NoteTemplate.allCases, id: \.self) { template in
+                    Text(template.title).tag(template)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            NoteSectionView(title: "Summary", items: note.summary, openEvidence: openEvidence)
+            NoteSectionView(title: "Decisions", items: note.decisions, openEvidence: openEvidence)
+            NoteSectionView(title: "Action items", items: note.actions, openEvidence: openEvidence)
+        }
+    }
+
+    private func templateBinding(_ note: Note) -> Binding<NoteTemplate> {
+        Binding(
+            get: { note.template },
+            set: { template in
+                var updated = note
+                updated.template = template
+                updated.isTemplateUserChosen = true
+                try? library.update(updated, for: recording)
+            }
+        )
+    }
+
+    private func openEvidence(_ item: NoteItem) {
+        guard let first = item.sourceSegmentIDs.first,
+              let segment = recording.segments.first(where: { $0.id == first })
+        else { return }
+
+        player.play(from: segment.start)
     }
 
     private func rename() {

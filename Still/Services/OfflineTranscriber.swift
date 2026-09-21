@@ -28,6 +28,7 @@ struct SpeechOfflineTranscriber: OfflineTranscriber {
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.requiresOnDeviceRecognition = true
         request.shouldReportPartialResults = false
+        request.addsPunctuation = true
 
         for buffer in Self.buffers(from: pcm, format: audioFormat) {
             request.append(buffer)

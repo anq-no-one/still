@@ -273,6 +273,10 @@ final class SpyRecordingLibrary: RecordingLibrary {
     func checkpointStore(forRecording id: UUID) throws -> TranscriptionCheckpointStore {
         MemoryCheckpointStore()
     }
+
+    func tracks(forRecording id: UUID) -> [AudioTrack] {
+        [.microphone]
+    }
 }
 
 final class StubOfflineTranscriber: OfflineTranscriber, @unchecked Sendable {
