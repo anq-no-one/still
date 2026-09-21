@@ -33,6 +33,7 @@ struct EncryptedRecordingRepository: RecordingRepository {
                 id: record.id,
                 title: content.title,
                 transcript: content.transcript,
+                segments: content.segments,
                 createdAt: record.createdAt,
                 duration: record.duration
             )
@@ -42,7 +43,11 @@ struct EncryptedRecordingRepository: RecordingRepository {
     func save(_ recording: Recording) throws {
         let sealed = try cipher.seal(
             try JSONEncoder().encode(
-                RecordingContent(title: recording.title, transcript: recording.transcript)
+                RecordingContent(
+                    title: recording.title,
+                    transcript: recording.transcript,
+                    segments: recording.segments
+                )
             )
         )
 

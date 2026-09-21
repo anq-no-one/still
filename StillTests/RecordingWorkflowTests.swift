@@ -39,8 +39,8 @@ struct RecordingWorkflowTests {
         #expect(workflow.state == .saved)
         #expect(library.recordings.count == 1)
         let recording = try #require(library.recordings.first)
-        #expect(recording.transcript == "Ship the private beta on Friday")
-        #expect(recording.title == "Ship the private beta on Friday")
+        #expect(recording.transcript == "Transcribed after saving")
+        #expect(recording.title == "Transcribed after saving")
         #expect(recording.createdAt == Date(timeIntervalSince1970: 1_000))
         #expect(recording.duration == 90)
         #expect(session.isRecording == false)
@@ -50,14 +50,15 @@ struct RecordingWorkflowTests {
     func refusesToSaveSilence() async {
         let session = FakeTranscriptionSession()
         let library = SpyRecordingLibrary()
-        let workflow = makeWorkflow(session: session, library: library)
+        let offlineTranscriber = StubOfflineTranscriber()
+        let workflow = makeWorkflow(session: session, library: library, offlineTranscriber: offlineTranscriber)
 
         await workflow.start()
         session.transcript = "   "
+        offlineTranscriber.result = ""
         await workflow.save()
 
         #expect(library.recordings.isEmpty)
-        #expect(workflow.canSave == false)
         #expect(workflow.state == .failed(RecordingWorkflowError.emptyTranscript.localizedDescription))
     }
 
@@ -201,7 +202,7 @@ struct RecordingWorkflowTests {
     ) -> RecordingWorkflow {
         RecordingWorkflow(
             session: session,
-            offlineTranscriber: offlineTranscriber,
+            finalTranscription: FinalTranscription(transcriber: offlineTranscriber, windowSeconds: 3_600),
             recorder: recorder,
             library: library,
             showsLiveDraft: showsLiveDraft,
@@ -268,15 +269,20 @@ final class SpyRecordingLibrary: RecordingLibrary {
     func capturedAudio(forRecording id: UUID) throws -> (pcm: Data, format: AudioFormat) {
         (capturedPCM, .transcription)
     }
+
+    func checkpointStore(forRecording id: UUID) throws -> TranscriptionCheckpointStore {
+        MemoryCheckpointStore()
+    }
 }
 
 final class StubOfflineTranscriber: OfflineTranscriber, @unchecked Sendable {
     var result = "Transcribed after saving"
     private(set) var calls = 0
 
-    func transcript(of pcm: Data, format: AudioFormat) async throws -> String {
+    func segments(of pcm: Data, format: AudioFormat) async throws -> [TranscriptSegment] {
         calls += 1
-        return result
+        guard !result.isEmpty else { return [] }
+        return [TranscriptSegment(start: 0, end: 5, text: result, language: "en", confidence: 0.9)]
     }
 }
 

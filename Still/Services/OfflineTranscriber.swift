@@ -5,11 +5,11 @@ import Speech
 /// Transcribes captured audio after a recording stops. The samples stay in
 /// memory, so no plaintext audio file is written to disk.
 protocol OfflineTranscriber: Sendable {
-    func transcript(of pcm: Data, format: AudioFormat) async throws -> String
+    func segments(of pcm: Data, format: AudioFormat) async throws -> [TranscriptSegment]
 }
 
 struct SpeechOfflineTranscriber: OfflineTranscriber {
-    func transcript(of pcm: Data, format: AudioFormat) async throws -> String {
+    func segments(of pcm: Data, format: AudioFormat) async throws -> [TranscriptSegment] {
         guard let recognizer = SFSpeechRecognizer(locale: .current), recognizer.isAvailable else {
             throw TranscriptionError.recognizerUnavailable
         }
@@ -34,6 +34,7 @@ struct SpeechOfflineTranscriber: OfflineTranscriber {
         }
         request.endAudio()
 
+        let language = recognizer.locale.identifier
         return try await withCheckedThrowingContinuation { continuation in
             var resumed = false
             recognizer.recognitionTask(with: request) { result, error in
@@ -44,7 +45,17 @@ struct SpeechOfflineTranscriber: OfflineTranscriber {
                     continuation.resume(throwing: error)
                 } else if let result, result.isFinal {
                     resumed = true
-                    continuation.resume(returning: result.bestTranscription.formattedString)
+                    continuation.resume(
+                        returning: result.bestTranscription.segments.map { segment in
+                            TranscriptSegment(
+                                start: segment.timestamp,
+                                end: segment.timestamp + segment.duration,
+                                text: segment.substring,
+                                language: language,
+                                confidence: segment.confidence > 0 ? Double(segment.confidence) : nil
+                            )
+                        }
+                    )
                 }
             }
         }

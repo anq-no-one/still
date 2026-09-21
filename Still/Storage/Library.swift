@@ -6,6 +6,7 @@ import Observation
 protocol RecordingLibrary: AnyObject {
     func add(_ recording: Recording) throws
     func capturedAudio(forRecording id: UUID) throws -> (pcm: Data, format: AudioFormat)
+    func checkpointStore(forRecording id: UUID) throws -> TranscriptionCheckpointStore
 }
 
 @MainActor
@@ -89,6 +90,16 @@ final class Library: RecordingLibrary {
 
         return try AudioChunkStore.audio(
             in: AudioChunkStore.directory(forRecording: recording.id, in: services.audioRoot),
+            cipher: LibraryCipher(key: key)
+        )
+    }
+
+    func checkpointStore(forRecording id: UUID) throws -> TranscriptionCheckpointStore {
+        guard let key else { throw LibraryError.locked }
+
+        return SealedCheckpointStore(
+            url: AudioChunkStore.directory(forRecording: id, in: services.audioRoot)
+                .appending(path: "transcript.checkpoint"),
             cipher: LibraryCipher(key: key)
         )
     }

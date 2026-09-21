@@ -19,4 +19,5 @@ final class EncryptedRecording {
 struct RecordingContent: Codable {
     var title: String
     var transcript: String
+    var segments: [TranscriptSegment] = []
 }

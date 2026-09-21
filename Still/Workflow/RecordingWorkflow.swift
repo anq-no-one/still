@@ -14,7 +14,7 @@ final class RecordingWorkflow {
     }
 
     private let session: TranscriptionSession
-    private let offlineTranscriber: OfflineTranscriber
+    private let finalTranscription: FinalTranscription
     private let recorder: AudioRecorder
     private let library: RecordingLibrary
     private let showsLiveDraft: Bool
@@ -28,14 +28,14 @@ final class RecordingWorkflow {
 
     init(
         session: TranscriptionSession,
-        offlineTranscriber: OfflineTranscriber,
+        finalTranscription: FinalTranscription,
         recorder: AudioRecorder,
         library: RecordingLibrary,
         showsLiveDraft: Bool,
         now: @escaping () -> Date = Date.init
     ) {
         self.session = session
-        self.offlineTranscriber = offlineTranscriber
+        self.finalTranscription = finalTranscription
         self.recorder = recorder
         self.library = library
         self.showsLiveDraft = showsLiveDraft
@@ -66,12 +66,7 @@ final class RecordingWorkflow {
     }
 
     var canSave: Bool {
-        guard state == .recording else { return false }
-        return usesLiveDraft ? !draftTranscript.isEmpty : elapsed > 0
-    }
-
-    private var usesLiveDraft: Bool {
-        showsLiveDraft && session.failure == nil
+        state == .recording && elapsed > 0
     }
 
     func start() async {
@@ -111,7 +106,8 @@ final class RecordingWorkflow {
 
         do {
             try recorder.finish()
-            let transcript = try await resolvedTranscript()
+            let segments = try await finalSegments()
+            let transcript = segments.plainText
             guard !transcript.isEmpty else {
                 recorder.discard()
                 state = .failed(RecordingWorkflowError.emptyTranscript.localizedDescription)
@@ -124,6 +120,7 @@ final class RecordingWorkflow {
                     id: recordingID,
                     title: RecordingTitle.from(transcript: transcript, date: startedAt),
                     transcript: transcript,
+                    segments: segments,
                     createdAt: startedAt,
                     duration: elapsed
                 )
@@ -142,13 +139,15 @@ final class RecordingWorkflow {
         state = .idle
     }
 
-    private func resolvedTranscript() async throws -> String {
-        if usesLiveDraft { return draftTranscript }
-
+    /// The live draft is a preview. The saved transcript always comes from the
+    /// journaled audio, so it carries timings and survives a failed recognizer.
+    private func finalSegments() async throws -> [TranscriptSegment] {
         let captured = try library.capturedAudio(forRecording: recordingID)
-        return try await offlineTranscriber
-            .transcript(of: captured.pcm, format: captured.format)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return try await finalTranscription.run(
+            pcm: captured.pcm,
+            format: captured.format,
+            checkpoints: try library.checkpointStore(forRecording: recordingID)
+        )
     }
 
     private var isFailed: Bool {

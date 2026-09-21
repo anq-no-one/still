@@ -62,7 +62,7 @@ struct CaptureView: View {
             do {
                 let workflow = RecordingWorkflow(
                     session: LiveTranscriber(),
-                    offlineTranscriber: SpeechOfflineTranscriber(),
+                    finalTranscription: FinalTranscription(transcriber: SpeechOfflineTranscriber()),
                     recorder: try library.makeRecorder(),
                     library: library,
                     showsLiveDraft: entitlements.allows(.liveTranscript)
