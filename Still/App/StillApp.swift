@@ -4,6 +4,7 @@ import SwiftUI
 @main
 struct StillApp: App {
     private let library: Library
+    private let modelInstaller: ModelPackInstaller
 
     init() {
         let container: ModelContainer
@@ -16,6 +17,16 @@ struct StillApp: App {
         let context = ModelContext(container)
         let audioRoot = URL.applicationSupportDirectory
             .appending(path: "Still/Audio", directoryHint: .isDirectory)
+
+        let supportRoot = URL.applicationSupportDirectory.appending(path: "Still", directoryHint: .isDirectory)
+
+        modelInstaller = MainActor.assumeIsolated {
+            ModelPackInstaller(
+                pack: ModelCatalog.parakeetV3,
+                root: supportRoot.appending(path: "Models", directoryHint: .isDirectory),
+                downloader: URLSessionModelFileDownloader()
+            )
+        }
 
         library = MainActor.assumeIsolated {
             Library(
@@ -39,7 +50,7 @@ struct StillApp: App {
 
     var body: some Scene {
         WindowGroup {
-            LibraryView(library: library)
+            LibraryView(library: library, modelInstaller: modelInstaller)
         }
 
         #if os(macOS)

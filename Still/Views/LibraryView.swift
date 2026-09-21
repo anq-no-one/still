@@ -2,9 +2,11 @@ import SwiftUI
 
 struct LibraryView: View {
     let library: Library
+    let modelInstaller: ModelPackInstaller
 
     @State private var selection: Recording.ID?
     @State private var isCapturing = false
+    @State private var isSettingUpModel = false
     @State private var actionError: String?
 
     var body: some View {
@@ -23,6 +25,12 @@ struct LibraryView: View {
                 emptyState
             }
             .toolbar {
+                ToolbarItem {
+                    Button("Set up transcription", systemImage: "waveform.badge.mic") {
+                        isSettingUpModel = true
+                    }
+                }
+
                 ToolbarItem(placement: .primaryAction) {
                     Button("Record", systemImage: "record.circle") {
                         isCapturing = true
@@ -41,6 +49,9 @@ struct LibraryView: View {
         .sheet(isPresented: $isCapturing) {
             CaptureView(library: library)
         }
+        .sheet(isPresented: $isSettingUpModel) {
+            ModelSetupView(installer: modelInstaller)
+        }
         .alert("Still could not finish that", isPresented: showsActionError) {
             Button("OK", role: .cancel) { actionError = nil }
         } message: {
@@ -48,6 +59,7 @@ struct LibraryView: View {
         }
         .task {
             await library.unlock()
+            isSettingUpModel = modelInstaller.state == .needsApproval
         }
     }
 
