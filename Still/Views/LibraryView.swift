@@ -11,18 +11,31 @@ struct LibraryView: View {
     @State private var isSettingUpModel = false
     @State private var isShowingPro = false
     @State private var actionError: String?
+    @State private var query = ""
+    @State private var evidenceTime: TimeInterval?
 
     var body: some View {
         NavigationSplitView {
-            List(library.recordings, selection: $selection) { recording in
-                RecordingRow(recording: recording)
-                    .tag(recording.id)
-                    .swipeActions {
-                        Button("Delete", systemImage: "trash", role: .destructive) {
-                            delete(recording)
-                        }
+            List(selection: $selection) {
+                if query.isEmpty {
+                    ForEach(library.recordings) { recording in
+                        RecordingRow(recording: recording)
+                            .tag(recording.id)
+                            .swipeActions {
+                                Button("Delete", systemImage: "trash", role: .destructive) {
+                                    delete(recording)
+                                }
+                            }
                     }
+                } else {
+                    ForEach(results) { result in
+                        SearchResultRow(result: result)
+                            .tag(result.recordingID)
+                            .onTapGesture { open(result) }
+                    }
+                }
             }
+            .searchable(text: $query, prompt: "Search recordings")
             .navigationTitle("Recordings")
             .overlay {
                 emptyState
@@ -53,7 +66,7 @@ struct LibraryView: View {
             }
         } detail: {
             if let recording = selected {
-                RecordingDetailView(recording: recording, library: library)
+                RecordingDetailView(recording: recording, library: library, startAt: evidenceTime)
                     .id(recording.id)
             } else {
                 PrivacyWelcomeView(startRecording: {
@@ -120,6 +133,15 @@ struct LibraryView: View {
         library.recordings.first { $0.id == selection }
     }
 
+    private var results: [SearchResult] {
+        LibrarySearch.results(for: query, in: library.recordings)
+    }
+
+    private func open(_ result: SearchResult) {
+        selection = result.recordingID
+        evidenceTime = result.time
+    }
+
     private var showsActionError: Binding<Bool> {
         Binding(get: { actionError != nil }, set: { if !$0 { actionError = nil } })
     }
@@ -130,6 +152,36 @@ struct LibraryView: View {
             try library.delete(recording)
         } catch {
             actionError = error.localizedDescription
+        }
+    }
+}
+
+private struct SearchResultRow: View {
+    let result: SearchResult
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(result.snippet)
+                .font(.body)
+                .lineLimit(3)
+
+            HStack {
+                Text(label)
+                if let time = result.time {
+                    Text(time.recordingDurationText)
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 4)
+    }
+
+    private var label: String {
+        switch result.match {
+        case .title: "Title"
+        case .transcript: "Transcript"
+        case .note: "Note"
         }
     }
 }

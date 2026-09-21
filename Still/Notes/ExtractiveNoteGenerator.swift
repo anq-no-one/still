@@ -58,10 +58,10 @@ struct ExtractiveNoteGenerator: NoteGenerator, Sendable {
 
         for segment in segments {
             if words.isEmpty { start = segment.start }
-            words.append(segment.text)
+            words.append(segment.displayText)
             ids.append(segment.id)
 
-            guard segment.text.last.map({ ".?!".contains($0) }) == true else { continue }
+            guard segment.displayText.last.map({ ".?!".contains($0) }) == true else { continue }
 
             sentences.append((words.joined(separator: " "), start, ids))
             words.removeAll()

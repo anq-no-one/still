@@ -2,14 +2,16 @@ import SwiftUI
 
 struct RecordingDetailView: View {
     let library: Library
+    let startAt: TimeInterval?
 
     @State private var editor: RecordingEditor
     @State private var player = RecordingPlayer()
     @State private var title: String
     @State private var noteText: String
 
-    init(recording: Recording, library: Library) {
+    init(recording: Recording, library: Library, startAt: TimeInterval? = nil) {
         self.library = library
+        self.startAt = startAt
         _editor = State(initialValue: RecordingEditor(recording: recording, library: library))
         _title = State(initialValue: recording.title)
         _noteText = State(initialValue: recording.note?.userText ?? "")
@@ -65,6 +67,7 @@ struct RecordingDetailView: View {
         .navigationTitle(title)
         .task {
             player.load((try? library.audio(for: recording)) ?? Data())
+            if let startAt { player.play(from: startAt) }
         }
         .onDisappear {
             editor.saveNow()
