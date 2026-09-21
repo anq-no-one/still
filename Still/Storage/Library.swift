@@ -120,6 +120,27 @@ final class Library: RecordingLibrary {
         )
     }
 
+    func sealForSync(_ recording: Recording) throws -> Data {
+        guard let key else { throw LibraryError.locked }
+
+        return try LibraryCipher(key: key).seal(try JSONEncoder().encode(recording))
+    }
+
+    func openSyncPayload(_ sealed: Data) throws -> Recording {
+        guard let key else { throw LibraryError.locked }
+
+        return try JSONDecoder().decode(Recording.self, from: try LibraryCipher(key: key).open(sealed))
+    }
+
+    func applyRemote(_ remote: Recording) throws {
+        guard let local = recordings.first(where: { $0.id == remote.id }) else {
+            try write(remote)
+            return
+        }
+
+        try write(RecordingMerge.merge(local, remote))
+    }
+
     func archive(_ recording: Recording, tracks: [AudioTrack]) throws -> Data {
         guard let key else { throw LibraryError.locked }
 

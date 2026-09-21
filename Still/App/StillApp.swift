@@ -8,6 +8,7 @@ struct StillApp: App {
     private let entitlements: Entitlements
     private let coordinator: RecordingCoordinator
     private let setup: SetupFlow
+    private let sync: SyncEngine
 
     #if os(macOS)
     @State private var shortcut: GlobalRecordingShortcut?
@@ -72,6 +73,13 @@ struct StillApp: App {
             )
         }
         library = recordingLibrary
+        sync = MainActor.assumeIsolated {
+            SyncEngine(
+                library: recordingLibrary,
+                transport: CloudKitSyncTransport(),
+                settings: UserDefaultsSyncSettings()
+            )
+        }
         coordinator = MainActor.assumeIsolated {
             RecordingCoordinator(library: recordingLibrary, entitlements: proEntitlements)
         }
@@ -84,7 +92,8 @@ struct StillApp: App {
                 modelInstaller: modelInstaller,
                 entitlements: entitlements,
                 coordinator: coordinator,
-                setup: setup
+                setup: setup,
+                sync: sync
             )
             #if os(macOS)
             .task {

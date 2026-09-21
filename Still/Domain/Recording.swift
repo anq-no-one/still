@@ -9,6 +9,7 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
     var note: Note?
     let createdAt: Date
     let duration: TimeInterval
+    var updatedAt: Date
 
     init(
         id: UUID = UUID(),
@@ -18,7 +19,8 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         speakers: [Speaker] = [],
         note: Note? = nil,
         createdAt: Date = .now,
-        duration: TimeInterval
+        duration: TimeInterval,
+        updatedAt: Date = .now
     ) {
         self.id = id
         self.title = title
@@ -28,5 +30,6 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         self.note = note
         self.createdAt = createdAt
         self.duration = duration
+        self.updatedAt = updatedAt
     }
 }

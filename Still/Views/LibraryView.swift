@@ -6,11 +6,13 @@ struct LibraryView: View {
     let entitlements: Entitlements
     let coordinator: RecordingCoordinator
     let setup: SetupFlow
+    let sync: SyncEngine
 
     @State private var selection: Recording.ID?
     @State private var isCapturing = false
     @State private var isSettingUpModel = false
     @State private var isShowingPro = false
+    @State private var isShowingSync = false
     @State private var actionError: String?
     @State private var query = ""
     @State private var evidenceTime: TimeInterval?
@@ -54,6 +56,12 @@ struct LibraryView: View {
                     }
                 }
 
+                ToolbarItem {
+                    Button("Sync", systemImage: sync.isEnabled ? "arrow.triangle.2.circlepath" : "icloud.slash") {
+                        isShowingSync = true
+                    }
+                }
+
                 ToolbarItem(placement: .primaryAction) {
                     Button(coordinator.isRecording ? "Recording" : "Record", systemImage: "record.circle") {
                         isCapturing = true
@@ -88,6 +96,9 @@ struct LibraryView: View {
         }
         .sheet(isPresented: $isShowingPro) {
             ProUnlockView(entitlements: entitlements)
+        }
+        .sheet(isPresented: $isShowingSync) {
+            SyncSettingsView(engine: sync, entitlements: entitlements)
         }
         .alert("Still could not finish that", isPresented: showsActionError) {
             Button("OK", role: .cancel) { actionError = nil }
