@@ -1,0 +1,18 @@
+import Foundation
+
+enum MeetingTitle {
+    static func from(transcript: String, date: Date = .now, calendar: Calendar = .current) -> String {
+        let words = transcript
+            .split(whereSeparator: \Character.isWhitespace)
+            .prefix(7)
+
+        guard !words.isEmpty else {
+            return date.formatted(
+                Date.FormatStyle(date: .abbreviated, time: .shortened, locale: calendar.locale ?? .current)
+            )
+        }
+
+        let title = words.joined(separator: " ")
+        return title.count > 52 ? String(title.prefix(49)) + "…" : title
+    }
+}

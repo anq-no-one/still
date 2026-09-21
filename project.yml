@@ -1,0 +1,91 @@
+name: Still
+options:
+  bundleIdPrefix: com.andrii
+  deploymentTarget:
+    iOS: "26.0"
+    macOS: "26.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    DEVELOPMENT_TEAM: ""
+targets:
+  Still-iOS:
+    type: application
+    platform: iOS
+    sources:
+      - path: Still
+    info:
+      path: Still/Supporting/iOS-Info.plist
+      properties:
+        CFBundleDisplayName: Still
+        NSMicrophoneUsageDescription: Still uses the microphone to transcribe a meeting on this device.
+        NSSpeechRecognitionUsageDescription: Still turns speech into text on this device.
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+          - UIInterfaceOrientationPortraitUpsideDown
+        "UISupportedInterfaceOrientations~ipad":
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.andrii.still
+        CODE_SIGN_ENTITLEMENTS: Still/Still.entitlements
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_HARDENED_RUNTIME: YES
+    entitlements:
+      path: Still/Still.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.device.audio-input: true
+  Still-macOS:
+    type: application
+    platform: macOS
+    sources:
+      - path: Still
+    settings:
+      base:
+        PRODUCT_NAME: Still
+        PRODUCT_BUNDLE_IDENTIFIER: com.andrii.still
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Still
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: Still uses the microphone to transcribe a meeting on this device.
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: Still turns speech into text on this device.
+        CODE_SIGN_ENTITLEMENTS: Still/Still.entitlements
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_HARDENED_RUNTIME: YES
+    entitlements:
+      path: Still/Still.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.device.audio-input: true
+  StillTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: StillTests
+    dependencies:
+      - target: Still-macOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.andrii.still.tests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Still.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Still"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+schemes:
+  Still-iOS:
+    build:
+      targets:
+        Still-iOS: all
+  Still-macOS:
+    build:
+      targets:
+        Still-macOS: all
+        StillTests: [test]
+    test:
+      targets:
+        - StillTests
