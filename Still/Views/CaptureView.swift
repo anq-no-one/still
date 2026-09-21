@@ -4,6 +4,7 @@ struct CaptureView: View {
     let coordinator: RecordingCoordinator
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var tick = Date.now
 
     var body: some View {
@@ -15,12 +16,18 @@ struct CaptureView: View {
                 Spacer()
                 Text(elapsed.recordingDurationText)
                     .font(.system(.body, design: .monospaced, weight: .semibold))
+                    .monospacedDigit()
+                    .accessibilityLabel("Recorded so far")
+                    .accessibilityValue(elapsed.recordingDurationText)
             }
 
             Image(systemName: coordinator.isRecording ? "waveform.circle.fill" : "waveform.circle")
-                .font(.system(size: 72))
+                .font(.system(.largeTitle, design: .rounded))
+                .scaleEffect(3)
+                .frame(height: 96)
                 .foregroundStyle(coordinator.isRecording ? .red : .secondary)
-                .symbolEffect(.pulse, isActive: coordinator.isRecording)
+                .symbolEffect(.pulse, isActive: coordinator.isRecording && !reduceMotion)
+                .accessibilityLabel(coordinator.isRecording ? "Recording" : "Not recording")
 
             ScrollView {
                 Text(draftText)
@@ -62,6 +69,7 @@ struct CaptureView: View {
                     }
                 }
                 .buttonStyle(.borderedProminent)
+                .keyboardShortcut(.return, modifiers: .command)
                 .disabled(!coordinator.canStop)
             }
         }

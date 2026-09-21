@@ -36,6 +36,7 @@ private struct SpeakerRow: View {
 
             TextField("Speaker name", text: $name)
                 .textFieldStyle(.plain)
+                .accessibilityLabel("Name for this speaker group")
                 .focused($isEditing)
                 .onChange(of: isEditing) { _, editing in
                     if !editing, !name.isEmpty { rename(name) }

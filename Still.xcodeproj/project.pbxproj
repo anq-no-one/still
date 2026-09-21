@@ -84,6 +84,7 @@
 		69A02230F1E3829BA04F215D /* NearbySync.swift in Sources */ = {isa = PBXBuildFile; fileRef = A19D7504927CA12A370ACCEA /* NearbySync.swift */; };
 		6ABBE4CA5956C0347F871C93 /* AutomaticRecording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E8C5C860C0BB63FF3D5816 /* AutomaticRecording.swift */; };
 		6D02CDC94FBB21CA4840CEC0 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5813DD23A9C422F9A353FFB /* AudioRecorder.swift */; };
+		6DC85F6719E38C197BAEAF97 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 568D6EA737E4E25FF1895983 /* Localizable.xcstrings */; };
 		6DF9A3ACCF4E91C511FA2FC3 /* RecordingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A0FB2D1326440786F71E81 /* RecordingRepository.swift */; };
 		6FD255D2315F13C5C28FD626 /* CloudKitSyncTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D47EAF15D354A9BBC2B6714 /* CloudKitSyncTransport.swift */; };
 		7017BFEDACEB615F0149F86B /* ExtractiveNoteGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C74A9E391AB33C57E9B9DA49 /* ExtractiveNoteGenerator.swift */; };
@@ -186,6 +187,7 @@
 		EA51102EBD72720A611E4458 /* SyncTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D23376E6C722188BB5CB9EFE /* SyncTransport.swift */; };
 		EBCDBC29591ABC1E949ADDB5 /* SyncSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C35B2C98BB8E77FD942E068A /* SyncSettingsView.swift */; };
 		ED3F66F391521996F1DB0536 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D691BA98E0575497415BFA /* LibraryView.swift */; };
+		EF4BE9324F5B4F9354614728 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 568D6EA737E4E25FF1895983 /* Localizable.xcstrings */; };
 		EFC3A43B7C44C149D21FA3FB /* ExportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB4358E75353B7A5872BE6E /* ExportTests.swift */; };
 		EFF59A773AC8A84E71FCD237 /* RecordingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C7A5B7BC74B7F1951D99F9 /* RecordingDetailView.swift */; };
 		F2B009007E7AF29359B384D8 /* NoteTemplateSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1414B043E233512D517A3FB /* NoteTemplateSelector.swift */; };
@@ -266,6 +268,7 @@
 		4886FA9723AC2955FEED6220 /* FinalTranscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinalTranscription.swift; sourceTree = "<group>"; };
 		4987DD5306D12A5318C2345A /* DiagnosticsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsSettingsView.swift; sourceTree = "<group>"; };
 		5471ADD2B500872193F4F89F /* PrivacyWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyWelcomeView.swift; sourceTree = "<group>"; };
+		568D6EA737E4E25FF1895983 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		577677FD22682F2A1B07B769 /* NetworkNearbySession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkNearbySession.swift; sourceTree = "<group>"; };
 		57C706785576B774730D5701 /* RecordingEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingEditor.swift; sourceTree = "<group>"; };
 		57DD9F47A3AF1F873326E02E /* BrowserMeetingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserMeetingTests.swift; sourceTree = "<group>"; };
@@ -364,6 +367,7 @@
 			isa = PBXGroup;
 			children = (
 				92E2291AAE80307F3DE70502 /* iOS-Info.plist */,
+				568D6EA737E4E25FF1895983 /* Localizable.xcstrings */,
 				D82252AF57447EA6F7D07F2A /* Still.storekit */,
 			);
 			path = Supporting;
@@ -807,6 +811,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EF4BE9324F5B4F9354614728 /* Localizable.xcstrings in Resources */,
 				B8DD4A1D37C715AE7A92541C /* Still.storekit in Resources */,
 				D183C27D7A745AB59982F0D5 /* iOS-Info.plist in Resources */,
 			);
@@ -826,6 +831,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6DC85F6719E38C197BAEAF97 /* Localizable.xcstrings in Resources */,
 				084DFFF38CB9BCA30570C23A /* Still.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1150,12 +1156,14 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
 			};
@@ -1292,11 +1300,13 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
 			};

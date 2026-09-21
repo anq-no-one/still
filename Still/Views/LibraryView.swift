@@ -23,6 +23,7 @@ struct LibraryView: View {
     @State private var isShowingAutomatic = false
     @State private var isShowingBrowser = false
     @State private var isShowingDiagnostics = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var actionError: String?
     @State private var query = ""
     @State private var evidenceTime: TimeInterval?
@@ -112,7 +113,8 @@ struct LibraryView: View {
                         }
                     }
                     .disabled(library.state != .unlocked)
-                    .symbolEffect(.pulse, isActive: coordinator.isRecording)
+                    .symbolEffect(.pulse, isActive: coordinator.isRecording && !reduceMotion)
+                    .keyboardShortcut("r", modifiers: [.command, .shift])
                 }
             }
         } detail: {

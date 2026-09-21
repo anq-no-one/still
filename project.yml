@@ -1,12 +1,15 @@
 name: Still
 options:
   bundleIdPrefix: com.andrii
+  developmentLanguage: en
   deploymentTarget:
     iOS: "26.0"
     macOS: "26.0"
 settings:
   base:
     SWIFT_VERSION: "6.0"
+    SWIFT_EMIT_LOC_STRINGS: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     DEVELOPMENT_TEAM: ""
 targets:
   Still-iOS:
