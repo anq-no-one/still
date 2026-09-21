@@ -11,11 +11,40 @@ struct FinalTranscriptionTests {
         let checkpoints = MemoryCheckpointStore()
         let final = FinalTranscription(transcriber: transcriber, windowSeconds: 10)
 
-        let segments = try await final.run(pcm: audio(seconds: 25), format: format, checkpoints: checkpoints)
+        let result = try await final.run(tracks: [track(.microphone, seconds: 25)], checkpoints: checkpoints)
 
-        #expect(segments.map(\.start) == [0, 10, 20])
-        #expect(segments.map(\.text) == ["window 0", "window 1", "window 2"])
-        #expect(segments.plainText == "window 0 window 1 window 2")
+        #expect(result.segments.map(\.start) == [0, 10, 20])
+        #expect(result.segments.map(\.text) == ["window 0", "window 1", "window 2"])
+        #expect(result.segments.plainText == "window 0 window 1 window 2")
+    }
+
+    @Test
+    func attributesEachTrackToItsOwnSpeakerOnOneTimeline() async throws {
+        let transcriber = WindowTranscriber()
+        let final = FinalTranscription(transcriber: transcriber, windowSeconds: 10)
+
+        let result = try await final.run(
+            tracks: [
+                track(.microphone, seconds: 10),
+                track(.system, seconds: 10, startOffset: 5),
+            ],
+            checkpoints: MemoryCheckpointStore()
+        )
+
+        #expect(result.speakers.count == 2)
+        let you = try #require(result.speakers.first { $0.isYou })
+        #expect(you.origin == .microphone)
+        #expect(result.segments.map(\.start) == [0, 5])
+        #expect(result.segments[0].speakerID == you.id)
+        #expect(result.segments[1].speakerID != you.id)
+    }
+
+    @Test
+    func aSingleTrackStaysOneGenericGroup() async throws {
+        let result = try await FinalTranscription(transcriber: WindowTranscriber(), windowSeconds: 10)
+            .run(tracks: [track(.microphone, seconds: 10)], checkpoints: MemoryCheckpointStore())
+
+        #expect(result.speakers.map(\.name) == [Speaker.forTrack(.microphone).name])
     }
 
     @Test
@@ -24,30 +53,29 @@ struct FinalTranscriptionTests {
         transcriber.failsAtCall = 3
         let checkpoints = MemoryCheckpointStore()
         let final = FinalTranscription(transcriber: transcriber, windowSeconds: 10)
-        let pcm = audio(seconds: 35)
+        let pcm = track(.microphone, seconds: 35)
 
         await #expect(throws: WindowTranscriber.Interrupted.self) {
-            try await final.run(pcm: pcm, format: format, checkpoints: checkpoints)
+            try await final.run(tracks: [pcm], checkpoints: checkpoints)
         }
-        #expect(checkpoints.stored?.completedWindows == 2)
+        #expect(checkpoints.stored?.completedWindows[AudioTrack.microphone.rawValue] == 2)
 
         transcriber.failsAtCall = nil
-        let segments = try await final.run(pcm: pcm, format: format, checkpoints: checkpoints)
+        let result = try await final.run(tracks: [pcm], checkpoints: checkpoints)
 
-        #expect(segments.count == 4)
+        #expect(result.segments.count == 4)
         #expect(transcriber.transcribedWindows == 5)
         #expect(checkpoints.stored == nil)
     }
 
     @Test
     func keepsSourceAudioUntouched() async throws {
-        let transcriber = WindowTranscriber()
-        let pcm = audio(seconds: 12)
+        let captured = track(.microphone, seconds: 12)
 
-        _ = try await FinalTranscription(transcriber: transcriber, windowSeconds: 10)
-            .run(pcm: pcm, format: format, checkpoints: MemoryCheckpointStore())
+        _ = try await FinalTranscription(transcriber: WindowTranscriber(), windowSeconds: 10)
+            .run(tracks: [captured], checkpoints: MemoryCheckpointStore())
 
-        #expect(pcm == audio(seconds: 12))
+        #expect(captured.pcm == audio(seconds: 12))
     }
 
     @Test
@@ -71,6 +99,10 @@ struct FinalTranscriptionTests {
         #expect(moved.revision == segment.revision)
         #expect(moved.start == 31)
         #expect(moved.end == 32)
+    }
+
+    private func track(_ track: AudioTrack, seconds: Int, startOffset: TimeInterval = 0) -> CapturedTrack {
+        CapturedTrack(track: track, format: format, startOffset: startOffset, pcm: audio(seconds: seconds))
     }
 
     private func audio(seconds: Int) -> Data {

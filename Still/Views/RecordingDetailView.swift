@@ -43,6 +43,12 @@ struct RecordingDetailView: View {
 
                 noteView
 
+                if !recording.speakers.isEmpty {
+                    SpeakerListView(speakers: recording.speakers) { speaker, name in
+                        editor.renameSpeaker(speaker, to: name)
+                    }
+                }
+
                 Divider()
 
                 if recording.segments.isEmpty {
@@ -54,6 +60,7 @@ struct RecordingDetailView: View {
                     ForEach(recording.segments) { segment in
                         SegmentRow(
                             segment: segment,
+                            speaker: editor.speaker(of: segment),
                             play: { player.play(from: segment.start) },
                             correct: { editor.correct(segment, to: $0) }
                         )
@@ -127,14 +134,21 @@ struct RecordingDetailView: View {
 
 private struct SegmentRow: View {
     let segment: TranscriptSegment
+    let speaker: Speaker?
     let play: () -> Void
     let correct: (String) -> Void
 
     @State private var text: String
     @FocusState private var isEditing: Bool
 
-    init(segment: TranscriptSegment, play: @escaping () -> Void, correct: @escaping (String) -> Void) {
+    init(
+        segment: TranscriptSegment,
+        speaker: Speaker?,
+        play: @escaping () -> Void,
+        correct: @escaping (String) -> Void
+    ) {
         self.segment = segment
+        self.speaker = speaker
         self.play = play
         self.correct = correct
         _text = State(initialValue: segment.displayText)
@@ -142,12 +156,21 @@ private struct SegmentRow: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
-            Button(segment.startText, action: play)
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(.secondary)
-                .buttonStyle(.plain)
-                .frame(width: 56, alignment: .leading)
-                .accessibilityHint("Plays the recording from \(segment.startText)")
+            VStack(alignment: .leading, spacing: 2) {
+                Button(segment.startText, action: play)
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundStyle(.secondary)
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Plays the recording from \(segment.startText)")
+
+                if let speaker {
+                    Text(speaker.name)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                }
+            }
+            .frame(width: 92, alignment: .leading)
 
             TextField("Transcript", text: $text, axis: .vertical)
                 .textFieldStyle(.plain)

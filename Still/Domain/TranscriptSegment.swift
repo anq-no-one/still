@@ -11,6 +11,7 @@ struct TranscriptSegment: Identifiable, Codable, Equatable, Sendable {
     /// The recognizer's text is an immutable revision. A correction is stored
     /// beside it, so Still can always show what was actually heard.
     var correction: String?
+    var speakerID: UUID?
 
     init(
         id: UUID = UUID(),
@@ -20,7 +21,8 @@ struct TranscriptSegment: Identifiable, Codable, Equatable, Sendable {
         text: String,
         language: String?,
         confidence: Double?,
-        correction: String? = nil
+        correction: String? = nil,
+        speakerID: UUID? = nil
     ) {
         self.id = id
         self.revision = revision
@@ -30,6 +32,7 @@ struct TranscriptSegment: Identifiable, Codable, Equatable, Sendable {
         self.language = language
         self.confidence = confidence
         self.correction = correction
+        self.speakerID = speakerID
     }
 
     var displayText: String {
@@ -60,8 +63,15 @@ struct TranscriptSegment: Identifiable, Codable, Equatable, Sendable {
             text: text,
             language: language,
             confidence: confidence,
-            correction: correction
+            correction: correction,
+            speakerID: speakerID
         )
+    }
+
+    func attributed(to speaker: Speaker) -> TranscriptSegment {
+        var copy = self
+        copy.speakerID = speaker.id
+        return copy
     }
 }
 

@@ -5,7 +5,7 @@ import Observation
 @MainActor
 protocol RecordingLibrary: AnyObject {
     func add(_ recording: Recording) throws
-    func capturedAudio(forRecording id: UUID) throws -> (pcm: Data, format: AudioFormat)
+    func capturedTracks(forRecording id: UUID) throws -> [CapturedTrack]
     func checkpointStore(forRecording id: UUID) throws -> TranscriptionCheckpointStore
     func tracks(forRecording id: UUID) -> [AudioTrack]
 }
@@ -177,6 +177,30 @@ final class Library: RecordingLibrary {
             in: services.audioRoot,
             cipher: LibraryCipher(key: key)
         )
+    }
+
+    func capturedTracks(forRecording id: UUID) throws -> [CapturedTrack] {
+        guard let key else { throw LibraryError.locked }
+
+        let cipher = LibraryCipher(key: key)
+        return try tracks(forRecording: id).map { track in
+            let directory = AudioChunkStore.trackDirectory(forRecording: id, track: track, in: services.audioRoot)
+            let manifest = try AudioChunkStore.manifest(in: directory, cipher: cipher)
+            return CapturedTrack(
+                track: track,
+                format: manifest.format,
+                startOffset: manifest.startOffset,
+                pcm: try AudioChunkStore.pcm(in: directory, cipher: cipher)
+            )
+        }
+    }
+
+    func renameSpeaker(_ speaker: Speaker, to name: String, in recording: Recording) throws {
+        guard let index = recording.speakers.firstIndex(where: { $0.id == speaker.id }) else { return }
+
+        var updated = recording
+        updated.speakers[index].name = name
+        try write(updated)
     }
 
     /// Audio left behind by a termination becomes a Recording on the next unlock.

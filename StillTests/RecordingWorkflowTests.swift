@@ -266,8 +266,8 @@ final class SpyRecordingLibrary: RecordingLibrary {
         recordings.append(recording)
     }
 
-    func capturedAudio(forRecording id: UUID) throws -> (pcm: Data, format: AudioFormat) {
-        (capturedPCM, .transcription)
+    func capturedTracks(forRecording id: UUID) throws -> [CapturedTrack] {
+        [CapturedTrack(track: .microphone, format: .transcription, startOffset: 0, pcm: capturedPCM)]
     }
 
     func checkpointStore(forRecording id: UUID) throws -> TranscriptionCheckpointStore {

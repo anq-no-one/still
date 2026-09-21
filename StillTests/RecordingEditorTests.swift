@@ -119,3 +119,46 @@ struct RecordingEditorTests {
         return library
     }
 }
+
+@MainActor
+struct SpeakerRenameTests {
+    @Test
+    func renamingASpeakerLeavesTranscriptTextAlone() async throws {
+        let container = try ModelContainer(
+            for: EncryptedRecording.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let context = ModelContext(container)
+        let library = Library(
+            keyRing: LibraryKeyRing(source: FakeDeviceKeySource()),
+            services: LibraryServices(
+                audioRoot: try Scratch().directory,
+                makeRepository: { key in
+                    MainActor.assumeIsolated { EncryptedRecordingRepository(context: context, key: key) }
+                },
+                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } }
+            )
+        )
+        await library.unlock()
+
+        let speaker = Speaker.forTrack(.system)
+        let segments = words("Hello everyone .").map { $0.attributed(to: speaker) }
+        let recording = Recording(
+            title: "Call",
+            transcript: segments.plainText,
+            segments: segments,
+            speakers: [speaker],
+            duration: 60
+        )
+        try library.add(recording)
+        let editor = RecordingEditor(recording: recording, library: library)
+
+        editor.renameSpeaker(speaker, to: "Anna")
+        editor.saveNow()
+
+        #expect(editor.recording.speakers.map(\.name) == ["Anna"])
+        #expect(editor.recording.transcript == segments.plainText)
+        #expect(editor.recording.segments.allSatisfy { $0.speakerID == speaker.id })
+        #expect(editor.speaker(of: segments[0])?.name == "Anna")
+    }
+}

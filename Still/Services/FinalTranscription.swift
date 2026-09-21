@@ -1,10 +1,23 @@
 import Foundation
 
-struct FinalTranscriptionCheckpoint: Codable, Equatable, Sendable {
-    var completedWindows: Int
-    var segments: [TranscriptSegment]
+struct CapturedTrack: Equatable, Sendable {
+    let track: AudioTrack
+    let format: AudioFormat
+    let startOffset: TimeInterval
+    let pcm: Data
+}
 
-    static let empty = FinalTranscriptionCheckpoint(completedWindows: 0, segments: [])
+struct TranscriptionResult: Equatable, Sendable {
+    var segments: [TranscriptSegment]
+    var speakers: [Speaker]
+}
+
+struct FinalTranscriptionCheckpoint: Codable, Equatable, Sendable {
+    var completedWindows: [String: Int]
+    var segments: [TranscriptSegment]
+    var speakers: [Speaker]
+
+    static let empty = FinalTranscriptionCheckpoint(completedWindows: [:], segments: [], speakers: [])
 }
 
 protocol TranscriptionCheckpointStore: Sendable {
@@ -13,9 +26,9 @@ protocol TranscriptionCheckpointStore: Sendable {
     func clear()
 }
 
-/// Reads the journaled audio without touching it and transcribes it one window
-/// at a time, saving a checkpoint after each window so an interrupted pass
-/// resumes instead of starting over.
+/// Reads the journaled audio without touching it and transcribes each track on
+/// its own, one window at a time behind a checkpoint. Keeping the tracks apart
+/// is what lets Still say which words came from the microphone.
 struct FinalTranscription: Sendable {
     let transcriber: OfflineTranscriber
     let windowSeconds: TimeInterval
@@ -26,28 +39,40 @@ struct FinalTranscription: Sendable {
     }
 
     func run(
-        pcm: Data,
-        format: AudioFormat,
+        tracks: [CapturedTrack],
         checkpoints: TranscriptionCheckpointStore
-    ) async throws -> [TranscriptSegment] {
-        let windowBytes = Int(windowSeconds * TimeInterval(format.bytesPerSecond))
-        let windowCount = max(1, Int(ceil(Double(pcm.count) / Double(windowBytes))))
+    ) async throws -> TranscriptionResult {
         var checkpoint = checkpoints.load()
 
-        while checkpoint.completedWindows < windowCount {
-            let index = checkpoint.completedWindows
-            let start = index * windowBytes
-            let window = pcm[start..<min(start + windowBytes, pcm.count)]
+        for captured in tracks {
+            let speaker = checkpoint.speakers.first { $0.origin == captured.track }
+                ?? Speaker.forTrack(captured.track)
+            if !checkpoint.speakers.contains(where: { $0.id == speaker.id }) {
+                checkpoint.speakers.append(speaker)
+            }
 
-            let produced = try await transcriber.segments(of: Data(window), format: format)
-            checkpoint.segments += produced.map { $0.offset(by: TimeInterval(index) * windowSeconds) }
-            checkpoint.completedWindows = index + 1
-            checkpoints.save(checkpoint)
+            let windowBytes = Int(windowSeconds * TimeInterval(captured.format.bytesPerSecond))
+            let windowCount = max(1, Int(ceil(Double(captured.pcm.count) / Double(windowBytes))))
+
+            while checkpoint.completedWindows[captured.track.rawValue, default: 0] < windowCount {
+                let index = checkpoint.completedWindows[captured.track.rawValue, default: 0]
+                let start = index * windowBytes
+                let window = captured.pcm[start..<min(start + windowBytes, captured.pcm.count)]
+                let offset = captured.startOffset + TimeInterval(index) * windowSeconds
+
+                let produced = try await transcriber.segments(of: Data(window), format: captured.format)
+                checkpoint.segments += produced.map { $0.offset(by: offset).attributed(to: speaker) }
+                checkpoint.completedWindows[captured.track.rawValue] = index + 1
+                checkpoints.save(checkpoint)
+            }
         }
 
-        let segments = checkpoint.segments
+        let result = TranscriptionResult(
+            segments: checkpoint.segments.sorted { $0.start < $1.start },
+            speakers: checkpoint.speakers
+        )
         checkpoints.clear()
-        return segments
+        return result
     }
 }
 

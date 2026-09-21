@@ -5,6 +5,7 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
     var title: String
     var transcript: String
     var segments: [TranscriptSegment]
+    var speakers: [Speaker]
     var note: Note?
     let createdAt: Date
     let duration: TimeInterval
@@ -14,6 +15,7 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         title: String,
         transcript: String,
         segments: [TranscriptSegment] = [],
+        speakers: [Speaker] = [],
         note: Note? = nil,
         createdAt: Date = .now,
         duration: TimeInterval
@@ -22,6 +24,7 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         self.title = title
         self.transcript = transcript
         self.segments = segments
+        self.speakers = speakers
         self.note = note
         self.createdAt = createdAt
         self.duration = duration
