@@ -7,6 +7,9 @@ struct LibraryView: View {
     let coordinator: RecordingCoordinator
     let setup: SetupFlow
     let sync: SyncEngine
+    #if os(macOS)
+    let automatic: AutomaticRecording
+    #endif
 
     @State private var selection: Recording.ID?
     @State private var isCapturing = false
@@ -15,6 +18,7 @@ struct LibraryView: View {
     @State private var isShowingSync = false
     @State private var isShowingSecurity = false
     @State private var isShowingRetention = false
+    @State private var isShowingAutomatic = false
     @State private var actionError: String?
     @State private var query = ""
     @State private var evidenceTime: TimeInterval?
@@ -76,6 +80,14 @@ struct LibraryView: View {
                     }
                 }
 
+                #if os(macOS)
+                ToolbarItem {
+                    Button("Automatic recording", systemImage: "bolt.badge.clock") {
+                        isShowingAutomatic = true
+                    }
+                }
+                #endif
+
                 ToolbarItem(placement: .primaryAction) {
                     Button(coordinator.isRecording ? "Recording" : "Record", systemImage: "record.circle") {
                         isCapturing = true
@@ -120,6 +132,11 @@ struct LibraryView: View {
         .sheet(isPresented: $isShowingRetention) {
             RetentionSettingsView(library: library)
         }
+        #if os(macOS)
+        .sheet(isPresented: $isShowingAutomatic) {
+            AutomaticRecordingSettingsView(automatic: automatic)
+        }
+        #endif
         .alert("Still could not finish that", isPresented: showsActionError) {
             Button("OK", role: .cancel) { actionError = nil }
         } message: {

@@ -9,6 +9,9 @@ struct StillApp: App {
     private let coordinator: RecordingCoordinator
     private let setup: SetupFlow
     private let sync: SyncEngine
+    #if os(macOS)
+    private let automatic: AutomaticRecording
+    #endif
 
     #if os(macOS)
     @State private var shortcut: GlobalRecordingShortcut?
@@ -80,13 +83,40 @@ struct StillApp: App {
                 settings: UserDefaultsSyncSettings()
             )
         }
-        coordinator = MainActor.assumeIsolated {
+        let recordingCoordinator = MainActor.assumeIsolated {
             RecordingCoordinator(library: recordingLibrary, entitlements: proEntitlements)
         }
+        coordinator = recordingCoordinator
+
+        #if os(macOS)
+        automatic = MainActor.assumeIsolated {
+            AutomaticRecording(
+                coordinator: recordingCoordinator,
+                watcher: WorkspaceCallAppWatcher(),
+                allowList: UserDefaultsCallAppAllowList()
+            )
+        }
+        #endif
     }
 
     var body: some Scene {
         WindowGroup {
+            #if os(macOS)
+            LibraryView(
+                library: library,
+                modelInstaller: modelInstaller,
+                entitlements: entitlements,
+                coordinator: coordinator,
+                setup: setup,
+                sync: sync,
+                automatic: automatic
+            )
+            .task {
+                guard shortcut == nil else { return }
+                let coordinator = coordinator
+                shortcut = GlobalRecordingShortcut { Task { await coordinator.toggle() } }
+            }
+            #else
             LibraryView(
                 library: library,
                 modelInstaller: modelInstaller,
@@ -95,12 +125,6 @@ struct StillApp: App {
                 setup: setup,
                 sync: sync
             )
-            #if os(macOS)
-            .task {
-                guard shortcut == nil else { return }
-                let coordinator = coordinator
-                shortcut = GlobalRecordingShortcut { Task { await coordinator.toggle() } }
-            }
             #endif
         }
 
