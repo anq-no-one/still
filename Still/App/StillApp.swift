@@ -6,6 +6,11 @@ struct StillApp: App {
     private let library: Library
     private let modelInstaller: ModelPackInstaller
     private let entitlements: Entitlements
+    private let coordinator: RecordingCoordinator
+
+    #if os(macOS)
+    @State private var shortcut: GlobalRecordingShortcut?
+    #endif
 
     init() {
         let container: ModelContainer
@@ -32,7 +37,7 @@ struct StillApp: App {
             )
         }
 
-        library = MainActor.assumeIsolated {
+        let recordingLibrary = MainActor.assumeIsolated {
             Library(
                 keyRing: LibraryKeyRing(source: KeychainDeviceKeySource()),
                 services: LibraryServices(
@@ -58,15 +63,40 @@ struct StillApp: App {
                 )
             )
         }
+
+        library = recordingLibrary
+        coordinator = MainActor.assumeIsolated {
+            RecordingCoordinator(library: recordingLibrary, entitlements: proEntitlements)
+        }
     }
 
     var body: some Scene {
         WindowGroup {
-            LibraryView(library: library, modelInstaller: modelInstaller, entitlements: entitlements)
+            LibraryView(
+                library: library,
+                modelInstaller: modelInstaller,
+                entitlements: entitlements,
+                coordinator: coordinator
+            )
+            #if os(macOS)
+            .task {
+                guard shortcut == nil else { return }
+                let coordinator = coordinator
+                shortcut = GlobalRecordingShortcut { Task { await coordinator.toggle() } }
+            }
+            #endif
         }
 
         #if os(macOS)
         .defaultSize(width: 980, height: 680)
+        #endif
+
+        #if os(macOS)
+        MenuBarExtra {
+            RecordingMenuBarContent(coordinator: coordinator)
+        } label: {
+            RecordingMenuBarLabel(coordinator: coordinator)
+        }
         #endif
     }
 }

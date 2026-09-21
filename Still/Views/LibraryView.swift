@@ -4,6 +4,7 @@ struct LibraryView: View {
     let library: Library
     let modelInstaller: ModelPackInstaller
     let entitlements: Entitlements
+    let coordinator: RecordingCoordinator
 
     @State private var selection: Recording.ID?
     @State private var isCapturing = false
@@ -40,10 +41,14 @@ struct LibraryView: View {
                 }
 
                 ToolbarItem(placement: .primaryAction) {
-                    Button("Record", systemImage: "record.circle") {
+                    Button(coordinator.isRecording ? "Recording" : "Record", systemImage: "record.circle") {
                         isCapturing = true
+                        if !coordinator.isRecording {
+                            Task { await coordinator.start() }
+                        }
                     }
                     .disabled(library.state != .unlocked)
+                    .symbolEffect(.pulse, isActive: coordinator.isRecording)
                 }
             }
         } detail: {
@@ -51,11 +56,14 @@ struct LibraryView: View {
                 RecordingDetailView(recording: recording, library: library)
                     .id(recording.id)
             } else {
-                PrivacyWelcomeView(startRecording: { isCapturing = true })
+                PrivacyWelcomeView(startRecording: {
+                    isCapturing = true
+                    Task { await coordinator.start() }
+                })
             }
         }
         .sheet(isPresented: $isCapturing) {
-            CaptureView(library: library, entitlements: entitlements)
+            CaptureView(coordinator: coordinator)
         }
         .sheet(isPresented: $isSettingUpModel) {
             ModelSetupView(installer: modelInstaller)
@@ -67,6 +75,9 @@ struct LibraryView: View {
             Button("OK", role: .cancel) { actionError = nil }
         } message: {
             Text(actionError ?? "")
+        }
+        .onChange(of: coordinator.isRecording) { _, isRecording in
+            if isRecording { isCapturing = true }
         }
         .task {
             await library.unlock()
