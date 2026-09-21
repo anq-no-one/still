@@ -203,7 +203,7 @@ struct LibraryAudioRecoveryTests {
     }
 
     @Test
-    func deletingARecordingRemovesItsAudio() async throws {
+    func purgingAnExpiredDeletionRemovesItsAudio() async throws {
         let scratch = try Scratch()
         let source = FakeDeviceKeySource()
         let library = makeLibrary(source: source, context: try makeContext(), audioRoot: scratch.directory)
@@ -219,7 +219,11 @@ struct LibraryAudioRecoveryTests {
         try writer.finish()
         try library.add(recording)
 
-        try library.delete(recording)
+        try library.delete(recording, at: Date(timeIntervalSince1970: 0))
+
+        #expect(FileManager.default.fileExists(atPath: directory.path))
+
+        try library.applyRetention(now: Date(timeIntervalSince1970: Retention.recoveryWindow + 1))
 
         #expect(!FileManager.default.fileExists(atPath: directory.path))
     }

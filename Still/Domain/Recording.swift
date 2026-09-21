@@ -10,6 +10,7 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
     let createdAt: Date
     let duration: TimeInterval
     var updatedAt: Date
+    var deletedAt: Date?
 
     init(
         id: UUID = UUID(),
@@ -20,7 +21,8 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         note: Note? = nil,
         createdAt: Date = .now,
         duration: TimeInterval,
-        updatedAt: Date = .now
+        updatedAt: Date = .now,
+        deletedAt: Date? = nil
     ) {
         self.id = id
         self.title = title
@@ -31,5 +33,10 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         self.createdAt = createdAt
         self.duration = duration
         self.updatedAt = updatedAt
+        self.deletedAt = deletedAt
+    }
+
+    var isDeleted: Bool {
+        deletedAt != nil
     }
 }

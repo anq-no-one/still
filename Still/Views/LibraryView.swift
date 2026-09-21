@@ -14,6 +14,7 @@ struct LibraryView: View {
     @State private var isShowingPro = false
     @State private var isShowingSync = false
     @State private var isShowingSecurity = false
+    @State private var isShowingRetention = false
     @State private var actionError: String?
     @State private var query = ""
     @State private var evidenceTime: TimeInterval?
@@ -69,6 +70,12 @@ struct LibraryView: View {
                     }
                 }
 
+                ToolbarItem {
+                    Button("Audio and deletion", systemImage: "clock.arrow.circlepath") {
+                        isShowingRetention = true
+                    }
+                }
+
                 ToolbarItem(placement: .primaryAction) {
                     Button(coordinator.isRecording ? "Recording" : "Record", systemImage: "record.circle") {
                         isCapturing = true
@@ -109,6 +116,9 @@ struct LibraryView: View {
         }
         .sheet(isPresented: $isShowingSecurity) {
             SecuritySettingsView(library: library)
+        }
+        .sheet(isPresented: $isShowingRetention) {
+            RetentionSettingsView(library: library)
         }
         .alert("Still could not finish that", isPresented: showsActionError) {
             Button("OK", role: .cancel) { actionError = nil }

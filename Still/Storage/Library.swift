@@ -33,11 +33,20 @@ final class Library: RecordingLibrary {
     private var key: SymmetricKey?
 
     private(set) var state: State = .locked
-    private(set) var recordings: [Recording] = []
+    private(set) var storedRecordings: [Recording] = []
+    var retentionPolicy: RetentionPolicy = .forever
 
     init(keyRing: LibraryKeyRing, services: LibraryServices) {
         self.keyRing = keyRing
         self.services = services
+    }
+
+    var recordings: [Recording] {
+        storedRecordings.filter { !$0.isDeleted }
+    }
+
+    var deletedRecordings: [Recording] {
+        storedRecordings.filter(\.isDeleted)
     }
 
     func unlock(reason: String = "Unlock your Still Library") async {
@@ -47,15 +56,16 @@ final class Library: RecordingLibrary {
         do {
             let key = try await keyRing.unlock(reason: reason)
             let repository = services.makeRepository(key)
-            recordings = try repository.load()
+            storedRecordings = try repository.load()
             self.repository = repository
             self.key = key
             try recoverInterruptedAudio(cipher: LibraryCipher(key: key))
+            try applyRetention()
             state = .unlocked
         } catch {
             repository = nil
             key = nil
-            recordings = []
+            storedRecordings = []
             state = .failed(error.localizedDescription)
         }
     }
@@ -80,14 +90,50 @@ final class Library: RecordingLibrary {
         try write(updated)
     }
 
-    func delete(_ recording: Recording) throws {
+    /// Deleting leaves a tombstone rather than erasing at once, so the same
+    /// decision reaches other devices and the user has a window to undo it.
+    func delete(_ recording: Recording, at date: Date = .now) throws {
+        var deleted = recording
+        deleted.deletedAt = date
+        deleted.updatedAt = date
+        try write(deleted)
+    }
+
+    func restore(_ recording: Recording) throws {
+        var restored = recording
+        restored.deletedAt = nil
+        restored.updatedAt = .now
+        try write(restored)
+    }
+
+    func applyRetention(now: Date = .now) throws {
         guard let repository else { throw LibraryError.locked }
 
-        try repository.delete(recording.id)
-        try? AudioChunkStore.discard(
-            AudioChunkStore.directory(forRecording: recording.id, in: services.audioRoot)
+        let sweep = Retention.sweep(
+            recordings: storedRecordings,
+            policy: retentionPolicy,
+            audioDirectories: audioDirectories(),
+            now: now
         )
-        recordings.removeAll { $0.id == recording.id }
+
+        for id in sweep.audioToDelete + sweep.orphanAudio {
+            try? AudioChunkStore.discard(AudioChunkStore.directory(forRecording: id, in: services.audioRoot))
+        }
+
+        for id in sweep.recordingsToPurge {
+            try repository.delete(id)
+            try? AudioChunkStore.discard(AudioChunkStore.directory(forRecording: id, in: services.audioRoot))
+            storedRecordings.removeAll { $0.id == id }
+        }
+    }
+
+    private func audioDirectories() -> [UUID] {
+        let contents = (try? FileManager.default.contentsOfDirectory(
+            at: services.audioRoot,
+            includingPropertiesForKeys: nil
+        )) ?? []
+
+        return contents.compactMap { UUID(uuidString: $0.lastPathComponent) }
     }
 
     func audio(for recording: Recording) throws -> Data {
@@ -130,7 +176,7 @@ final class Library: RecordingLibrary {
         do {
             let key = try keyRing.restore(using: code)
             let repository = services.makeRepository(key)
-            recordings = try repository.load()
+            storedRecordings = try repository.load()
             self.repository = repository
             self.key = key
             state = .unlocked
@@ -296,7 +342,7 @@ final class Library: RecordingLibrary {
     /// Audio left behind by a termination becomes a Recording on the next unlock.
     /// Adoption is keyed by the recording id, so repeating it creates no duplicate.
     private func recoverInterruptedAudio(cipher: LibraryCipher) throws {
-        let known = Set(recordings.map(\.id))
+        let known = Set(storedRecordings.map(\.id))
         let interrupted = try AudioChunkStore.interruptedRecordings(in: services.audioRoot, cipher: cipher)
 
         for recovered in interrupted {
@@ -321,11 +367,11 @@ final class Library: RecordingLibrary {
         guard let repository else { throw LibraryError.locked }
 
         try repository.save(recording)
-        if let index = recordings.firstIndex(where: { $0.id == recording.id }) {
-            recordings[index] = recording
+        if let index = storedRecordings.firstIndex(where: { $0.id == recording.id }) {
+            storedRecordings[index] = recording
         } else {
-            recordings.append(recording)
-            recordings.sort { $0.createdAt > $1.createdAt }
+            storedRecordings.append(recording)
+            storedRecordings.sort { $0.createdAt > $1.createdAt }
         }
     }
 }

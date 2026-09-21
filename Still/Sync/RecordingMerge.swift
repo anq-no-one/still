@@ -18,6 +18,7 @@ enum RecordingMerge {
         merged.segments = mergeSegments(newer.segments, older.segments)
         merged.note = mergeNote(newer.note, older.note)
         merged.updatedAt = max(local.updatedAt, remote.updatedAt)
+        merged.deletedAt = earliest(local.deletedAt, remote.deletedAt)
         return merged
     }
 
@@ -53,6 +54,17 @@ enum RecordingMerge {
     private static func mergeItems(_ newer: [NoteItem], _ older: [NoteItem]) -> [NoteItem] {
         let known = Set(newer.map(\.id))
         return newer + older.filter { $0.isUserAuthored && !known.contains($0.id) }
+    }
+
+    /// A deletion on either device wins, and the earlier stamp is kept so both
+    /// devices count the recovery window from the same moment.
+    private static func earliest(_ first: Date?, _ second: Date?) -> Date? {
+        switch (first, second) {
+        case (nil, nil): nil
+        case (let value?, nil): value
+        case (nil, let value?): value
+        case (let first?, let second?): min(first, second)
+        }
     }
 
     private static func unionOptional(_ first: String?, _ second: String?) -> String? {

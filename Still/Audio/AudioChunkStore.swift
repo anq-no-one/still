@@ -71,11 +71,12 @@ final class AudioChunkWriter: @unchecked Sendable {
         try writeManifest(isComplete: true)
     }
 
+    /// An atomic write lands the whole chunk or none of it, and replaces an
+    /// existing chunk at that index rather than failing, so a re-import or a
+    /// repeated sync writes the same slot cleanly.
     private func flush(_ bytes: Data) throws {
-        let sealed = try cipher.seal(Data(bytes))
-        let staging = directory.appendingPathComponent(String(format: "%06d.partial", nextIndex))
-        try sealed.write(to: staging, options: .atomic)
-        try FileManager.default.moveItem(at: staging, to: AudioChunkStore.chunkURL(in: directory, index: nextIndex))
+        try cipher.seal(Data(bytes))
+            .write(to: AudioChunkStore.chunkURL(in: directory, index: nextIndex), options: .atomic)
         nextIndex += 1
     }
 

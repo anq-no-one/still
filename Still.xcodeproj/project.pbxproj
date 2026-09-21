@@ -12,6 +12,7 @@
 		050E8A37DC68DE42EC487702 /* RecordingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A341116EE865894AA2B5CE96 /* RecordingCoordinator.swift */; };
 		05C06649E50682D218ED47EF /* NoteSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9CFFCA22411AE5CDA9A1D24 /* NoteSectionView.swift */; };
 		06E4BFADF175E8CEF65AB343 /* RecordingMenuBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3178169308F66E895CE0AD50 /* RecordingMenuBar.swift */; };
+		0847FF8D2CECC40E99CDB6B1 /* RetentionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF5FCBA220130E195D72217 /* RetentionTests.swift */; };
 		084DFFF38CB9BCA30570C23A /* Still.storekit in Resources */ = {isa = PBXBuildFile; fileRef = D82252AF57447EA6F7D07F2A /* Still.storekit */; };
 		1064FB6D9E5D5591A054DC55 /* Library.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C541C7FB67EBA00B14BC490 /* Library.swift */; };
 		1108A3E4F0915DF5C9F6784C /* RecordingPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1AEBFC0C489FF623FC6D6D /* RecordingPlayer.swift */; };
@@ -35,8 +36,10 @@
 		38ADA579DF3E0033CEA077D9 /* Recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB38F864906FB7D64D992B1 /* Recording.swift */; };
 		3ADF78D59D4861CBC645D2BB /* AudioChunkSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4821DEE18DBF24CA0CB88D68 /* AudioChunkSync.swift */; };
 		3BB4F73053AA1C96CD5EFA22 /* TranscriptionSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BC420DCDF72289386E9958 /* TranscriptionSession.swift */; };
+		3D512EB1AD61BC8173C7B899 /* Retention.swift in Sources */ = {isa = PBXBuildFile; fileRef = 282CA3F4838D898028F02F60 /* Retention.swift */; };
 		4215D7EC94809D2CE20C7AC4 /* RecordingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A341116EE865894AA2B5CE96 /* RecordingCoordinator.swift */; };
 		4353C304E8A8D24A1A04AC48 /* SystemAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD84D8B2CDE6A9B204A7603 /* SystemAudioRecorder.swift */; };
+		44E2EBD491E670FCF9F0C3E4 /* Retention.swift in Sources */ = {isa = PBXBuildFile; fileRef = 282CA3F4838D898028F02F60 /* Retention.swift */; };
 		4546C631F37FB5196E865983 /* TimeInterval+RecordingDuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761AC9223726492858D3A9A7 /* TimeInterval+RecordingDuration.swift */; };
 		45F23F61D7BB7A14EEBD70D9 /* TranscriptSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = F31C82E0D6631C810A9E0BCF /* TranscriptSegment.swift */; };
 		4C9079EABE0D8846E46BBB95 /* RecordingMerge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115F6B2B47515F36D9AAF797 /* RecordingMerge.swift */; };
@@ -44,6 +47,7 @@
 		4D1163A520D6B7DD2726A399 /* EncryptedRecording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 949D35E63A14F06CA7D72A6E /* EncryptedRecording.swift */; };
 		50E3B53B73FD062D2663B13D /* LibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DCD183C537891CA013631F /* LibraryTests.swift */; };
 		5137C5D00BFD187CAC7D91C8 /* RecordingMenuBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3178169308F66E895CE0AD50 /* RecordingMenuBar.swift */; };
+		519FCA5B4D8BBAFAD6607213 /* RetentionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7205DA1D1DD32873A417638 /* RetentionSettingsView.swift */; };
 		526326CF650BDFECD2832639 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5813DD23A9C422F9A353FFB /* AudioRecorder.swift */; };
 		53775443BBA44E8107AD3224 /* ModelSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E936114A0229A6B6E028DF3 /* ModelSetupView.swift */; };
 		545A3476F2A00C9DA23E17CA /* SetupFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFB37DCFFBB1EB604E4350A5 /* SetupFlow.swift */; };
@@ -102,6 +106,7 @@
 		AF8D60DE5F28FA56BD778B35 /* AudioFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = D381245294D23291EBE28BE4 /* AudioFormat.swift */; };
 		AFB768CCE226B55AF805B081 /* MicrophonePermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DD8EEBE7A0EABDC7BADE84 /* MicrophonePermission.swift */; };
 		B011551679A3828DBCBB9E5D /* LibrarySearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8855C30165897D18A50C1C35 /* LibrarySearchTests.swift */; };
+		B197074BC04EE7F59C0FD5CD /* RetentionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7205DA1D1DD32873A417638 /* RetentionSettingsView.swift */; };
 		B1B6FD23D46478C52EC27F2B /* LiveTranscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13BCD2A8FB0EDBCFAB25D240 /* LiveTranscriber.swift */; };
 		B1FC263589195B813AD7F6AE /* RecordingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C7A5B7BC74B7F1951D99F9 /* RecordingDetailView.swift */; };
 		B46832F2CEDC5F07F7A1F578 /* NearbySyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A5EF2EEADC5388B0823B1D /* NearbySyncTests.swift */; };
@@ -189,6 +194,7 @@
 		13BCD2A8FB0EDBCFAB25D240 /* LiveTranscriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranscriber.swift; sourceTree = "<group>"; };
 		16CC99B5A1788C31E341EB8B /* StillApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StillApp.swift; sourceTree = "<group>"; };
 		1E936114A0229A6B6E028DF3 /* ModelSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSetupView.swift; sourceTree = "<group>"; };
+		282CA3F4838D898028F02F60 /* Retention.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Retention.swift; sourceTree = "<group>"; };
 		288960374528D7132F7DE65F /* LibraryKeyRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryKeyRing.swift; sourceTree = "<group>"; };
 		2DE7A7228D166005A240B834 /* AudioChunkStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioChunkStoreTests.swift; sourceTree = "<group>"; };
 		2E21B74C251917584FE3B83E /* RecordingTitleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingTitleTests.swift; sourceTree = "<group>"; };
@@ -234,6 +240,7 @@
 		9DFF14A037F3E0F48687D740 /* RecordingTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingTitle.swift; sourceTree = "<group>"; };
 		A19D7504927CA12A370ACCEA /* NearbySync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbySync.swift; sourceTree = "<group>"; };
 		A341116EE865894AA2B5CE96 /* RecordingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingCoordinator.swift; sourceTree = "<group>"; };
+		A7205DA1D1DD32873A417638 /* RetentionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetentionSettingsView.swift; sourceTree = "<group>"; };
 		ABD519BB6BAECB3E6BFA2B2F /* ModelPackInstallerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelPackInstallerTests.swift; sourceTree = "<group>"; };
 		AF92EF39C9060C91B97BFB69 /* LibraryCipher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryCipher.swift; sourceTree = "<group>"; };
 		AFB4358E75353B7A5872BE6E /* ExportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportTests.swift; sourceTree = "<group>"; };
@@ -256,6 +263,7 @@
 		DAB3742729A60565FDCB96CE /* AudioChunkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioChunkStore.swift; sourceTree = "<group>"; };
 		DFC7EF849F362990469AEEA1 /* MicrophoneRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneRecorder.swift; sourceTree = "<group>"; };
 		E47FE1C3F7106AAD17217994 /* SyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTests.swift; sourceTree = "<group>"; };
+		EAF5FCBA220130E195D72217 /* RetentionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetentionTests.swift; sourceTree = "<group>"; };
 		EF8C0AA902FB42B0FDD7C475 /* SetupFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFlowTests.swift; sourceTree = "<group>"; };
 		F2A5EF2EEADC5388B0823B1D /* NearbySyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbySyncTests.swift; sourceTree = "<group>"; };
 		F31C82E0D6631C810A9E0BCF /* TranscriptSegment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptSegment.swift; sourceTree = "<group>"; };
@@ -297,6 +305,7 @@
 				980699F506661ABE140C6741 /* Models */,
 				98EFB4686B85DF6D61AE6591 /* Notes */,
 				8B3616313263B8384C59ECCD /* Purchase */,
+				A13F33EE78CFDB4B5CF0290B /* Retention */,
 				C3BE34D6BF9129220ECBDE9A /* Search */,
 				7049114977BB291E1D48A684 /* Security */,
 				1DEDDAEE3EF621C0D7E71F80 /* Services */,
@@ -330,6 +339,7 @@
 				2E21B74C251917584FE3B83E /* RecordingTitleTests.swift */,
 				12036573C00B181325383C2C /* RecordingWorkflowTests.swift */,
 				66E0091EAB97818E4E1BEB58 /* RecoveryTests.swift */,
+				EAF5FCBA220130E195D72217 /* RetentionTests.swift */,
 				EF8C0AA902FB42B0FDD7C475 /* SetupFlowTests.swift */,
 				E47FE1C3F7106AAD17217994 /* SyncTests.swift */,
 				91B7BAF56D1F78E0794E3C34 /* TranslationTests.swift */,
@@ -473,6 +483,14 @@
 			path = Notes;
 			sourceTree = "<group>";
 		};
+		A13F33EE78CFDB4B5CF0290B /* Retention */ = {
+			isa = PBXGroup;
+			children = (
+				282CA3F4838D898028F02F60 /* Retention.swift */,
+			);
+			path = Retention;
+			sourceTree = "<group>";
+		};
 		A9E415F7A5459BD5917E8871 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -517,6 +535,7 @@
 				42B4D18CC4791D688D79FE7C /* ProUnlockView.swift */,
 				F4C7A5B7BC74B7F1951D99F9 /* RecordingDetailView.swift */,
 				3178169308F66E895CE0AD50 /* RecordingMenuBar.swift */,
+				A7205DA1D1DD32873A417638 /* RetentionSettingsView.swift */,
 				BFDD31C806EAB9700A7BD3BC /* SecuritySettingsView.swift */,
 				601F786A421B1A2B028D4967 /* SetupView.swift */,
 				005E56963E13BDD318F0C2E6 /* SpeakerListView.swift */,
@@ -698,6 +717,8 @@
 				2ECB707E35C9014300D6945D /* RecordingTitle.swift in Sources */,
 				229EBCA14F4CCD9EFF0A5598 /* RecordingWorkflow.swift in Sources */,
 				C24A08C0F85D8D91B73FC694 /* RecoveryCode.swift in Sources */,
+				44E2EBD491E670FCF9F0C3E4 /* Retention.swift in Sources */,
+				B197074BC04EE7F59C0FD5CD /* RetentionSettingsView.swift in Sources */,
 				F44FE8EC11445980A9A410A9 /* SecuritySettingsView.swift in Sources */,
 				545A3476F2A00C9DA23E17CA /* SetupFlow.swift in Sources */,
 				D295A37BFF1C90D470A4C70F /* SetupView.swift in Sources */,
@@ -737,6 +758,7 @@
 				DC254105956D3FAEFBBDA3F0 /* RecordingTitleTests.swift in Sources */,
 				35B23458B76EECE7515A8491 /* RecordingWorkflowTests.swift in Sources */,
 				FF0BCE1A79439F749203DBF6 /* RecoveryTests.swift in Sources */,
+				0847FF8D2CECC40E99CDB6B1 /* RetentionTests.swift in Sources */,
 				B55EB9A3CC1DF15FD6C1A35F /* SetupFlowTests.swift in Sources */,
 				F3FB75C86A3F77B5463D90EB /* SyncTests.swift in Sources */,
 				77095B07AB7164B719F4B789 /* TranslationTests.swift in Sources */,
@@ -797,6 +819,8 @@
 				235B4DA83C4B6551A9A097F2 /* RecordingTitle.swift in Sources */,
 				68319291C318AF99175E8E6C /* RecordingWorkflow.swift in Sources */,
 				4CEB78E31E88FD0F9B14A5BD /* RecoveryCode.swift in Sources */,
+				3D512EB1AD61BC8173C7B899 /* Retention.swift in Sources */,
+				519FCA5B4D8BBAFAD6607213 /* RetentionSettingsView.swift in Sources */,
 				5BA2871F78E0BDC2500E43FF /* SecuritySettingsView.swift in Sources */,
 				01174B86BC6B245AE10903BC /* SetupFlow.swift in Sources */,
 				28642425DF121367F670B6F3 /* SetupView.swift in Sources */,
