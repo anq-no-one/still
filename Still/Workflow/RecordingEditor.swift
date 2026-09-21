@@ -81,6 +81,11 @@ final class RecordingEditor {
         return recording.speakers.first { $0.id == id }
     }
 
+    func applyTranslations(_ segments: [TranscriptSegment]) {
+        recording.segments = segments
+        scheduleSave()
+    }
+
     func segment(withID id: UUID) -> TranscriptSegment? {
         recording.segments.first { $0.id == id }
     }

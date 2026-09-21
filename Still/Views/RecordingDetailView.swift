@@ -1,4 +1,5 @@
 import SwiftUI
+import Translation
 
 struct RecordingDetailView: View {
     let library: Library
@@ -8,6 +9,8 @@ struct RecordingDetailView: View {
     @State private var player = RecordingPlayer()
     @State private var title: String
     @State private var noteText: String
+    @State private var showsTranslation = false
+    @State private var translationFailure: String?
 
     init(recording: Recording, library: Library, startAt: TimeInterval? = nil) {
         self.library = library
@@ -36,7 +39,11 @@ struct RecordingDetailView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-                if let message = editor.saveFailure ?? player.loadFailure {
+                Toggle("Show translation in \(readingLanguageName)", isOn: $showsTranslation)
+                    .toggleStyle(.switch)
+                    .font(.subheadline)
+
+                if let message = editor.saveFailure ?? player.loadFailure ?? translationFailure {
                     Label(message, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(.red)
                 }
@@ -59,6 +66,7 @@ struct RecordingDetailView: View {
                 } else {
                     ForEach(recording.segments) { segment in
                         SegmentRow(
+                            showsTranslation: showsTranslation,
                             segment: segment,
                             speaker: editor.speaker(of: segment),
                             play: { player.play(from: segment.start) },
@@ -77,6 +85,17 @@ struct RecordingDetailView: View {
                 ExportMenu(recording: recording, library: library)
             }
         }
+        .translationTask(translationConfiguration) { session in
+            do {
+                let translated = try await SegmentTranslator(engine: AppleTranslationEngine(session: session))
+                    .translate(editor.recording.segments, into: readingLanguage)
+                editor.applyTranslations(translated)
+                translationFailure = nil
+            } catch {
+                translationFailure = error.localizedDescription
+                showsTranslation = false
+            }
+        }
         .task {
             player.load((try? library.audio(for: recording)) ?? Data())
             if let startAt { player.play(from: startAt) }
@@ -88,6 +107,28 @@ struct RecordingDetailView: View {
 
     private var recording: Recording {
         editor.recording
+    }
+
+    private var readingLanguage: Locale.Language {
+        Locale.current.language
+    }
+
+    private var readingLanguageName: String {
+        Locale.current.localizedString(forLanguageCode: readingLanguage.languageCode?.identifier ?? "en")
+            ?? "your language"
+    }
+
+    /// Nil until the user asks, so the system never prompts for a language pack
+    /// on its own.
+    private var translationConfiguration: TranslationSession.Configuration? {
+        guard showsTranslation,
+              let spoken = recording.segments.compactMap(\.language).first
+        else { return nil }
+
+        return TranslationSession.Configuration(
+            source: Locale.Language(identifier: spoken),
+            target: readingLanguage
+        )
     }
 
     @ViewBuilder
@@ -133,6 +174,7 @@ struct RecordingDetailView: View {
 }
 
 private struct SegmentRow: View {
+    let showsTranslation: Bool
     let segment: TranscriptSegment
     let speaker: Speaker?
     let play: () -> Void
@@ -142,11 +184,13 @@ private struct SegmentRow: View {
     @FocusState private var isEditing: Bool
 
     init(
+        showsTranslation: Bool,
         segment: TranscriptSegment,
         speaker: Speaker?,
         play: @escaping () -> Void,
         correct: @escaping (String) -> Void
     ) {
+        self.showsTranslation = showsTranslation
         self.segment = segment
         self.speaker = speaker
         self.play = play
@@ -172,13 +216,21 @@ private struct SegmentRow: View {
             }
             .frame(width: 92, alignment: .leading)
 
-            TextField("Transcript", text: $text, axis: .vertical)
-                .textFieldStyle(.plain)
-                .focused($isEditing)
-                .foregroundStyle(segment.isUncertain && !segment.isCorrected ? .secondary : .primary)
-                .onChange(of: isEditing) { _, editing in
-                    if !editing { correct(text) }
+            VStack(alignment: .leading, spacing: 4) {
+                TextField("Transcript", text: $text, axis: .vertical)
+                    .textFieldStyle(.plain)
+                    .focused($isEditing)
+                    .foregroundStyle(segment.isUncertain && !segment.isCorrected ? .secondary : .primary)
+                    .onChange(of: isEditing) { _, editing in
+                        if !editing { correct(text) }
+                    }
+
+                if showsTranslation, let translation = segment.translation {
+                    Text(translation)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
                 }
+            }
 
             if segment.isCorrected {
                 Image(systemName: "pencil")

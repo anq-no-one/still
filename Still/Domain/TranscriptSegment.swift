@@ -12,6 +12,8 @@ struct TranscriptSegment: Identifiable, Codable, Equatable, Sendable {
     /// beside it, so Still can always show what was actually heard.
     var correction: String?
     var speakerID: UUID?
+    var translation: String?
+    var translationLanguage: String?
 
     init(
         id: UUID = UUID(),
