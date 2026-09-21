@@ -9,6 +9,7 @@ struct LibraryView: View {
     let sync: SyncEngine
     #if os(macOS)
     let automatic: AutomaticRecording
+    let browser: BrowserMeetingBridge
     #endif
 
     @State private var selection: Recording.ID?
@@ -19,6 +20,7 @@ struct LibraryView: View {
     @State private var isShowingSecurity = false
     @State private var isShowingRetention = false
     @State private var isShowingAutomatic = false
+    @State private var isShowingBrowser = false
     @State private var actionError: String?
     @State private var query = ""
     @State private var evidenceTime: TimeInterval?
@@ -86,6 +88,12 @@ struct LibraryView: View {
                         isShowingAutomatic = true
                     }
                 }
+
+                ToolbarItem {
+                    Button("Browser meetings", systemImage: "safari") {
+                        isShowingBrowser = true
+                    }
+                }
                 #endif
 
                 ToolbarItem(placement: .primaryAction) {
@@ -135,6 +143,9 @@ struct LibraryView: View {
         #if os(macOS)
         .sheet(isPresented: $isShowingAutomatic) {
             AutomaticRecordingSettingsView(automatic: automatic)
+        }
+        .sheet(isPresented: $isShowingBrowser) {
+            BrowserMeetingSettingsView(bridge: browser)
         }
         #endif
         .alert("Still could not finish that", isPresented: showsActionError) {

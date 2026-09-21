@@ -11,6 +11,7 @@ struct StillApp: App {
     private let sync: SyncEngine
     #if os(macOS)
     private let automatic: AutomaticRecording
+    private let browser: BrowserMeetingBridge
     #endif
 
     #if os(macOS)
@@ -100,6 +101,12 @@ struct StillApp: App {
                 allowList: UserDefaultsCallAppAllowList()
             )
         }
+        browser = MainActor.assumeIsolated {
+            BrowserMeetingBridge(
+                coordinator: recordingCoordinator,
+                allowList: UserDefaultsMeetingSiteAllowList()
+            )
+        }
         #endif
     }
 
@@ -113,7 +120,8 @@ struct StillApp: App {
                 coordinator: coordinator,
                 setup: setup,
                 sync: sync,
-                automatic: automatic
+                automatic: automatic,
+                browser: browser
             )
             .task {
                 guard shortcut == nil else { return }

@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Still",
+  "version": "1.0",
+  "description": "Tells Still when an approved meeting starts and ends. It sends nothing else.",
+  "permissions": ["nativeMessaging"],
+  "host_permissions": [
+    "https://meet.google.com/*",
+    "https://teams.microsoft.com/*",
+    "https://*.zoom.us/*",
+    "https://whereby.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://meet.google.com/*",
+        "https://teams.microsoft.com/*",
+        "https://*.zoom.us/*",
+        "https://whereby.com/*"
+      ],
+      "js": ["meeting.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

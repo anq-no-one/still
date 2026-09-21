@@ -51,6 +51,9 @@ targets:
   Still-macOS:
     type: application
     platform: macOS
+    dependencies:
+      - target: StillBrowserExtension
+        embed: true
     sources:
       - path: Still
     settings:
@@ -71,6 +74,23 @@ targets:
       properties:
         com.apple.security.app-sandbox: true
         com.apple.security.device.audio-input: true
+  StillBrowserExtension:
+    type: app-extension
+    platform: macOS
+    sources:
+      - path: StillBrowserExtension
+    info:
+      path: StillBrowserExtension/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.andrii.still.browser
+        PRODUCT_NAME: StillBrowserExtension
+        SKIP_INSTALL: YES
+        CODE_SIGN_ENTITLEMENTS: StillBrowserExtension/StillBrowserExtension.entitlements
+    entitlements:
+      path: StillBrowserExtension/StillBrowserExtension.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
   StillTests:
     type: bundle.unit-test
     platform: macOS
