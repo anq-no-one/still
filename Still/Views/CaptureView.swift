@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CaptureView: View {
     let library: Library
+    let entitlements: Entitlements
 
     @Environment(\.dismiss) private var dismiss
     @State private var workflow: RecordingWorkflow?
@@ -25,7 +26,7 @@ struct CaptureView: View {
                 .symbolEffect(.pulse, isActive: isCapturing)
 
             ScrollView {
-                Text(transcript.isEmpty ? "Listening…" : transcript)
+                Text(draftText)
                     .font(.title3)
                     .foregroundStyle(transcript.isEmpty ? .secondary : .primary)
                     .textSelection(.enabled)
@@ -48,7 +49,7 @@ struct CaptureView: View {
                 Spacer()
 
                 Button("Save recording", systemImage: "stop.fill") {
-                    save()
+                    Task { await save() }
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(workflow?.canSave != true)
@@ -61,8 +62,10 @@ struct CaptureView: View {
             do {
                 let workflow = RecordingWorkflow(
                     session: LiveTranscriber(),
+                    offlineTranscriber: SpeechOfflineTranscriber(),
                     recorder: try library.makeRecorder(),
-                    library: library
+                    library: library,
+                    showsLiveDraft: entitlements.allows(.liveTranscript)
                 )
                 self.workflow = workflow
                 await workflow.start()
@@ -100,10 +103,17 @@ struct CaptureView: View {
         return nil
     }
 
-    private func save() {
+    private var draftText: String {
+        if let workflow, !workflow.showsDraft {
+            return "Still is recording. The transcript appears when you save. Live transcript is part of Still Pro."
+        }
+        return transcript.isEmpty ? "Listening…" : transcript
+    }
+
+    private func save() async {
         guard let workflow else { return }
 
-        workflow.save()
+        await workflow.save()
         if workflow.state == .saved {
             dismiss()
         }

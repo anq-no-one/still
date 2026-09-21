@@ -34,7 +34,7 @@ struct RecordingWorkflowTests {
         await workflow.start()
         session.transcript = " Ship the private beta on Friday "
         clock.advance(by: 90)
-        workflow.save()
+        await workflow.save()
 
         #expect(workflow.state == .saved)
         #expect(library.recordings.count == 1)
@@ -54,7 +54,7 @@ struct RecordingWorkflowTests {
 
         await workflow.start()
         session.transcript = "   "
-        workflow.save()
+        await workflow.save()
 
         #expect(library.recordings.isEmpty)
         #expect(workflow.canSave == false)
@@ -83,7 +83,7 @@ struct RecordingWorkflowTests {
 
         await workflow.start()
         session.transcript = "Agreed the plan"
-        workflow.save()
+        await workflow.save()
 
         let recording = try #require(library.recordings.first)
         #expect(recorder.startedID == recording.id)
@@ -99,6 +99,37 @@ struct RecordingWorkflowTests {
         workflow.cancel()
 
         #expect(recorder.events.last == .discarded)
+    }
+
+    @Test
+    func freeRecordingHidesTheDraftAndTranscribesAfterSaving() async throws {
+        let session = FakeTranscriptionSession()
+        let offlineTranscriber = StubOfflineTranscriber()
+        let library = SpyRecordingLibrary()
+        let clock = StubClock(start: Date(timeIntervalSince1970: 0))
+        let workflow = makeWorkflow(
+            session: session,
+            library: library,
+            offlineTranscriber: offlineTranscriber,
+            showsLiveDraft: false,
+            clock: clock
+        )
+
+        await workflow.start()
+
+        #expect(workflow.showsDraft == false)
+        #expect(workflow.transcript.isEmpty)
+        #expect(session.isRecording == false)
+
+        clock.advance(by: 20)
+
+        #expect(workflow.canSave)
+
+        await workflow.save()
+
+        let recording = try #require(library.recordings.first)
+        #expect(offlineTranscriber.calls == 1)
+        #expect(recording.transcript == "Transcribed after saving")
     }
 
     @Test
@@ -125,7 +156,7 @@ struct RecordingWorkflowTests {
         await workflow.start()
         session.transcript = "Recorded"
         clock.advance(by: 12)
-        workflow.save()
+        await workflow.save()
         clock.advance(by: 300)
 
         #expect(workflow.elapsed == 12)
@@ -135,9 +166,18 @@ struct RecordingWorkflowTests {
         session: FakeTranscriptionSession = FakeTranscriptionSession(),
         recorder: SpyAudioRecorder = SpyAudioRecorder(),
         library: SpyRecordingLibrary = SpyRecordingLibrary(),
+        offlineTranscriber: StubOfflineTranscriber = StubOfflineTranscriber(),
+        showsLiveDraft: Bool = true,
         clock: StubClock = StubClock(start: Date(timeIntervalSince1970: 0))
     ) -> RecordingWorkflow {
-        RecordingWorkflow(session: session, recorder: recorder, library: library, now: clock.now)
+        RecordingWorkflow(
+            session: session,
+            offlineTranscriber: offlineTranscriber,
+            recorder: recorder,
+            library: library,
+            showsLiveDraft: showsLiveDraft,
+            now: clock.now
+        )
     }
 }
 
@@ -189,9 +229,24 @@ final class SpyAudioRecorder: AudioRecorder {
 @MainActor
 final class SpyRecordingLibrary: RecordingLibrary {
     private(set) var recordings: [Recording] = []
+    var capturedPCM = Data(repeating: 3, count: 32_000)
 
     func add(_ recording: Recording) throws {
         recordings.append(recording)
+    }
+
+    func capturedAudio(forRecording id: UUID) throws -> (pcm: Data, format: AudioFormat) {
+        (capturedPCM, .transcription)
+    }
+}
+
+final class StubOfflineTranscriber: OfflineTranscriber, @unchecked Sendable {
+    var result = "Transcribed after saving"
+    private(set) var calls = 0
+
+    func transcript(of pcm: Data, format: AudioFormat) async throws -> String {
+        calls += 1
+        return result
     }
 }
 

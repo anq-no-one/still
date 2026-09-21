@@ -3,10 +3,12 @@ import SwiftUI
 struct LibraryView: View {
     let library: Library
     let modelInstaller: ModelPackInstaller
+    let entitlements: Entitlements
 
     @State private var selection: Recording.ID?
     @State private var isCapturing = false
     @State private var isSettingUpModel = false
+    @State private var isShowingPro = false
     @State private var actionError: String?
 
     var body: some View {
@@ -31,6 +33,12 @@ struct LibraryView: View {
                     }
                 }
 
+                ToolbarItem {
+                    Button("Still Pro", systemImage: "sparkles") {
+                        isShowingPro = true
+                    }
+                }
+
                 ToolbarItem(placement: .primaryAction) {
                     Button("Record", systemImage: "record.circle") {
                         isCapturing = true
@@ -47,10 +55,13 @@ struct LibraryView: View {
             }
         }
         .sheet(isPresented: $isCapturing) {
-            CaptureView(library: library)
+            CaptureView(library: library, entitlements: entitlements)
         }
         .sheet(isPresented: $isSettingUpModel) {
             ModelSetupView(installer: modelInstaller)
+        }
+        .sheet(isPresented: $isShowingPro) {
+            ProUnlockView(entitlements: entitlements)
         }
         .alert("Still could not finish that", isPresented: showsActionError) {
             Button("OK", role: .cancel) { actionError = nil }
@@ -59,6 +70,7 @@ struct LibraryView: View {
         }
         .task {
             await library.unlock()
+            await entitlements.refresh()
             isSettingUpModel = modelInstaller.state == .needsApproval
         }
     }

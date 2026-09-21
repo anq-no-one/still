@@ -5,6 +5,7 @@ import SwiftUI
 struct StillApp: App {
     private let library: Library
     private let modelInstaller: ModelPackInstaller
+    private let entitlements: Entitlements
 
     init() {
         let container: ModelContainer
@@ -17,6 +18,8 @@ struct StillApp: App {
         let context = ModelContext(container)
         let audioRoot = URL.applicationSupportDirectory
             .appending(path: "Still/Audio", directoryHint: .isDirectory)
+
+        entitlements = MainActor.assumeIsolated { Entitlements(source: StoreKitEntitlementSource()) }
 
         let supportRoot = URL.applicationSupportDirectory.appending(path: "Still", directoryHint: .isDirectory)
 
@@ -50,7 +53,7 @@ struct StillApp: App {
 
     var body: some Scene {
         WindowGroup {
-            LibraryView(library: library, modelInstaller: modelInstaller)
+            LibraryView(library: library, modelInstaller: modelInstaller, entitlements: entitlements)
         }
 
         #if os(macOS)

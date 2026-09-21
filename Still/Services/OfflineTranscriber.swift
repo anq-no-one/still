@@ -1,0 +1,74 @@
+import AVFoundation
+import Foundation
+import Speech
+
+/// Transcribes captured audio after a recording stops. The samples stay in
+/// memory, so no plaintext audio file is written to disk.
+protocol OfflineTranscriber: Sendable {
+    func transcript(of pcm: Data, format: AudioFormat) async throws -> String
+}
+
+struct SpeechOfflineTranscriber: OfflineTranscriber {
+    func transcript(of pcm: Data, format: AudioFormat) async throws -> String {
+        guard let recognizer = SFSpeechRecognizer(locale: .current), recognizer.isAvailable else {
+            throw TranscriptionError.recognizerUnavailable
+        }
+        guard recognizer.supportsOnDeviceRecognition else {
+            throw TranscriptionError.onDeviceRecognitionUnavailable
+        }
+        guard let audioFormat = AVAudioFormat(
+            commonFormat: .pcmFormatInt16,
+            sampleRate: Double(format.sampleRate),
+            channels: AVAudioChannelCount(format.channels),
+            interleaved: true
+        ) else {
+            throw TranscriptionError.recognizerUnavailable
+        }
+
+        let request = SFSpeechAudioBufferRecognitionRequest()
+        request.requiresOnDeviceRecognition = true
+        request.shouldReportPartialResults = false
+
+        for buffer in Self.buffers(from: pcm, format: audioFormat) {
+            request.append(buffer)
+        }
+        request.endAudio()
+
+        return try await withCheckedThrowingContinuation { continuation in
+            var resumed = false
+            recognizer.recognitionTask(with: request) { result, error in
+                guard !resumed else { return }
+
+                if let error {
+                    resumed = true
+                    continuation.resume(throwing: error)
+                } else if let result, result.isFinal {
+                    resumed = true
+                    continuation.resume(returning: result.bestTranscription.formattedString)
+                }
+            }
+        }
+    }
+
+    private static func buffers(from pcm: Data, format: AVAudioFormat) -> [AVAudioPCMBuffer] {
+        let bytesPerFrame = Int(format.streamDescription.pointee.mBytesPerFrame)
+        let framesPerBuffer = Int(format.sampleRate)
+        let bytesPerBuffer = framesPerBuffer * bytesPerFrame
+
+        return stride(from: 0, to: pcm.count, by: bytesPerBuffer).compactMap { offset -> AVAudioPCMBuffer? in
+            let slice = pcm[offset..<min(offset + bytesPerBuffer, pcm.count)]
+            let frames = slice.count / bytesPerFrame
+            guard frames > 0,
+                  let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(frames)),
+                  let channel = buffer.int16ChannelData
+            else { return nil }
+
+            buffer.frameLength = AVAudioFrameCount(frames)
+            slice.withUnsafeBytes { raw in
+                guard let base = raw.bindMemory(to: Int16.self).baseAddress else { return }
+                channel[0].update(from: base, count: frames * Int(format.channelCount))
+            }
+            return buffer
+        }
+    }
+}

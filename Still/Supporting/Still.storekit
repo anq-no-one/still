@@ -1,0 +1,27 @@
+{
+  "identifier" : "A1B2C3D4",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "39.99",
+      "familyShareable" : true,
+      "internalID" : "still-pro",
+      "localizations" : [
+        {
+          "description" : "Unlocks Mac system audio, live transcription, speaker separation, translation, notes, semantic search, sync, and advanced export on iPhone, iPad, and Mac.",
+          "displayName" : "Still Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.andrii.still.pro",
+      "referenceName" : "Still Pro",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {},
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

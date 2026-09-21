@@ -14,8 +14,10 @@ final class RecordingWorkflow {
     }
 
     private let session: TranscriptionSession
+    private let offlineTranscriber: OfflineTranscriber
     private let recorder: AudioRecorder
     private let library: RecordingLibrary
+    private let showsLiveDraft: Bool
     private let now: () -> Date
 
     private var recordingID = UUID()
@@ -26,18 +28,26 @@ final class RecordingWorkflow {
 
     init(
         session: TranscriptionSession,
+        offlineTranscriber: OfflineTranscriber,
         recorder: AudioRecorder,
         library: RecordingLibrary,
+        showsLiveDraft: Bool,
         now: @escaping () -> Date = Date.init
     ) {
         self.session = session
+        self.offlineTranscriber = offlineTranscriber
         self.recorder = recorder
         self.library = library
+        self.showsLiveDraft = showsLiveDraft
         self.now = now
     }
 
     var transcript: String {
-        session.transcript
+        showsLiveDraft ? session.transcript : ""
+    }
+
+    var showsDraft: Bool {
+        showsLiveDraft
     }
 
     var isCapturing: Bool {
@@ -50,7 +60,8 @@ final class RecordingWorkflow {
     }
 
     var canSave: Bool {
-        !finishedTranscript.isEmpty
+        guard state == .recording else { return false }
+        return showsLiveDraft ? !draftTranscript.isEmpty : elapsed > 0
     }
 
     func start() async {
@@ -68,6 +79,11 @@ final class RecordingWorkflow {
             return
         }
 
+        guard showsLiveDraft else {
+            state = .recording
+            return
+        }
+
         do {
             try await session.start()
             state = .recording
@@ -77,22 +93,22 @@ final class RecordingWorkflow {
         }
     }
 
-    func save() {
+    func save() async {
         guard state == .recording else { return }
 
         state = .finalizing
         stopCapture()
 
-        let transcript = finishedTranscript
-        guard !transcript.isEmpty else {
-            recorder.discard()
-            state = .failed(RecordingWorkflowError.emptyTranscript.localizedDescription)
-            return
-        }
-
-        let startedAt = startedAt ?? now()
         do {
             try recorder.finish()
+            let transcript = try await resolvedTranscript()
+            guard !transcript.isEmpty else {
+                recorder.discard()
+                state = .failed(RecordingWorkflowError.emptyTranscript.localizedDescription)
+                return
+            }
+
+            let startedAt = startedAt ?? now()
             try library.add(
                 Recording(
                     id: recordingID,
@@ -116,12 +132,21 @@ final class RecordingWorkflow {
         state = .idle
     }
 
+    private func resolvedTranscript() async throws -> String {
+        if showsLiveDraft { return draftTranscript }
+
+        let captured = try library.capturedAudio(forRecording: recordingID)
+        return try await offlineTranscriber
+            .transcript(of: captured.pcm, format: captured.format)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     private var isFailed: Bool {
         if case .failed = state { return true }
         return false
     }
 
-    private var finishedTranscript: String {
+    private var draftTranscript: String {
         session.transcript.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 

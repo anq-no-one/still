@@ -83,11 +83,15 @@ schemes:
     build:
       targets:
         Still-iOS: all
+    run:
+      storeKitConfiguration: Still/Supporting/Still.storekit
   Still-macOS:
     build:
       targets:
         Still-macOS: all
         StillTests: [test]
+    run:
+      storeKitConfiguration: Still/Supporting/Still.storekit
     test:
       targets:
         - StillTests

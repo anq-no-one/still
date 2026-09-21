@@ -5,6 +5,7 @@ import Observation
 @MainActor
 protocol RecordingLibrary: AnyObject {
     func add(_ recording: Recording) throws
+    func capturedAudio(forRecording id: UUID) throws -> (pcm: Data, format: AudioFormat)
 }
 
 @MainActor
@@ -89,6 +90,17 @@ final class Library: RecordingLibrary {
         return try AudioChunkStore.audio(
             in: AudioChunkStore.directory(forRecording: recording.id, in: services.audioRoot),
             cipher: LibraryCipher(key: key)
+        )
+    }
+
+    func capturedAudio(forRecording id: UUID) throws -> (pcm: Data, format: AudioFormat) {
+        guard let key else { throw LibraryError.locked }
+
+        let cipher = LibraryCipher(key: key)
+        let directory = AudioChunkStore.directory(forRecording: id, in: services.audioRoot)
+        return (
+            try AudioChunkStore.pcm(in: directory, cipher: cipher),
+            try AudioChunkStore.manifest(in: directory, cipher: cipher).format
         )
     }
 
