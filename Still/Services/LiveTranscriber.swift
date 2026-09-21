@@ -4,7 +4,7 @@ import Speech
 
 @MainActor
 @Observable
-final class LiveTranscriber {
+final class LiveTranscriber: TranscriptionSession {
     private let audioEngine = AVAudioEngine()
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?

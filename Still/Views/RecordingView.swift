@@ -4,10 +4,8 @@ import SwiftUI
 struct RecordingView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @State private var transcriber = LiveTranscriber()
-    @State private var startedAt = Date.now
-    @State private var elapsed: TimeInterval = 0
-    @State private var errorMessage: String?
+    @State private var workflow: RecordingWorkflow?
+    @State private var tick = Date.now
 
     var body: some View {
         VStack(spacing: 28) {
@@ -20,75 +18,79 @@ struct RecordingView: View {
                     .font(.system(.body, design: .monospaced, weight: .semibold))
             }
 
-            Image(systemName: transcriber.isRecording ? "waveform.circle.fill" : "waveform.circle")
+            Image(systemName: isCapturing ? "waveform.circle.fill" : "waveform.circle")
                 .font(.system(size: 72))
-                .foregroundStyle(transcriber.isRecording ? .red : .secondary)
-                .symbolEffect(.pulse, isActive: transcriber.isRecording)
+                .foregroundStyle(isCapturing ? .red : .secondary)
+                .symbolEffect(.pulse, isActive: isCapturing)
 
             ScrollView {
-                Text(transcriber.transcript.isEmpty ? "Listening…" : transcriber.transcript)
+                Text(transcript.isEmpty ? "Listening…" : transcript)
                     .font(.title3)
-                    .foregroundStyle(transcriber.transcript.isEmpty ? .secondary : .primary)
+                    .foregroundStyle(transcript.isEmpty ? .secondary : .primary)
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .frame(minHeight: 220)
 
-            if let errorMessage {
-                Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
+            if let failureMessage {
+                Label(failureMessage, systemImage: "exclamationmark.triangle.fill")
                     .foregroundStyle(.red)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             HStack {
                 Button("Cancel", role: .cancel) {
-                    transcriber.stop()
+                    workflow?.cancel()
                     dismiss()
                 }
 
                 Spacer()
 
                 Button("Save meeting", systemImage: "stop.fill") {
-                    save()
+                    workflow?.save()
+                    dismiss()
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(transcriber.transcript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(workflow?.canSave != true)
             }
         }
         .padding(28)
         .frame(minWidth: 420, idealWidth: 560, minHeight: 480)
-        .interactiveDismissDisabled(transcriber.isRecording)
+        .interactiveDismissDisabled(isCapturing)
         .task {
-            startedAt = .now
-            do {
-                try await transcriber.start()
-            } catch {
-                errorMessage = error.localizedDescription
-            }
+            let workflow = RecordingWorkflow(
+                session: LiveTranscriber(),
+                library: SwiftDataMeetingLibrary(context: modelContext)
+            )
+            self.workflow = workflow
+            await workflow.start()
         }
         .task {
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(1))
-                if transcriber.isRecording {
-                    elapsed = Date.now.timeIntervalSince(startedAt)
-                }
+                tick = .now
             }
         }
         .onDisappear {
-            transcriber.stop()
+            workflow?.cancel()
         }
     }
 
-    private func save() {
-        transcriber.stop()
-        let transcript = transcriber.transcript.trimmingCharacters(in: .whitespacesAndNewlines)
-        let meeting = Meeting(
-            title: MeetingTitle.from(transcript: transcript, date: startedAt),
-            transcript: transcript,
-            createdAt: startedAt,
-            duration: elapsed
-        )
-        modelContext.insert(meeting)
-        dismiss()
+    private var transcript: String {
+        workflow?.transcript ?? ""
+    }
+
+    private var isCapturing: Bool {
+        workflow?.isCapturing ?? false
+    }
+
+    private var elapsed: TimeInterval {
+        _ = tick
+        return workflow?.elapsed ?? 0
+    }
+
+    private var failureMessage: String? {
+        if case .failed(let message) = workflow?.state { return message }
+        return nil
     }
 }
