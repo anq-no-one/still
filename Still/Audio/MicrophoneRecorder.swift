@@ -25,9 +25,9 @@ final class MicrophoneRecorder: AudioRecorder {
         try AudioStorage.assertRoom(at: root, format: format)
         try configureSession()
 
-        let directory = AudioChunkStore.directory(forRecording: recordingID, in: root)
+        let directory = AudioChunkStore.trackDirectory(forRecording: recordingID, track: .microphone, in: root)
         let writer = try AudioChunkWriter(directory: directory, cipher: cipher, format: format)
-        self.directory = directory
+        self.directory = AudioChunkStore.directory(forRecording: recordingID, in: root)
         self.writer = writer
 
         let input = engine.inputNode
@@ -58,14 +58,14 @@ final class MicrophoneRecorder: AudioRecorder {
         observeInterruptions()
     }
 
-    func finish() throws {
+    func finish() async throws {
         stopEngine()
         try writer?.finish()
         writer = nil
         directory = nil
     }
 
-    func discard() {
+    func discard() async {
         stopEngine()
         try? writer?.finish()
         writer = nil
@@ -108,10 +108,10 @@ final class MicrophoneRecorder: AudioRecorder {
         let session = AVAudioSession.sharedInstance()
         interruptionObservers = [
             center.addObserver(forName: AVAudioSession.interruptionNotification, object: session, queue: .main) { _ in
-                MainActor.assumeIsolated { try? self.finish() }
+                Task { try? await self.finish() }
             },
             center.addObserver(forName: AVAudioSession.mediaServicesWereResetNotification, object: session, queue: .main) { _ in
-                MainActor.assumeIsolated { try? self.finish() }
+                Task { try? await self.finish() }
             },
         ]
         #endif

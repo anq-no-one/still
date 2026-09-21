@@ -183,7 +183,7 @@ struct LibraryAudioRecoveryTests {
         let format = AudioFormat(sampleRate: 1_000, channels: 1, bitsPerSample: 16)
         let id = UUID()
         let writer = try AudioChunkWriter(
-            directory: AudioChunkStore.directory(forRecording: id, in: scratch.directory),
+            directory: AudioChunkStore.trackDirectory(forRecording: id, track: .microphone, in: scratch.directory),
             cipher: LibraryCipher(key: key),
             format: format,
             chunkSeconds: 5
@@ -211,7 +211,10 @@ struct LibraryAudioRecoveryTests {
         let recording = Recording(title: "Spoken", transcript: "text", duration: 5)
         let directory = AudioChunkStore.directory(forRecording: recording.id, in: scratch.directory)
         let key = try await LibraryKeyRing(source: source).unlock(reason: "seed")
-        let writer = try AudioChunkWriter(directory: directory, cipher: LibraryCipher(key: key))
+        let writer = try AudioChunkWriter(
+            directory: AudioChunkStore.trackDirectory(forRecording: recording.id, track: .microphone, in: scratch.directory),
+            cipher: LibraryCipher(key: key)
+        )
         try writer.append(Data(repeating: 1, count: 32_000))
         try writer.finish()
         try library.add(recording)

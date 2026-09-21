@@ -34,7 +34,10 @@ struct AudioChunkStoreTests {
 
         #expect(try AudioChunkStore.pcm(in: scratch.directory, cipher: cipher) == spoken)
 
-        let wav = try AudioChunkStore.audio(in: scratch.directory, cipher: cipher)
+        let wav = WAVFile.data(
+            pcm: try AudioChunkStore.pcm(in: scratch.directory, cipher: cipher),
+            format: format
+        )
         #expect(wav.count == spoken.count + 44)
         #expect(wav.suffix(spoken.count) == spoken)
     }
@@ -60,8 +63,10 @@ struct AudioChunkStoreTests {
         let scratch = try Scratch()
         let cipher = LibraryCipher(key: SymmetricKey(size: .bits256))
         let id = UUID()
-        let directory = AudioChunkStore.directory(forRecording: id, in: scratch.directory)
-        let writer = try makeWriter(in: directory, cipher: cipher)
+        let writer = try makeWriter(
+            in: AudioChunkStore.trackDirectory(forRecording: id, track: .microphone, in: scratch.directory),
+            cipher: cipher
+        )
         try writer.append(speech(seconds: 12))
 
         let interrupted = try AudioChunkStore.interruptedRecordings(in: scratch.directory, cipher: cipher)
@@ -69,7 +74,7 @@ struct AudioChunkStoreTests {
         #expect(interrupted.map(\.id) == [id])
         #expect(interrupted.first?.duration == 10)
 
-        try AudioChunkStore.markComplete(directory, cipher: cipher)
+        try AudioChunkStore.markComplete(forRecording: id, in: scratch.directory, cipher: cipher)
 
         #expect(try AudioChunkStore.interruptedRecordings(in: scratch.directory, cipher: cipher).isEmpty)
     }
@@ -92,7 +97,7 @@ struct AudioChunkStoreTests {
     func finishedAudioIsNotOfferedForRecovery() throws {
         let scratch = try Scratch()
         let cipher = LibraryCipher(key: SymmetricKey(size: .bits256))
-        let directory = AudioChunkStore.directory(forRecording: UUID(), in: scratch.directory)
+        let directory = AudioChunkStore.trackDirectory(forRecording: UUID(), track: .microphone, in: scratch.directory)
         let writer = try makeWriter(in: directory, cipher: cipher)
         try writer.append(speech(seconds: 6))
         try writer.finish()
@@ -100,8 +105,79 @@ struct AudioChunkStoreTests {
         #expect(try AudioChunkStore.interruptedRecordings(in: scratch.directory, cipher: cipher).isEmpty)
     }
 
-    private func makeWriter(in directory: URL, cipher: LibraryCipher) throws -> AudioChunkWriter {
-        try AudioChunkWriter(directory: directory, cipher: cipher, format: format, chunkSeconds: chunkSeconds)
+    private func makeWriter(
+        in directory: URL,
+        cipher: LibraryCipher,
+        startOffset: TimeInterval = 0
+    ) throws -> AudioChunkWriter {
+        try AudioChunkWriter(
+            directory: directory,
+            cipher: cipher,
+            format: format,
+            chunkSeconds: chunkSeconds,
+            startOffset: startOffset
+        )
+    }
+
+    @Test
+    func keepsTracksSeparateAndMixesThemOnOneTimeline() throws {
+        let scratch = try Scratch()
+        let cipher = LibraryCipher(key: SymmetricKey(size: .bits256))
+        let id = UUID()
+        let microphone = try makeWriter(
+            in: AudioChunkStore.trackDirectory(forRecording: id, track: .microphone, in: scratch.directory),
+            cipher: cipher
+        )
+        let system = try makeWriter(
+            in: AudioChunkStore.trackDirectory(forRecording: id, track: .system, in: scratch.directory),
+            cipher: cipher,
+            startOffset: 5
+        )
+        try microphone.append(tone(value: 100, seconds: 10))
+        try microphone.finish()
+        try system.append(tone(value: 30, seconds: 10))
+        try system.finish()
+
+        #expect(AudioChunkStore.tracks(forRecording: id, in: scratch.directory) == [.microphone, .system])
+
+        let micOnly = try AudioChunkStore.pcm(
+            in: AudioChunkStore.trackDirectory(forRecording: id, track: .microphone, in: scratch.directory),
+            cipher: cipher
+        )
+        #expect(micOnly == tone(value: 100, seconds: 10))
+
+        let mixed = try AudioChunkStore.mixed(forRecording: id, in: scratch.directory, cipher: cipher)
+        let samples = mixed.pcm.withUnsafeBytes { Array($0.bindMemory(to: Int16.self)) }
+
+        #expect(samples.count == 15 * format.sampleRate)
+        #expect(samples[0] == 100)
+        #expect(samples[7 * format.sampleRate] == 130)
+        #expect(samples[12 * format.sampleRate] == 30)
+    }
+
+    @Test
+    func clampsALoudMixInsteadOfWrappingIt() throws {
+        let scratch = try Scratch()
+        let cipher = LibraryCipher(key: SymmetricKey(size: .bits256))
+        let id = UUID()
+        for track in AudioTrack.allCases {
+            let writer = try makeWriter(
+                in: AudioChunkStore.trackDirectory(forRecording: id, track: track, in: scratch.directory),
+                cipher: cipher
+            )
+            try writer.append(tone(value: 30_000, seconds: 5))
+            try writer.finish()
+        }
+
+        let mixed = try AudioChunkStore.mixed(forRecording: id, in: scratch.directory, cipher: cipher)
+        let samples = mixed.pcm.withUnsafeBytes { Array($0.bindMemory(to: Int16.self)) }
+
+        #expect(samples.allSatisfy { $0 == Int16.max })
+    }
+
+    private func tone(value: Int16, seconds: Int) -> Data {
+        let samples = [Int16](repeating: value, count: seconds * format.sampleRate)
+        return samples.withUnsafeBufferPointer { Data(buffer: $0) }
     }
 
     private func speech(seconds: Int) -> Data {

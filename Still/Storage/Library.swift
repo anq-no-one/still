@@ -86,12 +86,23 @@ final class Library: RecordingLibrary {
     }
 
     func audio(for recording: Recording) throws -> Data {
+        let captured = try capturedAudio(forRecording: recording.id)
+        return WAVFile.data(pcm: captured.pcm, format: captured.format)
+    }
+
+    func audio(for recording: Recording, track: AudioTrack) throws -> Data {
         guard let key else { throw LibraryError.locked }
 
         return try AudioChunkStore.audio(
-            in: AudioChunkStore.directory(forRecording: recording.id, in: services.audioRoot),
+            forRecording: recording.id,
+            track: track,
+            in: services.audioRoot,
             cipher: LibraryCipher(key: key)
         )
+    }
+
+    func tracks(for recording: Recording) -> [AudioTrack] {
+        AudioChunkStore.tracks(forRecording: recording.id, in: services.audioRoot)
     }
 
     func checkpointStore(forRecording id: UUID) throws -> TranscriptionCheckpointStore {
@@ -107,11 +118,10 @@ final class Library: RecordingLibrary {
     func capturedAudio(forRecording id: UUID) throws -> (pcm: Data, format: AudioFormat) {
         guard let key else { throw LibraryError.locked }
 
-        let cipher = LibraryCipher(key: key)
-        let directory = AudioChunkStore.directory(forRecording: id, in: services.audioRoot)
-        return (
-            try AudioChunkStore.pcm(in: directory, cipher: cipher),
-            try AudioChunkStore.manifest(in: directory, cipher: cipher).format
+        return try AudioChunkStore.mixed(
+            forRecording: id,
+            in: services.audioRoot,
+            cipher: LibraryCipher(key: key)
         )
     }
 
@@ -122,7 +132,7 @@ final class Library: RecordingLibrary {
         let interrupted = try AudioChunkStore.interruptedRecordings(in: services.audioRoot, cipher: cipher)
 
         for recovered in interrupted {
-            try AudioChunkStore.markComplete(recovered.directory, cipher: cipher)
+            try AudioChunkStore.markComplete(forRecording: recovered.id, in: services.audioRoot, cipher: cipher)
             guard !known.contains(recovered.id) else { continue }
 
             let createdAt = (try? recovered.directory.resourceValues(forKeys: [.creationDateKey]))?

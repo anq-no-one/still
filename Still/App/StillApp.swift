@@ -19,7 +19,8 @@ struct StillApp: App {
         let audioRoot = URL.applicationSupportDirectory
             .appending(path: "Still/Audio", directoryHint: .isDirectory)
 
-        entitlements = MainActor.assumeIsolated { Entitlements(source: StoreKitEntitlementSource()) }
+        let proEntitlements = MainActor.assumeIsolated { Entitlements(source: StoreKitEntitlementSource()) }
+        entitlements = proEntitlements
 
         let supportRoot = URL.applicationSupportDirectory.appending(path: "Still", directoryHint: .isDirectory)
 
@@ -43,7 +44,15 @@ struct StillApp: App {
                     },
                     makeRecorder: { key in
                         MainActor.assumeIsolated {
+                            #if os(macOS)
+                            MacAudioRecorder(
+                                root: audioRoot,
+                                cipher: LibraryCipher(key: key),
+                                capturesSystemAudio: { proEntitlements.allows(.macSystemAudio) }
+                            )
+                            #else
                             MicrophoneRecorder(root: audioRoot, cipher: LibraryCipher(key: key))
+                            #endif
                         }
                     }
                 )

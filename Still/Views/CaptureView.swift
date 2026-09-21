@@ -34,6 +34,12 @@ struct CaptureView: View {
             }
             .frame(minHeight: 220)
 
+            if let note = workflow?.captureNote {
+                Label(note, systemImage: "speaker.slash")
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
             if let failureMessage {
                 Label(failureMessage, systemImage: "exclamationmark.triangle.fill")
                     .foregroundStyle(.red)
@@ -42,7 +48,7 @@ struct CaptureView: View {
 
             HStack {
                 Button("Cancel", role: .cancel) {
-                    workflow?.cancel()
+                    Task { await workflow?.cancel() }
                     dismiss()
                 }
 
@@ -80,7 +86,7 @@ struct CaptureView: View {
             }
         }
         .onDisappear {
-            workflow?.cancel()
+            Task { await workflow?.cancel() }
         }
     }
 

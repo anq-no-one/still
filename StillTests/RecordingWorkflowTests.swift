@@ -126,7 +126,7 @@ struct RecordingWorkflowTests {
         let workflow = makeWorkflow(recorder: recorder)
 
         await workflow.start()
-        workflow.cancel()
+        await workflow.cancel()
 
         #expect(recorder.events.last == .discarded)
     }
@@ -170,7 +170,7 @@ struct RecordingWorkflowTests {
 
         await workflow.start()
         session.transcript = "Discarded thought"
-        workflow.cancel()
+        await workflow.cancel()
 
         #expect(library.recordings.isEmpty)
         #expect(session.isRecording == false)
@@ -248,11 +248,11 @@ final class SpyAudioRecorder: AudioRecorder {
         events.append(.started(recordingID))
     }
 
-    func finish() throws {
+    func finish() async throws {
         events.append(.finished)
     }
 
-    func discard() {
+    func discard() async {
         events.append(.discarded)
     }
 }

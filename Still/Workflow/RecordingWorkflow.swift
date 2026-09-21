@@ -56,6 +56,10 @@ final class RecordingWorkflow {
         showsLiveDraft ? session.failure : nil
     }
 
+    var captureNote: String? {
+        recorder.captureNote
+    }
+
     var isCapturing: Bool {
         state == .recording
     }
@@ -93,7 +97,7 @@ final class RecordingWorkflow {
             try await session.start()
             state = .recording
         } catch {
-            recorder.discard()
+            await recorder.discard()
             fail(with: error)
         }
     }
@@ -105,11 +109,11 @@ final class RecordingWorkflow {
         stopCapture()
 
         do {
-            try recorder.finish()
+            try await recorder.finish()
             let segments = try await finalSegments()
             let transcript = segments.plainText
             guard !transcript.isEmpty else {
-                recorder.discard()
+                await recorder.discard()
                 state = .failed(RecordingWorkflowError.emptyTranscript.localizedDescription)
                 return
             }
@@ -131,11 +135,11 @@ final class RecordingWorkflow {
         }
     }
 
-    func cancel() {
+    func cancel() async {
         guard state != .saved else { return }
 
         stopCapture()
-        recorder.discard()
+        await recorder.discard()
         state = .idle
     }
 
