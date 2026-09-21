@@ -118,14 +118,7 @@ final class MicrophoneRecorder: AudioRecorder {
     }
 
     private func hasMicrophonePermission() async -> Bool {
-        switch AVCaptureDevice.authorizationStatus(for: .audio) {
-        case .authorized:
-            true
-        case .notDetermined:
-            await AVCaptureDevice.requestAccess(for: .audio)
-        default:
-            false
-        }
+        await MicrophonePermission.request()
     }
 
     private static func convert(

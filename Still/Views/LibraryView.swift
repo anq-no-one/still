@@ -5,6 +5,7 @@ struct LibraryView: View {
     let modelInstaller: ModelPackInstaller
     let entitlements: Entitlements
     let coordinator: RecordingCoordinator
+    let setup: SetupFlow
 
     @State private var selection: Recording.ID?
     @State private var isCapturing = false
@@ -81,6 +82,10 @@ struct LibraryView: View {
         .sheet(isPresented: $isSettingUpModel) {
             ModelSetupView(installer: modelInstaller)
         }
+        .sheet(isPresented: showsSetup) {
+            SetupView(flow: setup, installer: modelInstaller, entitlements: entitlements)
+                .interactiveDismissDisabled()
+        }
         .sheet(isPresented: $isShowingPro) {
             ProUnlockView(entitlements: entitlements)
         }
@@ -92,10 +97,12 @@ struct LibraryView: View {
         .onChange(of: coordinator.isRecording) { _, isRecording in
             if isRecording { isCapturing = true }
         }
+        .onChange(of: setup.wantsPro) { _, wantsPro in
+            isShowingPro = wantsPro
+        }
         .task {
             await library.unlock()
             await entitlements.refresh()
-            isSettingUpModel = modelInstaller.state == .needsApproval
         }
     }
 
@@ -140,6 +147,10 @@ struct LibraryView: View {
     private func open(_ result: SearchResult) {
         selection = result.recordingID
         evidenceTime = result.time
+    }
+
+    private var showsSetup: Binding<Bool> {
+        Binding(get: { !setup.isComplete }, set: { _ in })
     }
 
     private var showsActionError: Binding<Bool> {

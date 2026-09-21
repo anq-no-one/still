@@ -7,6 +7,7 @@ struct StillApp: App {
     private let modelInstaller: ModelPackInstaller
     private let entitlements: Entitlements
     private let coordinator: RecordingCoordinator
+    private let setup: SetupFlow
 
     #if os(macOS)
     @State private var shortcut: GlobalRecordingShortcut?
@@ -64,6 +65,12 @@ struct StillApp: App {
             )
         }
 
+        setup = MainActor.assumeIsolated {
+            SetupFlow(
+                store: UserDefaultsSetupProgressStore(),
+                microphone: SystemMicrophoneAccess()
+            )
+        }
         library = recordingLibrary
         coordinator = MainActor.assumeIsolated {
             RecordingCoordinator(library: recordingLibrary, entitlements: proEntitlements)
@@ -76,7 +83,8 @@ struct StillApp: App {
                 library: library,
                 modelInstaller: modelInstaller,
                 entitlements: entitlements,
-                coordinator: coordinator
+                coordinator: coordinator,
+                setup: setup
             )
             #if os(macOS)
             .task {
