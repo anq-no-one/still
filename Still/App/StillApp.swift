@@ -14,14 +14,27 @@ struct StillApp: App {
         }
 
         let context = ModelContext(container)
-        library = Library(
-            keyRing: LibraryKeyRing(source: KeychainDeviceKeySource()),
-            makeRepository: { key in
-                MainActor.assumeIsolated {
-                    EncryptedRecordingRepository(context: context, key: key)
-                }
-            }
-        )
+        let audioRoot = URL.applicationSupportDirectory
+            .appending(path: "Still/Audio", directoryHint: .isDirectory)
+
+        library = MainActor.assumeIsolated {
+            Library(
+                keyRing: LibraryKeyRing(source: KeychainDeviceKeySource()),
+                services: LibraryServices(
+                    audioRoot: audioRoot,
+                    makeRepository: { key in
+                        MainActor.assumeIsolated {
+                            EncryptedRecordingRepository(context: context, key: key)
+                        }
+                    },
+                    makeRecorder: { key in
+                        MainActor.assumeIsolated {
+                            MicrophoneRecorder(root: audioRoot, cipher: LibraryCipher(key: key))
+                        }
+                    }
+                )
+            )
+        }
     }
 
     var body: some Scene {

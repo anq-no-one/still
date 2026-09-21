@@ -14,16 +14,24 @@ final class RecordingWorkflow {
     }
 
     private let session: TranscriptionSession
+    private let recorder: AudioRecorder
     private let library: RecordingLibrary
     private let now: () -> Date
 
+    private var recordingID = UUID()
     private var startedAt: Date?
     private var finishedAt: Date?
 
     private(set) var state: State = .idle
 
-    init(session: TranscriptionSession, library: RecordingLibrary, now: @escaping () -> Date = Date.init) {
+    init(
+        session: TranscriptionSession,
+        recorder: AudioRecorder,
+        library: RecordingLibrary,
+        now: @escaping () -> Date = Date.init
+    ) {
         self.session = session
+        self.recorder = recorder
         self.library = library
         self.now = now
     }
@@ -49,15 +57,23 @@ final class RecordingWorkflow {
         guard state == .idle || isFailed else { return }
 
         state = .preparing
+        recordingID = UUID()
         startedAt = now()
         finishedAt = nil
+
+        do {
+            try await recorder.start(recordingID: recordingID)
+        } catch {
+            fail(with: error)
+            return
+        }
 
         do {
             try await session.start()
             state = .recording
         } catch {
-            finishedAt = now()
-            state = .failed(error.localizedDescription)
+            recorder.discard()
+            fail(with: error)
         }
     }
 
@@ -69,14 +85,17 @@ final class RecordingWorkflow {
 
         let transcript = finishedTranscript
         guard !transcript.isEmpty else {
+            recorder.discard()
             state = .failed(RecordingWorkflowError.emptyTranscript.localizedDescription)
             return
         }
 
         let startedAt = startedAt ?? now()
         do {
+            try recorder.finish()
             try library.add(
                 Recording(
+                    id: recordingID,
                     title: RecordingTitle.from(transcript: transcript, date: startedAt),
                     transcript: transcript,
                     createdAt: startedAt,
@@ -93,6 +112,7 @@ final class RecordingWorkflow {
         guard state != .saved else { return }
 
         stopCapture()
+        recorder.discard()
         state = .idle
     }
 
@@ -103,6 +123,11 @@ final class RecordingWorkflow {
 
     private var finishedTranscript: String {
         session.transcript.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func fail(with error: Error) {
+        finishedAt = now()
+        state = .failed(error.localizedDescription)
     }
 
     private func stopCapture() {

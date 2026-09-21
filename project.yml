@@ -20,6 +20,8 @@ targets:
         CFBundleDisplayName: Still
         NSMicrophoneUsageDescription: Still uses the microphone to transcribe a meeting on this device.
         NSSpeechRecognitionUsageDescription: Still turns speech into text on this device.
+        UIBackgroundModes:
+          - audio
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait

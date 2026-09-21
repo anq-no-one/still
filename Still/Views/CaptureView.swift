@@ -6,6 +6,7 @@ struct CaptureView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var workflow: RecordingWorkflow?
     @State private var tick = Date.now
+    @State private var startupError: String?
 
     var body: some View {
         VStack(spacing: 28) {
@@ -57,9 +58,17 @@ struct CaptureView: View {
         .frame(minWidth: 420, idealWidth: 560, minHeight: 480)
         .interactiveDismissDisabled(isCapturing)
         .task {
-            let workflow = RecordingWorkflow(session: LiveTranscriber(), library: library)
-            self.workflow = workflow
-            await workflow.start()
+            do {
+                let workflow = RecordingWorkflow(
+                    session: LiveTranscriber(),
+                    recorder: try library.makeRecorder(),
+                    library: library
+                )
+                self.workflow = workflow
+                await workflow.start()
+            } catch {
+                startupError = error.localizedDescription
+            }
         }
         .task {
             while !Task.isCancelled {
@@ -86,6 +95,7 @@ struct CaptureView: View {
     }
 
     private var failureMessage: String? {
+        if let startupError { return startupError }
         if case .failed(let message) = workflow?.state { return message }
         return nil
     }

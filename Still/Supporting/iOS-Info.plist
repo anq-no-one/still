@@ -24,6 +24,10 @@
 	<string>Still uses the microphone to transcribe a meeting on this device.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Still turns speech into text on this device.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

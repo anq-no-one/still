@@ -142,14 +142,103 @@ struct LibraryUnlockTests {
         #expect(library.recordings.isEmpty)
     }
 
-    private func makeLibrary(source: FakeDeviceKeySource, context: ModelContext) -> Library {
+    private func makeLibrary(
+        source: FakeDeviceKeySource,
+        context: ModelContext,
+        audioRoot: URL = URL.temporaryDirectory.appending(path: "still-tests/\(UUID().uuidString)")
+    ) -> Library {
         Library(
             keyRing: LibraryKeyRing(source: source),
-            makeRepository: { key in
-                MainActor.assumeIsolated {
-                    EncryptedRecordingRepository(context: context, key: key)
+            services: LibraryServices(
+                audioRoot: audioRoot,
+                makeRepository: { key in
+                    MainActor.assumeIsolated {
+                        EncryptedRecordingRepository(context: context, key: key)
+                    }
+                },
+                makeRecorder: { _ in
+                    MainActor.assumeIsolated { SpyAudioRecorder() }
                 }
-            }
+            )
+        )
+    }
+
+    private func makeContext() throws -> ModelContext {
+        let container = try ModelContainer(
+            for: EncryptedRecording.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        return ModelContext(container)
+    }
+}
+
+@MainActor
+struct LibraryAudioRecoveryTests {
+    @Test
+    func adoptsInterruptedAudioOnceAcrossUnlocks() async throws {
+        let scratch = try Scratch()
+        let source = FakeDeviceKeySource()
+        let context = try makeContext()
+        let key = try await LibraryKeyRing(source: source).unlock(reason: "seed")
+        let format = AudioFormat(sampleRate: 1_000, channels: 1, bitsPerSample: 16)
+        let id = UUID()
+        let writer = try AudioChunkWriter(
+            directory: AudioChunkStore.directory(forRecording: id, in: scratch.directory),
+            cipher: LibraryCipher(key: key),
+            format: format,
+            chunkSeconds: 5
+        )
+        try writer.append(Data(repeating: 7, count: 10 * format.bytesPerSecond))
+
+        let library = makeLibrary(source: source, context: context, audioRoot: scratch.directory)
+        await library.unlock()
+
+        #expect(library.recordings.map(\.id) == [id])
+        #expect(library.recordings.first?.duration == 10)
+
+        let second = makeLibrary(source: source, context: context, audioRoot: scratch.directory)
+        await second.unlock()
+
+        #expect(second.recordings.map(\.id) == [id])
+    }
+
+    @Test
+    func deletingARecordingRemovesItsAudio() async throws {
+        let scratch = try Scratch()
+        let source = FakeDeviceKeySource()
+        let library = makeLibrary(source: source, context: try makeContext(), audioRoot: scratch.directory)
+        await library.unlock()
+        let recording = Recording(title: "Spoken", transcript: "text", duration: 5)
+        let directory = AudioChunkStore.directory(forRecording: recording.id, in: scratch.directory)
+        let key = try await LibraryKeyRing(source: source).unlock(reason: "seed")
+        let writer = try AudioChunkWriter(directory: directory, cipher: LibraryCipher(key: key))
+        try writer.append(Data(repeating: 1, count: 32_000))
+        try writer.finish()
+        try library.add(recording)
+
+        try library.delete(recording)
+
+        #expect(!FileManager.default.fileExists(atPath: directory.path))
+    }
+
+    private func makeLibrary(
+        source: FakeDeviceKeySource,
+        context: ModelContext,
+        audioRoot: URL
+    ) -> Library {
+        Library(
+            keyRing: LibraryKeyRing(source: source),
+            services: LibraryServices(
+                audioRoot: audioRoot,
+                makeRepository: { key in
+                    MainActor.assumeIsolated {
+                        EncryptedRecordingRepository(context: context, key: key)
+                    }
+                },
+                makeRecorder: { _ in
+                    MainActor.assumeIsolated { SpyAudioRecorder() }
+                }
+            )
         )
     }
 

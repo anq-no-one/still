@@ -8,6 +8,13 @@ protocol RecordingLibrary: AnyObject {
 }
 
 @MainActor
+struct LibraryServices {
+    let audioRoot: URL
+    let makeRepository: (SymmetricKey) -> RecordingRepository
+    let makeRecorder: (SymmetricKey) -> AudioRecorder
+}
+
+@MainActor
 @Observable
 final class Library: RecordingLibrary {
     enum State: Equatable {
@@ -18,15 +25,16 @@ final class Library: RecordingLibrary {
     }
 
     private let keyRing: LibraryKeyRing
-    private let makeRepository: (SymmetricKey) -> RecordingRepository
+    private let services: LibraryServices
     private var repository: RecordingRepository?
+    private var key: SymmetricKey?
 
     private(set) var state: State = .locked
     private(set) var recordings: [Recording] = []
 
-    init(keyRing: LibraryKeyRing, makeRepository: @escaping (SymmetricKey) -> RecordingRepository) {
+    init(keyRing: LibraryKeyRing, services: LibraryServices) {
         self.keyRing = keyRing
-        self.makeRepository = makeRepository
+        self.services = services
     }
 
     func unlock(reason: String = "Unlock your Still Library") async {
@@ -34,15 +42,25 @@ final class Library: RecordingLibrary {
 
         state = .unlocking
         do {
-            let repository = makeRepository(try await keyRing.unlock(reason: reason))
+            let key = try await keyRing.unlock(reason: reason)
+            let repository = services.makeRepository(key)
             recordings = try repository.load()
             self.repository = repository
+            self.key = key
+            try recoverInterruptedAudio(cipher: LibraryCipher(key: key))
             state = .unlocked
         } catch {
             repository = nil
+            key = nil
             recordings = []
             state = .failed(error.localizedDescription)
         }
+    }
+
+    func makeRecorder() throws -> AudioRecorder {
+        guard let key else { throw LibraryError.locked }
+
+        return services.makeRecorder(key)
     }
 
     func add(_ recording: Recording) throws {
@@ -59,7 +77,43 @@ final class Library: RecordingLibrary {
         guard let repository else { throw LibraryError.locked }
 
         try repository.delete(recording.id)
+        try? AudioChunkStore.discard(
+            AudioChunkStore.directory(forRecording: recording.id, in: services.audioRoot)
+        )
         recordings.removeAll { $0.id == recording.id }
+    }
+
+    func audio(for recording: Recording) throws -> Data {
+        guard let key else { throw LibraryError.locked }
+
+        return try AudioChunkStore.audio(
+            in: AudioChunkStore.directory(forRecording: recording.id, in: services.audioRoot),
+            cipher: LibraryCipher(key: key)
+        )
+    }
+
+    /// Audio left behind by a termination becomes a Recording on the next unlock.
+    /// Adoption is keyed by the recording id, so repeating it creates no duplicate.
+    private func recoverInterruptedAudio(cipher: LibraryCipher) throws {
+        let known = Set(recordings.map(\.id))
+        let interrupted = try AudioChunkStore.interruptedRecordings(in: services.audioRoot, cipher: cipher)
+
+        for recovered in interrupted {
+            try AudioChunkStore.markComplete(recovered.directory, cipher: cipher)
+            guard !known.contains(recovered.id) else { continue }
+
+            let createdAt = (try? recovered.directory.resourceValues(forKeys: [.creationDateKey]))?
+                .creationDate ?? .now
+            try write(
+                Recording(
+                    id: recovered.id,
+                    title: RecordingTitle.from(transcript: "", date: createdAt),
+                    transcript: "",
+                    createdAt: createdAt,
+                    duration: recovered.duration
+                )
+            )
+        }
     }
 
     private func write(_ recording: Recording) throws {
@@ -69,7 +123,7 @@ final class Library: RecordingLibrary {
         if let index = recordings.firstIndex(where: { $0.id == recording.id }) {
             recordings[index] = recording
         } else {
-            recordings.insert(recording, at: 0)
+            recordings.append(recording)
             recordings.sort { $0.createdAt > $1.createdAt }
         }
     }

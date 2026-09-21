@@ -62,6 +62,46 @@ struct RecordingWorkflowTests {
     }
 
     @Test
+    func refusesToRecordWithoutMicrophoneAccess() async {
+        let recorder = SpyAudioRecorder()
+        recorder.startError = CaptureError.microphonePermissionDenied
+        let session = FakeTranscriptionSession()
+        let workflow = makeWorkflow(session: session, recorder: recorder)
+
+        await workflow.start()
+
+        #expect(workflow.state == .failed(CaptureError.microphonePermissionDenied.localizedDescription))
+        #expect(session.isRecording == false)
+    }
+
+    @Test
+    func savedRecordingMatchesItsAudio() async throws {
+        let session = FakeTranscriptionSession()
+        let recorder = SpyAudioRecorder()
+        let library = SpyRecordingLibrary()
+        let workflow = makeWorkflow(session: session, recorder: recorder, library: library)
+
+        await workflow.start()
+        session.transcript = "Agreed the plan"
+        workflow.save()
+
+        let recording = try #require(library.recordings.first)
+        #expect(recorder.startedID == recording.id)
+        #expect(recorder.events.last == .finished)
+    }
+
+    @Test
+    func cancellingDiscardsCapturedAudio() async {
+        let recorder = SpyAudioRecorder()
+        let workflow = makeWorkflow(recorder: recorder)
+
+        await workflow.start()
+        workflow.cancel()
+
+        #expect(recorder.events.last == .discarded)
+    }
+
+    @Test
     func cancellingKeepsLibraryUnchanged() async {
         let session = FakeTranscriptionSession()
         let library = SpyRecordingLibrary()
@@ -93,10 +133,11 @@ struct RecordingWorkflowTests {
 
     private func makeWorkflow(
         session: FakeTranscriptionSession = FakeTranscriptionSession(),
+        recorder: SpyAudioRecorder = SpyAudioRecorder(),
         library: SpyRecordingLibrary = SpyRecordingLibrary(),
         clock: StubClock = StubClock(start: Date(timeIntervalSince1970: 0))
     ) -> RecordingWorkflow {
-        RecordingWorkflow(session: session, library: library, now: clock.now)
+        RecordingWorkflow(session: session, recorder: recorder, library: library, now: clock.now)
     }
 }
 
@@ -113,6 +154,35 @@ final class FakeTranscriptionSession: TranscriptionSession {
 
     func stop() {
         isRecording = false
+    }
+}
+
+@MainActor
+final class SpyAudioRecorder: AudioRecorder {
+    enum Event: Equatable {
+        case started(UUID)
+        case finished
+        case discarded
+    }
+
+    var startError: Error?
+    private(set) var events: [Event] = []
+
+    var startedID: UUID? {
+        events.compactMap { if case .started(let id) = $0 { return id } else { return nil } }.first
+    }
+
+    func start(recordingID: UUID) async throws {
+        if let startError { throw startError }
+        events.append(.started(recordingID))
+    }
+
+    func finish() throws {
+        events.append(.finished)
+    }
+
+    func discard() {
+        events.append(.discarded)
     }
 }
 
