@@ -1,6 +1,6 @@
 import Foundation
 
-struct Recording: Identifiable, Equatable, Sendable {
+struct Recording: Identifiable, Codable, Equatable, Sendable {
     let id: UUID
     var title: String
     var transcript: String

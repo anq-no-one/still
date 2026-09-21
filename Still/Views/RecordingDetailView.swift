@@ -65,6 +65,11 @@ struct RecordingDetailView: View {
             .frame(maxWidth: .infinity)
         }
         .navigationTitle(title)
+        .toolbar {
+            ToolbarItem {
+                ExportMenu(recording: recording, library: library)
+            }
+        }
         .task {
             player.load((try? library.audio(for: recording)) ?? Data())
             if let startAt { player.play(from: startAt) }

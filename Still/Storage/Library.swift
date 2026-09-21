@@ -120,6 +120,55 @@ final class Library: RecordingLibrary {
         )
     }
 
+    func archive(_ recording: Recording, tracks: [AudioTrack]) throws -> Data {
+        guard let key else { throw LibraryError.locked }
+
+        let cipher = LibraryCipher(key: key)
+        let archived = try tracks.map { track -> ArchivedTrack in
+            let directory = AudioChunkStore.trackDirectory(
+                forRecording: recording.id,
+                track: track,
+                in: services.audioRoot
+            )
+            let manifest = try AudioChunkStore.manifest(in: directory, cipher: cipher)
+            return ArchivedTrack(
+                track: track,
+                format: manifest.format,
+                startOffset: manifest.startOffset,
+                pcm: try AudioChunkStore.pcm(in: directory, cipher: cipher)
+            )
+        }
+
+        return try StillArchiveCoder.seal(
+            StillArchive(version: StillArchive.currentVersion, recording: recording, tracks: archived),
+            with: key
+        )
+    }
+
+    func importArchive(_ data: Data) throws -> Recording {
+        guard let key else { throw LibraryError.locked }
+
+        let archive = try StillArchiveCoder.open(data, with: key)
+        let cipher = LibraryCipher(key: key)
+        for track in archive.tracks {
+            let writer = try AudioChunkWriter(
+                directory: AudioChunkStore.trackDirectory(
+                    forRecording: archive.recording.id,
+                    track: track.track,
+                    in: services.audioRoot
+                ),
+                cipher: cipher,
+                format: track.format,
+                startOffset: track.startOffset
+            )
+            try writer.append(track.pcm)
+            try writer.finish()
+        }
+
+        try write(archive.recording)
+        return archive.recording
+    }
+
     func capturedAudio(forRecording id: UUID) throws -> (pcm: Data, format: AudioFormat) {
         guard let key else { throw LibraryError.locked }
 
