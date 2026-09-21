@@ -7,6 +7,7 @@ struct LibraryView: View {
     let coordinator: RecordingCoordinator
     let setup: SetupFlow
     let sync: SyncEngine
+    let diagnostics: Diagnostics
     #if os(macOS)
     let automatic: AutomaticRecording
     let browser: BrowserMeetingBridge
@@ -21,6 +22,7 @@ struct LibraryView: View {
     @State private var isShowingRetention = false
     @State private var isShowingAutomatic = false
     @State private var isShowingBrowser = false
+    @State private var isShowingDiagnostics = false
     @State private var actionError: String?
     @State private var query = ""
     @State private var evidenceTime: TimeInterval?
@@ -82,6 +84,12 @@ struct LibraryView: View {
                     }
                 }
 
+                ToolbarItem {
+                    Button("Diagnostics", systemImage: "stethoscope") {
+                        isShowingDiagnostics = true
+                    }
+                }
+
                 #if os(macOS)
                 ToolbarItem {
                     Button("Automatic recording", systemImage: "bolt.badge.clock") {
@@ -139,6 +147,9 @@ struct LibraryView: View {
         }
         .sheet(isPresented: $isShowingRetention) {
             RetentionSettingsView(library: library)
+        }
+        .sheet(isPresented: $isShowingDiagnostics) {
+            DiagnosticsSettingsView(diagnostics: diagnostics)
         }
         #if os(macOS)
         .sheet(isPresented: $isShowingAutomatic) {

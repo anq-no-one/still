@@ -9,6 +9,7 @@ struct StillApp: App {
     private let coordinator: RecordingCoordinator
     private let setup: SetupFlow
     private let sync: SyncEngine
+    private let diagnostics: Diagnostics
     #if os(macOS)
     private let automatic: AutomaticRecording
     private let browser: BrowserMeetingBridge
@@ -77,6 +78,10 @@ struct StillApp: App {
             )
         }
         library = recordingLibrary
+        diagnostics = MainActor.assumeIsolated {
+            Diagnostics(settings: UserDefaultsDiagnosticsSettings(), sink: NoDiagnosticsSink())
+        }
+
         sync = MainActor.assumeIsolated {
             SyncEngine(
                 library: recordingLibrary,
@@ -120,6 +125,7 @@ struct StillApp: App {
                 coordinator: coordinator,
                 setup: setup,
                 sync: sync,
+                diagnostics: diagnostics,
                 automatic: automatic,
                 browser: browser
             )
@@ -135,7 +141,8 @@ struct StillApp: App {
                 entitlements: entitlements,
                 coordinator: coordinator,
                 setup: setup,
-                sync: sync
+                sync: sync,
+                diagnostics: diagnostics
             )
             #endif
         }
