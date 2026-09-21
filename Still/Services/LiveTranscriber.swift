@@ -11,6 +11,7 @@ final class LiveTranscriber: TranscriptionSession {
 
     private(set) var transcript = ""
     private(set) var isRecording = false
+    private(set) var failure: String?
 
     func start() async throws {
         guard !isRecording else { return }
@@ -39,6 +40,7 @@ final class LiveTranscriber: TranscriptionSession {
         request.shouldReportPartialResults = true
         recognitionRequest = request
         transcript = ""
+        failure = nil
 
         let inputNode = audioEngine.inputNode
         let format = inputNode.outputFormat(forBus: 0)
@@ -50,6 +52,10 @@ final class LiveTranscriber: TranscriptionSession {
             Task { @MainActor in
                 if let result {
                     self?.transcript = result.bestTranscription.formattedString
+                }
+
+                if let error {
+                    self?.failure = error.localizedDescription
                 }
 
                 if error != nil || result?.isFinal == true {

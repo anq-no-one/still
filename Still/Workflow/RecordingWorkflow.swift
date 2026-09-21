@@ -50,6 +50,12 @@ final class RecordingWorkflow {
         showsLiveDraft
     }
 
+    /// A recognizer that dies mid-recording does not end the recording. Capture
+    /// keeps journaling audio and the transcript comes from the saved audio.
+    var draftFailure: String? {
+        showsLiveDraft ? session.failure : nil
+    }
+
     var isCapturing: Bool {
         state == .recording
     }
@@ -61,7 +67,11 @@ final class RecordingWorkflow {
 
     var canSave: Bool {
         guard state == .recording else { return false }
-        return showsLiveDraft ? !draftTranscript.isEmpty : elapsed > 0
+        return usesLiveDraft ? !draftTranscript.isEmpty : elapsed > 0
+    }
+
+    private var usesLiveDraft: Bool {
+        showsLiveDraft && session.failure == nil
     }
 
     func start() async {
@@ -133,7 +143,7 @@ final class RecordingWorkflow {
     }
 
     private func resolvedTranscript() async throws -> String {
-        if showsLiveDraft { return draftTranscript }
+        if usesLiveDraft { return draftTranscript }
 
         let captured = try library.capturedAudio(forRecording: recordingID)
         return try await offlineTranscriber

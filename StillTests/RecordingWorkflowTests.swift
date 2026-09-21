@@ -91,6 +91,35 @@ struct RecordingWorkflowTests {
     }
 
     @Test
+    func aFailedRecognizerKeepsTheRecordingAndTranscribesTheAudio() async throws {
+        let session = FakeTranscriptionSession()
+        let offlineTranscriber = StubOfflineTranscriber()
+        let library = SpyRecordingLibrary()
+        let clock = StubClock(start: Date(timeIntervalSince1970: 0))
+        let workflow = makeWorkflow(
+            session: session,
+            library: library,
+            offlineTranscriber: offlineTranscriber,
+            clock: clock
+        )
+
+        await workflow.start()
+        session.transcript = "Partial dr"
+        session.failure = "Speech recognition stopped."
+        clock.advance(by: 30)
+
+        #expect(workflow.state == .recording)
+        #expect(workflow.draftFailure == "Speech recognition stopped.")
+        #expect(workflow.canSave)
+
+        await workflow.save()
+
+        let recording = try #require(library.recordings.first)
+        #expect(recording.transcript == "Transcribed after saving")
+        #expect(offlineTranscriber.calls == 1)
+    }
+
+    @Test
     func cancellingDiscardsCapturedAudio() async {
         let recorder = SpyAudioRecorder()
         let workflow = makeWorkflow(recorder: recorder)
@@ -185,6 +214,7 @@ struct RecordingWorkflowTests {
 final class FakeTranscriptionSession: TranscriptionSession {
     var transcript = ""
     var isRecording = false
+    var failure: String?
     var startError: Error?
 
     func start() async throws {
