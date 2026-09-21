@@ -88,6 +88,10 @@ struct StillApp: App {
         }
         coordinator = recordingCoordinator
 
+        MainActor.assumeIsolated {
+            StillIntentEnvironment.shared.install(library: recordingLibrary, coordinator: recordingCoordinator)
+        }
+
         #if os(macOS)
         automatic = MainActor.assumeIsolated {
             AutomaticRecording(

@@ -24,6 +24,8 @@
 	<array>
 		<string>_still-sync._tcp</string>
 	</array>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Still reads the event you are in to suggest a title and the people expected.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Still syncs directly with your other devices on this network when you turn on nearby sync.</string>
 	<key>NSMicrophoneUsageDescription</key>
