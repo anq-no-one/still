@@ -69,3 +69,14 @@ Mac. They have to show the real app, so they come after a build runs on a device
 Shipping is not only a signing problem. `docs/release-gates.md` lists what has not been measured
 and why, and `docs/localization.md` records that no language other than English is translated.
 Neither should be waved through to make a submission date.
+
+## The toolchain CI uses has not been exercised
+
+The workflow pins Xcode 26.6, the default on the `macos-26` runner. Development happens on
+Xcode 27, and the code has been built and tested on Xcode 27.0 (`27A266a`) as well as 27.1, so it
+does not depend on a beta. Nothing has compiled it with a 26.x toolchain, because none is
+installed here.
+
+If the first CI run fails to compile, that is the likeliest reason, and the fix is either to raise
+`XCODE_VERSION` to a 27 image or to adjust whatever 27-only construct it names. The selection step
+prints the resolved version and lists what the image has, so the run says which it used.
