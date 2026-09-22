@@ -55,56 +55,6 @@ struct LibraryView: View {
                 emptyState
             }
             .toolbar {
-                ToolbarItem {
-                    Button("Set up transcription", systemImage: "waveform.badge.mic") {
-                        isSettingUpModel = true
-                    }
-                }
-
-                ToolbarItem {
-                    Button("Still Pro", systemImage: "sparkles") {
-                        isShowingPro = true
-                    }
-                }
-
-                ToolbarItem {
-                    Button("Sync", systemImage: sync.isEnabled ? "arrow.triangle.2.circlepath" : "icloud.slash") {
-                        isShowingSync = true
-                    }
-                }
-
-                ToolbarItem {
-                    Button("Keys and devices", systemImage: "key") {
-                        isShowingSecurity = true
-                    }
-                }
-
-                ToolbarItem {
-                    Button("Audio and deletion", systemImage: "clock.arrow.circlepath") {
-                        isShowingRetention = true
-                    }
-                }
-
-                ToolbarItem {
-                    Button("Diagnostics", systemImage: "stethoscope") {
-                        isShowingDiagnostics = true
-                    }
-                }
-
-                #if os(macOS)
-                ToolbarItem {
-                    Button("Automatic recording", systemImage: "bolt.badge.clock") {
-                        isShowingAutomatic = true
-                    }
-                }
-
-                ToolbarItem {
-                    Button("Browser meetings", systemImage: "safari") {
-                        isShowingBrowser = true
-                    }
-                }
-                #endif
-
                 ToolbarItem(placement: .primaryAction) {
                     Button(coordinator.isRecording ? "Recording" : "Record", systemImage: "record.circle") {
                         isCapturing = true
@@ -115,6 +65,38 @@ struct LibraryView: View {
                     .disabled(library.state != .unlocked)
                     .symbolEffect(.pulse, isActive: coordinator.isRecording && !reduceMotion)
                     .keyboardShortcut("r", modifiers: [.command, .shift])
+                }
+
+                // One entry for everything that is not recording, so Record is
+                // never the thing that gets pushed into an overflow menu.
+                ToolbarItem {
+                    Menu("Settings", systemImage: "gearshape") {
+                        Button("Set up transcription", systemImage: "waveform.badge.mic") {
+                            isSettingUpModel = true
+                        }
+                        Button("Still Pro", systemImage: "sparkles") { isShowingPro = true }
+
+                        Divider()
+
+                        Button("Sync", systemImage: sync.isEnabled ? "arrow.triangle.2.circlepath" : "icloud.slash") {
+                            isShowingSync = true
+                        }
+                        Button("Keys and devices", systemImage: "key") { isShowingSecurity = true }
+                        Button("Audio and deletion", systemImage: "clock.arrow.circlepath") {
+                            isShowingRetention = true
+                        }
+
+                        Divider()
+
+                        Button("Diagnostics", systemImage: "stethoscope") { isShowingDiagnostics = true }
+
+                        #if os(macOS)
+                        Button("Automatic recording", systemImage: "bolt.badge.clock") {
+                            isShowingAutomatic = true
+                        }
+                        Button("Browser meetings", systemImage: "safari") { isShowingBrowser = true }
+                        #endif
+                    }
                 }
             }
         } detail: {
