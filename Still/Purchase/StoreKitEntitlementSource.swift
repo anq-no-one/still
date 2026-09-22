@@ -7,7 +7,10 @@ final class StoreKitEntitlementSource: EntitlementSource {
 
     private var updates: Task<Void, Never>?
 
-    init(onChange: @escaping @MainActor (EntitlementStatus) -> Void = { _ in }) {
+    init() {}
+
+    func observeChanges(_ onChange: @escaping @MainActor (EntitlementStatus) -> Void) {
+        updates?.cancel()
         updates = Task { [productID = Self.productID] in
             for await update in Transaction.updates {
                 guard case .verified(let transaction) = update,

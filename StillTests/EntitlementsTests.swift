@@ -80,6 +80,35 @@ struct EntitlementsTests {
     }
 
     @Test
+    func anApprovalArrivingLaterUnlocksProWithoutAsking() async {
+        let source = FakeEntitlementSource()
+        source.purchaseResult = .success(.pending)
+        let cache = MemoryEntitlementCache()
+        let entitlements = Entitlements(source: source, cache: cache)
+
+        await entitlements.purchase()
+
+        #expect(entitlements.status == .pending)
+
+        source.reportFromStore(.pro)
+
+        #expect(entitlements.isPro)
+        #expect(cache.load() == .pro)
+    }
+
+    @Test
+    func aRefundReportedByTheStoreTakesProAway() async {
+        let source = FakeEntitlementSource()
+        source.purchaseResult = .success(.pro)
+        let entitlements = Entitlements(source: source, cache: MemoryEntitlementCache())
+        await entitlements.purchase()
+
+        source.reportFromStore(.free)
+
+        #expect(!entitlements.isPro)
+    }
+
+    @Test
     func freeRecordingSurvivesAnUnavailableStore() async {
         let source = FakeEntitlementSource()
         source.currentResult = .failure(StoreUnavailable())
@@ -99,6 +128,16 @@ final class FakeEntitlementSource: EntitlementSource {
     var currentResult: Result<EntitlementStatus, Error> = .success(.free)
     var purchaseResult: Result<EntitlementStatus, Error> = .success(.free)
     var restoreResult: Result<EntitlementStatus, Error> = .success(.free)
+    private var onChange: (@MainActor (EntitlementStatus) -> Void)?
+
+    func observeChanges(_ onChange: @escaping @MainActor (EntitlementStatus) -> Void) {
+        self.onChange = onChange
+    }
+
+    /// Stands in for Ask to Buy clearing, or a purchase made elsewhere.
+    func reportFromStore(_ status: EntitlementStatus) {
+        onChange?(status)
+    }
 
     func current() async throws -> EntitlementStatus { try currentResult.get() }
     func purchase() async throws -> EntitlementStatus { try purchaseResult.get() }

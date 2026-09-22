@@ -24,6 +24,15 @@ protocol EntitlementSource: AnyObject {
     func current() async throws -> EntitlementStatus
     func purchase() async throws -> EntitlementStatus
     func restore() async throws -> EntitlementStatus
+
+    /// Reports a change Still did not ask for: an Ask to Buy approval coming
+    /// through, a bank challenge clearing, or a purchase made on another
+    /// device. Without it a paid user keeps seeing Free until they restart.
+    func observeChanges(_ onChange: @escaping @MainActor (EntitlementStatus) -> Void)
+}
+
+extension EntitlementSource {
+    func observeChanges(_ onChange: @escaping @MainActor (EntitlementStatus) -> Void) {}
 }
 
 protocol EntitlementCache: Sendable {
@@ -46,6 +55,16 @@ final class Entitlements {
         self.source = source
         self.cache = cache
         status = cache.load() ?? .free
+
+        source.observeChanges { [weak self] status in
+            self?.accept(status)
+        }
+    }
+
+    private func accept(_ status: EntitlementStatus) {
+        storeUnavailable = false
+        self.status = status
+        cache.save(status)
     }
 
     var isPro: Bool {
@@ -72,10 +91,7 @@ final class Entitlements {
     /// and never blocks free recording.
     private func apply(_ read: () async throws -> EntitlementStatus) async {
         do {
-            let fresh = try await read()
-            storeUnavailable = false
-            status = fresh
-            cache.save(fresh)
+            accept(try await read())
         } catch {
             storeUnavailable = true
         }
