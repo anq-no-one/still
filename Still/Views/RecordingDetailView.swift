@@ -43,7 +43,7 @@ struct RecordingDetailView: View {
                     .toggleStyle(.switch)
                     .font(.subheadline)
 
-                if let message = editor.saveFailure ?? player.loadFailure ?? translationFailure {
+                if let message = editor.saveFailure ?? playbackMessage ?? translationFailure {
                     Label(message, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(.red)
                 }
@@ -107,6 +107,17 @@ struct RecordingDetailView: View {
 
     private var recording: Recording {
         editor.recording
+    }
+
+    private var playbackMessage: String? {
+        switch player.state {
+        case .noAudio where !recording.segments.isEmpty:
+            "The audio for this recording was removed. The transcript is unchanged."
+        case .unreadable(let message):
+            message
+        case .noAudio, .ready:
+            nil
+        }
     }
 
     private var readingLanguage: Locale.Language {
