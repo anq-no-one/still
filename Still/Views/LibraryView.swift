@@ -8,21 +8,11 @@ struct LibraryView: View {
     let setup: SetupFlow
     let sync: SyncEngine
     let diagnostics: Diagnostics
-    #if os(macOS)
-    let automatic: AutomaticRecording
-    let browser: BrowserMeetingBridge
-    #endif
 
     @State private var selection: Recording.ID?
     @State private var isCapturing = false
-    @State private var isSettingUpModel = false
     @State private var isShowingPro = false
-    @State private var isShowingSync = false
-    @State private var isShowingSecurity = false
-    @State private var isShowingRetention = false
-    @State private var isShowingAutomatic = false
-    @State private var isShowingBrowser = false
-    @State private var isShowingDiagnostics = false
+    @State private var isShowingSettings = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var actionError: String?
     @State private var query = ""
@@ -49,7 +39,7 @@ struct LibraryView: View {
                     }
                 }
             }
-            .searchable(text: $query, prompt: "Search recordings")
+            .searchable(text: $query, prompt: "Search Recordings")
             .navigationTitle("Recordings")
             .overlay {
                 emptyState
@@ -57,7 +47,7 @@ struct LibraryView: View {
             .toolbar {
                 ToolbarItem(placement: recordPlacement) {
                     Button(
-                        coordinator.isRecording ? "Stop recording" : "Record",
+                        coordinator.isRecording ? "Stop Recording" : "Record",
                         systemImage: coordinator.isRecording ? "stop.circle.fill" : "record.circle.fill",
                         action: startRecording
                     )
@@ -70,37 +60,11 @@ struct LibraryView: View {
                     #endif
                 }
 
-                // One entry for everything that is not recording, so Record is
-                // never the thing that gets pushed into an overflow menu.
-                ToolbarItem {
-                    Menu("Settings", systemImage: "gearshape") {
-                        Button("Set up transcription", systemImage: "waveform.badge.mic") {
-                            isSettingUpModel = true
-                        }
-                        Button("Still Pro", systemImage: "sparkles") { isShowingPro = true }
-
-                        Divider()
-
-                        Button("Sync", systemImage: sync.isEnabled ? "arrow.triangle.2.circlepath" : "icloud.slash") {
-                            isShowingSync = true
-                        }
-                        Button("Keys and devices", systemImage: "key") { isShowingSecurity = true }
-                        Button("Audio and deletion", systemImage: "clock.arrow.circlepath") {
-                            isShowingRetention = true
-                        }
-
-                        Divider()
-
-                        Button("Diagnostics", systemImage: "stethoscope") { isShowingDiagnostics = true }
-
-                        #if os(macOS)
-                        Button("Automatic recording", systemImage: "bolt.badge.clock") {
-                            isShowingAutomatic = true
-                        }
-                        Button("Browser meetings", systemImage: "safari") { isShowingBrowser = true }
-                        #endif
-                    }
+                #if os(iOS)
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Settings", systemImage: "gearshape") { isShowingSettings = true }
                 }
+                #endif
             }
         } detail: {
             if let recording = selected {
@@ -113,34 +77,30 @@ struct LibraryView: View {
         .sheet(isPresented: $isCapturing) {
             CaptureView(coordinator: coordinator)
         }
-        .sheet(isPresented: $isSettingUpModel) {
-            ModelSetupView(installer: modelInstaller)
-        }
         .sheet(isPresented: showsSetup) {
-            SetupView(flow: setup, installer: modelInstaller, entitlements: entitlements)
+            SetupView(flow: setup, installer: modelInstaller)
                 .interactiveDismissDisabled()
         }
         .sheet(isPresented: $isShowingPro) {
-            ProUnlockView(entitlements: entitlements)
+            NavigationStack {
+                ProUnlockView(entitlements: entitlements)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { isShowingPro = false }
+                        }
+                    }
+            }
+            .stillSheetWidth(mac: 420, minHeight: 420)
         }
-        .sheet(isPresented: $isShowingSync) {
-            SyncSettingsView(engine: sync, entitlements: entitlements)
-        }
-        .sheet(isPresented: $isShowingSecurity) {
-            SecuritySettingsView(library: library)
-        }
-        .sheet(isPresented: $isShowingRetention) {
-            RetentionSettingsView(library: library)
-        }
-        .sheet(isPresented: $isShowingDiagnostics) {
-            DiagnosticsSettingsView(diagnostics: diagnostics)
-        }
-        #if os(macOS)
-        .sheet(isPresented: $isShowingAutomatic) {
-            AutomaticRecordingSettingsView(automatic: automatic)
-        }
-        .sheet(isPresented: $isShowingBrowser) {
-            BrowserMeetingSettingsView(bridge: browser)
+        #if os(iOS)
+        .sheet(isPresented: $isShowingSettings) {
+            SettingsView(
+                library: library,
+                modelInstaller: modelInstaller,
+                entitlements: entitlements,
+                sync: sync,
+                diagnostics: diagnostics
+            )
         }
         #endif
         .alert("Still could not finish that", isPresented: showsActionError) {
@@ -165,23 +125,23 @@ struct LibraryView: View {
         switch library.state {
         case .locked, .unlocking:
             ContentUnavailableView(
-                "Library locked",
+                "Library Locked",
                 systemImage: "lock.fill",
                 description: Text("Authenticate to open your recordings.")
             )
         case .failed(let message):
             ContentUnavailableView {
-                Label("Library locked", systemImage: "lock.trianglebadge.exclamationmark")
+                Label("Library Locked", systemImage: "lock.trianglebadge.exclamationmark")
             } description: {
                 Text(message)
             } actions: {
-                Button("Try again") {
+                Button("Try Again") {
                     Task { await library.unlock() }
                 }
             }
         case .unlocked where library.recordings.isEmpty:
             ContentUnavailableView {
-                Label("No recordings yet", systemImage: "waveform")
+                Label("No Recordings Yet", systemImage: "waveform")
             } description: {
                 Text("Record your first private, on-device transcript.")
             } actions: {

@@ -82,7 +82,8 @@ struct StillApp: App {
         setup = MainActor.assumeIsolated {
             SetupFlow(
                 store: UserDefaultsSetupProgressStore(),
-                microphone: SystemMicrophoneAccess()
+                microphone: SystemMicrophoneAccess(),
+                offersPro: !Entitlements.everythingIsFree
             )
         }
         library = recordingLibrary
@@ -125,24 +126,6 @@ struct StillApp: App {
 
     var body: some Scene {
         WindowGroup {
-            #if os(macOS)
-            LibraryView(
-                library: library,
-                modelInstaller: modelInstaller,
-                entitlements: entitlements,
-                coordinator: coordinator,
-                setup: setup,
-                sync: sync,
-                diagnostics: diagnostics,
-                automatic: automatic,
-                browser: browser
-            )
-            .task {
-                guard shortcut == nil else { return }
-                let coordinator = coordinator
-                shortcut = GlobalRecordingShortcut { Task { await coordinator.toggle() } }
-            }
-            #else
             LibraryView(
                 library: library,
                 modelInstaller: modelInstaller,
@@ -152,6 +135,12 @@ struct StillApp: App {
                 sync: sync,
                 diagnostics: diagnostics
             )
+            #if os(macOS)
+            .task {
+                guard shortcut == nil else { return }
+                let coordinator = coordinator
+                shortcut = GlobalRecordingShortcut { Task { await coordinator.toggle() } }
+            }
             #endif
         }
 
@@ -160,6 +149,18 @@ struct StillApp: App {
         #endif
 
         #if os(macOS)
+        Settings {
+            SettingsView(
+                library: library,
+                modelInstaller: modelInstaller,
+                entitlements: entitlements,
+                sync: sync,
+                diagnostics: diagnostics,
+                automatic: automatic,
+                browser: browser
+            )
+        }
+
         MenuBarExtra {
             RecordingMenuBarContent(coordinator: coordinator)
         } label: {

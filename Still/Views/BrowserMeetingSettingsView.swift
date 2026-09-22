@@ -4,34 +4,16 @@ import SwiftUI
 struct BrowserMeetingSettingsView: View {
     let bridge: BrowserMeetingBridge
 
-    @Environment(\.dismiss) private var dismiss
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Label("Browser meetings", systemImage: "safari")
-                .font(.title2.bold())
-
-            Text("The Still extension tells the app when a meeting on one of these sites starts and ends. It reads no page content, and nothing from your Library ever reaches the browser.")
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-
+        Section {
             ForEach(bridge.sites) { site in
                 Toggle(site.name, isOn: allowed(site))
             }
-
-            Text("Turning the extension off in Safari leaves manual recording and allowed call apps working exactly as before.")
-                .font(.footnote)
-                .foregroundStyle(.tertiary)
-                .fixedSize(horizontal: false, vertical: true)
-
-            HStack {
-                Spacer()
-                Button("Done") { dismiss() }
-                    .buttonStyle(.borderedProminent)
-            }
+        } header: {
+            Text("Browser Meetings")
+        } footer: {
+            Text("The Still extension for Safari tells the app when a meeting on one of these sites starts and ends. It reads no page content, and nothing from your Library ever reaches the browser. Turning the extension off leaves manual recording and allowed call apps working as before.")
         }
-        .padding(28)
-        .stillSheetWidth(mac: 420)
     }
 
     private func allowed(_ site: MeetingSite) -> Binding<Bool> {
