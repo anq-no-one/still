@@ -56,9 +56,11 @@ jobs:
             CODE_SIGNING_ALLOWED=NO
 
       - name: Upload test results
-        if: always()
+        if: failure()
+        continue-on-error: true
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: still-test-results
           path: ${{ env.RESULT_BUNDLE }}
-          if-no-files-found: error
+          if-no-files-found: warn
+          retention-days: 3
