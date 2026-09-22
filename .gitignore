@@ -4,3 +4,4 @@ DerivedData/
 xcuserdata/
 Artifacts/
 Release/build/
+.claude/*.local.md
