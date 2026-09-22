@@ -71,8 +71,13 @@ final class Entitlements {
         status == .pro
     }
 
+    /// Everything is free while the product decides how it will be sold. The
+    /// entitlement seam stays in place, so turning a capability back into a
+    /// paid one is a change here and nowhere else.
+    static let everythingIsFree = true
+
     func allows(_ capability: ProCapability) -> Bool {
-        isPro
+        Self.everythingIsFree || isPro
     }
 
     func refresh() async {

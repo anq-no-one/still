@@ -17,7 +17,7 @@ struct EntitlementsTests {
     }
 
     @Test
-    func aPendingPurchaseGrantsNothingYet() async {
+    func aPendingPurchaseIsStillPending() async {
         let source = FakeEntitlementSource()
         source.purchaseResult = .success(.pending)
         let entitlements = Entitlements(source: source, cache: MemoryEntitlementCache())
@@ -25,7 +25,15 @@ struct EntitlementsTests {
         await entitlements.purchase()
 
         #expect(entitlements.status == .pending)
-        #expect(!entitlements.allows(.liveTranscript))
+        #expect(!entitlements.isPro)
+    }
+
+    @Test
+    func everyCapabilityIsFreeForNow() {
+        let entitlements = Entitlements(source: FakeEntitlementSource(), cache: MemoryEntitlementCache())
+
+        #expect(!entitlements.isPro)
+        #expect(ProCapability.allCases.allSatisfy(entitlements.allows))
     }
 
     @Test
@@ -117,7 +125,7 @@ struct EntitlementsTests {
         await entitlements.refresh()
 
         #expect(entitlements.status == .free)
-        #expect(!entitlements.allows(.liveTranscript))
+        #expect(!entitlements.isPro)
     }
 }
 
