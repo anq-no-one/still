@@ -105,6 +105,7 @@ enum TranscriptionError: LocalizedError {
     case speechPermissionDenied
     case recognizerUnavailable
     case onDeviceRecognitionUnavailable
+    case timedOut
 
     var errorDescription: String? {
         switch self {
@@ -114,6 +115,8 @@ enum TranscriptionError: LocalizedError {
             "Speech recognition is not available for the current language."
         case .onDeviceRecognitionUnavailable:
             "This language cannot be transcribed on this device without an internet connection."
+        case .timedOut:
+            "Speech recognition stopped responding. Your recording and its audio are saved."
         }
     }
 }
