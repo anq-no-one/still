@@ -49,7 +49,7 @@ final class Library: RecordingLibrary {
         storedRecordings.filter(\.isDeleted)
     }
 
-    func unlock(reason: String = "Unlock your Still Library") async {
+    func unlock(reason: String = String(localized: "Unlock your Still Library")) async {
         guard state != .unlocked, state != .unlocking else { return }
 
         state = .unlocking
@@ -189,7 +189,7 @@ final class Library: RecordingLibrary {
 
     /// Rotating re-seals everything under a key a revoked device never held, so
     /// nothing written afterwards opens with the material it kept.
-    func revokeOtherDevices(reason: String = "Rotate your Still Library key") async throws {
+    func revokeOtherDevices(reason: String = String(localized: "Rotate your Still Library key")) async throws {
         guard let oldKey = key, let repository else { throw LibraryError.locked }
 
         let newKey = try await keyRing.beginRotation(reason: reason)

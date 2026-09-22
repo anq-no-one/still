@@ -55,16 +55,19 @@ struct LibraryView: View {
                 emptyState
             }
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button(coordinator.isRecording ? "Recording" : "Record", systemImage: "record.circle") {
-                        isCapturing = true
-                        if !coordinator.isRecording {
-                            Task { await coordinator.start() }
-                        }
-                    }
+                ToolbarItem(placement: recordPlacement) {
+                    Button(
+                        coordinator.isRecording ? "Stop recording" : "Record",
+                        systemImage: coordinator.isRecording ? "stop.circle.fill" : "record.circle.fill",
+                        action: startRecording
+                    )
                     .disabled(library.state != .unlocked)
+                    .tint(.red)
                     .symbolEffect(.pulse, isActive: coordinator.isRecording && !reduceMotion)
                     .keyboardShortcut("r", modifiers: [.command, .shift])
+                    #if os(iOS)
+                    .buttonStyle(.borderedProminent)
+                    #endif
                 }
 
                 // One entry for everything that is not recording, so Record is
@@ -104,10 +107,7 @@ struct LibraryView: View {
                 RecordingDetailView(recording: recording, library: library, startAt: evidenceTime)
                     .id(recording.id)
             } else {
-                PrivacyWelcomeView(startRecording: {
-                    isCapturing = true
-                    Task { await coordinator.start() }
-                })
+                PrivacyWelcomeView(startRecording: startRecording)
             }
         }
         .sheet(isPresented: $isCapturing) {
@@ -180,11 +180,15 @@ struct LibraryView: View {
                 }
             }
         case .unlocked where library.recordings.isEmpty:
-            ContentUnavailableView(
-                "No recordings yet",
-                systemImage: "waveform",
-                description: Text("Record your first private, on-device transcript.")
-            )
+            ContentUnavailableView {
+                Label("No recordings yet", systemImage: "waveform")
+            } description: {
+                Text("Record your first private, on-device transcript.")
+            } actions: {
+                Button("Record", systemImage: "record.circle.fill", action: startRecording)
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
+            }
         case .unlocked:
             EmptyView()
         }
@@ -201,6 +205,23 @@ struct LibraryView: View {
     private func open(_ result: SearchResult) {
         selection = result.recordingID
         evidenceTime = result.time
+    }
+
+    /// The Mac has a toolbar; a phone has a thumb. Recording is the reason the
+    /// app exists, so on iPhone it sits where the thumb already is.
+    private var recordPlacement: ToolbarItemPlacement {
+        #if os(iOS)
+        .bottomBar
+        #else
+        .primaryAction
+        #endif
+    }
+
+    private func startRecording() {
+        isCapturing = true
+        if !coordinator.isRecording {
+            Task { await coordinator.start() }
+        }
     }
 
     private var showsSetup: Binding<Bool> {
