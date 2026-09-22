@@ -21,32 +21,38 @@ struct URLSessionModelFileDownloader: ModelFileDownloader {
             request.setValue("bytes=\(existing)-", forHTTPHeaderField: "Range")
         }
 
-        let (bytes, response) = try await session.bytes(for: request)
+        // URLSession streams the body to its own file, which keeps a 483 MB
+        // pack off the heap and out of a per-byte loop.
+        let (downloaded, response) = try await session.download(for: request)
+        defer { try? FileManager.default.removeItem(at: downloaded) }
+
         guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
             throw ModelPackError.offline
         }
 
-        if http.statusCode == 200 {
+        // A server that ignored the range sent the whole file, so what is
+        // already on disk has to go rather than be appended to.
+        if http.statusCode != 206 {
             try? FileManager.default.removeItem(at: destination)
         }
         if !FileManager.default.fileExists(atPath: destination.path) {
             FileManager.default.createFile(atPath: destination.path, contents: nil)
         }
 
-        let handle = try FileHandle(forWritingTo: destination)
-        defer { try? handle.close() }
-        try handle.seekToEnd()
+        try Self.append(contentsOf: downloaded, to: destination)
+    }
 
-        var buffer = Data()
-        buffer.reserveCapacity(1 << 20)
-        for try await byte in bytes {
-            buffer.append(byte)
-            if buffer.count >= 1 << 20 {
-                try handle.write(contentsOf: buffer)
-                buffer.removeAll(keepingCapacity: true)
-            }
+    private static func append(contentsOf source: URL, to destination: URL) throws {
+        let reader = try FileHandle(forReadingFrom: source)
+        defer { try? reader.close() }
+
+        let writer = try FileHandle(forWritingTo: destination)
+        defer { try? writer.close() }
+        try writer.seekToEnd()
+
+        while let chunk = try reader.read(upToCount: 1 << 20), !chunk.isEmpty {
+            try writer.write(contentsOf: chunk)
         }
-        try handle.write(contentsOf: buffer)
     }
 }
 
