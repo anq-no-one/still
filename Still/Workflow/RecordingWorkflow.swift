@@ -24,6 +24,7 @@ final class RecordingWorkflow {
     private var recordingID = UUID()
     private var startedAt: Date?
     private var finishedAt: Date?
+    private var draftStartFailure: String?
 
     private(set) var state: State = .idle
 
@@ -56,7 +57,8 @@ final class RecordingWorkflow {
     /// A recognizer that dies mid-recording does not end the recording. Capture
     /// keeps journaling audio and the transcript comes from the saved audio.
     var draftFailure: String? {
-        showsLiveDraft ? session.failure : nil
+        guard showsLiveDraft else { return nil }
+        return draftStartFailure ?? session.failure
     }
 
     var captureNote: String? {
@@ -83,6 +85,7 @@ final class RecordingWorkflow {
         recordingID = UUID()
         startedAt = now()
         finishedAt = nil
+        draftStartFailure = nil
 
         do {
             try await recorder.start(recordingID: recordingID)
@@ -98,11 +101,13 @@ final class RecordingWorkflow {
 
         do {
             try await session.start()
-            state = .recording
         } catch {
-            await recorder.discard()
-            fail(with: error)
+            // The audio is the part worth keeping. A recognizer that will not
+            // start costs the live preview, not the recording.
+            draftStartFailure = error.localizedDescription
         }
+
+        state = .recording
     }
 
     func save() async {

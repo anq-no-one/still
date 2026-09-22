@@ -14,14 +14,26 @@ struct RecordingWorkflowTests {
     }
 
     @Test
-    func reportsCaptureFailure() async {
+    func aRecognizerThatWillNotStartCostsTheDraftNotTheRecording() async throws {
         let session = FakeTranscriptionSession()
-        session.startError = TranscriptionError.speechPermissionDenied
-        let workflow = makeWorkflow(session: session)
+        session.startError = TranscriptionError.recognizerUnavailable
+        let recorder = SpyAudioRecorder()
+        let library = SpyRecordingLibrary()
+        let clock = StubClock(start: Date(timeIntervalSince1970: 0))
+        let workflow = makeWorkflow(session: session, recorder: recorder, library: library, clock: clock)
 
         await workflow.start()
 
-        #expect(workflow.state == .failed(TranscriptionError.speechPermissionDenied.localizedDescription))
+        #expect(workflow.state == .recording)
+        #expect(workflow.draftFailure == TranscriptionError.recognizerUnavailable.localizedDescription)
+        #expect(!recorder.events.contains(.discarded))
+
+        clock.advance(by: 20)
+        await workflow.save()
+
+        let recording = try #require(library.recordings.first)
+        #expect(recording.transcript == "Transcribed after saving")
+        #expect(workflow.state == .saved)
     }
 
     @Test

@@ -48,9 +48,11 @@ evidence rather than to the upstream default.
 `inputNode`. During a Pro recording both start, so two engines capture the same hardware input in
 one process.
 
-`RecordingWorkflow.start()` starts the recorder first and the recognizer second. If the second
-engine fails to start, the workflow discards the capture and reports a failure — which would mean
-a Pro user cannot record at all. On the free path only one engine runs, so that path is unaffected.
+`RecordingWorkflow.start()` starts the recorder first and the recognizer second. A recognizer that
+will not start now costs only the live preview: the recording continues, the draft explains what
+stopped, and the transcript comes from the journaled audio on save. So the contention can no longer
+prevent a Pro user from recording, but two engines still compete for one input and that is worth
+removing.
 
 This has not been observed, because no build has run on a device with a microphone. It is listed
 here rather than fixed because the correct fix reshapes the capture seam: one engine owns the
