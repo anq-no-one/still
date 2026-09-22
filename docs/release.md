@@ -8,10 +8,31 @@ Already registered, through the App Store Connect API:
 
 - App ID `com.andrii.still`, platform UNIVERSAL, so one purchase covers iPhone, iPad and Mac
 - Capabilities: iCloud with CloudKit, and In-App Purchase
-- The build Mac registered as a device, which is what lets development profiles be issued
+- A Mac device entry, registered with the wrong identifier — see below
 
 Verified end to end on this machine: a signed archive and an App Store export for both platforms,
 producing `Still.pkg` and `Still-iOS.ipa`.
+
+## Fix the Mac device registration first
+
+The Mac was registered with its `IOPlatformUUID`. Apple wants the **provisioning UDID**, which is
+a different value: System Information → Hardware → Provisioning UDID, `00006021-0010602C3ABB401E`
+on the current build machine.
+
+The consequence is verified rather than assumed. The team provisioning profile embedded in a
+signed archive lists exactly one device, and it is the wrong identifier, so the built Mac app
+refuses to launch here (`RBSRequestErrorDomain Code=5`, launchd spawn failure). Archiving and
+exporting still succeed, because neither validates the running device.
+
+    POST /v1/devices  {"attributes": {"name": "...", "platform": "MAC_OS", "udid": "<provisioning UDID>"}}
+
+Then disable the wrong entry (`PATCH /v1/devices/<id>` with `"status": "DISABLED"`; Apple does not
+delete device records) and rebuild so a fresh profile is issued.
+
+Until this is done, one thing stays unproven: whether the encrypted Library unlocks on a properly
+signed build. On the simulator the keychain returns `-34018` (`errSecMissingEntitlement`), but
+simulator builds carry empty entitlements and an ad-hoc signature, so that result says nothing
+about the product.
 
 ## The one thing the API cannot do
 
