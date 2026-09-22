@@ -71,17 +71,22 @@ final class RecordingPlayer {
 /// AVAudioPlayer reports the end of playback through a delegate, which has to
 /// be an NSObject, so the button does not stay offering Pause forever.
 private final class PlaybackFinishWatcher: NSObject, AVAudioPlayerDelegate {
-    private let onFinish: @MainActor () -> Void
+    private let onFinish: @Sendable @MainActor () -> Void
 
-    init(onFinish: @escaping @MainActor () -> Void) {
+    init(onFinish: @escaping @Sendable @MainActor () -> Void) {
         self.onFinish = onFinish
     }
 
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        Task { @MainActor in onFinish() }
+        finish()
     }
 
     func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        finish()
+    }
+
+    private func finish() {
+        let onFinish = onFinish
         Task { @MainActor in onFinish() }
     }
 }
