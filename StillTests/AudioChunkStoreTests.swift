@@ -197,3 +197,44 @@ final class Scratch {
         try? FileManager.default.removeItem(at: directory)
     }
 }
+
+struct AudioChunkWriterFailureTests {
+    private let format = AudioFormat(sampleRate: 1_000, channels: 1, bitsPerSample: 16)
+
+    @Test
+    func aWriterStartsWithNoFailure() throws {
+        let scratch = try Scratch()
+        let writer = try AudioChunkWriter(
+            directory: scratch.directory.appending(path: "track"),
+            cipher: LibraryCipher(key: SymmetricKey(size: .bits256)),
+            format: format,
+            chunkSeconds: 1
+        )
+
+        #expect(writer.failure == nil)
+    }
+
+    @Test
+    func aFailedWriteIsRememberedSoCaptureCanStopAndSayWhy() throws {
+        let scratch = try Scratch()
+        let directory = scratch.directory.appending(path: "track")
+        let writer = try AudioChunkWriter(
+            directory: directory,
+            cipher: LibraryCipher(key: SymmetricKey(size: .bits256)),
+            format: format,
+            chunkSeconds: 1
+        )
+        try writer.append(Data(repeating: 1, count: format.bytesPerSecond))
+
+        #expect(writer.failure == nil)
+
+        // The directory disappearing stands in for a disk that can no longer
+        // take the next chunk.
+        try FileManager.default.removeItem(at: directory)
+
+        #expect(throws: (any Error).self) {
+            try writer.append(Data(repeating: 1, count: format.bytesPerSecond))
+        }
+        #expect(writer.failure != nil)
+    }
+}

@@ -30,6 +30,7 @@ final class AudioChunkWriter: @unchecked Sendable {
 
     private var pending = Data()
     private var nextIndex = 0
+    private var writeFailure: Error?
 
     init(
         directory: URL,
@@ -48,15 +49,29 @@ final class AudioChunkWriter: @unchecked Sendable {
         try writeManifest(isComplete: false)
     }
 
+    /// Capture runs on the audio thread, which cannot wait for anyone and has
+    /// nowhere to throw. A failed write is remembered here so the recording can
+    /// stop and say why, instead of looking healthy while nothing lands.
+    var failure: Error? {
+        lock.lock()
+        defer { lock.unlock() }
+        return writeFailure
+    }
+
     func append(_ pcm: Data) throws {
         lock.lock()
         defer { lock.unlock() }
 
-        pending.append(pcm)
-        let chunkBytes = Int(chunkSeconds * TimeInterval(format.bytesPerSecond))
-        while pending.count >= chunkBytes {
-            try flush(pending.prefix(chunkBytes))
-            pending.removeFirst(chunkBytes)
+        do {
+            pending.append(pcm)
+            let chunkBytes = Int(chunkSeconds * TimeInterval(format.bytesPerSecond))
+            while pending.count >= chunkBytes {
+                try flush(pending.prefix(chunkBytes))
+                pending.removeFirst(chunkBytes)
+            }
+        } catch {
+            writeFailure = error
+            throw error
         }
     }
 

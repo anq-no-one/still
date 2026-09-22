@@ -13,7 +13,13 @@ final class MacAudioRecorder: AudioRecorder {
 
     private var isCapturingSystemAudio = false
 
-    private(set) var captureNote: String?
+    private var systemAudioNote: String?
+
+    /// A microphone that cannot write is the worse of the two failures, because
+    /// then nothing at all is being kept, so it is the one the user is told.
+    var captureNote: String? {
+        microphone.captureNote ?? systemAudioNote
+    }
 
     init(
         root: URL,
@@ -29,7 +35,7 @@ final class MacAudioRecorder: AudioRecorder {
     }
 
     func start(recordingID: UUID) async throws {
-        captureNote = nil
+        systemAudioNote = nil
         let startedAt = now()
         try await microphone.start(recordingID: recordingID)
 
@@ -42,7 +48,7 @@ final class MacAudioRecorder: AudioRecorder {
             )
             isCapturingSystemAudio = true
         } catch {
-            captureNote = CaptureError.systemAudioUnavailable.localizedDescription
+            systemAudioNote = CaptureError.systemAudioUnavailable.localizedDescription
         }
     }
 

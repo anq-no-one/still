@@ -12,6 +12,10 @@ final class MicrophoneRecorder: AudioRecorder {
     private var directory: URL?
     private var interruptionObservers: [NSObjectProtocol] = []
 
+    var captureNote: String? {
+        writer?.failure.map { _ in CaptureError.insufficientStorage.localizedDescription }
+    }
+
     init(root: URL, cipher: LibraryCipher, format: AudioFormat = .transcription) {
         self.root = root
         self.cipher = cipher
@@ -52,6 +56,9 @@ final class MicrophoneRecorder: AudioRecorder {
             try engine.start()
         } catch {
             input.removeTap(onBus: 0)
+            self.writer = nil
+            self.directory = nil
+            try? AudioChunkStore.discard(directory)
             throw CaptureError.inputUnavailable
         }
 
