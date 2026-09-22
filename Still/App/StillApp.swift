@@ -20,9 +20,17 @@ struct StillApp: App {
     #endif
 
     init() {
+        // SwiftData turns on CloudKit mirroring by itself when the app carries
+        // an iCloud entitlement. Still syncs through its own encrypted
+        // transport, so that mirroring is refused: it would need optional
+        // attributes and no unique id, and it would put the store in iCloud
+        // outside Still's encryption.
         let container: ModelContainer
         do {
-            container = try ModelContainer(for: EncryptedRecording.self)
+            container = try ModelContainer(
+                for: EncryptedRecording.self,
+                configurations: ModelConfiguration(cloudKitDatabase: .none)
+            )
         } catch {
             fatalError("Unable to open the local Library store.")
         }
