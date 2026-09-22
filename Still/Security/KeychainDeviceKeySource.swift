@@ -8,6 +8,7 @@ struct KeychainDeviceKeySource: DeviceKeySource {
     private let deviceKeyAccount = "library-device-key"
     private let masterKeyAccount = "library-master-key"
     private let recoveryAccount = "library-recovery"
+    private let pendingMasterKeyAccount = "library-master-key-pending"
 
     init(service: String = "com.andrii.still.library") {
         self.service = service
@@ -43,10 +44,27 @@ struct KeychainDeviceKeySource: DeviceKeySource {
         try write(try JSONEncoder().encode(recoveryBundle), account: recoveryAccount, accessControl: nil)
     }
 
-    func rotateDeviceKey() throws -> SymmetricKey {
-        let key = SymmetricKey(size: .bits256)
-        try writeDeviceKey(key.rawBytes)
-        return key
+    func pendingMasterKey() throws -> Data? {
+        try read(account: pendingMasterKeyAccount, context: nil)
+    }
+
+    func store(pendingMasterKey: Data) throws {
+        try write(pendingMasterKey, account: pendingMasterKeyAccount, accessControl: nil)
+    }
+
+    func promotePendingMasterKey() throws {
+        guard let pending = try pendingMasterKey() else { return }
+
+        try store(wrappedMasterKey: pending)
+        try discardPendingMasterKey()
+    }
+
+    func discardPendingMasterKey() throws {
+        SecItemDelete([
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: pendingMasterKeyAccount,
+        ] as CFDictionary)
     }
 
     private func readDeviceKey(context: LAContext) throws -> Data? {

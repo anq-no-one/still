@@ -192,21 +192,29 @@ final class Library: RecordingLibrary {
     func revokeOtherDevices(reason: String = "Rotate your Still Library key") async throws {
         guard let oldKey = key, let repository else { throw LibraryError.locked }
 
-        let newKey = try await keyRing.rotate(reason: reason)
+        let newKey = try await keyRing.beginRotation(reason: reason)
         let oldCipher = LibraryCipher(key: oldKey)
         let newCipher = LibraryCipher(key: newKey)
-
-        for recording in recordings {
-            for track in tracks(forRecording: recording.id) {
-                try reseal(recording.id, track: track, from: oldCipher, to: newCipher)
-            }
-        }
-
         let newRepository = services.makeRepository(newKey)
-        for recording in recordings {
-            try newRepository.save(recording)
+
+        do {
+            for recording in storedRecordings {
+                for track in tracks(forRecording: recording.id) {
+                    try reseal(recording.id, track: track, from: oldCipher, to: newCipher)
+                }
+            }
+
+            for recording in storedRecordings {
+                try newRepository.save(recording)
+            }
+        } catch {
+            // Nothing has replaced the Library key yet, so the old one still
+            // opens whatever was not re-sealed.
+            try? keyRing.abandonRotation()
+            throw error
         }
 
+        try keyRing.completeRotation()
         _ = repository
         self.repository = newRepository
         key = newKey

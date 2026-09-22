@@ -7,7 +7,13 @@ protocol DeviceKeySource: Sendable {
     func store(wrappedMasterKey: Data) throws
     func recoveryBundle() throws -> RecoveryBundle?
     func store(recoveryBundle: RecoveryBundle) throws
-    func rotateDeviceKey() throws -> SymmetricKey
+
+    /// A rotation in progress. The replacement is written here first and only
+    /// becomes the Library key once everything has been re-sealed under it.
+    func pendingMasterKey() throws -> Data?
+    func store(pendingMasterKey: Data) throws
+    func promotePendingMasterKey() throws
+    func discardPendingMasterKey() throws
 }
 
 struct LibraryKeyRing {
@@ -20,6 +26,13 @@ struct LibraryKeyRing {
     func unlock(reason: String) async throws -> SymmetricKey {
         let deviceKey = try await source.deviceKey(reason: reason)
         let wrapping = LibraryCipher(key: deviceKey)
+
+        // A rotation interrupted after re-sealing but before promotion leaves
+        // the content readable only by the pending key, so it is tried first.
+        if let pending = try source.pendingMasterKey(),
+           let bytes = try? wrapping.open(pending) {
+            return SymmetricKey(data: bytes)
+        }
 
         if let wrapped = try source.wrappedMasterKey() {
             do {
@@ -58,13 +71,21 @@ struct LibraryKeyRing {
         return SymmetricKey(data: bytes)
     }
 
-    /// Rotation gives a new master key and a device key that a revoked device
-    /// never held, so nothing written afterwards opens with the old material.
-    func rotate(reason: String) async throws -> SymmetricKey {
-        let deviceKey = try source.rotateDeviceKey()
+    /// Starts a rotation without disturbing the key that currently opens the
+    /// Library, so a failure part way through loses nothing.
+    func beginRotation(reason: String) async throws -> SymmetricKey {
+        let deviceKey = try await source.deviceKey(reason: reason)
         let master = SymmetricKey(size: .bits256)
-        try source.store(wrappedMasterKey: try LibraryCipher(key: deviceKey).seal(master.rawBytes))
+        try source.store(pendingMasterKey: try LibraryCipher(key: deviceKey).seal(master.rawBytes))
         return master
+    }
+
+    func completeRotation() throws {
+        try source.promotePendingMasterKey()
+    }
+
+    func abandonRotation() throws {
+        try source.discardPendingMasterKey()
     }
 }
 

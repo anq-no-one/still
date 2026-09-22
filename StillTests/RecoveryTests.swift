@@ -111,3 +111,106 @@ struct LibraryRecoveryTests {
         return library
     }
 }
+
+@MainActor
+struct RotationSafetyTests {
+    @Test
+    func anInterruptedRotationStillOpensTheLibrary() async throws {
+        let source = FakeDeviceKeySource()
+        let keyRing = LibraryKeyRing(source: source)
+        let original = try await keyRing.unlock(reason: "seed")
+
+        // The replacement is written, then the process dies before anything is
+        // re-sealed and before the rotation is completed.
+        let replacement = try await keyRing.beginRotation(reason: "rotate")
+
+        #expect(replacement != original)
+        #expect(source.storedPending != nil)
+        #expect(source.storedWrappedKey != nil)
+
+        // A later launch must still be able to open the Library.
+        let recovered = try await LibraryKeyRing(source: source).unlock(reason: "relaunch")
+
+        #expect(recovered == replacement)
+    }
+
+    @Test
+    func abandoningARotationLeavesTheOriginalKeyInCharge() async throws {
+        let source = FakeDeviceKeySource()
+        let keyRing = LibraryKeyRing(source: source)
+        let original = try await keyRing.unlock(reason: "seed")
+
+        _ = try await keyRing.beginRotation(reason: "rotate")
+        try keyRing.abandonRotation()
+
+        #expect(try await LibraryKeyRing(source: source).unlock(reason: "relaunch") == original)
+    }
+
+    @Test
+    func aCompletedRotationRetiresTheOldKey() async throws {
+        let source = FakeDeviceKeySource()
+        let keyRing = LibraryKeyRing(source: source)
+        let original = try await keyRing.unlock(reason: "seed")
+
+        let replacement = try await keyRing.beginRotation(reason: "rotate")
+        try keyRing.completeRotation()
+
+        #expect(source.storedPending == nil)
+        let opened = try await LibraryKeyRing(source: source).unlock(reason: "relaunch")
+        #expect(opened == replacement)
+        #expect(opened != original)
+    }
+
+    @Test
+    func aFailedResealKeepsEveryRecordingReadable() async throws {
+        let scratch = try Scratch()
+        let source = FakeDeviceKeySource()
+        let container = try ModelContainer(
+            for: EncryptedRecording.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let context = ModelContext(container)
+        let library = Library(
+            keyRing: LibraryKeyRing(source: source),
+            services: LibraryServices(
+                audioRoot: scratch.directory,
+                makeRepository: { key in
+                    MainActor.assumeIsolated { EncryptedRecordingRepository(context: context, key: key) }
+                },
+                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } }
+            )
+        )
+        await library.unlock()
+        let recording = Recording(title: "Confidential", transcript: "board notes", duration: 30)
+        try library.add(recording)
+
+        // A track directory with a manifest but an unreadable chunk makes the
+        // re-seal throw part way through.
+        let key = try await LibraryKeyRing(source: source).unlock(reason: "seed")
+        let directory = AudioChunkStore.trackDirectory(forRecording: recording.id, track: .microphone, in: scratch.directory)
+        let writer = try AudioChunkWriter(directory: directory, cipher: LibraryCipher(key: key))
+        try writer.append(Data(repeating: 2, count: AudioFormat.transcription.bytesPerSecond))
+        try writer.finish()
+        try Data("not ciphertext".utf8).write(to: AudioChunkStore.chunkURL(in: directory, index: 0))
+
+        await #expect(throws: (any Error).self) {
+            try await library.revokeOtherDevices()
+        }
+
+        // The Library must still open, with its text intact.
+        let reopened = Library(
+            keyRing: LibraryKeyRing(source: source),
+            services: LibraryServices(
+                audioRoot: scratch.directory,
+                makeRepository: { key in
+                    MainActor.assumeIsolated { EncryptedRecordingRepository(context: context, key: key) }
+                },
+                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } }
+            )
+        )
+        await reopened.unlock()
+
+        #expect(reopened.state == .unlocked)
+        #expect(reopened.recordings.map(\.title) == ["Confidential"])
+    }
+}

@@ -113,9 +113,24 @@ final class FakeDeviceKeySource: DeviceKeySource, @unchecked Sendable {
         storedRecovery = recoveryBundle
     }
 
-    func rotateDeviceKey() throws -> SymmetricKey {
-        deviceKey = SymmetricKey(size: .bits256)
-        return deviceKey
+    private(set) var storedPending: Data?
+
+    func pendingMasterKey() throws -> Data? {
+        storedPending
+    }
+
+    func store(pendingMasterKey: Data) throws {
+        storedPending = pendingMasterKey
+    }
+
+    func promotePendingMasterKey() throws {
+        guard let storedPending else { return }
+        storedWrappedKey = storedPending
+        self.storedPending = nil
+    }
+
+    func discardPendingMasterKey() throws {
+        storedPending = nil
     }
 }
 

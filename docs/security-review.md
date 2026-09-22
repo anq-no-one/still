@@ -18,6 +18,7 @@ against.
 | A deletion arriving before an older copy | Tombstones match on every stored Recording, so an older copy merges into the deletion | `aDeletionIsNotResurrectedByAnOlderCopy` |
 | Readable leftovers after deletion | Purge removes the record and its chunks; orphan audio is swept on unlock | `purgedContentLeavesNothingReadableBehind` |
 | A killed process mid-write | Chunks are written atomically and authenticated, so a damaged tail is dropped rather than read | `anInterruptedAudioTransferLeavesNoHalfWrittenChunk` |
+| A revocation interrupted part way | The replacement key is written beside the old one and only promoted once every Recording and chunk is re-sealed | `RotationSafetyTests` |
 | Content leaking through diagnostics | Reports have no free-text field; the event name comes from a closed set | `DiagnosticsTests` |
 | Unnoticed network use | A test names every file allowed to reach the network and fails on any other | `NetworkBoundaryTests` |
 
@@ -28,6 +29,9 @@ against.
   recorded, never what was said.
 - **Merge preserves text by joining it.** Two devices that rename the same Recording produce a
   title holding both names. Nothing is lost, but the result needs a human to tidy.
+- **Revocation rotates the Library key, not the device key.** What locks a lost device out is that
+  everything is re-sealed under a key it never held. Replacing this device's own keychain key would
+  add nothing and, done first, would have destroyed the Library if the rotation were interrupted.
 - **Revocation is not retroactive.** A device that copied ciphertext before revocation keeps
   whatever it already had. Rotation protects everything written afterwards, not the past.
 - **A recovery code is the whole key.** Anyone holding it can open the Library, and Still cannot
