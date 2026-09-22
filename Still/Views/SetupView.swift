@@ -3,10 +3,9 @@ import SwiftUI
 struct SetupView: View {
     let flow: SetupFlow
     let installer: ModelPackInstaller
-    let entitlements: Entitlements
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        Group {
             switch flow.step {
             case .privacy:
                 privacyStep
@@ -20,55 +19,54 @@ struct SetupView: View {
                 EmptyView()
             }
         }
-        .padding(32)
-        .frame(maxHeight: .infinity, alignment: .top)
-        .stillSheetWidth(mac: 460)
+        .padding(.horizontal, 32)
+        .padding(.vertical, 40)
+        .stillSheetWidth(mac: 440, minHeight: 520)
+        .animation(.default, value: flow.step)
     }
 
     private var privacyStep: some View {
         step(
-            icon: "lock.shield",
-            title: "Your recordings stay here",
+            icon: "lock.shield.fill",
+            title: "Your Recordings Stay Here",
             body: "Still records, transcribes, and stores everything on this device. There is no account, and nothing is sent anywhere until you ask for it."
         ) {
-            Button("Continue", action: flow.acknowledgePrivacy)
-                .buttonStyle(.borderedProminent)
+            primary("Continue", action: flow.acknowledgePrivacy)
         }
     }
 
     private var microphoneStep: some View {
         step(
-            icon: "mic",
-            title: "Let Still hear the room",
-            body: "Still needs the microphone to record. macOS and iOS ask you directly, and you can change your mind later in Settings."
+            icon: "mic.fill",
+            title: "Let Still Hear the Room",
+            body: "Still needs the microphone to record. The system asks you directly, and you can change your mind later in Settings."
         ) {
-            Button("Not now", role: .cancel, action: flow.skipMicrophone)
-            Button("Allow microphone") {
+            primary("Allow Microphone") {
                 Task { await flow.requestMicrophone() }
             }
-            .buttonStyle(.borderedProminent)
+            secondary("Not Now", action: flow.skipMicrophone)
         }
     }
 
     private var transcriptionStep: some View {
         step(
-            icon: "waveform.badge.mic",
-            title: "Set up transcription",
+            icon: "waveform",
+            title: "Transcribe on This Device",
             body: installer.pack.purpose
         ) {
-            Button("Skip for now", role: .cancel, action: flow.finishTranscription)
-
             switch installer.state {
             case .installed:
-                Button("Continue", action: flow.finishTranscription)
-                    .buttonStyle(.borderedProminent)
+                primary("Continue", action: flow.finishTranscription)
             case .installing, .verifying:
-                ProgressView(value: installer.progress)
+                ProgressView(value: installer.progress) {
+                    Text("Downloading…")
+                }
+                secondary("Continue in Background", action: flow.finishTranscription)
             default:
-                Button("Download \(installer.pack.downloadSizeText)") {
+                primary("Download \(installer.pack.downloadSizeText)") {
                     Task { await installer.approveAndInstall() }
                 }
-                .buttonStyle(.borderedProminent)
+                secondary("Not Now", action: flow.finishTranscription)
             }
         }
     }
@@ -76,44 +74,71 @@ struct SetupView: View {
     private var proStep: some View {
         step(
             icon: "sparkles",
-            title: "Still Pro is optional",
-            body: "Recording, transcription, exact search, and text export are free. Pro adds the live transcript, Mac system audio, speaker groups, translation, notes, and sync — all still on this device."
+            title: "Still Pro Is Optional",
+            body: "Recording, transcription, exact search, and text export are free. Pro adds the live transcript, Mac system audio, speakers, translation, notes, and sync — all still on this device."
         ) {
-            Button("Stay on free", role: .cancel, action: flow.finishPro)
-            Button("See Still Pro") {
+            primary("See Still Pro") {
                 flow.wantsPro = true
                 flow.finishPro()
             }
-            .buttonStyle(.borderedProminent)
+            secondary("Not Now", action: flow.finishPro)
         }
     }
 
     private func step<Actions: View>(
         icon: String,
-        title: String,
+        title: LocalizedStringKey,
         body text: String,
         @ViewBuilder actions: () -> Actions
     ) -> some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Label(title, systemImage: icon)
-                .font(.title2.bold())
+        VStack(spacing: 20) {
+            Spacer(minLength: 0)
+
+            Image(systemName: icon)
+                .font(.system(size: 56, weight: .regular))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(.tint)
+                .frame(height: 72)
+                .accessibilityHidden(true)
+
+            Text(title)
+                .font(.largeTitle.bold())
+                .multilineTextAlignment(.center)
 
             Text(text)
+                .font(.body)
                 .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
             if case .failed(let message) = installer.state, flow.step == .transcription {
                 Label(message, systemImage: "exclamationmark.triangle.fill")
                     .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
             }
 
             Spacer(minLength: 24)
 
-            HStack {
-                Spacer()
+            VStack(spacing: 12) {
                 actions()
             }
+            .frame(maxWidth: 360)
         }
-        .frame(maxHeight: .infinity, alignment: .top)
+        .frame(maxWidth: .infinity)
+    }
+
+    private func primary(_ title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.borderedProminent)
+        .controlSize(.large)
+        .keyboardShortcut(.defaultAction)
+    }
+
+    private func secondary(_ title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+        Button(title, action: action)
+            .buttonStyle(.borderless)
     }
 }

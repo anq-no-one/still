@@ -32,6 +32,21 @@ struct SetupFlowTests {
     }
 
     @Test
+    func finishesAfterTranscriptionWhenProIsNotOffered() async {
+        let flow = SetupFlow(
+            store: MemorySetupStore(),
+            microphone: FakeMicrophoneAccess(granted: true),
+            offersPro: false
+        )
+
+        flow.acknowledgePrivacy()
+        await flow.requestMicrophone()
+        flow.finishTranscription()
+
+        #expect(flow.isComplete)
+    }
+
+    @Test
     func resumesAtTheStepThatStillNeedsAnAnswer() async {
         let store = MemorySetupStore()
         let first = SetupFlow(store: store, microphone: FakeMicrophoneAccess(granted: true))

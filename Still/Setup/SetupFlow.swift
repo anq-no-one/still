@@ -27,6 +27,7 @@ protocol MicrophoneAccess: AnyObject {
 final class SetupFlow {
     private let store: SetupProgressStore
     private let microphone: MicrophoneAccess
+    private let steps: [SetupStep]
 
     private(set) var completed: Set<SetupStep>
     private(set) var microphoneGranted = false
@@ -35,14 +36,15 @@ final class SetupFlow {
     /// diagnostics are not part of setup because neither is on.
     var wantsPro = false
 
-    init(store: SetupProgressStore, microphone: MicrophoneAccess) {
+    init(store: SetupProgressStore, microphone: MicrophoneAccess, offersPro: Bool = true) {
         self.store = store
         self.microphone = microphone
+        steps = SetupStep.allCases.filter { offersPro || $0 != .pro }
         completed = store.completedSteps()
     }
 
     var step: SetupStep? {
-        SetupStep.allCases.first { !completed.contains($0) }
+        steps.first { !completed.contains($0) }
     }
 
     var isComplete: Bool {
