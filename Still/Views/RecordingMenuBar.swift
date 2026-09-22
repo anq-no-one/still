@@ -35,16 +35,16 @@ struct RecordingMenuBarContent: View {
         Divider()
 
         if coordinator.isRecording {
-            Button("Stop and save") {
+            Button("Stop and Save") {
                 Task { await coordinator.stopAndSave() }
             }
             .disabled(!coordinator.canStop)
 
-            Button("Discard recording") {
+            Button("Discard Recording") {
                 Task { await coordinator.cancel() }
             }
         } else {
-            Button("Start recording") {
+            Button("Start Recording") {
                 Task { await coordinator.start() }
             }
         }

@@ -8,12 +8,12 @@ struct ExportMenu: View {
         Menu("Export", systemImage: "square.and.arrow.up") {
             ShareLink("Note as PDF", item: RecordingExport.pdf(recording), preview: preview("PDF"))
             ShareLink("Note as Markdown", item: RecordingExport.markdown(recording), preview: preview("Markdown"))
-            ShareLink("Note as plain text", item: RecordingExport.plainText(recording), preview: preview("Text"))
+            ShareLink("Note as Plain Text", item: RecordingExport.plainText(recording), preview: preview("Text"))
 
             Divider()
 
             ShareLink(
-                "All audio",
+                "All Audio",
                 item: RecordingExport.audio(recording, track: nil, load: mixedAudio),
                 preview: preview("Audio")
             )
@@ -29,7 +29,7 @@ struct ExportMenu: View {
             Divider()
 
             ShareLink(
-                "Encrypted Still archive",
+                "Encrypted Still Archive",
                 item: RecordingExport.archive(recording, build: archive),
                 preview: preview("Archive")
             )
@@ -42,8 +42,8 @@ struct ExportMenu: View {
 
     private func trackTitle(_ track: AudioTrack) -> String {
         switch track {
-        case .microphone: "Microphone audio only"
-        case .system: "System audio only"
+        case .microphone: "Microphone Audio Only"
+        case .system: "System Audio Only"
         }
     }
 

@@ -8,26 +8,21 @@ struct CaptureView: View {
     @State private var tick = Date.now
 
     var body: some View {
-        VStack(spacing: 28) {
-            HStack {
-                Label("On-device", systemImage: "lock.fill")
-                    .font(.caption.weight(.semibold))
+        VStack(spacing: 20) {
+            VStack(spacing: 6) {
+                Label(coordinator.isRecording ? "Recording on This Device" : "Not Recording", systemImage: "lock.fill")
+                    .font(.footnote.weight(.semibold))
                     .foregroundStyle(.secondary)
-                Spacer()
+
                 Text(elapsed.recordingDurationText)
-                    .font(.system(.body, design: .monospaced, weight: .semibold))
+                    .font(.system(size: 56, weight: .light, design: .rounded))
                     .monospacedDigit()
+                    .contentTransition(.numericText())
+                    .foregroundStyle(coordinator.isRecording ? .primary : .secondary)
                     .accessibilityLabel("Recorded so far")
                     .accessibilityValue(elapsed.recordingDurationText)
             }
-
-            Image(systemName: coordinator.isRecording ? "waveform.circle.fill" : "waveform.circle")
-                .font(.system(.largeTitle, design: .rounded))
-                .scaleEffect(3)
-                .frame(height: 96)
-                .foregroundStyle(coordinator.isRecording ? .red : .secondary)
-                .symbolEffect(.pulse, isActive: coordinator.isRecording && !reduceMotion)
-                .accessibilityLabel(coordinator.isRecording ? "Recording" : "Not recording")
+            .padding(.top, 8)
 
             ScrollView {
                 Text(draftText)
@@ -35,8 +30,11 @@ struct CaptureView: View {
                     .foregroundStyle(transcript.isEmpty ? .secondary : .primary)
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
             }
+            .defaultScrollAnchor(.bottom)
             .frame(minHeight: 220)
+            .background(.fill.quaternary, in: .rect(cornerRadius: 16))
 
             if let note = coordinator.workflow?.captureNote {
                 Label(note, systemImage: "speaker.slash")
@@ -50,27 +48,30 @@ struct CaptureView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            HStack {
-                Button("Cancel", role: .cancel) {
-                    Task {
-                        await coordinator.cancel()
-                        dismiss()
-                    }
-                }
-
-                Spacer()
-
-                Button("Save recording", systemImage: "stop.fill") {
-                    Task {
-                        await coordinator.stopAndSave()
-                        if coordinator.phase != .failed(""), coordinator.workflow == nil {
+            ZStack {
+                HStack {
+                    Button("Cancel", role: .cancel) {
+                        Task {
+                            await coordinator.cancel()
                             dismiss()
                         }
                     }
+                    Spacer()
                 }
-                .buttonStyle(.borderedProminent)
+
+                Button(action: save) {
+                    Image(systemName: "stop.fill")
+                        .font(.title2)
+                        .foregroundStyle(.white)
+                        .frame(width: 64, height: 64)
+                        .background(.red, in: .circle)
+                        .symbolEffect(.pulse, isActive: coordinator.isRecording && !reduceMotion)
+                }
+                .buttonStyle(.plain)
                 .keyboardShortcut(.return, modifiers: .command)
                 .disabled(!coordinator.canStop)
+                .opacity(coordinator.canStop ? 1 : 0.4)
+                .accessibilityLabel("Save Recording")
             }
         }
         .padding(28)
@@ -80,6 +81,15 @@ struct CaptureView: View {
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(1))
                 tick = .now
+            }
+        }
+    }
+
+    private func save() {
+        Task {
+            await coordinator.stopAndSave()
+            if coordinator.phase != .failed(""), coordinator.workflow == nil {
+                dismiss()
             }
         }
     }

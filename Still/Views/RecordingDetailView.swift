@@ -23,7 +23,7 @@ struct RecordingDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                TextField("Recording title", text: $title)
+                TextField("Title", text: $title)
                     .font(.largeTitle.bold())
                     .textFieldStyle(.plain)
                     .onChange(of: title) { _, value in editor.rename(to: value) }
@@ -38,10 +38,6 @@ struct RecordingDetailView: View {
                 }
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-
-                Toggle("Show translation in \(readingLanguageName)", isOn: $showsTranslation)
-                    .toggleStyle(.switch)
-                    .font(.subheadline)
 
                 if let message = editor.saveFailure ?? playbackMessage ?? translationFailure {
                     Label(message, systemImage: "exclamationmark.triangle.fill")
@@ -81,6 +77,10 @@ struct RecordingDetailView: View {
         }
         .navigationTitle(title)
         .toolbar {
+            ToolbarItem {
+                Toggle("Translate to \(readingLanguageName)", systemImage: "translate", isOn: $showsTranslation)
+                    .disabled(recording.segments.isEmpty)
+            }
             ToolbarItem {
                 ExportMenu(recording: recording, library: library)
             }
@@ -145,7 +145,7 @@ struct RecordingDetailView: View {
     @ViewBuilder
     private var noteView: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Picker("Note shape", selection: templateBinding) {
+            Picker("Note Format", selection: templateBinding) {
                 ForEach(NoteTemplate.allCases, id: \.self) { template in
                     Text(template.title).tag(template)
                 }
@@ -154,10 +154,10 @@ struct RecordingDetailView: View {
 
             NoteSectionView(title: "Summary", items: editor.note.summary, openEvidence: openEvidence)
             NoteSectionView(title: "Decisions", items: editor.note.decisions, openEvidence: openEvidence)
-            NoteSectionView(title: "Action items", items: editor.note.actions, openEvidence: openEvidence)
+            NoteSectionView(title: "Action Items", items: editor.note.actions, openEvidence: openEvidence)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Your notes")
+                Text("Your Notes")
                     .font(.headline)
 
                 TextEditor(text: $noteText)
