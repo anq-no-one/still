@@ -41,3 +41,21 @@ cannot be produced here.
 Both encoder precisions (`int8` and `int8-v2`) must be measured against the same cuts, because the
 upstream default corrupted Ukrainian tokens in FluidAudio issue #760 and the choice belongs to
 evidence rather than to the upstream default.
+
+## Known defect: two audio engines share one microphone
+
+`MicrophoneRecorder` and `LiveTranscriber` each own an `AVAudioEngine` and each install a tap on
+`inputNode`. During a Pro recording both start, so two engines capture the same hardware input in
+one process.
+
+`RecordingWorkflow.start()` starts the recorder first and the recognizer second. If the second
+engine fails to start, the workflow discards the capture and reports a failure — which would mean
+a Pro user cannot record at all. On the free path only one engine runs, so that path is unaffected.
+
+This has not been observed, because no build has run on a device with a microphone. It is listed
+here rather than fixed because the correct fix reshapes the capture seam: one engine owns the
+input, converts once, and fans the buffers out to the chunk writer and the recognizer. That
+crosses an actor boundary — the tap runs on the audio thread while the session is main-actor
+isolated — so it needs a real device to verify rather than a blind refactor.
+
+Measure it on the first device run, before the accuracy gates above.

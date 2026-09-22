@@ -47,8 +47,18 @@ final class SystemAudioRecorder: NSObject {
             configuration: configuration,
             delegate: nil
         )
-        try stream.addStreamOutput(output, type: .audio, sampleHandlerQueue: sampleQueue)
-        try await stream.startCapture()
+
+        do {
+            try stream.addStreamOutput(output, type: .audio, sampleHandlerQueue: sampleQueue)
+            try await stream.startCapture()
+        } catch {
+            // A track that never carried audio must not survive, or the final
+            // pass would attribute a speaker to silence.
+            try? AudioChunkStore.discard(
+                AudioChunkStore.trackDirectory(forRecording: recordingID, track: .system, in: root)
+            )
+            throw error
+        }
 
         self.writer = writer
         self.output = output

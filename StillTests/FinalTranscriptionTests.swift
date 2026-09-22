@@ -135,3 +135,23 @@ final class MemoryCheckpointStore: TranscriptionCheckpointStore, @unchecked Send
     func save(_ checkpoint: FinalTranscriptionCheckpoint) { stored = checkpoint }
     func clear() { stored = nil }
 }
+
+struct EmptyTrackTests {
+    @Test
+    func aTrackWithNoAudioProducesNoSpeakerAndNoSegments() async throws {
+        let format = AudioFormat(sampleRate: 1_000, channels: 1, bitsPerSample: 16)
+        let transcriber = WindowTranscriber()
+
+        let result = try await FinalTranscription(transcriber: transcriber, windowSeconds: 10).run(
+            tracks: [
+                CapturedTrack(track: .microphone, format: format, startOffset: 0, pcm: Data(repeating: 1, count: format.bytesPerSecond * 5)),
+                CapturedTrack(track: .system, format: format, startOffset: 0, pcm: Data()),
+            ],
+            checkpoints: MemoryCheckpointStore()
+        )
+
+        #expect(result.speakers.count == 1)
+        #expect(result.speakers.first?.origin == .microphone)
+        #expect(transcriber.transcribedWindows == 1)
+    }
+}

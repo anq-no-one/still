@@ -44,7 +44,7 @@ struct FinalTranscription: Sendable {
     ) async throws -> TranscriptionResult {
         var checkpoint = checkpoints.load()
 
-        for captured in tracks {
+        for captured in tracks where !captured.pcm.isEmpty {
             let speaker = checkpoint.speakers.first { $0.origin == captured.track }
                 ?? Speaker.forTrack(captured.track)
             if !checkpoint.speakers.contains(where: { $0.id == speaker.id }) {
