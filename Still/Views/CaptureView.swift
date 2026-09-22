@@ -74,7 +74,7 @@ struct CaptureView: View {
             }
         }
         .padding(28)
-        .frame(minWidth: 420, idealWidth: 560, minHeight: 480)
+        .stillSheetWidth(mac: 480, minHeight: 480)
         .interactiveDismissDisabled(coordinator.isRecording)
         .task {
             while !Task.isCancelled {

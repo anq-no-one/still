@@ -21,7 +21,8 @@ struct SetupView: View {
             }
         }
         .padding(32)
-        .frame(minWidth: 420, idealWidth: 520)
+        .frame(maxHeight: .infinity, alignment: .top)
+        .stillSheetWidth(mac: 460)
     }
 
     private var privacyStep: some View {
@@ -106,10 +107,13 @@ struct SetupView: View {
                     .foregroundStyle(.red)
             }
 
+            Spacer(minLength: 24)
+
             HStack {
                 Spacer()
                 actions()
             }
         }
+        .frame(maxHeight: .infinity, alignment: .top)
     }
 }

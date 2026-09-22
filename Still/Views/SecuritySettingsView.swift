@@ -75,6 +75,6 @@ struct SecuritySettingsView: View {
             }
         }
         .padding(28)
-        .frame(minWidth: 420, idealWidth: 500)
+        .stillSheetWidth(mac: 440)
     }
 }

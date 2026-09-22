@@ -49,6 +49,6 @@ struct SyncSettingsView: View {
             }
         }
         .padding(28)
-        .frame(minWidth: 400, idealWidth: 480)
+        .stillSheetWidth(mac: 420)
     }
 }

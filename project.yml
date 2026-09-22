@@ -44,6 +44,7 @@ targets:
           - UIInterfaceOrientationLandscapeRight
     settings:
       base:
+        PRODUCT_NAME: Still
         PRODUCT_BUNDLE_IDENTIFIER: com.andrii.still
         CODE_SIGN_ENTITLEMENTS: Still/Still.entitlements
         CODE_SIGN_STYLE: Automatic

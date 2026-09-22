@@ -33,7 +33,7 @@ struct AutomaticRecordingSettingsView: View {
             }
         }
         .padding(28)
-        .frame(minWidth: 420, idealWidth: 480)
+        .stillSheetWidth(mac: 420)
     }
 
     private func allowed(_ app: CallApp) -> Binding<Bool> {

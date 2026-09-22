@@ -118,3 +118,32 @@ final class FakeDeviceKeySource: DeviceKeySource, @unchecked Sendable {
         return deviceKey
     }
 }
+
+struct KeychainStatusMessageTests {
+    @Test
+    func aMissingEntitlementBlamesTheBuildNotTheDevice() {
+        let message = LibraryKeyError.missingKeychainPermission.localizedDescription
+
+        #expect(message.contains("keychain permission"))
+        #expect(!message.contains("-34018"))
+    }
+
+    @Test
+    func anUnmappedStatusStillCarriesItsCodeForSupport() {
+        #expect(LibraryKeyError.keychainFailure(-25300).localizedDescription.contains("-25300"))
+    }
+
+    @Test
+    func eachFailureReadsAsSomethingTheUserCanActmOn() {
+        let messages = [
+            LibraryKeyError.authenticationCancelled,
+            .authenticationUnavailable,
+            .unreadableKeyMaterial,
+            .unrecoverable,
+            .missingKeychainPermission,
+        ].map(\.localizedDescription)
+
+        #expect(messages.allSatisfy { $0.hasSuffix(".") })
+        #expect(messages.allSatisfy { $0.count > 30 })
+    }
+}

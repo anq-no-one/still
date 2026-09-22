@@ -73,6 +73,7 @@ enum LibraryKeyError: LocalizedError, Equatable {
     case authenticationUnavailable
     case unreadableKeyMaterial
     case unrecoverable
+    case missingKeychainPermission
     case keychainFailure(OSStatus)
 
     var errorDescription: String? {
@@ -85,8 +86,10 @@ enum LibraryKeyError: LocalizedError, Equatable {
             "Still cannot unlock the Library with the key stored on this device. Your recordings are untouched."
         case .unrecoverable:
             "That recovery code does not open this Library, and Still has no other way in. Encryption has no back door."
-        case .keychainFailure:
-            "Still cannot reach the device keychain, so the Library stays locked."
+        case .missingKeychainPermission:
+            "This build of Still is missing its keychain permission, so it cannot lock your Library. Reinstall a properly signed copy."
+        case .keychainFailure(let status):
+            "Still could not set up the lock for your Library (keychain status \(status))."
         }
     }
 }

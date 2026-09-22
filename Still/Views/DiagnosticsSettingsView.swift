@@ -34,7 +34,7 @@ struct DiagnosticsSettingsView: View {
             }
         }
         .padding(28)
-        .frame(minWidth: 420, idealWidth: 480)
+        .stillSheetWidth(mac: 420)
     }
 
     private var enabled: Binding<Bool> {

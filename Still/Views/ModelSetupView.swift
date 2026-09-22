@@ -49,7 +49,7 @@ struct ModelSetupView: View {
             }
         }
         .padding(28)
-        .frame(minWidth: 380, idealWidth: 460)
+        .stillSheetWidth(mac: 400)
     }
 
     private var primaryTitle: String {

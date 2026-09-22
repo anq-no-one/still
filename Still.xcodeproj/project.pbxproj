@@ -25,6 +25,7 @@
 		1A020FC48DF314F8EEDA5DEC /* StillIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 861AFD94D3EEE3ED1D06A647 /* StillIntents.swift */; };
 		1AE1C4F8D66B634B6E90BECD /* Diagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C573BC2F872D6F46081B728A /* Diagnostics.swift */; };
 		1C6C28CCC6BFCF795403D81A /* WorkspaceCallAppWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 794CE51740158ED99184CCC5 /* WorkspaceCallAppWatcher.swift */; };
+		1DBBDA1301020CD6766310D1 /* SheetSizing.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0741E127CB4B36AAEEC8114 /* SheetSizing.swift */; };
 		229EBCA14F4CCD9EFF0A5598 /* RecordingWorkflow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8912564CB80223EF40674BD /* RecordingWorkflow.swift */; };
 		235B4DA83C4B6551A9A097F2 /* RecordingTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DFF14A037F3E0F48687D740 /* RecordingTitle.swift */; };
 		253CCDC3EA80732A299BB242 /* StillApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16CC99B5A1788C31E341EB8B /* StillApp.swift */; };
@@ -120,6 +121,7 @@
 		9BB3299C43808D74D89E46C5 /* NoDiagnosticsSink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5843C0EA5B0697DF375321E8 /* NoDiagnosticsSink.swift */; };
 		9D2225612156CF361099C7E0 /* ProUnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42B4D18CC4791D688D79FE7C /* ProUnlockView.swift */; };
 		9D25BBCCB88F232A8284BDD0 /* LibraryKeyRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 288960374528D7132F7DE65F /* LibraryKeyRing.swift */; };
+		9D4C288545F032532FCC288E /* SheetSizing.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0741E127CB4B36AAEEC8114 /* SheetSizing.swift */; };
 		9D6956437C3C42049DEE6B8B /* SyncTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D23376E6C722188BB5CB9EFE /* SyncTransport.swift */; };
 		9E95FFFC7A390570528965D5 /* ExportMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12805408FD17DB614FD66338 /* ExportMenu.swift */; };
 		A021905F41E57B6131913CA2 /* NoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F06869F59FDBD7032480186 /* NoteTests.swift */; };
@@ -347,6 +349,7 @@
 		DAB3742729A60565FDCB96CE /* AudioChunkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioChunkStore.swift; sourceTree = "<group>"; };
 		DDAEA4A273D365FE4B495944 /* StillIntentEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StillIntentEnvironment.swift; sourceTree = "<group>"; };
 		DFC7EF849F362990469AEEA1 /* MicrophoneRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneRecorder.swift; sourceTree = "<group>"; };
+		E0741E127CB4B36AAEEC8114 /* SheetSizing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetSizing.swift; sourceTree = "<group>"; };
 		E47FE1C3F7106AAD17217994 /* SyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTests.swift; sourceTree = "<group>"; };
 		EABF0DBC14FCCC53FBD89E25 /* NetworkBoundaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkBoundaryTests.swift; sourceTree = "<group>"; };
 		EAF5FCBA220130E195D72217 /* RetentionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetentionTests.swift; sourceTree = "<group>"; };
@@ -692,6 +695,7 @@
 				A7205DA1D1DD32873A417638 /* RetentionSettingsView.swift */,
 				BFDD31C806EAB9700A7BD3BC /* SecuritySettingsView.swift */,
 				601F786A421B1A2B028D4967 /* SetupView.swift */,
+				E0741E127CB4B36AAEEC8114 /* SheetSizing.swift */,
 				005E56963E13BDD318F0C2E6 /* SpeakerListView.swift */,
 				C35B2C98BB8E77FD942E068A /* SyncSettingsView.swift */,
 			);
@@ -941,6 +945,7 @@
 				F44FE8EC11445980A9A410A9 /* SecuritySettingsView.swift in Sources */,
 				545A3476F2A00C9DA23E17CA /* SetupFlow.swift in Sources */,
 				D295A37BFF1C90D470A4C70F /* SetupView.swift in Sources */,
+				1DBBDA1301020CD6766310D1 /* SheetSizing.swift in Sources */,
 				C7C3F909783771234601BF00 /* Speaker.swift in Sources */,
 				02894A5A1EEBE7FFE65375E9 /* SpeakerListView.swift in Sources */,
 				253CCDC3EA80732A299BB242 /* StillApp.swift in Sources */,
@@ -1061,6 +1066,7 @@
 				5BA2871F78E0BDC2500E43FF /* SecuritySettingsView.swift in Sources */,
 				01174B86BC6B245AE10903BC /* SetupFlow.swift in Sources */,
 				28642425DF121367F670B6F3 /* SetupView.swift in Sources */,
+				9D4C288545F032532FCC288E /* SheetSizing.swift in Sources */,
 				E18D728F53A93FF19658AE79 /* Speaker.swift in Sources */,
 				C68327E809121DD8AE55CCC3 /* SpeakerListView.swift in Sources */,
 				6949D34A4C735B67B37288E8 /* StillApp.swift in Sources */,
@@ -1111,6 +1117,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.andrii.still;
+				PRODUCT_NAME = Still;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1284,6 +1291,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.andrii.still;
+				PRODUCT_NAME = Still;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

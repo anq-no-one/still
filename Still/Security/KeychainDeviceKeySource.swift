@@ -116,7 +116,7 @@ struct KeychainDeviceKeySource: DeviceKeySource {
 
         let status = SecItemAdd(attributes as CFDictionary, nil)
         guard status == errSecSuccess else {
-            throw LibraryKeyError.keychainFailure(status)
+            throw Self.authenticationError(for: status) ?? LibraryKeyError.keychainFailure(status)
         }
     }
 
@@ -126,6 +126,8 @@ struct KeychainDeviceKeySource: DeviceKeySource {
             .authenticationCancelled
         case errSecInteractionNotAllowed, errSecNotAvailable:
             .authenticationUnavailable
+        case errSecMissingEntitlement:
+            .missingKeychainPermission
         default:
             nil
         }
