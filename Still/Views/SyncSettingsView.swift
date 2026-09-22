@@ -38,7 +38,7 @@ struct SyncSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .navigationTitle("Sync")
+        .settingsPaneTitle("Sync")
     }
 
     private var enabled: Binding<Bool> {

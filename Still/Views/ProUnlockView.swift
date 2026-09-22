@@ -31,7 +31,7 @@ struct ProUnlockView: View {
             }
         }
         .formStyle(.grouped)
-        .navigationTitle("Still Pro")
+        .settingsPaneTitle("Still Pro")
     }
 
     @ViewBuilder

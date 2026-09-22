@@ -20,7 +20,7 @@ struct DiagnosticsSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .navigationTitle("Diagnostics")
+        .settingsPaneTitle("Diagnostics")
     }
 
     private var enabled: Binding<Bool> {

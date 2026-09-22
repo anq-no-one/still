@@ -48,7 +48,7 @@ struct RetentionSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .navigationTitle("Audio and Deletion")
+        .settingsPaneTitle("Audio and Deletion")
     }
 
     private func apply() {

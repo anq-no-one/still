@@ -45,7 +45,7 @@ struct SecuritySettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .navigationTitle("Keys and Devices")
+        .settingsPaneTitle("Keys and Devices")
         .confirmationDialog("Revoke other devices?", isPresented: $confirmsRevoke) {
             Button("Revoke", role: .destructive, action: revoke)
         } message: {

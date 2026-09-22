@@ -14,7 +14,7 @@ struct TranscriptionSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .navigationTitle("Transcription")
+        .settingsPaneTitle("Transcription")
     }
 
     @ViewBuilder
