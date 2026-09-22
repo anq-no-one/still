@@ -43,9 +43,8 @@ final class GlobalRecordingShortcut {
             &handler
         )
 
-        var id = EventHotKeyID(signature: OSType(0x53_54_4C_4C), id: 1)
+        let id = EventHotKeyID(signature: OSType(0x53_54_4C_4C), id: 1)
         RegisterEventHotKey(Self.keyCode, Self.modifiers, id, GetApplicationEventTarget(), 0, &hotKey)
-        _ = id
     }
 }
 #endif

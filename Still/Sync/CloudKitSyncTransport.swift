@@ -21,20 +21,26 @@ struct CloudKitSyncTransport: SyncTransport {
         return container.privateCloudDatabase
     }
 
+    /// CloudKit rejects a freshly built record that already exists on the
+    /// server, because it carries no change tag. Existing records are fetched
+    /// and edited in place so the second sync of a Recording behaves like the
+    /// first.
     func push(_ changes: [SyncChange]) async throws {
-        let records = changes.map { change -> CKRecord in
-            let record = CKRecord(
-                recordType: Self.recordType,
-                recordID: CKRecord.ID(recordName: change.recordingID.uuidString)
-            )
-            record["updatedAt"] = change.updatedAt as NSDate
-            record["deviceID"] = change.deviceID.uuidString as NSString
-            record["payload"] = change.sealedRecording as NSData
-            return record
-        }
+        let database = try database()
+        let ids = changes.map { CKRecord.ID(recordName: $0.recordingID.uuidString) }
 
         do {
-            _ = try await database().modifyRecords(saving: records, deleting: [], savePolicy: .changedKeys)
+            let existing = try await database.records(for: ids)
+            let records = changes.map { change -> CKRecord in
+                let id = CKRecord.ID(recordName: change.recordingID.uuidString)
+                let record = (try? existing[id]?.get()) ?? CKRecord(recordType: Self.recordType, recordID: id)
+                record["updatedAt"] = change.updatedAt as NSDate
+                record["deviceID"] = change.deviceID.uuidString as NSString
+                record["payload"] = change.sealedRecording as NSData
+                return record
+            }
+
+            _ = try await database.modifyRecords(saving: records, deleting: [], savePolicy: .changedKeys)
         } catch {
             throw SyncError.unreachable
         }
