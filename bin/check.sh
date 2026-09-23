@@ -43,7 +43,7 @@ unit_tests() {
     -parallel-testing-enabled NO \
     -derivedDataPath "$DERIVED_DATA" \
     -resultBundlePath "$UNIT_RESULT" \
-    CODE_SIGNING_ALLOWED=NO
+    ${STILL_UNSIGNED:+CODE_SIGNING_ALLOWED=NO}
 }
 
 step "Generate project" xcodegen generate --spec "${ROOT}/project.yml" --project "${ROOT}" --quiet

@@ -69,7 +69,7 @@ struct BrowserMeetingBridgeTests {
     private func make(allowed: [String]) async throws -> (BrowserMeetingBridge, RecordingCoordinator) {
         let container = try ModelContainer(
             for: EncryptedRecording.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         )
         let context = ModelContext(container)
         let audioRoot = try Scratch().directory

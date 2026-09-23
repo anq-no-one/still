@@ -217,7 +217,7 @@ struct SecurityAndSyncGateTests {
     private func makeLibrary(source: FakeDeviceKeySource, audioRoot: URL) async throws -> Library {
         let container = try ModelContainer(
             for: EncryptedRecording.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         )
         let context = ModelContext(container)
         let library = Library(
