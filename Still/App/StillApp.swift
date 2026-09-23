@@ -55,13 +55,19 @@ struct StillApp: App {
 
         let supportRoot = URL.applicationSupportDirectory.appending(path: "Still", directoryHint: .isDirectory)
 
+        #if DEBUG
+        let modelRoot = UITestLaunch.modelRoot ?? supportRoot.appending(path: "Models", directoryHint: .isDirectory)
+        #else
+        let modelRoot = supportRoot.appending(path: "Models", directoryHint: .isDirectory)
+        #endif
         modelInstaller = MainActor.assumeIsolated {
             ModelPackInstaller(
                 pack: ModelCatalog.parakeetV3,
-                root: supportRoot.appending(path: "Models", directoryHint: .isDirectory),
+                root: modelRoot,
                 downloader: URLSessionModelFileDownloader()
             )
         }
+        let speech = ParakeetEngine(pack: ModelCatalog.parakeetV3, root: modelRoot)
 
         let recordingLibrary = MainActor.assumeIsolated {
             Library(
@@ -114,7 +120,8 @@ struct StillApp: App {
             RecordingCoordinator(
                 library: recordingLibrary,
                 entitlements: proEntitlements,
-                makeSession: { LiveTranscriber(input: microphone) }
+                makeSession: { LiveTranscriber(input: microphone, engine: speech) },
+                makeFinalTranscription: { FinalTranscription(transcriber: ParakeetOfflineTranscriber(engine: speech)) }
             )
         }
         coordinator = recordingCoordinator

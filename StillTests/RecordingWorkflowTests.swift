@@ -16,7 +16,7 @@ struct RecordingWorkflowTests {
     @Test
     func aRecognizerThatWillNotStartCostsTheDraftNotTheRecording() async throws {
         let session = FakeTranscriptionSession()
-        session.startError = TranscriptionError.recognizerUnavailable
+        session.startError = TranscriptionError.recognitionFailed
         let recorder = SpyAudioRecorder()
         let library = SpyRecordingLibrary()
         let clock = StubClock(start: Date(timeIntervalSince1970: 0))
@@ -25,7 +25,7 @@ struct RecordingWorkflowTests {
         await workflow.start()
 
         #expect(workflow.state == .recording)
-        #expect(workflow.draftFailure == TranscriptionError.recognizerUnavailable.localizedDescription)
+        #expect(workflow.draftFailure == TranscriptionError.recognitionFailed.localizedDescription)
         #expect(!recorder.events.contains(.discarded))
 
         clock.advance(by: 20)
@@ -78,7 +78,7 @@ struct RecordingWorkflowTests {
     func keepsTheRecordingWhenThisDeviceCannotTranscribe() async throws {
         let session = FakeTranscriptionSession()
         let offlineTranscriber = StubOfflineTranscriber()
-        offlineTranscriber.error = TranscriptionError.onDeviceRecognitionUnavailable
+        offlineTranscriber.error = TranscriptionError.modelNotInstalled
         let recorder = SpyAudioRecorder()
         let library = SpyRecordingLibrary()
         let workflow = makeWorkflow(

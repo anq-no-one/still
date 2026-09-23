@@ -104,8 +104,8 @@ struct CaptureView: View {
     }
 
     private var draftText: String {
-        if coordinator.workflow?.draftFailure != nil {
-            return "The live transcript stopped, but Still keeps recording and transcribes the audio when you save."
+        if let message = coordinator.workflow?.draftFailure {
+            return message
         }
         if let workflow = coordinator.workflow, !workflow.showsDraft {
             return "Still is recording. The transcript appears when you save. Live transcript is part of Still Pro."

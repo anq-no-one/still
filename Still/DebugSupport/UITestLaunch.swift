@@ -7,6 +7,13 @@ import Security
 enum UITestLaunch {
     static let resetKey = "STILL_UI_TEST_RESET"
     static let audioFixtureKey = "STILL_AUDIO_FIXTURE"
+    static let modelRootKey = "STILL_MODEL_ROOT"
+
+    /// A simulator run keeps the Model Pack in one folder on the Mac, so the
+    /// download happens once rather than on every fresh simulator.
+    static var modelRoot: URL? {
+        ProcessInfo.processInfo.environment[modelRootKey].map { URL(filePath: $0, directoryHint: .isDirectory) }
+    }
 
     static var audioFixture: URL? {
         guard let name = ProcessInfo.processInfo.environment[audioFixtureKey] else { return nil }

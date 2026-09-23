@@ -5,6 +5,10 @@ options:
   deploymentTarget:
     iOS: "26.0"
     macOS: "26.0"
+packages:
+  FluidAudio:
+    url: https://github.com/FluidInference/FluidAudio
+    revision: 87a39dfe4068fef0f1c69bfe704b2b3ef4fbc5bc
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -13,10 +17,13 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     DEVELOPMENT_TEAM: "R3XFQ7K885"
+    "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64
 targets:
   Still-iOS:
     type: application
     platform: iOS
+    dependencies:
+      - package: FluidAudio
     sources:
       - path: Still
     info:
@@ -24,7 +31,6 @@ targets:
       properties:
         CFBundleDisplayName: Still
         NSMicrophoneUsageDescription: Still uses the microphone to transcribe a meeting on this device.
-        NSSpeechRecognitionUsageDescription: Still turns speech into text on this device.
         NSLocalNetworkUsageDescription: Still syncs directly with your other devices on this network when you turn on nearby sync.
         NSCalendarsFullAccessUsageDescription: Still reads the event you are in to suggest a title and the people expected.
         NSBonjourServices:
@@ -69,6 +75,7 @@ targets:
     dependencies:
       - target: StillBrowserExtension
         embed: true
+      - package: FluidAudio
     sources:
       - path: Still
     settings:
@@ -79,7 +86,6 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Still
         INFOPLIST_KEY_NSMicrophoneUsageDescription: Still uses the microphone to transcribe a meeting on this device.
-        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: Still turns speech into text on this device.
         INFOPLIST_KEY_NSLocalNetworkUsageDescription: Still syncs directly with your other devices on this network when you turn on nearby sync.
         INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription: Still reads the event you are in to suggest a title and the people expected.
         CODE_SIGN_ENTITLEMENTS: Still/Still.entitlements

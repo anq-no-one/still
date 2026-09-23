@@ -28,9 +28,7 @@ final class RecordingCoordinator {
         library: Library,
         entitlements: Entitlements,
         makeSession: @escaping () -> TranscriptionSession,
-        makeFinalTranscription: @escaping () -> FinalTranscription = {
-            FinalTranscription(transcriber: SpeechOfflineTranscriber())
-        }
+        makeFinalTranscription: @escaping () -> FinalTranscription
     ) {
         self.library = library
         self.entitlements = entitlements
