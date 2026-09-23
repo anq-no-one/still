@@ -44,35 +44,37 @@ struct LibraryView: View {
             .overlay {
                 emptyState
             }
+            #if os(macOS)
+            .navigationSplitViewColumnWidth(min: 220, ideal: 260)
+            #endif
             .toolbar {
-                ToolbarItem(placement: recordPlacement) {
-                    Button(
-                        coordinator.isRecording ? "Stop Recording" : "Record",
-                        systemImage: coordinator.isRecording ? "stop.circle.fill" : "record.circle.fill",
-                        action: startRecording
-                    )
-                    .disabled(library.state != .unlocked)
-                    .tint(.red)
-                    .symbolEffect(.pulse, isActive: coordinator.isRecording && !reduceMotion)
-                    .keyboardShortcut("r", modifiers: [.command, .shift])
-                    #if os(iOS)
-                    .buttonStyle(.borderedProminent)
-                    #endif
+                #if os(iOS)
+                ToolbarItem(placement: .bottomBar) {
+                    recordButton
+                        .buttonStyle(.borderedProminent)
                 }
 
-                #if os(iOS)
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Settings", systemImage: "gearshape") { isShowingSettings = true }
                 }
                 #endif
             }
         } detail: {
-            if let recording = selected {
-                RecordingDetailView(recording: recording, library: library, startAt: evidenceTime)
-                    .id(recording.id)
-            } else {
-                PrivacyWelcomeView(startRecording: startRecording)
+            Group {
+                if let recording = selected {
+                    RecordingDetailView(recording: recording, library: library, startAt: evidenceTime)
+                        .id(recording.id)
+                } else {
+                    PrivacyWelcomeView(startRecording: startRecording)
+                }
             }
+            #if os(macOS)
+            .toolbar {
+                ToolbarItem(placement: .navigation) {
+                    recordButton
+                }
+            }
+            #endif
         }
         .sheet(isPresented: $isCapturing) {
             CaptureView(coordinator: coordinator)
@@ -124,11 +126,7 @@ struct LibraryView: View {
     private var emptyState: some View {
         switch library.state {
         case .locked, .unlocking:
-            ContentUnavailableView(
-                "Library Locked",
-                systemImage: "lock.fill",
-                description: Text("Authenticate to open your recordings.")
-            )
+            ProgressView("Opening Your Library")
         case .failed(let message):
             ContentUnavailableView {
                 Label("Library Locked", systemImage: "lock.trianglebadge.exclamationmark")
@@ -167,14 +165,19 @@ struct LibraryView: View {
         evidenceTime = result.time
     }
 
-    /// The Mac has a toolbar; a phone has a thumb. Recording is the reason the
-    /// app exists, so on iPhone it sits where the thumb already is.
-    private var recordPlacement: ToolbarItemPlacement {
-        #if os(iOS)
-        .bottomBar
-        #else
-        .primaryAction
+    private var recordButton: some View {
+        Button(
+            coordinator.isRecording ? "Stop Recording" : "Record",
+            systemImage: coordinator.isRecording ? "stop.circle.fill" : "record.circle.fill",
+            action: startRecording
+        )
+        #if os(macOS)
+        .labelStyle(.titleAndIcon)
         #endif
+        .disabled(library.state != .unlocked)
+        .tint(.red)
+        .symbolEffect(.pulse, isActive: coordinator.isRecording && !reduceMotion)
+        .keyboardShortcut("r", modifiers: [.command, .shift])
     }
 
     private func startRecording() {
