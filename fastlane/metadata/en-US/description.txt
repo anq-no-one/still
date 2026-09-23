@@ -12,14 +12,18 @@ RECORD
 READ BACK
 • A live transcript while you record, and a full transcript when you stop
 • Every line is linked to the moment it was said — tap it and hear it
+• A local AI model cleans up the raw transcript: filler words trimmed, punctuation fixed, meaning untouched
 • Words Still is unsure of stay marked rather than being rewritten into confident text
 • Correct a name and the original stays beside your correction
-• Speakers are grouped, and you can rename a group without touching the transcript
+• Speakers are recognized by name and matched across meetings, so the same person is the same speaker next time — rename a group without touching the transcript
 
 UNDERSTAND
 • Summary, decisions and action items, each one quoting the transcript it came from
 • Meeting, lecture, interview and voice-note formats, chosen for you and changeable afterwards
 • Translation beneath the original, with the original still the record of what was said
+
+CONNECT (Mac)
+• Run Still as a local MCP server so Claude Code, Codex or another AI tool on your Mac can read your real meeting notes and decisions — nothing leaves your device to do it
 
 FIND AND KEEP
 • Search titles, transcripts, corrections and notes

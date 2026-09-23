@@ -1,0 +1,1 @@
+Din AI-anteckningsassistent som aldrig lämnar din enhet. Spelar in samtal automatiskt och låter Claude Code eller Codex läsa dina möten via MCP — offline.

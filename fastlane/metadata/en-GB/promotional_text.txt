@@ -1,0 +1,1 @@
+Your own AI note taker that never leaves your device. Records calls and meetings, recognises speakers by name, and writes decisions and action items — offline.

@@ -1,0 +1,1 @@
+translate,voicememo,callrecorder,notetaking,lecture,speaker,transcript,meetingnotes,dictation

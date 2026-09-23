@@ -1,0 +1,38 @@
+O Still grava reuniões, chamadas, aulas e memorandos de voz, transforma-os numa transcrição com marcas de tempo e redige as decisões e tarefas — tudo no seu Mac.
+
+Não há conta nem servidor a pensar por si. O Still transcreve com o seu próprio modelo de voz diretamente no seu iPhone, iPad ou Mac, por isso a gravação e a transcrição funcionam mesmo em modo de avião. O Still não faz qualquer pedido de rede até descarregar o modelo de voz, ativar a sincronização ou partilhar algo.
+
+RECORD
+• Um único botão de gravar, sempre na barra de menus
+• O microfone e o outro lado de uma chamada são captados como faixas separadas
+• Grava chamadas automaticamente: quando uma app autorizada começa a usar o microfone, o Still começa a gravar e guarda quando a chamada termina
+• Inicie e pare a partir da barra de menus ou de um atalho de teclado, sem abrir a janela
+• O áudio é gravado em pequenos blocos cifrados enquanto fala, por isso uma falha custa segundos, não a sessão inteira
+
+READ BACK
+• Transcrição em direto durante a gravação, e completa quando pára
+• Cada linha está ligada ao momento em que foi dita — clique para ouvir
+• Um modelo de IA local limpa a transcrição em bruto: remove hesitações, corrige a pontuação, sem alterar o significado
+• As palavras de que o Still não tem a certeza ficam marcadas em vez de reescritas com falsa segurança
+• Corrija um nome e o original fica junto à sua correção
+• Os oradores são reconhecidos pelo nome e associados entre reuniões, para que a mesma pessoa seja sempre o mesmo orador — renomeie um grupo sem tocar na transcrição
+
+UNDERSTAND
+• Resumo, decisões e tarefas, cada uma citando o trecho da transcrição de onde veio
+• Formatos de reunião, aula, entrevista e nota de voz, escolhidos automaticamente e alteráveis depois
+• Tradução por baixo do original, que continua a ser o registo fiel do que foi dito
+
+CONNECT
+• Corra o Still como servidor MCP local para que o Claude Code, o Codex ou outra ferramenta de IA possa ler as suas notas e decisões reais de reunião — nada sai do seu dispositivo
+
+FIND AND KEEP
+• Pesquise títulos, transcrições, correções e notas
+• Exporte em PDF, Markdown, texto simples, áudio ou arquivo Still cifrado
+• Escolha durante quanto tempo guardar o áudio; a eliminação pode ser anulada durante trinta dias
+
+PRIVACY
+A sua biblioteca está cifrada com uma chave guardada no chaveiro deste dispositivo. Se ativar a sincronização com o iCloud, a Apple guarda apenas texto cifrado: nenhuma transcrição, nota, áudio ou chave sai alguma vez do seu dispositivo de forma legível. O diagnóstico está desativado por predefinição e, mesmo que o ative, os relatórios não contêm conteúdo.
+
+Todas as funcionalidades são gratuitas.
+
+É responsável pelo consentimento que a sua jurisdição exige das pessoas que grava.

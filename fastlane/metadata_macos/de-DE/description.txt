@@ -1,0 +1,38 @@
+Still nimmt Besprechungen, Anrufe, Vorlesungen und Sprachmemos auf, macht daraus ein Transkript mit Zeitstempel und fasst Entscheidungen und Aufgaben zusammen – vollständig auf deinem Mac.
+
+Es gibt kein Konto und keinen Server, der mitdenkt. Still transkribiert mit einem eigenen Sprachmodell direkt auf deinem iPhone, iPad oder Mac, Aufnahme und Transkription funktionieren also auch im Flugmodus. Still sendet keine Netzwerkanfrage, bis du das Sprachmodell herunterlädst, die Synchronisierung aktivierst oder etwas teilst.
+
+RECORD
+• Eine Aufnahme-Taste, immer in der Menüleiste
+• Mikrofon und die andere Seite eines Anrufs werden als getrennte Spuren aufgenommen
+• Anrufe automatisch aufnehmen: Sobald eine von dir erlaubte App das Mikrofon nutzt, startet Still die Aufnahme und speichert sie, wenn der Anruf endet
+• Start und Stopp über die Menüleiste oder einen Tastaturkurzbefehl, ohne das Fenster zu öffnen
+• Audio wird in kleinen verschlüsselten Teilen gespeichert, während du sprichst – ein Absturz kostet dich Sekunden statt der ganzen Aufnahme
+
+READ BACK
+• Ein Live-Transkript während der Aufnahme, ein vollständiges Transkript danach
+• Jede Zeile ist mit dem Moment verknüpft, in dem sie gesagt wurde – anklicken und anhören
+• Ein lokales KI-Modell überarbeitet das Rohtranskript: Füllwörter entfernt, Zeichensetzung korrigiert, Bedeutung unverändert
+• Wörter, bei denen Still unsicher ist, bleiben markiert, statt in falsche Sicherheit umgeschrieben zu werden
+• Korrigierst du einen Namen, bleibt das Original neben deiner Korrektur stehen
+• Sprecher werden namentlich erkannt und über mehrere Besprechungen hinweg zugeordnet – dieselbe Person bleibt derselbe Sprecher; eine Gruppe umbenennen, ohne das Transkript zu verändern
+
+UNDERSTAND
+• Zusammenfassung, Entscheidungen und Aufgaben, jede mit einem Zitat aus dem Transkript
+• Formate für Besprechung, Vorlesung, Interview und Sprachnotiz, automatisch gewählt und später änderbar
+• Übersetzung unter dem Original, das Original bleibt der Beleg für das Gesagte
+
+CONNECT
+• Still als lokalen MCP-Server betreiben, damit Claude Code, Codex oder ein anderes KI-Tool deine echten Besprechungsnotizen und Entscheidungen lesen kann – dafür verlässt nichts dein Gerät
+
+FIND AND KEEP
+• Titel, Transkripte, Korrekturen und Notizen durchsuchen
+• Export als PDF, Markdown, reiner Text, Audio oder verschlüsseltes Still-Archiv
+• Du bestimmst, wie lange Audio aufbewahrt wird; Löschen lässt sich dreißig Tage lang rückgängig machen
+
+PRIVACY
+Deine Bibliothek ist mit einem Schlüssel verschlüsselt, der im Schlüsselbund dieses Geräts liegt. Aktivierst du die iCloud-Synchronisierung, speichert Apple nur Chiffretext: Kein Transkript, keine Notiz, kein Audio und kein Schlüssel verlässt dein Gerät jemals im Klartext. Diagnose ist standardmäßig aus, und selbst wenn du sie aktivierst, enthalten die Berichte keine Inhalte.
+
+Jede Funktion ist kostenlos.
+
+Du bist selbst dafür verantwortlich, welche Zustimmung dein Rechtsraum von den Personen verlangt, die du aufnimmst.

@@ -1,0 +1,1 @@
+Your own AI note taker that never leaves your device. Records calls automatically and lets Claude Code or Codex read your real meetings via MCP — offline.

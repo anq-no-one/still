@@ -1,0 +1,38 @@
+Still spelar in möten, samtal, föreläsningar och röstmemon, gör dem till en tidsstämplad transkription och skriver ihop beslut och att-göra-punkter — helt på din Mac.
+
+Det finns inget konto och ingen server som tänker åt dig. Still transkriberar med sin egen talmodell direkt på din iPhone, iPad eller Mac, så inspelning och transkribering fungerar även i flygplansläge. Still gör ingen nätverksförfrågan förrän du laddar ner talmodellen, aktiverar synk eller delar något.
+
+RECORD
+• En enda inspelningsknapp, alltid i menyraden
+• Mikrofonen och andra sidan av ett samtal spelas in som separata spår
+• Spela in samtal automatiskt: när en app du tillåtit börjar använda mikrofonen börjar Still spela in och sparar när samtalet avslutas
+• Starta och stoppa från menyraden eller ett tangentbordskommando, utan att öppna fönstret
+• Ljudet skrivs i små krypterade bitar medan du pratar, så en krasch kostar sekunder, inte hela sessionen
+
+READ BACK
+• En live-transkription medan du spelar in, och en fullständig när du stoppar
+• Varje rad är länkad till ögonblicket den sades — klicka för att lyssna
+• En lokal AI-modell städar upp den råa transkriptionen: utfyllnadsord bort, skiljetecken rättade, innebörden orörd
+• Ord som Still är osäker på förblir markerade i stället för att skrivas om med falsk säkerhet
+• Rätta ett namn och originalet stannar kvar bredvid din rättelse
+• Talare känns igen på namn och matchas mellan möten, så samma person förblir samma talare — byt namn på en grupp utan att röra transkriptionen
+
+UNDERSTAND
+• Sammanfattning, beslut och att-göra-punkter, var och en med ett citat från transkriptionen den kommer från
+• Format för möte, föreläsning, intervju och röstanteckning, valda åt dig och ändringsbara efteråt
+• Översättning under originalet, där originalet förblir den sanna uppteckningen av det som sades
+
+CONNECT
+• Kör Still som en lokal MCP-server så att Claude Code, Codex eller ett annat AI-verktyg kan läsa dina verkliga mötesanteckningar och beslut — inget lämnar din enhet
+
+FIND AND KEEP
+• Sök i titlar, transkriptioner, rättelser och anteckningar
+• Exportera som PDF, Markdown, ren text, ljud eller ett krypterat Still-arkiv
+• Välj hur länge ljud sparas; radering går att ångra i trettio dagar
+
+PRIVACY
+Ditt bibliotek är krypterat med en nyckel som förvaras i den här enhetens nyckelring. Om du slår på iCloud-synk lagrar Apple bara kryptotext: ingen transkription, anteckning, ljud eller nyckel lämnar någonsin enheten i läsbar form. Diagnostik är avstängt som standard, och även om du slår på det innehåller rapporterna inget innehåll.
+
+Alla funktioner är gratis.
+
+Du ansvarar själv för det samtycke din jurisdiktion kräver av de personer du spelar in.

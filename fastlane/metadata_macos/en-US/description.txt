@@ -1,25 +1,29 @@
-Still records meetings, calls, lectures and voice memos, turns them into a timestamped transcript, and writes up the decisions and action items — entirely on your device.
+Still records meetings, calls, lectures and voice memos, turns them into a timestamped transcript, and writes up the decisions and action items — entirely on your Mac.
 
 There is no account and no server doing the thinking. Still transcribes with its own speech model running on your iPhone, iPad or Mac, so recording and transcription work in airplane mode. Still makes no network request until you download the speech model, turn on sync, or share something.
 
 RECORD
-• One Record button on iPhone, iPad and Mac
-• On the Mac, capture your microphone and the other side of a call as separate tracks
+• One Record button, always in the menu bar
+• Capture your microphone and the other side of a call as separate tracks
 • Record calls automatically: when an app you allow starts using the microphone, Still starts recording, and saves when the call ends
 • Start and stop from the menu bar or a keyboard shortcut, without opening the window
 • Audio is written in small encrypted pieces as you speak, so a crash costs you seconds rather than the session
 
 READ BACK
 • A live transcript while you record, and a full transcript when you stop
-• Every line is linked to the moment it was said — tap it and hear it
+• Every line is linked to the moment it was said — click it and hear it
+• A local AI model cleans up the raw transcript: filler words trimmed, punctuation fixed, meaning untouched
 • Words Still is unsure of stay marked rather than being rewritten into confident text
 • Correct a name and the original stays beside your correction
-• Speakers are grouped, and you can rename a group without touching the transcript
+• Speakers are recognized by name and matched across meetings, so the same person is the same speaker next time — rename a group without touching the transcript
 
 UNDERSTAND
 • Summary, decisions and action items, each one quoting the transcript it came from
 • Meeting, lecture, interview and voice-note formats, chosen for you and changeable afterwards
 • Translation beneath the original, with the original still the record of what was said
+
+CONNECT
+• Run Still as a local MCP server so Claude Code, Codex or another AI tool can read your real meeting notes and decisions — nothing leaves your device to do it
 
 FIND AND KEEP
 • Search titles, transcripts, corrections and notes

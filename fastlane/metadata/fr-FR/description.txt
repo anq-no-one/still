@@ -1,0 +1,38 @@
+Still enregistre réunions, appels, cours et mémos vocaux, en fait une transcription horodatée et rédige les décisions et les tâches à faire — entièrement sur votre appareil.
+
+Pas de compte, pas de serveur qui réfléchit à votre place. Still transcrit avec son propre modèle vocal directement sur votre iPhone, iPad ou Mac : l'enregistrement et la transcription fonctionnent donc en mode avion. Still n'envoie aucune requête réseau tant que vous ne téléchargez pas le modèle vocal, n'activez pas la synchronisation ou ne partagez rien.
+
+RECORD
+• Un seul bouton Enregistrer sur iPhone, iPad et Mac
+• Sur Mac, votre micro et l'autre côté d'un appel sont capturés sur deux pistes distinctes
+• Enregistrement automatique des appels : dès qu'une application autorisée utilise le micro, Still commence à enregistrer et sauvegarde à la fin de l'appel
+• Démarrer et arrêter depuis la barre de menus ou un raccourci clavier, sans ouvrir la fenêtre
+• L'audio est écrit par petits blocs chiffrés pendant que vous parlez : un plantage ne coûte que quelques secondes, pas la session
+
+READ BACK
+• Une transcription en direct pendant l'enregistrement, complète à l'arrêt
+• Chaque ligne est liée à l'instant où elle a été dite — touchez-la pour l'écouter
+• Un modèle IA local nettoie la transcription brute : mots de remplissage retirés, ponctuation corrigée, sens inchangé
+• Les mots dont Still n'est pas sûr restent signalés plutôt que réécrits avec une fausse assurance
+• Corrigez un nom : l'original reste affiché à côté de votre correction
+• Les intervenants sont reconnus par leur nom et retrouvés d'une réunion à l'autre, sans retoucher la transcription
+
+UNDERSTAND
+• Résumé, décisions et tâches à faire, chacun citant l'extrait de la transcription dont il vient
+• Formats réunion, cours, entretien et mémo vocal, choisis pour vous et modifiables ensuite
+• Traduction sous l'original, l'original restant la trace fidèle de ce qui a été dit
+
+CONNECT (Mac)
+• Faites tourner Still comme serveur MCP local sur votre Mac pour que Claude Code, Codex ou un autre outil IA puisse lire vos vraies notes de réunion et décisions — rien ne quitte votre appareil
+
+FIND AND KEEP
+• Rechercher dans les titres, transcriptions, corrections et notes
+• Exporter en PDF, Markdown, texte brut, audio ou archive Still chiffrée
+• Choisissez la durée de conservation de l'audio ; la suppression reste annulable pendant trente jours
+
+PRIVACY
+Votre bibliothèque est chiffrée avec une clé conservée dans le trousseau de cet appareil. Si vous activez la synchronisation iCloud, Apple ne stocke que du texte chiffré : aucune transcription, note, audio ni clé ne quitte votre appareil en clair. Le diagnostic est désactivé par défaut, et même activé, les rapports ne contiennent aucun contenu.
+
+Toutes les fonctionnalités sont gratuites.
+
+Vous êtes seul responsable du consentement exigé par votre juridiction auprès des personnes que vous enregistrez.

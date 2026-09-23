@@ -1,0 +1,38 @@
+Still neemt vergaderingen, gesprekken, colleges en spraakmemo's op, zet ze om in een transcript met tijdstempels en stelt de besluiten en actiepunten samen — volledig op je apparaat.
+
+Er is geen account en geen server die voor je meedenkt. Still transcribeert met een eigen spraakmodel rechtstreeks op je iPhone, iPad of Mac, dus opnemen en transcriberen werken ook in vliegtuigmodus. Still doet geen netwerkverzoek totdat je het spraakmodel downloadt, synchronisatie inschakelt of iets deelt.
+
+RECORD
+• Eén opnameknop op iPhone, iPad en Mac
+• Op de Mac worden je microfoon en de andere kant van een gesprek als aparte sporen vastgelegd
+• Neem gesprekken automatisch op: zodra een toegestane app de microfoon gebruikt, begint Still met opnemen en slaat het op zodra het gesprek eindigt
+• Start en stop vanuit de menubalk of met een sneltoets, zonder het venster te openen
+• Audio wordt in kleine versleutelde stukjes weggeschreven terwijl je spreekt, dus een crash kost je seconden in plaats van de hele opname
+
+READ BACK
+• Een live transcript tijdens het opnemen, en een volledig transcript zodra je stopt
+• Elke regel is gekoppeld aan het moment waarop hij werd gezegd — tik erop om het te beluisteren
+• Een lokaal AI-model maakt het ruwe transcript schoon: stopwoordjes verwijderd, interpunctie hersteld, betekenis ongewijzigd
+• Woorden waar Still niet zeker van is, blijven gemarkeerd in plaats van herschreven met valse zekerheid
+• Corrigeer een naam en het origineel blijft naast je correctie staan
+• Sprekers worden herkend op naam en gekoppeld tussen vergaderingen door, zodat dezelfde persoon steeds dezelfde spreker is — hernoem een groep zonder het transcript aan te raken
+
+UNDERSTAND
+• Samenvatting, besluiten en actiepunten, elk met een citaat uit het transcript waar het vandaan komt
+• Formats voor vergadering, college, sollicitatiegesprek en spraaknotitie, automatisch gekozen en later aan te passen
+• Vertaling onder het origineel, waarbij het origineel de getrouwe weergave blijft van wat er gezegd is
+
+CONNECT (Mac)
+• Draai Still als lokale MCP-server op je Mac, zodat Claude Code, Codex of een andere AI-tool je echte vergadernotities en besluiten kan lezen — er verlaat niets je apparaat
+
+FIND AND KEEP
+• Doorzoek titels, transcripten, correcties en notities
+• Exporteer als PDF, Markdown, platte tekst, audio of een versleuteld Still-archief
+• Kies hoe lang audio bewaard blijft; verwijderen is dertig dagen lang ongedaan te maken
+
+PRIVACY
+Je bibliotheek is versleuteld met een sleutel die in de sleutelhanger van dit apparaat staat. Als je iCloud-synchronisatie inschakelt, slaat Apple alleen cijfertekst op: geen transcript, notitie, audio of sleutel verlaat ooit leesbaar je apparaat. Diagnostiek staat standaard uit, en zelfs als je het inschakelt, bevatten de rapporten geen inhoud.
+
+Elke functie is gratis.
+
+Jij bent verantwoordelijk voor de toestemming die jouw rechtsgebied vereist van de mensen die je opneemt.

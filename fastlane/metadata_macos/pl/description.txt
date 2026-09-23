@@ -1,0 +1,38 @@
+Still nagrywa spotkania, rozmowy, wykłady i notatki głosowe, zamienia je w transkrypcję ze znacznikami czasu i spisuje decyzje oraz zadania — w całości na Twoim Macu.
+
+Nie ma konta ani serwera, który myśli za Ciebie. Still transkrybuje własnym modelem mowy bezpośrednio na iPhonie, iPadzie lub Macu, więc nagrywanie i transkrypcja działają nawet w trybie samolotowym. Still nie wysyła żadnego żądania sieciowego, dopóki nie pobierzesz modelu mowy, nie włączysz synchronizacji lub nie udostępnisz czegoś.
+
+RECORD
+• Jeden przycisk nagrywania, zawsze na pasku menu
+• Mikrofon i druga strona rozmowy są nagrywane jako osobne ścieżki
+• Automatyczne nagrywanie rozmów: gdy dozwolona aplikacja zaczyna korzystać z mikrofonu, Still zaczyna nagrywać i zapisuje po zakończeniu rozmowy
+• Start i stop z paska menu lub skrótu klawiszowego, bez otwierania okna
+• Dźwięk jest zapisywany w małych zaszyfrowanych fragmentach w trakcie mówienia, więc awaria kosztuje sekundy, nie całą sesję
+
+READ BACK
+• Transkrypcja na żywo podczas nagrywania, a po zatrzymaniu — pełna transkrypcja
+• Każda linia jest powiązana z chwilą, w której padła — kliknij, by jej posłuchać
+• Lokalny model AI porządkuje surową transkrypcję: usuwa wtrącenia, poprawia interpunkcję, nie zmienia sensu
+• Słowa, których Still nie jest pewna, pozostają oznaczone zamiast być przepisane z fałszywą pewnością
+• Popraw imię, a oryginał zostaje obok Twojej poprawki
+• Mówcy są rozpoznawani po imieniu i dopasowywani między spotkaniami, więc ta sama osoba pozostaje tym samym mówcą — zmień nazwę grupy bez ingerencji w transkrypcję
+
+UNDERSTAND
+• Podsumowanie, decyzje i zadania, każde z cytatem z transkrypcji, z którego pochodzi
+• Formaty spotkania, wykładu, rozmowy kwalifikacyjnej i notatki głosowej, dobierane automatycznie i zmienialne później
+• Tłumaczenie pod oryginałem, przy czym oryginał pozostaje wiernym zapisem tego, co powiedziano
+
+CONNECT
+• Uruchom Still jako lokalny serwer MCP, aby Claude Code, Codex lub inne narzędzie AI mogło odczytać Twoje prawdziwe notatki i decyzje ze spotkań — nic nie opuszcza Twojego urządzenia
+
+FIND AND KEEP
+• Przeszukuj tytuły, transkrypcje, poprawki i notatki
+• Eksportuj jako PDF, Markdown, zwykły tekst, audio lub zaszyfrowane archiwum Still
+• Wybierz, jak długo przechowywać audio; usunięcie można cofnąć przez trzydzieści dni
+
+PRIVACY
+Twoja biblioteka jest szyfrowana kluczem przechowywanym w pęku kluczy tego urządzenia. Po włączeniu synchronizacji iCloud Apple przechowuje wyłącznie zaszyfrowany tekst: żadna transkrypcja, notatka, nagranie ani klucz nigdy nie opuszczają urządzenia w czytelnej formie. Diagnostyka jest domyślnie wyłączona, a nawet po włączeniu raporty nie zawierają treści.
+
+Każda funkcja jest bezpłatna.
+
+Odpowiadasz za zgodę, jakiej Twoja jurysdykcja wymaga od osób, które nagrywasz.

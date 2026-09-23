@@ -1,0 +1,1 @@
+Twój asystent notatek AI, który nigdy nie opuszcza urządzenia. Nagrywa rozmowy automatycznie i pozwala Claude Code lub Codex czytać Twoje spotkania przez MCP — offline.

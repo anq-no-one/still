@@ -1,1 +1,1 @@
-transcription,transcribe,call,lecture,meeting,minutes,audio,record,sound,private,local,summary,text
+transcription,transcribe,call,lecture,meeting,minutes,audio,record,sound,private,local,summary
