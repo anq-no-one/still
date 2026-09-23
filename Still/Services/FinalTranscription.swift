@@ -68,7 +68,8 @@ struct FinalTranscription: Sendable {
         }
 
         let result = TranscriptionResult(
-            segments: checkpoint.segments.sorted { $0.start < $1.start },
+            segments: EchoFilter.removingEcho(from: checkpoint.segments, speakers: checkpoint.speakers)
+                .sorted { $0.start < $1.start },
             speakers: checkpoint.speakers
         )
         checkpoints.clear()
