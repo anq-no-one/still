@@ -132,3 +132,17 @@ Deployment target is now iOS/macOS 26.
 - Diarization branch worktree-agent-a21221bbef762254b accepted (2 commits), follow-ups running; merge after the TestFlight trial build finishes
 - ASC app record exists: "Still - AI note taker", Apple ID 6815369488
 - TODO: semantic index builds on the main actor at unlock; move off main before release
+
+## Product specification and issue handoff — 2026-09-24
+
+- Canonical current product scope: `docs/still-product-spec.md`; published as GitHub issue #34. Treat `docs/wayfinder.md` and issue #1 as historical context where they conflict with #34.
+- Still is a free, complete public app with no Pro tier, subscription, purchase gate, or default account requirement. iOS/iPadOS and macOS 26 are the current deployment targets in this worktree.
+- First run must explain each required permission before the system prompt and withhold Record until required capture access and the local transcription pack are ready. Calendar and meeting-window access are optional. App lock is separately opt-in and off by default.
+- The privacy boundary is local-first. Recording content stays encrypted; no AI-provider upload. Unconfirmed project assignment blocks sync. A Mac must receive only selected projects and their keys, not merely hide excluded projects in its UI. Remembered speaker voice profiles require separate consent.
+- Diagnostics need a local 90-day event journal, safe 100-event breadcrumbs on failures, complete redaction of user content and secrets, and a streaming plain-text export without a file-size cap.
+- Settings should follow native Apple patterns with a spacious Mac sidebar and adaptive iPhone/iPad layout. The attached CleanShot references informed layout ideas, not a pixel copy. Model selection stays automatic. Preference export must exclude keys, consents, device access, and tool grants.
+- GitHub work items #35–#54 are the agent-sized implementation slices under #34. Each contains a bounded outcome, acceptance checks, verification command, and `Blocked by` edges. Start with an unblocked issue, finish and verify it, then move to its dependent issue; do not pick a blocked issue simply because it has `ready-for-agent`.
+- First slices: #35 onboarding, #36 optional lock, #37 diagnostic journal, #38 Mac audio import, #39 timed speaker suggestion, #40 approved Mac capture, #41 project confirmation, #44 microphone selection. Dependencies include #41 -> #47 -> #42/#43/#45/#46, #43 -> #48, #45 -> #49, #44 -> #50, #38 -> #51, #42 -> #52, #37 -> #53, and #39 -> #54.
+- Existing #29, #32, and #33 now use the free-product release criteria. #8 and #9 had stray CLI output at the top of their bodies; it was removed. #9 no longer depends on the closed Pro issue #5. No issue was closed because the remaining open tasks still describe work to do; #1 was left as the historical parent per the ticketing contract.
+- This handoff added documentation and edited GitHub issues only. Do not infer any new app-code implementation from it. At handoff, `main` is at `c8acffd` and no task-owned background job is running. Another worker committed the spec, progress notes, fixture, and wayfinder move while this issue pass was in progress; preserve that commit and all existing `.claude/worktrees/` content.
+- Exact next action for the implementer: open #35, inspect the current onboarding/model-permission flow and any active worktree, then implement only its acceptance criteria and run its listed verification command.
