@@ -81,7 +81,11 @@ struct RecordingDetailView: View {
             .frame(maxWidth: 760, alignment: .leading)
             .frame(maxWidth: .infinity)
         }
+        #if os(macOS)
         .navigationTitle(title)
+        #else
+        .navigationBarTitleDisplayMode(.inline)
+        #endif
         .toolbar {
             ToolbarItem {
                 Toggle("Translate to \(readingLanguageName)", systemImage: "translate", isOn: $showsTranslation)
