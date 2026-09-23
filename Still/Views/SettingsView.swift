@@ -25,7 +25,7 @@ struct SettingsView: View {
                 .formStyle(.grouped)
             }
             Tab("Sync", systemImage: "arrow.triangle.2.circlepath") {
-                SyncSettingsView(engine: sync, entitlements: entitlements)
+                SyncSettingsView(engine: sync)
             }
             Tab("Security", systemImage: "key") {
                 SecuritySettingsView(library: library)
@@ -81,7 +81,7 @@ private struct SettingsList: View {
                         TranscriptionSettingsView(installer: modelInstaller)
                     }
                     link("Sync", systemImage: "arrow.triangle.2.circlepath", color: .cyan) {
-                        SyncSettingsView(engine: sync, entitlements: entitlements)
+                        SyncSettingsView(engine: sync)
                     }
                 }
 

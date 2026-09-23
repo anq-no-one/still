@@ -117,13 +117,14 @@ struct StillApp: App {
             Diagnostics(settings: UserDefaultsDiagnosticsSettings(), sink: NoDiagnosticsSink())
         }
 
-        sync = MainActor.assumeIsolated {
+        let syncEngine = MainActor.assumeIsolated {
             SyncEngine(
                 library: recordingLibrary,
                 transport: CloudKitSyncTransport(),
                 settings: UserDefaultsSyncSettings()
             )
         }
+        sync = syncEngine
         let recordingCoordinator = MainActor.assumeIsolated {
             RecordingCoordinator(
                 library: recordingLibrary,
@@ -138,6 +139,7 @@ struct StillApp: App {
         Task { @MainActor in
             await recordingLibrary.unlock()
             await proEntitlements.refresh()
+            await syncEngine.syncIfEnabled()
         }
         #if os(macOS)
         shortcut = MainActor.assumeIsolated {
@@ -172,7 +174,6 @@ struct StillApp: App {
             libraryView
         }
         .defaultSize(width: 980, height: 680)
-        .defaultLaunchBehavior(setup.isComplete ? .suppressed : .presented)
 
         Settings {
             SettingsView(

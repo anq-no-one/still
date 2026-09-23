@@ -9,9 +9,8 @@ protocol SyncSettingsStore: Sendable {
     func setLastSyncedAt(_ date: Date)
 }
 
-/// Sync is off until someone turns it on, and turning it on is the only thing
-/// that lets a Recording leave this device. Text and metadata travel first;
-/// audio follows on its own schedule.
+/// Sync is on for a new install and only ever sends sealed payloads to the
+/// user's own iCloud. Turning it off keeps every Recording on this device.
 @MainActor
 @Observable
 final class SyncEngine {
@@ -42,7 +41,7 @@ final class SyncEngine {
     }
 
     static let whatLeavesTheDevice = String(localized: """
-        Turning on sync sends your recordings to your own iCloud account, encrypted on this device \
+        Sync sends your recordings to your own iCloud account, encrypted on this device \
         first. Apple stores only ciphertext: no transcript, note, audio, or key ever leaves in \
         readable form. Text and notes arrive on your other devices before the audio finishes.
         """)
@@ -55,6 +54,11 @@ final class SyncEngine {
     func disable() {
         isEnabled = false
         settings.setEnabled(false)
+    }
+
+    func syncIfEnabled() async {
+        guard isEnabled else { return }
+        await sync()
     }
 
     func sync() async {
@@ -110,7 +114,7 @@ struct UserDefaultsSyncSettings: SyncSettingsStore, @unchecked Sendable {
     }
 
     func isEnabled() -> Bool {
-        defaults.bool(forKey: enabledKey)
+        defaults.object(forKey: enabledKey) as? Bool ?? true
     }
 
     func setEnabled(_ enabled: Bool) {

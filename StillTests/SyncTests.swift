@@ -95,7 +95,16 @@ struct RecordingMergeTests {
 @MainActor
 struct SyncEngineTests {
     @Test
-    func sendsNothingUntilSyncIsTurnedOn() async throws {
+    func syncIsOnForANewInstall() throws {
+        let suite = "still.sync.tests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        #expect(UserDefaultsSyncSettings(defaults: defaults).isEnabled())
+    }
+
+    @Test
+    func sendsNothingWhileSyncIsOff() async throws {
         let transport = SpySyncTransport()
         let engine = try await makeEngine(transport: transport)
 
@@ -211,7 +220,7 @@ struct SyncEngineTests {
     private func makeLibrary() async throws -> Library {
         let container = try ModelContainer(
             for: EncryptedRecording.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         )
         let context = ModelContext(container)
         let library = Library(
