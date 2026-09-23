@@ -164,10 +164,12 @@ struct StillApp: App {
             )
         }
         browser = MainActor.assumeIsolated {
-            BrowserMeetingBridge(
+            let bridge = BrowserMeetingBridge(
                 coordinator: recordingCoordinator,
                 allowList: UserDefaultsMeetingSiteAllowList()
             )
+            bridge.listenForExtensions()
+            return bridge
         }
         #endif
     }

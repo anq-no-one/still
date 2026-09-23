@@ -6,6 +6,7 @@ import Testing
 @MainActor
 struct BrowserMeetingBridgeTests {
     private let meet = "meet.google.com"
+    private let chrome = "com.google.Chrome"
 
     @Test
     func recordsOnlyForAnApprovedSite() async throws {
@@ -68,12 +69,52 @@ struct BrowserMeetingBridgeTests {
     }
 
     @Test
-    func aBrowserMeetingCapturesBrowsersOnly() async throws {
+    func aBrowserMeetingCapturesOnlyTheBrowserThatHostsIt() async throws {
+        let (bridge, coordinator) = try await make(allowed: [meet])
+
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .started, browserBundleID: chrome))
+
+        #expect(coordinator.audioTarget.scope == .apps([chrome]))
+    }
+
+    @Test
+    func aMeetingFromAnUnnamedBrowserCapturesBrowsersOnly() async throws {
         let (bridge, coordinator) = try await make(allowed: [meet])
 
         await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .started))
 
         #expect(coordinator.audioTarget.scope == .browser(nil))
+    }
+
+    @Test
+    func aZoomMeetingOnACompanySubdomainCounts() async throws {
+        let (bridge, coordinator) = try await make(allowed: ["zoom.us"])
+
+        await bridge.handle(BrowserMeetingEvent(host: "us02web.zoom.us", meetingID: "z", phase: .started))
+
+        #expect(coordinator.isRecording)
+    }
+
+    @Test
+    func aLookalikeHostDoesNotCount() async throws {
+        let (bridge, coordinator) = try await make(allowed: ["zoom.us"])
+
+        await bridge.handle(BrowserMeetingEvent(host: "notzoom.us", meetingID: "z", phase: .started))
+
+        #expect(!coordinator.isRecording)
+    }
+
+    @Test
+    func quittingTheHostBrowserEndsTheMeeting() async throws {
+        let (bridge, coordinator) = try await make(allowed: [meet])
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .started, browserBundleID: chrome))
+
+        await bridge.browserQuit("com.apple.Safari")
+        #expect(coordinator.isRecording)
+
+        await bridge.browserQuit(chrome)
+        #expect(!coordinator.isRecording)
+        #expect(bridge.activeMeetingID == nil)
     }
 
     private func make(allowed: [String]) async throws -> (BrowserMeetingBridge, RecordingCoordinator) {
