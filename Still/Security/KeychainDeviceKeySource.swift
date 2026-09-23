@@ -4,6 +4,11 @@ import LocalAuthentication
 import Security
 
 struct KeychainDeviceKeySource: DeviceKeySource {
+    private enum Keychain {
+        case dataProtection
+        case legacyFile
+    }
+
     private let service: String
     private let deviceKeyAccount = "library-device-key-unlocked"
     private let presenceDeviceKeyAccount = "library-device-key"
@@ -39,11 +44,7 @@ struct KeychainDeviceKeySource: DeviceKeySource {
         guard try read(account: deviceKeyAccount, context: nil) == key else {
             throw LibraryKeyError.authenticationUnavailable
         }
-        SecItemDelete([
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: presenceDeviceKeyAccount,
-        ] as CFDictionary)
+        delete(account: presenceDeviceKeyAccount)
     }
 
     func wrappedMasterKey() throws -> Data? {
@@ -79,11 +80,7 @@ struct KeychainDeviceKeySource: DeviceKeySource {
     }
 
     func discardPendingMasterKey() throws {
-        SecItemDelete([
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: pendingMasterKeyAccount,
-        ] as CFDictionary)
+        delete(account: pendingMasterKeyAccount)
     }
 
     private func readPresenceDeviceKey(context: LAContext) throws -> Data? {
@@ -95,12 +92,25 @@ struct KeychainDeviceKeySource: DeviceKeySource {
     }
 
     private func read(account: String, context: LAContext?) throws -> Data? {
-        var query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: account,
-            kSecReturnData as String: true,
-        ]
+        if let data = try copy(query(account: account, keychain: .dataProtection), context: context) {
+            return data
+        }
+
+        #if os(macOS)
+        guard let legacy = try copy(query(account: account, keychain: .legacyFile), context: context) else {
+            return nil
+        }
+        try write(legacy, account: account)
+        SecItemDelete(query(account: account, keychain: .legacyFile) as CFDictionary)
+        return legacy
+        #else
+        return nil
+        #endif
+    }
+
+    private func copy(_ query: [String: Any], context: LAContext?) throws -> Data? {
+        var query = query
+        query[kSecReturnData as String] = true
         if let context {
             query[kSecUseAuthenticationContext as String] = context
         }
@@ -119,24 +129,30 @@ struct KeychainDeviceKeySource: DeviceKeySource {
     }
 
     private func write(_ data: Data, account: String) throws {
-        let attributes: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: account,
-            kSecValueData as String: data,
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
-        ]
+        var attributes = query(account: account, keychain: .dataProtection)
+        attributes[kSecValueData as String] = data
+        attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
 
-        SecItemDelete([
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: account,
-        ] as CFDictionary)
+        SecItemDelete(query(account: account, keychain: .dataProtection) as CFDictionary)
 
         let status = SecItemAdd(attributes as CFDictionary, nil)
         guard status == errSecSuccess else {
             throw Self.authenticationError(for: status) ?? LibraryKeyError.keychainFailure(status)
         }
+    }
+
+    private func delete(account: String) {
+        SecItemDelete(query(account: account, keychain: .dataProtection) as CFDictionary)
+        SecItemDelete(query(account: account, keychain: .legacyFile) as CFDictionary)
+    }
+
+    private func query(account: String, keychain: Keychain) -> [String: Any] {
+        [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+            kSecUseDataProtectionKeychain as String: keychain == .dataProtection,
+        ]
     }
 
     private static func authenticationError(for status: OSStatus) -> LibraryKeyError? {
