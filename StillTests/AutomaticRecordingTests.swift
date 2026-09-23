@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 import SwiftData
 import Testing
 @testable import Still
@@ -110,6 +111,19 @@ struct AutomaticRecordingTests {
     }
 
     @Test
+    func switchingAnAppRedrawsTheList() async throws {
+        let (automatic, _, _) = try await make(allowed: [])
+        let app = try #require(automatic.apps.first { $0.bundleID == chrome })
+        let redrawn = Flag()
+        withObservationTracking { _ = automatic.apps } onChange: { redrawn.raise() }
+
+        automatic.setAllowed(true, for: app)
+
+        #expect(redrawn.isRaised)
+        #expect(automatic.apps.first { $0.bundleID == chrome }?.isAllowed == true)
+    }
+
+    @Test
     func nothingStartsBeforeWatchingBegins() async throws {
         let (_, watcher, coordinator) = try await make(allowed: [zoom])
 
@@ -140,7 +154,7 @@ struct AutomaticRecordingTests {
     ) async throws -> (AutomaticRecording, FakeCallAppWatcher, RecordingCoordinator) {
         let container = try ModelContainer(
             for: EncryptedRecording.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         )
         let context = ModelContext(container)
         let audioRoot = try Scratch().directory
@@ -223,5 +237,13 @@ final class MemoryAllowList: CallAppAllowList, @unchecked Sendable {
 
     func setWatching(_ watching: Bool) {
         watches = watching
+    }
+}
+
+final class Flag: @unchecked Sendable {
+    private(set) var isRaised = false
+
+    func raise() {
+        isRaised = true
     }
 }

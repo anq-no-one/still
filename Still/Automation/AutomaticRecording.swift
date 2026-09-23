@@ -51,18 +51,16 @@ final class AutomaticRecording {
 
     private(set) var isWatching = false
     private(set) var triggeredBy: String?
+    private(set) var apps: [CallApp]
 
     init(coordinator: RecordingCoordinator, watcher: CallAppWatcher, allowList: CallAppAllowList) {
         self.coordinator = coordinator
         self.watcher = watcher
         self.allowList = allowList
+        apps = allowList.apps()
         if allowList.watches {
             startWatching()
         }
-    }
-
-    var apps: [CallApp] {
-        allowList.apps()
     }
 
     func startWatching() {
@@ -88,6 +86,7 @@ final class AutomaticRecording {
 
     func setAllowed(_ allowed: Bool, for app: CallApp) {
         allowList.setAllowed(allowed, forBundleID: app.bundleID)
+        apps = allowList.apps()
 
         if !allowed, triggeredBy == app.bundleID {
             triggeredBy = nil
@@ -103,7 +102,7 @@ final class AutomaticRecording {
         guard isWatching,
               triggeredBy == nil,
               !coordinator.isRecording,
-              let app = allowList.apps().first(where: { $0.isAllowed && $0.owns(processBundleID) })
+              let app = apps.first(where: { $0.isAllowed && $0.owns(processBundleID) })
         else { return }
 
         triggeredBy = app.bundleID
