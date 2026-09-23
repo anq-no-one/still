@@ -18,6 +18,7 @@ struct StillApp: App {
     private let navigation: LibraryNavigation
     #if os(macOS)
     private let shortcut: GlobalRecordingShortcut
+    @NSApplicationDelegateAdaptor private var reopener: LibraryWindowReopener
     #endif
 
     static let libraryWindowID = "library"
@@ -174,6 +175,7 @@ struct StillApp: App {
             libraryView
         }
         .defaultSize(width: 980, height: 680)
+        .defaultLaunchBehavior(.presented)
 
         Settings {
             SettingsView(
@@ -191,6 +193,7 @@ struct StillApp: App {
             RecordingMenuBarPanel(coordinator: coordinator, library: library, automatic: automatic, navigation: navigation)
         } label: {
             RecordingMenuBarLabel(coordinator: coordinator)
+                .modifier(LibraryWindowOpenerInstaller(reopener: reopener))
         }
         .menuBarExtraStyle(.window)
         #else
