@@ -50,6 +50,9 @@ targets:
         CODE_SIGN_STYLE: Automatic
         ENABLE_APP_SANDBOX: YES
         ENABLE_HARDENED_RUNTIME: YES
+      configs:
+        Release:
+          EXCLUDED_SOURCE_FILE_NAMES: "*.fixture.caf"
     entitlements:
       path: Still/Still.entitlements
       properties:
@@ -82,6 +85,9 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Still/Still.entitlements
         ENABLE_APP_SANDBOX: YES
         ENABLE_HARDENED_RUNTIME: YES
+      configs:
+        Release:
+          EXCLUDED_SOURCE_FILE_NAMES: "*.fixture.caf"
     entitlements:
       path: Still/Still.entitlements
       properties:
@@ -109,6 +115,19 @@ targets:
       path: StillBrowserExtension/StillBrowserExtension.entitlements
       properties:
         com.apple.security.app-sandbox: true
+  StillUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: StillUITests
+    dependencies:
+      - target: Still-iOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.andrii.still.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Still-iOS
+        CODE_SIGN_STYLE: Automatic
   StillTests:
     type: bundle.unit-test
     platform: macOS
@@ -127,8 +146,12 @@ schemes:
     build:
       targets:
         Still-iOS: all
+        StillUITests: [test]
     run:
       storeKitConfiguration: Still/Supporting/Still.storekit
+    test:
+      targets:
+        - StillUITests
   Still-macOS:
     build:
       targets:

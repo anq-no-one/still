@@ -15,7 +15,16 @@ xcodegen generate
 open Still.xcodeproj
 ```
 
-Use a physical device or a Mac with microphone access. The selected language must support on-device speech recognition.
+Use a physical device or a Mac with microphone access.
+
+## End-to-end tests
+
+```sh
+bin/e2e.sh                     # fresh silent simulator, deleted afterwards
+bin/e2e.sh --device <udid>     # a connected iPhone with UI Automation enabled
+```
+
+A Debug build hears `Still/DebugSupport/meeting.fixture.caf` instead of the microphone, so every run records the same meeting. The simulator has no on-device speech models, so there the suite proves that a Recording survives a device that cannot transcribe; the words themselves are checked on a device. The selected language must support on-device speech recognition.
 
 ## Product path
 

@@ -10,14 +10,27 @@ final class MicrophoneInput {
 
     private let engine = AVAudioEngine()
     private let consumers = ConsumerList()
+    private let fixture: AudioFixture?
+
+    /// A fixture replaces the microphone with a recorded file played at real
+    /// speed, so an end-to-end run hears the same words every time.
+    init(fixture: URL? = nil) {
+        self.fixture = fixture.flatMap(AudioFixture.init(url:))
+    }
 
     var isRunning: Bool {
-        engine.isRunning
+        fixture?.isPlaying ?? engine.isRunning
     }
 
     /// Hands the consumer the input's real format before the first buffer
     /// arrives, so a consumer can build its converter once.
     func attach(_ makeConsumer: (AVAudioFormat) throws -> Consumer) throws -> UUID {
+        if let fixture {
+            let id = consumers.insert(try makeConsumer(fixture.format))
+            fixture.play(to: consumers)
+            return id
+        }
+
         let wasRunning = engine.isRunning
         if !wasRunning {
             try configureSession()
@@ -61,6 +74,10 @@ final class MicrophoneInput {
     }
 
     private func stop() {
+        if let fixture {
+            fixture.stop()
+            return
+        }
         engine.stop()
         engine.inputNode.removeTap(onBus: 0)
         deactivateSession()
@@ -88,6 +105,77 @@ final class MicrophoneInput {
         #if os(iOS)
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         #endif
+    }
+}
+
+private final class AudioFixture: @unchecked Sendable {
+    private static let framesPerBuffer: AVAudioFrameCount = 1_600
+
+    let format: AVAudioFormat
+    private let samples: AVAudioPCMBuffer
+    private let queue = DispatchQueue(label: "com.andrii.still.audio-fixture")
+    private var timer: DispatchSourceTimer?
+    private var position: AVAudioFramePosition = 0
+
+    init?(url: URL) {
+        guard let file = try? AVAudioFile(forReading: url),
+              let samples = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: AVAudioFrameCount(file.length)),
+              (try? file.read(into: samples)) != nil
+        else { return nil }
+
+        format = file.processingFormat
+        self.samples = samples
+    }
+
+    var isPlaying: Bool {
+        queue.sync { timer != nil }
+    }
+
+    func play(to consumers: ConsumerList) {
+        queue.sync {
+            guard timer == nil else { return }
+
+            position = 0
+            let interval = Double(Self.framesPerBuffer) / format.sampleRate
+            let timer = DispatchSource.makeTimerSource(queue: queue)
+            timer.schedule(deadline: .now(), repeating: interval)
+            timer.setEventHandler { [weak self] in
+                guard let self, let buffer = nextBuffer() else { return }
+                consumers.deliver(buffer)
+            }
+            self.timer = timer
+            timer.resume()
+        }
+    }
+
+    func stop() {
+        queue.sync {
+            timer?.cancel()
+            timer = nil
+        }
+    }
+
+    /// Past the end of the file the fixture keeps delivering silence, as a
+    /// quiet room does, until the recording stops.
+    private func nextBuffer() -> AVAudioPCMBuffer? {
+        guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: Self.framesPerBuffer),
+              let source = samples.floatChannelData,
+              let target = buffer.floatChannelData
+        else { return nil }
+
+        let frames = Int(Self.framesPerBuffer)
+        let available = max(0, Int(samples.frameLength) - Int(position))
+        let copied = min(frames, available)
+        for channel in 0..<Int(format.channelCount) {
+            let destination = target[channel]
+            if copied > 0 {
+                destination.update(from: source[channel] + Int(position), count: copied)
+            }
+            (destination + copied).update(repeating: 0, count: frames - copied)
+        }
+        buffer.frameLength = Self.framesPerBuffer
+        position += AVAudioFramePosition(copied)
+        return buffer
     }
 }
 

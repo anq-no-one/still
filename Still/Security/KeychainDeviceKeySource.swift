@@ -10,7 +10,9 @@ struct KeychainDeviceKeySource: DeviceKeySource {
     private let recoveryAccount = "library-recovery"
     private let pendingMasterKeyAccount = "library-master-key-pending"
 
-    init(service: String = "com.andrii.still.library") {
+    static let defaultService = "com.andrii.still.library"
+
+    init(service: String = Self.defaultService) {
         self.service = service
     }
 

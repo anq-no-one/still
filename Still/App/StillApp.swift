@@ -20,6 +20,10 @@ struct StillApp: App {
     #endif
 
     init() {
+        #if DEBUG
+        UITestLaunch.resetIfRequested(keychainService: KeychainDeviceKeySource.defaultService)
+        #endif
+
         // SwiftData turns on CloudKit mirroring by itself when the app carries
         // an iCloud entitlement. Still syncs through its own encrypted
         // transport, so that mirroring is refused: it would need optional
@@ -42,7 +46,12 @@ struct StillApp: App {
         let proEntitlements = MainActor.assumeIsolated { Entitlements(source: StoreKitEntitlementSource()) }
         entitlements = proEntitlements
 
-        let microphone = MainActor.assumeIsolated { MicrophoneInput() }
+        #if DEBUG
+        let audioFixture = UITestLaunch.audioFixture
+        #else
+        let audioFixture: URL? = nil
+        #endif
+        let microphone = MainActor.assumeIsolated { MicrophoneInput(fixture: audioFixture) }
 
         let supportRoot = URL.applicationSupportDirectory.appending(path: "Still", directoryHint: .isDirectory)
 
