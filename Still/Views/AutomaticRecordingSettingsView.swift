@@ -18,7 +18,7 @@ struct AutomaticRecordingSettingsView: View {
         } header: {
             Text("Calls")
         } footer: {
-            Text("Still starts recording when an app you allow here starts using the microphone, and saves the recording when the call ends. Recording always shows in the menu bar and can be stopped or thrown away at once. For meetings in Safari, use the Still extension below.")
+            Text("Still starts recording when an app you allow here joins a call, meaning it uses the microphone and plays sound at the same time. It saves the recording once the app lets go of the microphone. Music and other apps are not recorded. Recording always shows in the menu bar and can be stopped or thrown away at once. For meetings in a browser, use the Still extension below.")
         }
     }
 

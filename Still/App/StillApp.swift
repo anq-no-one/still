@@ -156,7 +156,7 @@ struct StillApp: App {
         automatic = MainActor.assumeIsolated {
             AutomaticRecording(
                 coordinator: recordingCoordinator,
-                watcher: MicrophoneUseWatcher(),
+                watcher: CallActivityWatcher(),
                 allowList: UserDefaultsCallAppAllowList()
             )
         }
