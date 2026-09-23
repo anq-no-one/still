@@ -43,6 +43,24 @@ struct RecordingCoordinatorTests {
     }
 
     @Test
+    func nothingStartsBeforeStillIsReadyToRecord() async throws {
+        let library = makeLibrary(context: try makeContext(), audioRoot: try Scratch().directory)
+        let coordinator = RecordingCoordinator(
+            library: library,
+            entitlements: Entitlements(source: FakeEntitlementSource(), cache: MemoryEntitlementCache()),
+            makeSession: { FakeTranscriptionSession() },
+            makeFinalTranscription: { FinalTranscription(transcriber: StubOfflineTranscriber(), windowSeconds: 3_600) },
+            isReady: { false }
+        )
+
+        await coordinator.start()
+
+        #expect(!coordinator.canStart)
+        #expect(coordinator.phase == .idle)
+        #expect(coordinator.workflow == nil)
+    }
+
+    @Test
     func aLockedLibraryBecomesARecoverableFailure() async throws {
         let library = makeLibrary(context: try makeContext(), audioRoot: try Scratch().directory)
         let coordinator = makeCoordinator(library: library, session: FakeTranscriptionSession())

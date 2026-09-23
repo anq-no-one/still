@@ -5,94 +5,90 @@ import Testing
 @MainActor
 struct SetupFlowTests {
     @Test
-    func startsWithPrivacyAndNeedsNoAccount() {
-        let flow = SetupFlow(store: MemorySetupStore(), microphone: FakeMicrophoneAccess(granted: true))
+    func startsWithPrivacy() {
+        let flow = makeFlow()
 
         #expect(flow.step == .privacy)
         #expect(!flow.isComplete)
-        #expect(!flow.wantsPro)
     }
 
     @Test
-    func walksEveryStepOnceAndFinishes() async {
-        let flow = SetupFlow(store: MemorySetupStore(), microphone: FakeMicrophoneAccess(granted: true))
+    func walksEveryStepAndFinishesOnlyWhenEverythingIsReady() async {
+        let permissions = FakeSetupPermissions()
+        var modelReady = false
+        let flow = makeFlow(permissions: permissions, isTranscriptionReady: { modelReady })
 
         flow.acknowledgePrivacy()
         #expect(flow.step == .microphone)
 
         await flow.requestMicrophone()
-        #expect(flow.microphoneGranted)
+        #expect(flow.step == .systemAudio)
+
+        flow.requestSystemAudio()
         #expect(flow.step == .transcription)
 
-        flow.finishTranscription()
-        #expect(flow.step == .pro)
-
-        flow.finishPro()
+        modelReady = true
+        flow.refresh()
         #expect(flow.isComplete)
     }
 
     @Test
-    func finishesAfterTranscriptionWhenProIsNotOffered() async {
-        let flow = SetupFlow(
-            store: MemorySetupStore(),
-            microphone: FakeMicrophoneAccess(granted: true),
-            offersPro: false
-        )
+    func aDeclinedMicrophoneKeepsSetupOpen() async {
+        let permissions = FakeSetupPermissions(microphoneAnswer: .denied)
+        let flow = makeFlow(permissions: permissions)
+        flow.acknowledgePrivacy()
+
+        await flow.requestMicrophone()
+
+        #expect(flow.step == .microphone)
+        #expect(flow.microphone == .denied)
+    }
+
+    @Test
+    func aPermissionTakenAwayLaterReopensItsStep() async {
+        let permissions = FakeSetupPermissions()
+        let flow = makeFlow(permissions: permissions, isTranscriptionReady: { true })
+        flow.acknowledgePrivacy()
+        await flow.requestMicrophone()
+        flow.requestSystemAudio()
+        #expect(flow.isComplete)
+
+        permissions.systemAudio = .denied
+        flow.refresh()
+
+        #expect(flow.step == .systemAudio)
+    }
+
+    @Test
+    func iPhoneSetupHasNoSystemAudioStep() async {
+        let flow = makeFlow(includesSystemAudio: false, isTranscriptionReady: { true })
 
         flow.acknowledgePrivacy()
         await flow.requestMicrophone()
-        flow.finishTranscription()
 
         #expect(flow.isComplete)
     }
 
     @Test
-    func resumesAtTheStepThatStillNeedsAnAnswer() async {
+    func privacyIsRememberedAcrossLaunches() {
         let store = MemorySetupStore()
-        let first = SetupFlow(store: store, microphone: FakeMicrophoneAccess(granted: true))
-        first.acknowledgePrivacy()
-        await first.requestMicrophone()
+        makeFlow(store: store).acknowledgePrivacy()
 
-        let resumed = SetupFlow(store: store, microphone: FakeMicrophoneAccess(granted: true))
-
-        #expect(resumed.step == .transcription)
+        #expect(makeFlow(store: store).step == .microphone)
     }
 
-    @Test
-    func nothingHappensBeforeItsStep() async {
-        let microphone = FakeMicrophoneAccess(granted: true)
-        let flow = SetupFlow(store: MemorySetupStore(), microphone: microphone)
-
-        flow.acknowledgePrivacy()
-
-        #expect(microphone.requests == 0)
-
-        await flow.requestMicrophone()
-
-        #expect(microphone.requests == 1)
-    }
-
-    @Test
-    func aDeclinedMicrophoneStillMovesOn() async {
-        let flow = SetupFlow(store: MemorySetupStore(), microphone: FakeMicrophoneAccess(granted: false))
-        flow.acknowledgePrivacy()
-
-        await flow.requestMicrophone()
-
-        #expect(!flow.microphoneGranted)
-        #expect(flow.step == .transcription)
-    }
-
-    @Test
-    func skippingTheMicrophoneDoesNotAsk() {
-        let microphone = FakeMicrophoneAccess(granted: true)
-        let flow = SetupFlow(store: MemorySetupStore(), microphone: microphone)
-        flow.acknowledgePrivacy()
-
-        flow.skipMicrophone()
-
-        #expect(microphone.requests == 0)
-        #expect(flow.step == .transcription)
+    private func makeFlow(
+        store: MemorySetupStore = MemorySetupStore(),
+        permissions: FakeSetupPermissions = FakeSetupPermissions(),
+        includesSystemAudio: Bool = true,
+        isTranscriptionReady: @escaping @MainActor () -> Bool = { false }
+    ) -> SetupFlow {
+        SetupFlow(
+            store: store,
+            permissions: permissions,
+            includesSystemAudio: includesSystemAudio,
+            isTranscriptionReady: isTranscriptionReady
+        )
     }
 }
 
@@ -105,16 +101,20 @@ final class MemorySetupStore: SetupProgressStore, @unchecked Sendable {
 }
 
 @MainActor
-final class FakeMicrophoneAccess: MicrophoneAccess {
-    private let granted: Bool
-    private(set) var requests = 0
+final class FakeSetupPermissions: SetupPermissions {
+    var microphone: PermissionState = .notAsked
+    var systemAudio: PermissionState = .notAsked
+    private let microphoneAnswer: PermissionState
 
-    init(granted: Bool) {
-        self.granted = granted
+    init(microphoneAnswer: PermissionState = .granted) {
+        self.microphoneAnswer = microphoneAnswer
     }
 
-    func requestAccess() async -> Bool {
-        requests += 1
-        return granted
+    func requestMicrophone() async {
+        microphone = microphoneAnswer
+    }
+
+    func requestSystemAudio() {
+        systemAudio = .granted
     }
 }

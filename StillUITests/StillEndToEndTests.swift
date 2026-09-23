@@ -76,19 +76,20 @@ final class StillEndToEndTests: XCTestCase {
 
     private func completeOnboarding() {
         tap("Continue")
-        tap("Allow Microphone")
+        let allowMicrophone = app.buttons["Allow Microphone"]
+        if allowMicrophone.waitForExistence(timeout: 5) {
+            allowMicrophone.tap()
+        }
         installTranscription()
     }
 
     private func installTranscription() {
         let download = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Download'")).firstMatch
-        let proceed = app.buttons["Continue"]
-        waitFor(app.staticTexts["Transcribe on This Device"], "the transcription step")
+        waitFor(app.staticTexts["No Recordings Yet"].exists ? app.staticTexts["No Recordings Yet"] : app.staticTexts["Transcribe on This Device"], "the transcription step")
         if download.exists {
             download.tap()
         }
-        waitFor(proceed, timeout: 1_800, "the Model Pack to download and verify")
-        proceed.tap()
+        waitForAbsence(app.staticTexts["Transcribe on This Device"], timeout: 1_800, "the Model Pack to download and verify")
     }
 
     private func tap(_ label: String) {

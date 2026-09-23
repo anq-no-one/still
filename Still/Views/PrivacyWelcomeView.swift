@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct PrivacyWelcomeView: View {
+    let canRecord: Bool
     let startRecording: () -> Void
 
     var body: some View {
@@ -11,6 +12,7 @@ struct PrivacyWelcomeView: View {
         } actions: {
             Button("Record a meeting", systemImage: "record.circle", action: startRecording)
                 .buttonStyle(.borderedProminent)
+                .disabled(!canRecord)
         }
     }
 }

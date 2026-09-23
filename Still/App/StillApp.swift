@@ -99,13 +99,16 @@ struct StillApp: App {
             )
         }
 
-        setup = MainActor.assumeIsolated {
+        let installer = modelInstaller
+        let setupFlow = MainActor.assumeIsolated {
             SetupFlow(
                 store: UserDefaultsSetupProgressStore(),
-                microphone: SystemMicrophoneAccess(),
-                offersPro: !Entitlements.everythingIsFree
+                permissions: SystemSetupPermissions(),
+                includesSystemAudio: SetupFlow.recordsSystemAudio,
+                isTranscriptionReady: { installer.state == .installed }
             )
         }
+        setup = setupFlow
         library = recordingLibrary
         diagnostics = MainActor.assumeIsolated {
             Diagnostics(settings: UserDefaultsDiagnosticsSettings(), sink: NoDiagnosticsSink())
@@ -123,7 +126,8 @@ struct StillApp: App {
                 library: recordingLibrary,
                 entitlements: proEntitlements,
                 makeSession: { LiveTranscriber(input: microphone, systemAudio: systemAudio, engine: speech) },
-                makeFinalTranscription: { FinalTranscription(transcriber: ParakeetOfflineTranscriber(engine: speech)) }
+                makeFinalTranscription: { FinalTranscription(transcriber: ParakeetOfflineTranscriber(engine: speech)) },
+                isReady: { setupFlow.isComplete && recordingLibrary.state == .unlocked }
             )
         }
         coordinator = recordingCoordinator

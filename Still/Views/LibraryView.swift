@@ -11,7 +11,6 @@ struct LibraryView: View {
 
     @State private var selection: Recording.ID?
     @State private var isCapturing = false
-    @State private var isShowingPro = false
     @State private var isShowingSettings = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var actionError: String?
@@ -65,7 +64,7 @@ struct LibraryView: View {
                     RecordingDetailView(recording: recording, library: library, startAt: evidenceTime)
                         .id(recording.id)
                 } else {
-                    PrivacyWelcomeView(startRecording: startRecording)
+                    PrivacyWelcomeView(canRecord: coordinator.canStart, startRecording: startRecording)
                 }
             }
             #if os(macOS)
@@ -82,17 +81,6 @@ struct LibraryView: View {
         .sheet(isPresented: showsSetup) {
             SetupView(flow: setup, installer: modelInstaller)
                 .interactiveDismissDisabled()
-        }
-        .sheet(isPresented: $isShowingPro) {
-            NavigationStack {
-                ProUnlockView(entitlements: entitlements)
-                    .toolbar {
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Done") { isShowingPro = false }
-                        }
-                    }
-            }
-            .stillSheetWidth(mac: 420, minHeight: 420)
         }
         #if os(iOS)
         .sheet(isPresented: $isShowingSettings) {
@@ -112,9 +100,6 @@ struct LibraryView: View {
         }
         .onChange(of: coordinator.isRecording) { _, isRecording in
             if isRecording { isCapturing = true }
-        }
-        .onChange(of: setup.wantsPro) { _, wantsPro in
-            isShowingPro = wantsPro
         }
         .task {
             await library.unlock()
@@ -146,6 +131,7 @@ struct LibraryView: View {
                 Button("Record", systemImage: "record.circle.fill", action: startRecording)
                     .buttonStyle(.borderedProminent)
                     .tint(.red)
+                    .disabled(!coordinator.canStart)
             }
         case .unlocked:
             EmptyView()
@@ -174,13 +160,15 @@ struct LibraryView: View {
         #if os(macOS)
         .labelStyle(.titleAndIcon)
         #endif
-        .disabled(library.state != .unlocked)
+        .disabled(!coordinator.isRecording && !coordinator.canStart)
         .tint(.red)
         .symbolEffect(.pulse, isActive: coordinator.isRecording && !reduceMotion)
         .keyboardShortcut("r", modifiers: [.command, .shift])
     }
 
     private func startRecording() {
+        guard coordinator.isRecording || coordinator.canStart else { return }
+
         isCapturing = true
         if !coordinator.isRecording {
             Task { await coordinator.start() }

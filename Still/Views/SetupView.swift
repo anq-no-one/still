@@ -11,10 +11,10 @@ struct SetupView: View {
                 privacyStep
             case .microphone:
                 microphoneStep
+            case .systemAudio:
+                systemAudioStep
             case .transcription:
                 transcriptionStep
-            case .pro:
-                proStep
             case nil:
                 EmptyView()
             }
@@ -23,6 +23,12 @@ struct SetupView: View {
         .padding(.vertical, 40)
         .stillSheetWidth(mac: 440, minHeight: 520)
         .animation(.default, value: flow.step)
+        .task {
+            while !Task.isCancelled {
+                flow.refresh()
+                try? await Task.sleep(for: .seconds(1))
+            }
+        }
     }
 
     private var privacyStep: some View {
@@ -38,13 +44,29 @@ struct SetupView: View {
     private var microphoneStep: some View {
         step(
             icon: "mic.fill",
-            title: "Let Still Hear the Room",
-            body: "Still needs the microphone to record. The system asks you directly, and you can change your mind later in Settings."
+            title: "Let Still Hear You",
+            body: flow.microphone == .denied
+                ? "Still cannot record without the microphone. Turn on Still in Privacy & Security → Microphone, then come back."
+                : "Still needs the microphone to record you. Everything it hears stays on this device."
         ) {
-            primary("Allow Microphone") {
+            primary(flow.microphone == .denied ? "Open System Settings" : "Allow Microphone") {
                 Task { await flow.requestMicrophone() }
             }
-            secondary("Not Now", action: flow.skipMicrophone)
+        }
+    }
+
+    private var systemAudioStep: some View {
+        step(
+            icon: "person.2.wave.2.fill",
+            title: "Hear Everyone on the Call",
+            body: flow.systemAudio == .denied
+                ? "Turn on Still in Privacy & Security → Screen & System Audio Recording. Still records only sound, never your screen."
+                : "To record the other people on a call, macOS asks you to allow Screen & System Audio Recording. Still records only sound, never your screen."
+        ) {
+            primary(flow.systemAudio == .denied ? "Open System Settings" : "Allow", action: flow.requestSystemAudio)
+            if flow.systemAudio == .denied {
+                secondary("I Allowed It — Reopen Still", action: SystemSetupPermissions.relaunch)
+            }
         }
     }
 
@@ -55,33 +77,19 @@ struct SetupView: View {
             body: installer.pack.purpose
         ) {
             switch installer.state {
-            case .installed:
-                primary("Continue", action: flow.finishTranscription)
             case .installing, .verifying:
                 ProgressView(value: installer.progress) {
                     Text("Downloading…")
                 }
-                secondary("Continue in Background", action: flow.finishTranscription)
+            case .failed:
+                primary("Try Again") {
+                    Task { await installer.approveAndInstall() }
+                }
             default:
                 primary("Download \(installer.pack.downloadSizeText)") {
                     Task { await installer.approveAndInstall() }
                 }
-                secondary("Not Now", action: flow.finishTranscription)
             }
-        }
-    }
-
-    private var proStep: some View {
-        step(
-            icon: "sparkles",
-            title: "Still Pro Is Optional",
-            body: "Recording, transcription, exact search, and text export are free. Pro adds the live transcript, Mac system audio, speakers, translation, notes, and sync — all still on this device."
-        ) {
-            primary("See Still Pro") {
-                flow.wantsPro = true
-                flow.finishPro()
-            }
-            secondary("Not Now", action: flow.finishPro)
         }
     }
 

@@ -47,6 +47,7 @@ struct RecordingMenuBarContent: View {
             Button("Start Recording") {
                 Task { await coordinator.start() }
             }
+            .disabled(!coordinator.canStart)
         }
     }
 

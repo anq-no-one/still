@@ -4,8 +4,14 @@ import Observation
 enum SetupStep: String, Codable, CaseIterable, Sendable {
     case privacy
     case microphone
+    case systemAudio
     case transcription
-    case pro
+}
+
+enum PermissionState: Equatable, Sendable {
+    case notAsked
+    case granted
+    case denied
 }
 
 protocol SetupProgressStore: Sendable {
@@ -15,68 +21,91 @@ protocol SetupProgressStore: Sendable {
 }
 
 @MainActor
-protocol MicrophoneAccess: AnyObject {
-    func requestAccess() async -> Bool
+protocol SetupPermissions: AnyObject {
+    var microphone: PermissionState { get }
+    var systemAudio: PermissionState { get }
+    func requestMicrophone() async
+    func requestSystemAudio()
 }
 
-/// Walks a new user through privacy, permission, and the model download in that
-/// order. Each step is recorded as it completes, so an interrupted setup opens
-/// again at the step that still needs an answer.
 @MainActor
 @Observable
 final class SetupFlow {
     private let store: SetupProgressStore
-    private let microphone: MicrophoneAccess
+    private let permissions: SetupPermissions
     private let steps: [SetupStep]
+    private let isTranscriptionReady: @MainActor () -> Bool
 
-    private(set) var completed: Set<SetupStep>
-    private(set) var microphoneGranted = false
+    private var acknowledged: Set<SetupStep>
+    private var revision = 0
 
-    /// Local-only is what Still does unless the user chooses otherwise. Sync and
-    /// diagnostics are not part of setup because neither is on.
-    var wantsPro = false
-
-    init(store: SetupProgressStore, microphone: MicrophoneAccess, offersPro: Bool = true) {
+    init(
+        store: SetupProgressStore,
+        permissions: SetupPermissions,
+        includesSystemAudio: Bool,
+        isTranscriptionReady: @escaping @MainActor () -> Bool
+    ) {
         self.store = store
-        self.microphone = microphone
-        steps = SetupStep.allCases.filter { offersPro || $0 != .pro }
-        completed = store.completedSteps()
+        self.permissions = permissions
+        self.isTranscriptionReady = isTranscriptionReady
+        steps = SetupStep.allCases.filter { includesSystemAudio || $0 != .systemAudio }
+        acknowledged = store.completedSteps()
+    }
+
+    static var recordsSystemAudio: Bool {
+        #if os(macOS)
+        true
+        #else
+        false
+        #endif
     }
 
     var step: SetupStep? {
-        steps.first { !completed.contains($0) }
+        _ = revision
+        return steps.first { !isDone($0) }
     }
 
     var isComplete: Bool {
         step == nil
     }
 
+    var microphone: PermissionState {
+        _ = revision
+        return permissions.microphone
+    }
+
+    var systemAudio: PermissionState {
+        _ = revision
+        return permissions.systemAudio
+    }
+
     func acknowledgePrivacy() {
-        complete(.privacy)
+        acknowledged.insert(.privacy)
+        store.markCompleted(.privacy)
+        refresh()
     }
 
     func requestMicrophone() async {
-        microphoneGranted = await microphone.requestAccess()
-        complete(.microphone)
+        await permissions.requestMicrophone()
+        refresh()
     }
 
-    func skipMicrophone() {
-        complete(.microphone)
+    func requestSystemAudio() {
+        permissions.requestSystemAudio()
+        refresh()
     }
 
-    func finishTranscription() {
-        complete(.transcription)
+    func refresh() {
+        revision += 1
     }
 
-    func finishPro() {
-        complete(.pro)
-    }
-
-    private func complete(_ step: SetupStep) {
-        guard !completed.contains(step) else { return }
-
-        completed.insert(step)
-        store.markCompleted(step)
+    private func isDone(_ step: SetupStep) -> Bool {
+        switch step {
+        case .privacy: acknowledged.contains(.privacy)
+        case .microphone: permissions.microphone == .granted
+        case .systemAudio: permissions.systemAudio == .granted
+        case .transcription: isTranscriptionReady()
+        }
     }
 }
 
@@ -100,12 +129,5 @@ struct UserDefaultsSetupProgressStore: SetupProgressStore, @unchecked Sendable {
 
     func reset() {
         defaults.removeObject(forKey: key)
-    }
-}
-
-@MainActor
-final class SystemMicrophoneAccess: MicrophoneAccess {
-    func requestAccess() async -> Bool {
-        await MicrophonePermission.request()
     }
 }

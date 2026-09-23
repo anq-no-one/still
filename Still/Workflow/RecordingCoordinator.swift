@@ -20,6 +20,7 @@ final class RecordingCoordinator {
     private let entitlements: Entitlements
     private let makeSession: () -> TranscriptionSession
     private let makeFinalTranscription: () -> FinalTranscription
+    private let isReady: @MainActor () -> Bool
 
     private(set) var workflow: RecordingWorkflow?
     private(set) var startFailure: String?
@@ -28,8 +29,10 @@ final class RecordingCoordinator {
         library: Library,
         entitlements: Entitlements,
         makeSession: @escaping () -> TranscriptionSession,
-        makeFinalTranscription: @escaping () -> FinalTranscription
+        makeFinalTranscription: @escaping () -> FinalTranscription,
+        isReady: @escaping @MainActor () -> Bool = { true }
     ) {
+        self.isReady = isReady
         self.library = library
         self.entitlements = entitlements
         self.makeSession = makeSession
@@ -61,8 +64,12 @@ final class RecordingCoordinator {
         workflow?.elapsed ?? 0
     }
 
+    var canStart: Bool {
+        isReady() && !isRecording && phase != .preparing
+    }
+
     func start() async {
-        guard !isRecording, phase != .preparing else { return }
+        guard canStart else { return }
 
         startFailure = nil
         do {
