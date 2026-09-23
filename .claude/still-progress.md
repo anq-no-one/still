@@ -103,3 +103,32 @@ Issues are not closed and no comments are posted; the user has not authorized Gi
 
 ## Model cache
 ~/Library/Caches/Still/ModelCache/parakeet-tdt-0.6b-v3-coreml/<revision> (469 MB, verified digests)
+
+## Wayfinder audit 2026-09-23
+Gaps found against wayfinder.md and Capy 2.4.1 (id6667094162):
+- A Diarization model (FluidAudio Sortformer <=4 / LS-EEND <=10) — speakers are track-based only
+- B Semantic search (local embeddings, hybrid with exact) — exact only
+- C Local LLM notes (Qwen by memory tier; topics, summary, actions with segment refs) — extractive only
+- D Chromium extension + native messaging host on Mac — Safari only
+- E UI localization 12 langs + store metadata locales — xcstrings empty, metadata en-US only
+- F bin/release.sh reads wrong 1Password paths (vault is Personal; fields APP_STORE_KEY_ID / APP_STORE_ISSUER_ID / APP_STORE_KEY_CONTENT base64)
+Deliberately not done: whisper.cpp (#4 made Parakeet primary), SQLite swap (SwiftData stores only sealed ciphertext), Pro gating (product chose free for now).
+Blocked on user: App Store Connect app record for com.andrii.still does not exist (API cannot create; needs web UI login).
+Plan: A,B,C,D in parallel worktrees, then E, then F, then TestFlight after the app record exists.
+
+## Release push (from repo CLAUDE.md, 2026-09-23 evening)
+Workstreams (agents in .claude/worktrees, merged into main one by one):
+- W1 Diarization + speaker names (calendar attendees, voice profiles remembered across meetings)
+- W2 Semantic search (NLContextualEmbedding, hybrid)
+- W3 MLX local LLM: grounded notes, transcript cleanup pass, cross-recording facts and tasks on the strongest device
+- W4 Mac MCP server exposing meetings, facts, tasks to codex/claude
+- W5 Smart call capture on Mac (calls only, ignore YouTube/music) + Chromium extension
+Then: W6 localization (main European languages), W7 ASO metadata + screenshots via Astro MCP (http://127.0.0.1:8089/mcp, works via curl JSON-RPC), W8 TestFlight (blocked: ASC app record missing).
+Deployment target is now iOS/macOS 26.
+- Site: public repo anq-no-one/still-app on GitHub Pages. https://anq-no-one.github.io/still-app/ (privacy/, support/). Source of the policy: docs/privacy-policy.md; regenerate the page when it changes.
+- ASC app record: user creates it this once; next time do it in Chrome yourself.
+- W9 Projects with colors: Mac chooses all / some / excluded projects per device, iPhone sees all, MCP exposes only the Mac's selection
+- W10 Google Analytics (Firebase) + Crashlytics, opt-in only, Firebase project under Google account anq.no.one@gmail.com, set up in Chrome
+- Diarization branch worktree-agent-a21221bbef762254b accepted (2 commits), follow-ups running; merge after the TestFlight trial build finishes
+- ASC app record exists: "Still - AI note taker", Apple ID 6815369488
+- TODO: semantic index builds on the main actor at unlock; move off main before release
