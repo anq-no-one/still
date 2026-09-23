@@ -1,7 +1,7 @@
 import XCTest
 
-/// Drives the real app from a first launch. The microphone hears a recorded
-/// meeting, so every run transcribes the same words: "Good morning everyone.
+/// Drives the real app from a first launch, with Still's own recognizer. The
+/// microphone hears a recorded meeting, so every run transcribes the same words: "Good morning everyone.
 /// The quarterly budget review moves to Thursday. Maria will send the updated
 /// forecast by Friday."
 @MainActor
@@ -15,12 +15,8 @@ final class StillEndToEndTests: XCTestCase {
         waitFor(app.staticTexts["No Recordings Yet"], "an empty, unlocked Library")
 
         app.toolbars.buttons["Record"].tap()
-        if Self.canRecognizeSpeech {
-            waitForText("budget", timeout: 45, "the live transcript to hear the meeting")
-        } else {
-            waitForText("live transcript stopped", timeout: 30, "the notice that recording continues without a live transcript")
-            Thread.sleep(forTimeInterval: 8)
-        }
+        waitForText("budget", timeout: 60, "the live transcript to hear the meeting")
+        keepScreenshot("1 Live transcript")
 
         let save = app.buttons["Save Recording"]
         waitFor(save, "the Save button")
@@ -30,20 +26,16 @@ final class StillEndToEndTests: XCTestCase {
         let recording = app.collectionViews.cells.firstMatch
         waitFor(recording, "the saved Recording in the Library")
         recording.tap()
-        if Self.canRecognizeSpeech {
-            waitForText("forecast", timeout: 20, "the saved transcript")
-        } else {
-            waitFor(app.staticTexts["No Transcript"], "the Recording kept without words")
-        }
+        waitForText("forecast", timeout: 20, "the saved transcript")
+        keepScreenshot("2 Saved transcript")
         navigateBack()
 
-        if Self.canRecognizeSpeech {
-            let search = app.searchFields["Search Recordings"]
-            waitFor(search, "the search field")
-            search.tap()
-            search.typeText("Thursday")
-            waitForText("Thursday", timeout: 10, "a search result for a spoken word", excluding: search)
-        }
+        let search = app.searchFields["Search Recordings"]
+        waitFor(search, "the search field")
+        search.tap()
+        search.typeText("Thursday")
+        waitForText("Thursday", timeout: 10, "a search result for a spoken word", excluding: search)
+        keepScreenshot("3 Search")
 
         app.terminate()
         launch(resetting: false)
@@ -65,30 +57,44 @@ final class StillEndToEndTests: XCTestCase {
         waitFor(app.staticTexts["Keep Audio"], "the retention choices")
     }
 
-    /// The simulator ships without on-device speech models, so there the run
-    /// proves that a Recording survives a device that cannot transcribe.
-    private static var canRecognizeSpeech: Bool {
-        #if targetEnvironment(simulator)
-        false
-        #else
-        true
-        #endif
-    }
-
     private func launch(resetting: Bool) {
         continueAfterFailure = false
         app.launchArguments = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
-        app.launchEnvironment = [
+        var environment = [
             "STILL_AUDIO_FIXTURE": "meeting",
             "STILL_UI_TEST_RESET": resetting ? "1" : "0",
         ]
+        if let modelRoot = ProcessInfo.processInfo.environment["STILL_MODEL_ROOT"] {
+            environment["STILL_MODEL_ROOT"] = modelRoot
+        }
+        app.launchEnvironment = environment
         app.launch()
+    }
+
+    private func keepScreenshot(_ name: String) {
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
     }
 
     private func completeOnboarding() {
         tap("Continue")
         tap("Allow Microphone")
-        tap("Not Now")
+        installTranscription()
+    }
+
+    /// The first run on a Mac downloads the Model Pack through Still itself;
+    /// later runs find it already verified and continue at once.
+    private func installTranscription() {
+        let download = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Download'")).firstMatch
+        let proceed = app.buttons["Continue"]
+        waitFor(app.staticTexts["Transcribe on This Device"], "the transcription step")
+        if download.exists {
+            download.tap()
+        }
+        waitFor(proceed, timeout: 1_800, "the Model Pack to download and verify")
+        proceed.tap()
     }
 
     private func tap(_ label: String) {

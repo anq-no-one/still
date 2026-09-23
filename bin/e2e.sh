@@ -3,7 +3,8 @@
 #
 # On a simulator the run needs nobody: it creates its own device, keeps it
 # silent, enrolls Face ID and approves every Face ID request, then deletes the
-# device. On a physical device Face ID is real, so reopening the Library after
+# device. The Model Pack lives in one folder on this Mac, so only the first run
+# downloads it. On a physical device Face ID is real, so reopening the Library after
 # relaunch waits for the person holding the phone.
 #
 # Usage: bin/e2e.sh [--device <udid>] [--only <test name>]
@@ -13,6 +14,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DERIVED_DATA="${STILL_DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/Still-shared}"
 RESULT="${ROOT}/Artifacts/E2E.xcresult"
+MODEL_ROOT="${STILL_E2E_MODEL_ROOT:-$HOME/Library/Caches/Still-E2E/Models}"
 DEVICE=""
 ONLY=""
 
@@ -70,6 +72,8 @@ else
   approve_face_id_forever "$SIMULATOR" &
   MATCHER=$!
   DESTINATION="id=${SIMULATOR}"
+  mkdir -p "$MODEL_ROOT"
+  export TEST_RUNNER_STILL_MODEL_ROOT="$MODEL_ROOT"
 fi
 
 rm -rf "$RESULT"
@@ -109,5 +113,25 @@ def walk(node):
 for node in json.load(sys.stdin).get("testNodes", []):
     walk(node)
 ' || true
+
+SCREENS="${ROOT}/Artifacts/E2E-screens"
+rm -rf "$SCREENS"
+mkdir -p "$SCREENS"
+if xcrun xcresulttool export attachments --path "$RESULT" --output-path "$SCREENS" >/dev/null 2>&1; then
+  python3 - "$SCREENS" <<'PY'
+import json, os, sys
+root = sys.argv[1]
+for test in json.load(open(os.path.join(root, "manifest.json"))):
+    for attachment in test.get("attachments", []):
+        name = attachment.get("suggestedHumanReadableName", "")
+        exported = os.path.join(root, attachment["exportedFileName"])
+        if name.endswith(".png") and name[0].isdigit():
+            os.rename(exported, os.path.join(root, name.split("_")[0] + ".png"))
+        else:
+            os.remove(exported)
+os.remove(os.path.join(root, "manifest.json"))
+PY
+  echo "Screenshots: Artifacts/E2E-screens"
+fi
 
 exit "$STATUS"
