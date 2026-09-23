@@ -47,17 +47,20 @@ final class AudioChunkSync {
     private let audioRoot: URL
     private let transport: AudioChunkTransport
     private let freeBytes: (URL) -> Int?
+    private let keepsAudio: (UUID) -> Bool
 
     private(set) var state: State = .idle
 
     init(
         audioRoot: URL,
         transport: AudioChunkTransport,
-        freeBytes: @escaping (URL) -> Int? = ModelPackInstaller.freeBytes
+        freeBytes: @escaping (URL) -> Int? = ModelPackInstaller.freeBytes,
+        keepsAudio: @escaping (UUID) -> Bool = { _ in true }
     ) {
         self.audioRoot = audioRoot
         self.transport = transport
         self.freeBytes = freeBytes
+        self.keepsAudio = keepsAudio
     }
 
     func sync(recordingID: UUID) async {
@@ -66,7 +69,9 @@ final class AudioChunkSync {
             let local = localPayloads(for: recordingID)
 
             let toUpload = local.filter { remote[$0.id] != $0.digest }
-            let toDownload = remote.keys.filter { id in !local.contains { $0.id == id } }
+            let toDownload = keepsAudio(recordingID)
+                ? remote.keys.filter { id in !local.contains { $0.id == id } }
+                : []
 
             let total = toUpload.count + toDownload.count
             guard total > 0 else {

@@ -19,7 +19,7 @@ enum RecordingMerge {
         merged.note = mergeNote(newer.note, older.note)
         merged.updatedAt = max(local.updatedAt, remote.updatedAt)
         merged.deletedAt = earliest(local.deletedAt, remote.deletedAt)
-        return merged
+        return merged.keepingLatestProject(of: older)
     }
 
     private static func mergeSegments(

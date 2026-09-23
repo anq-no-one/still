@@ -78,7 +78,8 @@ final class RecordingCoordinator {
                 finalTranscription: makeFinalTranscription(),
                 recorder: try library.makeRecorder(),
                 library: library,
-                showsLiveDraft: entitlements.allows(.liveTranscript)
+                showsLiveDraft: entitlements.allows(.liveTranscript),
+                projectID: library.defaultProjectID
             )
             self.workflow = workflow
             await workflow.start()

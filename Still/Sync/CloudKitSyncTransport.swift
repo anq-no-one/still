@@ -33,11 +33,12 @@ struct CloudKitSyncTransport: SyncTransport {
     /// first.
     func push(_ changes: [SyncChange]) async throws {
         try await reachingCloudKit { database in
-            let ids = changes.map { CKRecord.ID(recordName: $0.recordingID.uuidString, zoneID: Self.zoneID) }
+            let ids = changes.map { CKRecord.ID(recordName: Self.recordName(for: $0), zoneID: Self.zoneID) }
             let existing = try await database.records(for: ids)
             let records = changes.map { change -> CKRecord in
-                let id = CKRecord.ID(recordName: change.recordingID.uuidString, zoneID: Self.zoneID)
+                let id = CKRecord.ID(recordName: Self.recordName(for: change), zoneID: Self.zoneID)
                 let record = (try? existing[id]?.get()) ?? CKRecord(recordType: Self.recordType, recordID: id)
+                record["kind"] = change.kind.rawValue as NSString
                 record["updatedAt"] = change.updatedAt as NSDate
                 record["deviceID"] = change.deviceID.uuidString as NSString
                 record["payload"] = change.sealedRecording as NSData
@@ -84,13 +85,34 @@ struct CloudKitSyncTransport: SyncTransport {
         }
     }
 
+    static let projectPrefix = "project-"
+
+    /// Projects carry a prefix so an older build, which reads every record
+    /// name as a Recording id, skips them instead of misreading them.
+    static func recordName(for change: SyncChange) -> String {
+        switch change.kind {
+        case .recording: change.recordingID.uuidString
+        case .project: projectPrefix + change.recordingID.uuidString
+        }
+    }
+
     private static func change(from record: CKRecord) -> SyncChange? {
-        guard let recordingID = UUID(uuidString: record.recordID.recordName),
+        let kind = (record["kind"] as? String).flatMap(SyncChange.Kind.init(rawValue:)) ?? .recording
+        let name = record.recordID.recordName
+        let idText = kind == .project && name.hasPrefix(projectPrefix) ? String(name.dropFirst(projectPrefix.count)) : name
+
+        guard let recordingID = UUID(uuidString: idText),
               let updatedAt = record["updatedAt"] as? Date,
               let deviceID = (record["deviceID"] as? String).flatMap(UUID.init(uuidString:)),
               let payload = record["payload"] as? Data
         else { return nil }
 
-        return SyncChange(recordingID: recordingID, updatedAt: updatedAt, deviceID: deviceID, sealedRecording: payload)
+        return SyncChange(
+            recordingID: recordingID,
+            updatedAt: updatedAt,
+            deviceID: deviceID,
+            sealedRecording: payload,
+            kind: kind
+        )
     }
 }

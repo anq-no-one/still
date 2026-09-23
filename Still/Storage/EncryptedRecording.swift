@@ -22,4 +22,6 @@ struct RecordingContent: Codable {
     var segments: [TranscriptSegment] = []
     var speakers: [Speaker] = []
     var note: Note?
+    var projectID: UUID?
+    var projectAssignedAt: Date?
 }

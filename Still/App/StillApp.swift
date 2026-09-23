@@ -36,7 +36,7 @@ struct StillApp: App {
         let container: ModelContainer
         do {
             container = try ModelContainer(
-                for: EncryptedRecording.self,
+                for: EncryptedRecording.self, EncryptedProject.self,
                 configurations: ModelConfiguration(cloudKitDatabase: .none)
             )
         } catch {
@@ -98,8 +98,14 @@ struct StillApp: App {
                             MicrophoneRecorder(root: audioRoot, cipher: LibraryCipher(key: key), input: microphone)
                             #endif
                         }
+                    },
+                    makeProjectRepository: { key in
+                        MainActor.assumeIsolated {
+                            EncryptedProjectRepository(context: context, key: key)
+                        }
                     }
-                )
+                ),
+                selectionStore: UserDefaultsProjectSelectionStore()
             )
         }
 

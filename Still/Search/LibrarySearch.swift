@@ -35,6 +35,14 @@ struct SearchResult: Identifiable, Equatable, Sendable {
 /// decrypted recordings and rebuilt on every unlock, so deleting a recording
 /// removes it from results and nothing derived has to be kept in sync.
 enum LibrarySearch {
+    static func results(
+        for query: String,
+        in recordings: [Recording],
+        visibleTo visibility: any RecordingVisibility
+    ) -> [SearchResult] {
+        results(for: query, in: recordings.filter(visibility.isVisible))
+    }
+
     static func results(for query: String, in recordings: [Recording]) -> [SearchResult] {
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard needle.count > 1 else { return [] }

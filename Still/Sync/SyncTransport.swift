@@ -3,10 +3,16 @@ import Foundation
 /// What a device sends. The payload is already sealed, so a transport only ever
 /// handles ciphertext plus the metadata it needs to order changes.
 struct SyncChange: Equatable, Sendable {
+    enum Kind: String, Sendable {
+        case recording
+        case project
+    }
+
     let recordingID: UUID
     let updatedAt: Date
     let deviceID: UUID
     let sealedRecording: Data
+    var kind: Kind = .recording
 }
 
 protocol SyncTransport: Sendable {
