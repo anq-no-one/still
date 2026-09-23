@@ -38,31 +38,6 @@ Still проектируется так, будто его делает Apple.
 - Облачные AI-провайдеры и BYOK не поддерживаются.
 - Apple AI может ускорять отдельные операции, но не является основой продукта.
 
-## 3. Репозиторий и карта Wayfinder
-
-Первым исполняемым шагом станет создание приватного репозитория `anq-no-one/still`.
-
-- Существующий прототип попадёт в первый коммит как исполняемый эскиз.
-- Репозиторий останется без открытой лицензии.
-- `main` станет основной веткой.
-- GitHub Issues станет трекером решений и последующей реализации.
-- Текущий SwiftData-код не считается окончательной архитектурой.
-
-Главная Wayfinder-карта получит название **Ship Still as an offline-first Apple-style recording and notes app**.
-
-Начальный фронтир карты будет состоять из решений:
-
-- **Lock the local model checkpoints and licences**
-- **Prove system audio capture and call detection**
-- **Lock the encrypted library and recovery model**
-- **Lock encrypted CloudKit and peer-to-peer sync**
-- **Prototype the one-button recording and review flow**
-- **Set transcription, diarization and energy release gates**
-- **Clear the Still name, model licences and recording consent UX**
-- **Define App Store operations, support and release ownership**
-
-Карта завершится, когда все решения закрыты, зависимости сняты и готов упорядоченный набор задач реализации.
-
 ## 4. Архитектура и реализация
 
 ### 4.1 Общий фундамент
