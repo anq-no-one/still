@@ -5,7 +5,8 @@ import Security
 
 struct KeychainDeviceKeySource: DeviceKeySource {
     private let service: String
-    private let deviceKeyAccount = "library-device-key"
+    private let deviceKeyAccount = "library-device-key-unlocked"
+    private let presenceDeviceKeyAccount = "library-device-key"
     private let masterKeyAccount = "library-master-key"
     private let recoveryAccount = "library-recovery"
     private let pendingMasterKeyAccount = "library-master-key-pending"
@@ -17,16 +18,32 @@ struct KeychainDeviceKeySource: DeviceKeySource {
     }
 
     func deviceKey(reason: String) async throws -> SymmetricKey {
-        let context = LAContext()
-        context.localizedReason = reason
-
-        if let existing = try readDeviceKey(context: context) {
+        if let existing = try read(account: deviceKeyAccount, context: nil) {
             return SymmetricKey(data: existing)
         }
 
+        let context = LAContext()
+        context.localizedReason = reason
+        if let presenceKey = try readPresenceDeviceKey(context: context) {
+            try keepWithoutPresence(presenceKey)
+            return SymmetricKey(data: presenceKey)
+        }
+
         let key = SymmetricKey(size: .bits256)
-        try writeDeviceKey(key.rawBytes)
+        try write(key.rawBytes, account: deviceKeyAccount)
         return key
+    }
+
+    private func keepWithoutPresence(_ key: Data) throws {
+        try write(key, account: deviceKeyAccount)
+        guard try read(account: deviceKeyAccount, context: nil) == key else {
+            throw LibraryKeyError.authenticationUnavailable
+        }
+        SecItemDelete([
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: presenceDeviceKeyAccount,
+        ] as CFDictionary)
     }
 
     func wrappedMasterKey() throws -> Data? {
@@ -34,7 +51,7 @@ struct KeychainDeviceKeySource: DeviceKeySource {
     }
 
     func store(wrappedMasterKey: Data) throws {
-        try write(wrappedMasterKey, account: masterKeyAccount, accessControl: nil)
+        try write(wrappedMasterKey, account: masterKeyAccount)
     }
 
     func recoveryBundle() throws -> RecoveryBundle? {
@@ -43,7 +60,7 @@ struct KeychainDeviceKeySource: DeviceKeySource {
     }
 
     func store(recoveryBundle: RecoveryBundle) throws {
-        try write(try JSONEncoder().encode(recoveryBundle), account: recoveryAccount, accessControl: nil)
+        try write(try JSONEncoder().encode(recoveryBundle), account: recoveryAccount)
     }
 
     func pendingMasterKey() throws -> Data? {
@@ -51,7 +68,7 @@ struct KeychainDeviceKeySource: DeviceKeySource {
     }
 
     func store(pendingMasterKey: Data) throws {
-        try write(pendingMasterKey, account: pendingMasterKeyAccount, accessControl: nil)
+        try write(pendingMasterKey, account: pendingMasterKeyAccount)
     }
 
     func promotePendingMasterKey() throws {
@@ -69,26 +86,12 @@ struct KeychainDeviceKeySource: DeviceKeySource {
         ] as CFDictionary)
     }
 
-    private func readDeviceKey(context: LAContext) throws -> Data? {
+    private func readPresenceDeviceKey(context: LAContext) throws -> Data? {
         do {
-            return try read(account: deviceKeyAccount, context: context)
+            return try read(account: presenceDeviceKeyAccount, context: context)
         } catch LibraryKeyError.keychainFailure(let status) {
             throw Self.authenticationError(for: status) ?? LibraryKeyError.keychainFailure(status)
         }
-    }
-
-    private func writeDeviceKey(_ data: Data) throws {
-        var error: Unmanaged<CFError>?
-        guard let control = SecAccessControlCreateWithFlags(
-            nil,
-            kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
-            .userPresence,
-            &error
-        ) else {
-            throw LibraryKeyError.authenticationUnavailable
-        }
-
-        try write(data, account: deviceKeyAccount, accessControl: control)
     }
 
     private func read(account: String, context: LAContext?) throws -> Data? {
@@ -115,18 +118,14 @@ struct KeychainDeviceKeySource: DeviceKeySource {
         }
     }
 
-    private func write(_ data: Data, account: String, accessControl: SecAccessControl?) throws {
-        var attributes: [String: Any] = [
+    private func write(_ data: Data, account: String) throws {
+        let attributes: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
             kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
         ]
-        if let accessControl {
-            attributes[kSecAttrAccessControl as String] = accessControl
-        } else {
-            attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-        }
 
         SecItemDelete([
             kSecClass as String: kSecClassGenericPassword,
