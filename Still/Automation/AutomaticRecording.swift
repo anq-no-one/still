@@ -115,7 +115,7 @@ final class AutomaticRecording {
         else { return }
 
         triggeredBy = app.bundleID
-        await coordinator.start()
+        await coordinator.start(capturing: .app(app))
     }
 
     private func appWentAway(_ processBundleID: String) async {

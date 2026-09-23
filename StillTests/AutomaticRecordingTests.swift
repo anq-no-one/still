@@ -41,6 +41,17 @@ struct AutomaticRecordingTests {
     }
 
     @Test
+    func anAutomaticCallCapturesOnlyThatAppsSound() async throws {
+        let (automatic, watcher, coordinator) = try await make(allowed: [zoom])
+        automatic.startWatching()
+
+        watcher.activate(zoom)
+        await settle()
+
+        #expect(coordinator.audioTarget.scope == .apps([zoom]))
+    }
+
+    @Test
     func browsersAreLeftToTheExtension() {
         let browsers = ["com.google.Chrome", "com.apple.Safari", "com.microsoft.edgemac", "com.brave.Browser"]
 

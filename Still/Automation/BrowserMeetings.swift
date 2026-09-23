@@ -65,7 +65,7 @@ final class BrowserMeetingBridge {
         case .started:
             guard activeMeetingID == nil, !coordinator.isRecording else { return }
             activeMeetingID = event.meetingID
-            await coordinator.start()
+            await coordinator.start(capturing: .browser(nil))
         case .ended:
             guard activeMeetingID == event.meetingID else { return }
             activeMeetingID = nil

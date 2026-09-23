@@ -64,6 +64,16 @@ struct BrowserMeetingBridgeTests {
         await coordinator.start()
 
         #expect(coordinator.isRecording)
+        #expect(coordinator.audioTarget.scope == .callApps)
+    }
+
+    @Test
+    func aBrowserMeetingCapturesBrowsersOnly() async throws {
+        let (bridge, coordinator) = try await make(allowed: [meet])
+
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .started))
+
+        #expect(coordinator.audioTarget.scope == .browser(nil))
     }
 
     private func make(allowed: [String]) async throws -> (BrowserMeetingBridge, RecordingCoordinator) {

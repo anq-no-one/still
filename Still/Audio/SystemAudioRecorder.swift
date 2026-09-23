@@ -1,12 +1,13 @@
 #if os(macOS)
+import AppKit
 import AVFoundation
 import Foundation
 import ScreenCaptureKit
 
-/// Records what the Mac plays. The stream carries only an audio output, so no
-/// screen frame ever reaches Still and nothing about the display is retained.
 @MainActor
 final class SystemAudioRecorder: NSObject {
+    static let launchSettleDelay: Duration = .seconds(2)
+
     private let root: URL
     private let cipher: LibraryCipher
     private let format: AudioFormat
@@ -16,6 +17,8 @@ final class SystemAudioRecorder: NSObject {
     private var stream: SCStream?
     private var writer: AudioChunkWriter?
     private var output: SystemAudioOutput?
+    private var scope: SystemAudioScope = .callApps
+    private var launchObserver: NSObjectProtocol?
 
     init(root: URL, cipher: LibraryCipher, input: SystemAudioInput, format: AudioFormat = .transcription) {
         self.root = root
@@ -24,9 +27,8 @@ final class SystemAudioRecorder: NSObject {
         self.format = format
     }
 
-    func start(recordingID: UUID, startOffset: TimeInterval) async throws {
-        let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
-        guard let display = content.displays.first else { throw CaptureError.inputUnavailable }
+    func start(recordingID: UUID, startOffset: TimeInterval, scope: SystemAudioScope) async throws {
+        let filter = try await Self.filter(for: scope)
 
         let configuration = SCStreamConfiguration()
         configuration.capturesAudio = true
@@ -44,18 +46,12 @@ final class SystemAudioRecorder: NSObject {
             startOffset: startOffset
         )
         let output = SystemAudioOutput(writer: writer, input: input)
-        let stream = SCStream(
-            filter: SCContentFilter(display: display, excludingWindows: []),
-            configuration: configuration,
-            delegate: nil
-        )
+        let stream = SCStream(filter: filter, configuration: configuration, delegate: nil)
 
         do {
             try stream.addStreamOutput(output, type: .audio, sampleHandlerQueue: sampleQueue)
             try await stream.startCapture()
         } catch {
-            // A track that never carried audio must not survive, or the final
-            // pass would attribute a speaker to silence.
             try? AudioChunkStore.discard(
                 AudioChunkStore.trackDirectory(forRecording: recordingID, track: .system, in: root)
             )
@@ -65,9 +61,12 @@ final class SystemAudioRecorder: NSObject {
         self.writer = writer
         self.output = output
         self.stream = stream
+        self.scope = scope
+        followLaunches()
     }
 
     func finish() async throws {
+        stopFollowingLaunches()
         try? await stream?.stopCapture()
         stream = nil
         output = nil
@@ -76,11 +75,47 @@ final class SystemAudioRecorder: NSObject {
     }
 
     func discard() async {
+        stopFollowingLaunches()
         try? await stream?.stopCapture()
         stream = nil
         output = nil
         try? writer?.finish()
         writer = nil
+    }
+
+    private static func filter(for scope: SystemAudioScope) async throws -> SCContentFilter {
+        let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false)
+        guard let display = content.displays.first else { throw CaptureError.inputUnavailable }
+
+        let apps = content.applications.filter { scope.includes($0.bundleIdentifier) }
+        return SCContentFilter(display: display, including: apps, exceptingWindows: [])
+    }
+
+    private func followLaunches() {
+        launchObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didLaunchApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            let launched = (notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication)?.bundleIdentifier
+            MainActor.assumeIsolated {
+                guard let self, let launched, self.scope.includes(launched) else { return }
+                Task { await self.refilter() }
+            }
+        }
+    }
+
+    private func stopFollowingLaunches() {
+        if let launchObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(launchObserver)
+        }
+        launchObserver = nil
+    }
+
+    private func refilter() async {
+        try? await Task.sleep(for: Self.launchSettleDelay)
+        guard let stream, let filter = try? await Self.filter(for: scope) else { return }
+        try? await stream.updateContentFilter(filter)
     }
 }
 

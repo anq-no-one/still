@@ -21,6 +21,7 @@ final class RecordingCoordinator {
     private let makeSession: () -> TranscriptionSession
     private let makeFinalTranscription: () -> FinalTranscription
     private let isReady: @MainActor () -> Bool
+    let audioTarget: SystemAudioTarget
 
     private(set) var workflow: RecordingWorkflow?
     private(set) var startFailure: String?
@@ -30,9 +31,11 @@ final class RecordingCoordinator {
         entitlements: Entitlements,
         makeSession: @escaping () -> TranscriptionSession,
         makeFinalTranscription: @escaping () -> FinalTranscription,
-        isReady: @escaping @MainActor () -> Bool = { true }
+        isReady: @escaping @MainActor () -> Bool = { true },
+        audioTarget: SystemAudioTarget = SystemAudioTarget()
     ) {
         self.isReady = isReady
+        self.audioTarget = audioTarget
         self.library = library
         self.entitlements = entitlements
         self.makeSession = makeSession
@@ -68,9 +71,10 @@ final class RecordingCoordinator {
         isReady() && !isRecording && phase != .preparing
     }
 
-    func start() async {
+    func start(capturing scope: SystemAudioScope = .callApps) async {
         guard canStart else { return }
 
+        audioTarget.scope = scope
         startFailure = nil
         do {
             let workflow = RecordingWorkflow(

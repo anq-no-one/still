@@ -41,8 +41,10 @@ reads no page content, and nothing from your Library ever reaches the browser.
 
 - **Microphone** — to record. Still cannot record without it.
 - **Speech recognition** — to turn speech into text on your device.
-- **Screen recording (Mac)** — to capture what a call is playing. Still takes audio only; no
-  screen image is captured or stored.
+- **Screen recording (Mac)** — to capture what a call is playing. Still takes audio only, and only
+  from call apps and browsers. Music players and other apps are never captured, and an automatic
+  recording hears only the one app or browser that holds the call. No screen image is captured or
+  stored.
 - **Calendar** — optional, to suggest a title and the people expected in a meeting.
 - **Local network** — optional, only for syncing directly with your own nearby devices.
 

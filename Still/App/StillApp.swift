@@ -57,6 +57,7 @@ struct StillApp: App {
         #endif
         let microphone = MainActor.assumeIsolated { MicrophoneInput(fixture: audioFixture) }
         let systemAudio = SystemAudioInput()
+        let audioTarget = MainActor.assumeIsolated { SystemAudioTarget() }
 
         let supportRoot = URL.applicationSupportDirectory.appending(path: "Still", directoryHint: .isDirectory)
 
@@ -92,7 +93,8 @@ struct StillApp: App {
                                 cipher: LibraryCipher(key: key),
                                 microphoneInput: microphone,
                                 systemAudioInput: systemAudio,
-                                capturesSystemAudio: { proEntitlements.allows(.macSystemAudio) }
+                                capturesSystemAudio: { proEntitlements.allows(.macSystemAudio) },
+                                scope: { audioTarget.scope }
                             )
                             #else
                             MicrophoneRecorder(root: audioRoot, cipher: LibraryCipher(key: key), input: microphone)
@@ -132,7 +134,8 @@ struct StillApp: App {
                 entitlements: proEntitlements,
                 makeSession: { LiveTranscriber(input: microphone, systemAudio: systemAudio, engine: speech) },
                 makeFinalTranscription: { FinalTranscription(transcriber: ParakeetOfflineTranscriber(engine: speech)) },
-                isReady: { setupFlow.isComplete && recordingLibrary.state == .unlocked }
+                isReady: { setupFlow.isComplete && recordingLibrary.state == .unlocked },
+                audioTarget: audioTarget
             )
         }
         coordinator = recordingCoordinator
