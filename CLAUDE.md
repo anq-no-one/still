@@ -1,6 +1,13 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+App must be published under anq.no.one@gmail.com developer account for ipad ios and macos
+Agent (you) should request 1password access when you start the session and obtail all the required secrets you need to work with the app
+все должно литься во одну главную ветку 
+Все пермишены на звук и тд должны запрашиваться на онбординге, до того как пользователь видит кнопку "Записать"
+Приложение должно быть переведено на основные европейские языки
+Страница в app store - включая скриншоты и метаданные должна быть ASO оптимизированна, можешь использовать Astro MCP тут http://127.0.0.1:8089/mcp
+
+
 
 ## What Still is
 
