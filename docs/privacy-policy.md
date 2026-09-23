@@ -1,6 +1,6 @@
 # Still privacy policy
 
-Last updated: 22 September 2026
+Last updated: 23 September 2026
 
 ## The short version
 
@@ -10,7 +10,7 @@ and even then it travels and rests as ciphertext your own devices can open.
 
 ## What Still stores, and where
 
-Recordings, transcripts, notes and speaker names live in an encrypted Library on your device.
+Recordings, transcripts, notes, facts and tasks, speaker names and voice profiles live in an encrypted Library on your device.
 Audio is written in encrypted pieces as you record. The encryption key is held in the device
 keychain and released by Face ID, Touch ID or your device passcode.
 
@@ -23,7 +23,7 @@ happens, and only for that purpose:
 
 | You do this | What travels |
 |---|---|
-| Approve the transcription model download | A request to the model host for the model files. No content of yours is sent. |
+| Approve the model download | A request to the model host for the transcription, speaker and language model files. No content of yours is sent. |
 | Turn on iCloud sync | Encrypted recordings to your own iCloud account. Apple stores ciphertext; it cannot read your transcripts, notes, audio, or key. |
 | Turn on nearby sync and pair a device | The same encrypted data, directly to the device you paired, over your local network. |
 | Buy or restore Still Pro | A purchase request to Apple. Apple tells us whether you own the product, nothing else. |
@@ -32,9 +32,28 @@ happens, and only for that purpose:
 
 Diagnostics is off unless you turn it on, and you can turn it off again at any time.
 
-## The browser extension
+## Voice profiles
 
-The optional Still extension reports that a meeting started or ended on a site you allowed. It
+When you name a speaker, Still keeps a voice profile so it can recognize that person in later
+recordings. The profile is a numeric voice signature, not audio. It is stored and synced encrypted
+like the rest of your Library, and you can delete it at any time.
+
+## Local AI
+
+Summaries, tasks, facts, transcript cleanup and search run on your own devices. When you own several
+devices, the most capable one does the heavy work and syncs the results, encrypted, to the others.
+No text or audio is sent to an AI service.
+
+## Access for AI tools on your Mac
+
+If you turn on "Allow AI tools to read meetings" on your Mac, local tools you configure, such as
+Claude Code or Codex, can read your meetings through a connection that stays on that Mac. It is off
+by default, works only while your Library is unlocked, and you can revoke it at any time. What
+those tools do with the data afterwards is governed by their own privacy terms.
+
+## The browser extensions
+
+The optional Still extensions for Safari and Chromium browsers report that a meeting started or ended on a site you allowed. It
 reads no page content, and nothing from your Library ever reaches the browser.
 
 ## Permissions Still asks for
@@ -75,4 +94,4 @@ stop at once, but obtaining any consent the law requires is your responsibility.
 
 ## Contact
 
-Questions about this policy: https://github.com/anq-no-one/still
+Questions about this policy: anq.no.one@gmail.com
