@@ -16,7 +16,7 @@ UPLOAD="${2:-}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_DIR="${ROOT}/Release/build"
 TEAM_ID="${STILL_TEAM_ID:-}"
-ASC_ITEM="${STILL_OP_ASC_KEY_ITEM:-App Store Connect API Key}"
+ASC_ITEM="${STILL_OP_ASC_KEY_ITEM:-op://Personal/colouring - App Store Connect API}"
 
 if [ -z "$TEAM_ID" ]; then
   echo "Set STILL_TEAM_ID to the Apple Developer team this build belongs to." >&2
@@ -56,9 +56,9 @@ fetch_api_key() {
   mkdir -p "$dir"
   chmod 700 "$dir"
 
-  KEY_ID="$(op read "op://Private/${ASC_ITEM}/key id")"
-  ISSUER_ID="$(op read "op://Private/${ASC_ITEM}/issuer id")"
-  op read "op://Private/${ASC_ITEM}/AuthKey.p8" > "${dir}/AuthKey_${KEY_ID}.p8"
+  KEY_ID="$(op read "${ASC_ITEM}/APP_STORE_KEY_ID")"
+  ISSUER_ID="$(op read "${ASC_ITEM}/APP_STORE_ISSUER_ID")"
+  op read "${ASC_ITEM}/APP_STORE_KEY_CONTENT" | base64 --decode > "${dir}/AuthKey_${KEY_ID}.p8"
   chmod 600 "${dir}/AuthKey_${KEY_ID}.p8"
   API_KEY_DIR="$dir"
 }
@@ -69,7 +69,7 @@ upload() {
   fetch_api_key
   trap 'rm -rf "$API_KEY_DIR"' EXIT
 
-  xcrun altool --upload-app \
+  API_PRIVATE_KEYS_DIR="$API_KEY_DIR" xcrun altool --upload-app \
     --type "$2" \
     --file "$package" \
     --apiKey "$KEY_ID" \
