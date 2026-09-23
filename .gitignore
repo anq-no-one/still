@@ -1,7 +1,9 @@
-.DS_Store
-DerivedData/
 *.xcuserstate
-xcuserdata/
-Artifacts/
-Release/build/
+.DS_Store
 .claude/*.local.md
+Artifacts/
+DerivedData/
+Release/build/
+fastlane/README.md
+fastlane/report.xml
+xcuserdata/

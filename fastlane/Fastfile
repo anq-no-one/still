@@ -1,0 +1,149 @@
+require "tmpdir"
+
+default_platform(:ios)
+
+OP_ITEM = ENV.fetch("STILL_OP_ASC_KEY_ITEM", "op://Personal/colouring - App Store Connect API")
+ROOT = File.expand_path("..", __dir__)
+BUILD_DIR = File.join(ROOT, "Release", "build")
+
+def op_field(name)
+  value = sh("op", "read", "#{OP_ITEM}/#{name}", log: false).strip
+  UI.user_error!("1Password field #{name} is empty") if value.empty?
+  value
+end
+
+def team_id
+  @team_id ||= ENV["STILL_TEAM_ID"] || op_field("TEAM_ID")
+end
+
+def asc_api_key
+  @asc_api_key ||= begin
+    key = app_store_connect_api_key(
+      key_id: op_field("APP_STORE_KEY_ID"),
+      issuer_id: op_field("APP_STORE_ISSUER_ID"),
+      key_content: op_field("APP_STORE_KEY_CONTENT"),
+      is_key_content_base64: true,
+      in_house: false
+    )
+    @key_path = File.join(Dir.mktmpdir("still-asc"), "AuthKey_#{key[:key_id]}.p8")
+    File.write(@key_path, key[:key])
+    File.chmod(0o600, @key_path)
+    key
+  end
+end
+
+def provisioning_xcargs
+  key = asc_api_key
+  [
+    "DEVELOPMENT_TEAM=#{team_id}",
+    "-allowProvisioningUpdates",
+    "-authenticationKeyPath #{@key_path.shellescape}",
+    "-authenticationKeyID #{key[:key_id]}",
+    "-authenticationKeyIssuerID #{key[:issuer_id]}"
+  ].join(" ")
+end
+
+def export_options(platform)
+  plist = Plist.parse_xml(File.join(ROOT, "Release", "ExportOptions-#{platform}.plist"))
+  plist["teamID"] = team_id
+  plist
+end
+
+def next_build_number(platform)
+  latest = latest_testflight_build_number(api_key: asc_api_key, platform: platform == "macOS" ? "osx" : "ios", initial_build_number: 0)
+  [latest.to_i + 1, Time.now.utc.strftime("%Y%m%d%H").to_i].max
+end
+
+def build(scheme:, platform:, destination:)
+  sh("xcodegen", "generate", "--spec", File.join(ROOT, "project.yml"), "--project", ROOT)
+  build_number = next_build_number(platform)
+  build_app(
+    project: File.join(ROOT, "Still.xcodeproj"),
+    scheme: scheme,
+    destination: destination,
+    output_directory: File.join(BUILD_DIR, platform),
+    archive_path: File.join(BUILD_DIR, "#{scheme}.xcarchive"),
+    export_options: export_options(platform),
+    xcargs: "#{provisioning_xcargs} CURRENT_PROJECT_VERSION=#{build_number}",
+    skip_profile_detection: true
+  )
+end
+
+def deliver_metadata(platform:, metadata_path:)
+  deliver(
+    api_key: asc_api_key,
+    platform: platform,
+    metadata_path: File.join(ROOT, "fastlane", metadata_path),
+    screenshots_path: File.join(ROOT, "fastlane", "screenshots", platform),
+    skip_binary_upload: true,
+    skip_screenshots: !Dir.exist?(File.join(ROOT, "fastlane", "screenshots", platform)),
+    overwrite_screenshots: true,
+    submit_for_review: false,
+    run_precheck_before_submit: false,
+    force: true
+  )
+end
+
+desc "Confirm the App Store Connect key works and the Still app record exists"
+lane :doctor do
+  asc_api_key
+  app = Spaceship::ConnectAPI::App.find("com.andrii.still")
+  UI.user_error!("No App Store Connect app record for com.andrii.still") unless app
+  UI.success("App record #{app.id} \"#{app.name}\" is reachable")
+end
+
+platform :ios do
+  desc "Upload the iPhone and iPad listing: metadata and screenshots"
+  lane :metadata do
+    deliver_metadata(platform: "ios", metadata_path: "metadata")
+  end
+
+  desc "Build and upload an iOS build to TestFlight"
+  lane :beta do
+    build(scheme: "Still-iOS", platform: "iOS", destination: "generic/platform=iOS")
+    upload_to_testflight(api_key: asc_api_key, skip_waiting_for_build_processing: true)
+  end
+
+  desc "Submit the latest processed iOS build for App Review"
+  lane :submit do
+    deliver(
+      api_key: asc_api_key,
+      platform: "ios",
+      metadata_path: File.join(ROOT, "fastlane", "metadata"),
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      submit_for_review: true,
+      automatic_release: true,
+      force: true,
+      submission_information: { add_id_info_uses_idfa: false, export_compliance_uses_encryption: false }
+    )
+  end
+end
+
+platform :mac do
+  desc "Upload the Mac listing: metadata and screenshots"
+  lane :metadata do
+    deliver_metadata(platform: "osx", metadata_path: "metadata_macos")
+  end
+
+  desc "Build and upload a Mac build to TestFlight"
+  lane :beta do
+    build(scheme: "Still-macOS", platform: "macOS", destination: "generic/platform=macOS")
+    upload_to_testflight(api_key: asc_api_key, app_platform: "osx", pkg: lane_context[SharedValues::PKG_OUTPUT_PATH], skip_waiting_for_build_processing: true)
+  end
+
+  desc "Submit the latest processed Mac build for App Review"
+  lane :submit do
+    deliver(
+      api_key: asc_api_key,
+      platform: "osx",
+      metadata_path: File.join(ROOT, "fastlane", "metadata_macos"),
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      submit_for_review: true,
+      automatic_release: true,
+      force: true,
+      submission_information: { add_id_info_uses_idfa: false, export_compliance_uses_encryption: false }
+    )
+  end
+end

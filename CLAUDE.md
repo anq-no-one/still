@@ -28,7 +28,8 @@ bin/check.sh --skip-e2e            # build + unit tests only
 bin/e2e.sh                         # E2E on a fresh, muted, throwaway simulator
 bin/e2e.sh --only testRecordTranscribeFindAndReopen
 bin/e2e.sh --device <udid>         # physical iPhone with UI Automation enabled
-bin/release.sh [ios|macos|both] [--upload]   # needs STILL_TEAM_ID; reads the ASC key from 1Password
+fastlane ios beta | fastlane mac beta        # TestFlight upload; key and team ID come from 1Password
+fastlane ios metadata | fastlane mac metadata # store listing and screenshots
 ```
 
 Run a single unit test (Swift Testing, macOS host):

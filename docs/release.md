@@ -40,24 +40,22 @@ about the product.
 
     403 FORBIDDEN_ERROR — The resource 'apps' does not allow 'CREATE'
 
-An app record has to be created in the App Store Connect web interface, or with a fastlane session
-that answers a two-factor prompt. Everything downstream — uploading a build, TestFlight, the
-in-app purchase, the listing — waits on that record.
+The app record exists: "Still - AI note taker", Apple ID 6815369488, bundle ID `com.andrii.still`.
+The API cannot create app records, so a new one is made once in the App Store Connect web page.
 
-Create it with: platforms iOS and macOS, bundle ID `com.andrii.still`, SKU `STILL-2026`, primary
-language English (U.S.). If the name Still is taken, the bundle ID stays valid; only the listing
-name changes.
+## fastlane does every store step
 
-## Then
+Every lane reads the App Store Connect key and team ID from 1Password (`op signin` first).
 
-1. `bin/release.sh both --upload` archives, exports and uploads. It needs `STILL_TEAM_ID` and an
-   unlocked 1Password, and reads the App Store Connect key without putting it on a command line.
-2. Create the non-consumable in-app purchase `com.andrii.still.pro` at $39.99, Family Sharing on.
-   `Still/Supporting/Still.storekit` already describes it for local testing.
-3. Upload the listing text with `fastlane deliver`. It lives in `fastlane/metadata/en-US/`.
-4. Answer App Privacy in App Store Connect. Still collects nothing, so every data type is "Not
-   collected" and tracking is "No". This matches `Still/Supporting/PrivacyInfo.xcprivacy`, which
-   declares only three required-reason APIs: UserDefaults, file timestamps, and free disk space.
+| Command | What it does |
+|---|---|
+| `fastlane doctor` | Checks the key and that the app record is reachable |
+| `fastlane ios beta` / `fastlane mac beta` | Archives, signs and uploads a build to TestFlight |
+| `fastlane ios metadata` / `fastlane mac metadata` | Uploads listing text from `fastlane/metadata*` and screenshots from `fastlane/screenshots/<platform>` |
+| `fastlane ios submit` / `fastlane mac submit` | Submits the latest processed build for App Review |
+
+App Privacy answers stay in App Store Connect: every data type is "Not collected" and tracking is
+"No", matching `Still/Supporting/PrivacyInfo.xcprivacy`.
 
 ## Screenshots
 
