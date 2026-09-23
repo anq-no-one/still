@@ -1,1 +1,1 @@
-meeting,transcribe,recorder,notes,offline,private,transcript,voice,dictation,encrypted
+transcription,transcribe,call,lecture,meeting,minutes,audio,text,speech,private,translate,summary

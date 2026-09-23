@@ -1,22 +1,24 @@
-Still records meetings, lectures, interviews and voice notes, turns them into a timestamped transcript, and writes up the decisions and action items — entirely on your device.
+Still records meetings, calls, lectures and voice memos, turns them into a timestamped transcript, and writes up the decisions and action items — entirely on your device.
 
-There is no account. There is no server doing the thinking. Recording and transcription work in airplane mode, and Still makes no network request until you ask it to download a language model, turn on sync, buy Still Pro, or share something.
+There is no account and no server doing the thinking. Still transcribes with its own speech model running on your iPhone, iPad or Mac, so recording and transcription work in airplane mode. Still makes no network request until you download the speech model, turn on sync, or share something.
 
 RECORD
-• One prominent Record button on iPhone, iPad and Mac
-• On the Mac, capture what the call is playing and your own microphone as separate tracks
+• One Record button on iPhone, iPad and Mac
+• On the Mac, capture your microphone and the other side of a call as separate tracks
+• Record calls automatically: when an app you allow starts using the microphone, Still starts recording, and saves when the call ends
 • Start and stop from the menu bar or a keyboard shortcut, without opening the window
 • Audio is written in small encrypted pieces as you speak, so a crash costs you seconds rather than the session
 
 READ BACK
-• Every line of the transcript is linked to the moment it was said — tap it and hear it
+• A live transcript while you record, and a full transcript when you stop
+• Every line is linked to the moment it was said — tap it and hear it
 • Words Still is unsure of stay marked rather than being rewritten into confident text
 • Correct a name and the original stays beside your correction
 • Speakers are grouped, and you can rename a group without touching the transcript
 
 UNDERSTAND
 • Summary, decisions and action items, each one quoting the transcript it came from
-• Meeting, lecture, interview and voice-note shapes, chosen for you and changeable afterwards
+• Meeting, lecture, interview and voice-note formats, chosen for you and changeable afterwards
 • Translation beneath the original, with the original still the record of what was said
 
 FIND AND KEEP
@@ -25,9 +27,8 @@ FIND AND KEEP
 • Choose how long audio is kept; deleting is undoable for thirty days
 
 PRIVACY
-Your Library is encrypted with a key held in the Secure Enclave-backed keychain and released by Face ID or Touch ID. If you turn on iCloud sync, Apple stores ciphertext only: no transcript, note, audio or key ever leaves your device in readable form. Diagnostics is off, and reports carry no content even when you turn it on.
+Your Library is encrypted with a key kept in this device's keychain. If you turn on iCloud sync, Apple stores ciphertext only: no transcript, note, audio or key ever leaves your device in readable form. Diagnostics is off, and reports carry no content even when you turn it on.
 
-STILL PRO
-Free covers manual recording, local transcription, exact search and text export. One purchase of Still Pro unlocks the live transcript, Mac system audio, speaker groups, translation, generated notes, sync and advanced export on iPhone, iPad and Mac. It is a single purchase, not a subscription, and Family Sharing is supported.
+Every feature is free.
 
-Still does not record telephone calls. You are responsible for any consent your jurisdiction requires from the people you record.
+You are responsible for any consent your jurisdiction requires from the people you record.
