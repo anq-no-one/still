@@ -47,7 +47,7 @@ struct RecordingDetailView: View {
                 noteView
 
                 if !recording.speakers.isEmpty {
-                    SpeakerListView(speakers: recording.speakers) { speaker, name in
+                    SpeakerListView(speakers: recording.speakers, suggestions: recording.unclaimedParticipants) { speaker, name in
                         editor.renameSpeaker(speaker, to: name)
                     }
                 }

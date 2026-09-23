@@ -37,6 +37,14 @@ struct Speaker: Identifiable, Codable, Equatable, Sendable {
         nameSource == .user
     }
 
+    var isUnnamedGuest: Bool {
+        guard !isYou else { return false }
+        switch nameSource {
+        case .none, .track, .diarization: return true
+        case .calendar, .voiceProfile, .owner, .user: return false
+        }
+    }
+
     func named(_ name: String, by source: NameSource) -> Speaker {
         var copy = self
         copy.name = name

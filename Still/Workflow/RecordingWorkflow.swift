@@ -124,7 +124,8 @@ final class RecordingWorkflow {
 
         do {
             try await recorder.finish()
-            let transcription = try await transcribeAndSeparateSpeakers()
+            let participants = await expectedParticipants(startedAt ?? now())
+            let transcription = try await transcribeAndSeparateSpeakers(expecting: participants)
             let segments = transcription?.segments ?? []
             let transcript = segments.plainText
             guard !transcript.isEmpty || transcription == nil else {
@@ -147,6 +148,7 @@ final class RecordingWorkflow {
                     transcript: transcript,
                     segments: segments,
                     speakers: transcription?.speakers ?? [],
+                    expectedParticipants: participants.isEmpty ? nil : participants,
                     note: note,
                     createdAt: startedAt,
                     duration: elapsed
@@ -166,7 +168,7 @@ final class RecordingWorkflow {
         state = .idle
     }
 
-    private func transcribeAndSeparateSpeakers() async throws -> TranscriptionResult? {
+    private func transcribeAndSeparateSpeakers(expecting participants: [String]) async throws -> TranscriptionResult? {
         let tracks = try library.capturedTracks(forRecording: recordingID)
         let transcription: TranscriptionResult
         do {
@@ -178,7 +180,7 @@ final class RecordingWorkflow {
             return nil
         }
         var naming = library.speakerNaming
-        naming.participants = await expectedParticipants(startedAt ?? now())
+        naming.participants = participants
         return await speakerSeparation.separate(transcription, tracks: tracks, naming: naming)
     }
 

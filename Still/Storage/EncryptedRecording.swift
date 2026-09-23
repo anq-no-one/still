@@ -21,5 +21,6 @@ struct RecordingContent: Codable {
     var transcript: String
     var segments: [TranscriptSegment] = []
     var speakers: [Speaker] = []
+    var expectedParticipants: [String]?
     var note: Note?
 }

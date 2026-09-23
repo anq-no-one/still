@@ -240,7 +240,7 @@ struct RecordingWorkflowTests {
             speakerSeparation: SpeakerSeparation(diarizer: StubDiarizer(turns: [SpeakerTurn(speaker: 0, start: 0, end: 5)])),
             expectedParticipants: { date in
                 askedAbout = date
-                return []
+                return ["Anna Kowalska", "Ben Olsen"]
             },
             recorder: SpyAudioRecorder(),
             library: library,
@@ -256,6 +256,7 @@ struct RecordingWorkflowTests {
         #expect(recording.speakers.map(\.name) == ["Andrii D."])
         #expect(recording.segments.allSatisfy { $0.speakerID == recording.speakers[0].id })
         #expect(askedAbout == Date(timeIntervalSince1970: 500))
+        #expect(recording.expectedParticipants == ["Anna Kowalska", "Ben Olsen"])
     }
 
     private func makeWorkflow(

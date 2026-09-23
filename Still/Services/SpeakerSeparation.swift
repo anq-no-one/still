@@ -176,7 +176,7 @@ enum SpeakerNaming {
             return speaker.named(owner, by: .owner)
         }
 
-        let recognized = VoiceMatcher(profiles: context.profiles).matches(for: named.filter(isUnnamedGuest))
+        let recognized = VoiceMatcher(profiles: context.profiles).matches(for: named.filter(\.isUnnamedGuest))
         named = named.map { speaker in
             recognized[speaker.id].map { speaker.named($0.name, by: .voiceProfile) } ?? speaker
         }
@@ -185,20 +185,12 @@ enum SpeakerNaming {
         let expected = context.participants
             .filter { !taken.contains(VoiceProfiles.key(for: $0)) }
             .uniqued()
-        let guests = named.filter(isUnnamedGuest)
+        let guests = named.filter(\.isUnnamedGuest)
         guard guests.count == 1, expected.count == 1, let guest = guests.first, let name = expected.first else {
             return named
         }
 
         return named.map { $0.id == guest.id ? $0.named(name, by: .calendar) : $0 }
-    }
-
-    private static func isUnnamedGuest(_ speaker: Speaker) -> Bool {
-        guard !speaker.isYou else { return false }
-        switch speaker.nameSource {
-        case .none, .track, .diarization: return true
-        case .calendar, .voiceProfile, .owner, .user: return false
-        }
     }
 }
 

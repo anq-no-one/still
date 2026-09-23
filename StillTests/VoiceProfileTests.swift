@@ -144,6 +144,51 @@ struct VoiceProfileLearningTests {
     }
 }
 
+struct CalendarSuggestionTests {
+    @Test
+    func offersOnlyTheAttendeesNobodyIsNamedAfter() {
+        let recording = Recording(
+            title: "Call",
+            transcript: "",
+            speakers: [
+                Speaker.forTrack(.microphone).named("Andrii D.", by: .owner),
+                Speaker(name: "Anna Kowalska", origin: .system, isYou: false, nameSource: .voiceProfile),
+                Speaker(name: "Speaker 2", origin: .system, isYou: false, nameSource: .diarization),
+                Speaker(name: "Speaker 3", origin: .system, isYou: false, nameSource: .diarization),
+            ],
+            expectedParticipants: ["anna kowalska", "Ben Olsen", "Andrii D.", "Chloé Martin", "Ben Olsen"],
+            duration: 60
+        )
+
+        #expect(recording.unclaimedParticipants == ["Ben Olsen", "Chloé Martin"])
+    }
+
+    @Test
+    func pickingASuggestionTakesItOffTheList() {
+        let guest = Speaker(name: "Speaker 1", origin: .system, isYou: false, nameSource: .diarization)
+        let recording = Recording(
+            title: "Call",
+            transcript: "",
+            speakers: [guest],
+            expectedParticipants: ["Ben Olsen", "Chloé Martin"],
+            duration: 60
+        )
+
+        let renamed = recording.renamingSpeaker(guest, to: "Ben Olsen")
+
+        #expect(renamed.unclaimedParticipants == ["Chloé Martin"])
+        #expect(!renamed.speakers[0].isUnnamedGuest)
+    }
+
+    @Test
+    func onlyUnnamedGuestsGetSuggestions() {
+        #expect(Speaker(name: "Speaker 1", origin: .system, isYou: false, nameSource: .diarization).isUnnamedGuest)
+        #expect(Speaker.forTrack(.system).isUnnamedGuest)
+        #expect(!Speaker.forTrack(.microphone).isUnnamedGuest)
+        #expect(!Speaker(name: "Anna", origin: .system, isYou: false, nameSource: .calendar).isUnnamedGuest)
+    }
+}
+
 struct SpeakerNamingTests {
     private let you = Speaker.forTrack(.microphone)
 

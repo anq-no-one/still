@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SpeakerListView: View {
     let speakers: [Speaker]
+    let suggestions: [String]
     let rename: (Speaker, String) -> Void
 
     var body: some View {
@@ -10,7 +11,9 @@ struct SpeakerListView: View {
                 .font(.headline)
 
             ForEach(speakers) { speaker in
-                SpeakerRow(speaker: speaker) { rename(speaker, $0) }
+                SpeakerRow(speaker: speaker, suggestions: speaker.isUnnamedGuest ? suggestions : []) {
+                    rename(speaker, $0)
+                }
             }
         }
     }
@@ -18,18 +21,41 @@ struct SpeakerListView: View {
 
 private struct SpeakerRow: View {
     let speaker: Speaker
+    let suggestions: [String]
     let rename: (String) -> Void
 
     @State private var name: String
     @FocusState private var isEditing: Bool
 
-    init(speaker: Speaker, rename: @escaping (String) -> Void) {
+    init(speaker: Speaker, suggestions: [String], rename: @escaping (String) -> Void) {
         self.speaker = speaker
+        self.suggestions = suggestions
         self.rename = rename
         _name = State(initialValue: speaker.name)
     }
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            field
+            if !suggestions.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(suggestions, id: \.self) { suggestion in
+                            Button(suggestion) {
+                                name = suggestion
+                                rename(suggestion)
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                            .accessibilityHint("Names this speaker \(suggestion)")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var field: some View {
         HStack(spacing: 10) {
             Image(systemName: icon)
                 .foregroundStyle(.secondary)
