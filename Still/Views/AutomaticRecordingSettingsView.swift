@@ -6,7 +6,7 @@ struct AutomaticRecordingSettingsView: View {
 
     var body: some View {
         Section {
-            Toggle("Record Allowed Apps Automatically", isOn: watching)
+            Toggle("Record Calls Automatically", isOn: watching)
             ForEach(automatic.apps) { app in
                 Toggle(app.name, isOn: allowed(app))
             }
@@ -16,9 +16,9 @@ struct AutomaticRecordingSettingsView: View {
                 }
             }
         } header: {
-            Text("Call Apps")
+            Text("Calls")
         } footer: {
-            Text("Still starts recording when an app you allow here comes forward. Recording always shows in the menu bar and can be stopped or thrown away at once.")
+            Text("Still starts recording when an app you allow here starts using the microphone, and saves the recording when the call ends. Recording always shows in the menu bar and can be stopped or thrown away at once. For meetings in Safari, use the Still extension below.")
         }
     }
 

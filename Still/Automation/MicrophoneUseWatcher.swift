@@ -1,0 +1,101 @@
+#if os(macOS)
+import CoreAudio
+import Foundation
+
+@MainActor
+final class MicrophoneUseWatcher: CallAppWatcher {
+    static let pollInterval: Duration = .milliseconds(1_500)
+    static let releaseGrace: TimeInterval = 5
+
+    private let ownBundleID = Bundle.main.bundleIdentifier ?? ""
+    private var loop: Task<Void, Never>?
+    private var listening: [String: Date] = [:]
+
+    func start(
+        onActivate: @escaping @MainActor (String) -> Void,
+        onDeactivate: @escaping @MainActor (String) -> Void
+    ) {
+        stop()
+        loop = Task { [weak self] in
+            while !Task.isCancelled {
+                self?.poll(onActivate: onActivate, onDeactivate: onDeactivate)
+                try? await Task.sleep(for: Self.pollInterval)
+            }
+        }
+    }
+
+    func stop() {
+        loop?.cancel()
+        loop = nil
+        listening.removeAll()
+    }
+
+    private func poll(
+        onActivate: @MainActor (String) -> Void,
+        onDeactivate: @MainActor (String) -> Void
+    ) {
+        let now = Date.now
+        let current = Self.bundleIDsUsingMicrophone().filter { $0 != ownBundleID && !$0.hasPrefix(ownBundleID + ".") }
+
+        for bundleID in current {
+            if listening[bundleID] == nil {
+                onActivate(bundleID)
+            }
+            listening[bundleID] = now
+        }
+
+        for (bundleID, lastHeard) in listening where !current.contains(bundleID) {
+            if now.timeIntervalSince(lastHeard) >= Self.releaseGrace {
+                listening[bundleID] = nil
+                onDeactivate(bundleID)
+            }
+        }
+    }
+
+    private nonisolated static func bundleIDsUsingMicrophone() -> Set<String> {
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyProcessObjectList,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var size: UInt32 = 0
+        guard AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size) == noErr,
+              size > 0
+        else { return [] }
+
+        var processes = [AudioObjectID](repeating: 0, count: Int(size) / MemoryLayout<AudioObjectID>.size)
+        guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &processes) == noErr
+        else { return [] }
+
+        return Set(processes.compactMap { process in
+            isRunningInput(process) ? bundleID(of: process) : nil
+        })
+    }
+
+    private nonisolated static func isRunningInput(_ process: AudioObjectID) -> Bool {
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioProcessPropertyIsRunningInput,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var running: UInt32 = 0
+        var size = UInt32(MemoryLayout<UInt32>.size)
+        return AudioObjectGetPropertyData(process, &address, 0, nil, &size, &running) == noErr && running != 0
+    }
+
+    private nonisolated static func bundleID(of process: AudioObjectID) -> String? {
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioProcessPropertyBundleID,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var value: Unmanaged<CFString>?
+        var size = UInt32(MemoryLayout<Unmanaged<CFString>?>.size)
+        guard AudioObjectGetPropertyData(process, &address, 0, nil, &size, &value) == noErr,
+              let bundleID = value?.takeRetainedValue() as String?,
+              !bundleID.isEmpty
+        else { return nil }
+        return bundleID
+    }
+}
+#endif

@@ -9,17 +9,31 @@ struct CallApp: Identifiable, Codable, Equatable, Sendable {
     var isAllowed: Bool
 
     static let known: [CallApp] = [
+        CallApp(bundleID: "com.google.Chrome", name: "Google Chrome", isAllowed: false),
+        CallApp(bundleID: "company.thebrowser.Browser", name: "Arc", isAllowed: false),
+        CallApp(bundleID: "com.microsoft.edgemac", name: "Microsoft Edge", isAllowed: false),
+        CallApp(bundleID: "com.brave.Browser", name: "Brave", isAllowed: false),
+        CallApp(bundleID: "org.mozilla.firefox", name: "Firefox", isAllowed: false),
         CallApp(bundleID: "us.zoom.xos", name: "Zoom", isAllowed: false),
         CallApp(bundleID: "com.microsoft.teams2", name: "Microsoft Teams", isAllowed: false),
         CallApp(bundleID: "com.cisco.webexmeetingsapp", name: "Webex", isAllowed: false),
         CallApp(bundleID: "com.tinyspeck.slackmacgap", name: "Slack", isAllowed: false),
         CallApp(bundleID: "com.apple.FaceTime", name: "FaceTime", isAllowed: false),
+        CallApp(bundleID: "ru.keepcoder.Telegram", name: "Telegram", isAllowed: false),
+        CallApp(bundleID: "net.whatsapp.WhatsApp", name: "WhatsApp", isAllowed: false),
+        CallApp(bundleID: "com.hnc.Discord", name: "Discord", isAllowed: false),
     ]
+
+    func owns(_ processBundleID: String) -> Bool {
+        processBundleID == bundleID || processBundleID.hasPrefix(bundleID + ".")
+    }
 }
 
 protocol CallAppAllowList: Sendable {
+    var watches: Bool { get }
     func apps() -> [CallApp]
     func setAllowed(_ allowed: Bool, forBundleID bundleID: String)
+    func setWatching(_ watching: Bool)
 }
 
 @MainActor
@@ -28,10 +42,6 @@ protocol CallAppWatcher: AnyObject {
     func stop()
 }
 
-/// Starts a Recording when an app the user explicitly allowed comes forward.
-/// One activation means one Recording: coming back to the same app while it is
-/// still recording changes nothing, and an app the user switches off never
-/// starts another.
 @MainActor
 @Observable
 final class AutomaticRecording {
@@ -46,6 +56,9 @@ final class AutomaticRecording {
         self.coordinator = coordinator
         self.watcher = watcher
         self.allowList = allowList
+        if allowList.watches {
+            startWatching()
+        }
     }
 
     var apps: [CallApp] {
@@ -60,15 +73,17 @@ final class AutomaticRecording {
                 Task { await self?.appBecameActive(bundleID) }
             },
             onDeactivate: { [weak self] bundleID in
-                self?.appWentAway(bundleID)
+                Task { await self?.appWentAway(bundleID) }
             }
         )
         isWatching = true
+        allowList.setWatching(true)
     }
 
     func stopWatching() {
         watcher.stop()
         isWatching = false
+        allowList.setWatching(false)
     }
 
     func setAllowed(_ allowed: Bool, for app: CallApp) {
@@ -79,35 +94,47 @@ final class AutomaticRecording {
         }
     }
 
-    /// A recording that should never have started leaves nothing behind.
     func discardAutomaticRecording() async {
         await coordinator.cancel()
         triggeredBy = nil
     }
 
-    private func appBecameActive(_ bundleID: String) async {
+    private func appBecameActive(_ processBundleID: String) async {
         guard isWatching,
               triggeredBy == nil,
               !coordinator.isRecording,
-              allowList.apps().contains(where: { $0.bundleID == bundleID && $0.isAllowed })
+              let app = allowList.apps().first(where: { $0.isAllowed && $0.owns(processBundleID) })
         else { return }
 
-        triggeredBy = bundleID
+        triggeredBy = app.bundleID
         await coordinator.start()
     }
 
-    private func appWentAway(_ bundleID: String) {
-        guard triggeredBy == bundleID else { return }
-        triggeredBy = nil
+    private func appWentAway(_ processBundleID: String) async {
+        guard let triggeredBy, CallApp(bundleID: triggeredBy, name: "", isAllowed: true).owns(processBundleID) else { return }
+
+        self.triggeredBy = nil
+        if coordinator.isRecording {
+            await coordinator.stopAndSave()
+        }
     }
 }
 
 struct UserDefaultsCallAppAllowList: CallAppAllowList, @unchecked Sendable {
     private let key = "still.callApps.allowed"
+    private let watchingKey = "still.callApps.watching"
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+    }
+
+    var watches: Bool {
+        defaults.bool(forKey: watchingKey)
+    }
+
+    func setWatching(_ watching: Bool) {
+        defaults.set(watching, forKey: watchingKey)
     }
 
     func apps() -> [CallApp] {

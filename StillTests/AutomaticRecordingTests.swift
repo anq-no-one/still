@@ -7,6 +7,48 @@ import Testing
 struct AutomaticRecordingTests {
     private let zoom = "us.zoom.xos"
     private let teams = "com.microsoft.teams2"
+    private let chrome = "com.google.Chrome"
+
+    @Test
+    func savesTheRecordingWhenTheCallEnds() async throws {
+        let (automatic, watcher, coordinator) = try await make(allowed: [zoom])
+        automatic.startWatching()
+
+        watcher.activate(zoom)
+        await settle()
+        #expect(coordinator.isRecording)
+
+        watcher.terminate(zoom)
+        await settle(until: { coordinator.workflow == nil })
+
+        #expect(!coordinator.isRecording)
+        #expect(coordinator.workflow == nil)
+        #expect(coordinator.phase == .idle)
+        #expect(automatic.triggeredBy == nil)
+    }
+
+    @Test
+    func aBrowserHelperProcessCountsAsTheBrowser() async throws {
+        let (automatic, watcher, coordinator) = try await make(allowed: [chrome])
+        automatic.startWatching()
+
+        watcher.activate("com.google.Chrome.helper")
+        await settle()
+
+        #expect(coordinator.isRecording)
+        #expect(automatic.triggeredBy == chrome)
+    }
+
+    @Test
+    func keepsWatchingAfterRelaunch() async throws {
+        let allowList = MemoryAllowList(allowed: [zoom])
+        let (first, _, coordinator) = try await make(allowList: allowList)
+        first.startWatching()
+
+        let relaunched = AutomaticRecording(coordinator: coordinator, watcher: FakeCallAppWatcher(), allowList: allowList)
+
+        #expect(relaunched.isWatching)
+    }
 
     @Test
     func recordsOnlyForAnAppTheUserAllowed() async throws {
@@ -81,8 +123,20 @@ struct AutomaticRecordingTests {
         for _ in 0..<4 { await Task.yield() }
     }
 
+    private func settle(until done: () -> Bool) async {
+        for _ in 0..<200 where !done() {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+    }
+
     private func make(
         allowed: [String]
+    ) async throws -> (AutomaticRecording, FakeCallAppWatcher, RecordingCoordinator) {
+        try await make(allowList: MemoryAllowList(allowed: Set(allowed)))
+    }
+
+    private func make(
+        allowList: MemoryAllowList
     ) async throws -> (AutomaticRecording, FakeCallAppWatcher, RecordingCoordinator) {
         let container = try ModelContainer(
             for: EncryptedRecording.self,
@@ -114,7 +168,7 @@ struct AutomaticRecordingTests {
         let automatic = AutomaticRecording(
             coordinator: coordinator,
             watcher: watcher,
-            allowList: MemoryAllowList(allowed: Set(allowed))
+            allowList: allowList
         )
         return (automatic, watcher, coordinator)
     }
@@ -149,6 +203,7 @@ final class FakeCallAppWatcher: CallAppWatcher {
 
 final class MemoryAllowList: CallAppAllowList, @unchecked Sendable {
     private var allowed: Set<String>
+    var watches = false
 
     init(allowed: Set<String>) {
         self.allowed = allowed
@@ -164,5 +219,9 @@ final class MemoryAllowList: CallAppAllowList, @unchecked Sendable {
         } else {
             allowed.remove(bundleID)
         }
+    }
+
+    func setWatching(_ watching: Bool) {
+        watches = watching
     }
 }
