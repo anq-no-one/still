@@ -40,9 +40,8 @@ actor ParakeetEngine {
             throw TranscriptionError.modelNotInstalled
         }
 
-        let directory = root.appending(path: "\(pack.id)/\(pack.version)", directoryHint: .isDirectory)
         do {
-            let models = try AsrModels.loadLocal(from: directory)
+            let models = try AsrModels.loadLocal(from: pack.installedDirectory(in: root))
             let manager = AsrManager()
             try await manager.loadModels(models)
             self.manager = manager

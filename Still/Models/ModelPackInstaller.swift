@@ -37,7 +37,7 @@ final class ModelPackInstaller {
     }
 
     var installedDirectory: URL {
-        root.appending(path: "\(pack.id)/\(pack.version)", directoryHint: .isDirectory)
+        pack.installedDirectory(in: root)
     }
 
     var progress: Double {
@@ -74,7 +74,7 @@ final class ModelPackInstaller {
                 }
 
                 try await downloader.download(
-                    from: pack.baseURL.appending(path: file.path),
+                    from: pack.remoteURL(of: file),
                     resumingInto: destination
                 )
 
@@ -118,7 +118,7 @@ final class ModelPackInstaller {
     /// A launch-time check that stays cheap. The digests were verified when each
     /// file landed, so matching sizes are enough to trust the installed pack.
     nonisolated static func isInstalled(pack: ModelPack, root: URL) -> Bool {
-        let directory = root.appending(path: "\(pack.id)/\(pack.version)", directoryHint: .isDirectory)
+        let directory = pack.installedDirectory(in: root)
         return pack.files.allSatisfy { file in
             let attributes = try? FileManager.default.attributesOfItem(
                 atPath: directory.appending(path: file.path).path

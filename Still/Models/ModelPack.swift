@@ -4,6 +4,14 @@ struct ModelFile: Equatable, Sendable {
     let path: String
     let bytes: Int
     let sha256: String
+    let source: URL?
+
+    init(path: String, bytes: Int, sha256: String, source: URL? = nil) {
+        self.path = path
+        self.bytes = bytes
+        self.sha256 = sha256
+        self.source = source
+    }
 }
 
 struct ModelPack: Equatable, Sendable {
@@ -13,6 +21,14 @@ struct ModelPack: Equatable, Sendable {
     let baseURL: URL
     let minimumMemoryBytes: Int
     let files: [ModelFile]
+
+    func remoteURL(of file: ModelFile) -> URL {
+        (file.source ?? baseURL).appending(path: file.path)
+    }
+
+    func installedDirectory(in root: URL) -> URL {
+        root.appending(path: "\(id)/\(version)", directoryHint: .isDirectory)
+    }
 
     var totalBytes: Int {
         files.reduce(0) { $0 + $1.bytes }
