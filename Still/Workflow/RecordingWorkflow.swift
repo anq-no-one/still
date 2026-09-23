@@ -118,10 +118,10 @@ final class RecordingWorkflow {
 
         do {
             try await recorder.finish()
-            let transcription = try await transcribeCapturedTracks()
-            let segments = transcription.segments
+            let transcription = try await transcribeCapturedTracksIfPossible()
+            let segments = transcription?.segments ?? []
             let transcript = segments.plainText
-            guard !transcript.isEmpty else {
+            guard !transcript.isEmpty || transcription == nil else {
                 await recorder.discard()
                 state = .failed(RecordingWorkflowError.emptyTranscript.localizedDescription)
                 return
@@ -140,7 +140,7 @@ final class RecordingWorkflow {
                     title: RecordingTitle.from(transcript: transcript, date: startedAt),
                     transcript: transcript,
                     segments: segments,
-                    speakers: transcription.speakers,
+                    speakers: transcription?.speakers ?? [],
                     note: note,
                     createdAt: startedAt,
                     duration: elapsed
@@ -162,11 +162,17 @@ final class RecordingWorkflow {
 
     /// The live draft is a preview. The saved transcript always comes from the
     /// journaled audio, so it carries timings and survives a failed recognizer.
-    private func transcribeCapturedTracks() async throws -> TranscriptionResult {
-        try await finalTranscription.run(
-            tracks: try library.capturedTracks(forRecording: recordingID),
-            checkpoints: try library.checkpointStore(forRecording: recordingID)
-        )
+    /// A device that cannot transcribe still keeps the audio: nil saves the
+    /// Recording without words rather than losing it.
+    private func transcribeCapturedTracksIfPossible() async throws -> TranscriptionResult? {
+        do {
+            return try await finalTranscription.run(
+                tracks: try library.capturedTracks(forRecording: recordingID),
+                checkpoints: try library.checkpointStore(forRecording: recordingID)
+            )
+        } catch is TranscriptionError {
+            return nil
+        }
     }
 
     private var isFailed: Bool {

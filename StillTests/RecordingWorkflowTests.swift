@@ -75,6 +75,30 @@ struct RecordingWorkflowTests {
     }
 
     @Test
+    func keepsTheRecordingWhenThisDeviceCannotTranscribe() async throws {
+        let session = FakeTranscriptionSession()
+        let offlineTranscriber = StubOfflineTranscriber()
+        offlineTranscriber.error = TranscriptionError.onDeviceRecognitionUnavailable
+        let recorder = SpyAudioRecorder()
+        let library = SpyRecordingLibrary()
+        let workflow = makeWorkflow(
+            session: session,
+            recorder: recorder,
+            library: library,
+            offlineTranscriber: offlineTranscriber
+        )
+
+        await workflow.start()
+        await workflow.save()
+
+        let recording = try #require(library.recordings.first)
+        #expect(workflow.state == .saved)
+        #expect(recording.transcript.isEmpty)
+        #expect(recording.segments.isEmpty)
+        #expect(recorder.events.last == .finished)
+    }
+
+    @Test
     func refusesToRecordWithoutMicrophoneAccess() async {
         let recorder = SpyAudioRecorder()
         recorder.startError = CaptureError.microphonePermissionDenied
@@ -293,10 +317,12 @@ final class SpyRecordingLibrary: RecordingLibrary {
 
 final class StubOfflineTranscriber: OfflineTranscriber, @unchecked Sendable {
     var result = "Transcribed after saving"
+    var error: Error?
     private(set) var calls = 0
 
     func segments(of pcm: Data, format: AudioFormat) async throws -> [TranscriptSegment] {
         calls += 1
+        if let error { throw error }
         guard !result.isEmpty else { return [] }
         return [TranscriptSegment(start: 0, end: 5, text: result, language: "en", confidence: 0.9)]
     }

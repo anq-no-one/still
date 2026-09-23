@@ -44,8 +44,8 @@ struct SpeechOfflineTranscriber: OfflineTranscriber {
         return try await withCheckedThrowingContinuation { continuation in
             let once = SingleResume(continuation)
             let recognitionTask = recognizer.recognitionTask(with: request) { result, error in
-                if let error {
-                    once.resume(throwing: error)
+                if error != nil {
+                    once.resume(throwing: TranscriptionError.recognitionFailed)
                 } else if let result, result.isFinal {
                     once.resume(
                         returning: result.bestTranscription.segments.map { segment in

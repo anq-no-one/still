@@ -54,7 +54,13 @@ struct RecordingDetailView: View {
 
                 Divider()
 
-                if recording.segments.isEmpty {
+                if recording.transcript.isEmpty {
+                    ContentUnavailableView(
+                        "No Transcript",
+                        systemImage: "waveform.slash",
+                        description: Text("This device could not turn the recording into text. The audio is saved, so you can still play it.")
+                    )
+                } else if recording.segments.isEmpty {
                     Text(recording.transcript)
                         .font(.body)
                         .textSelection(.enabled)
