@@ -80,6 +80,10 @@ final class StillEndToEndTests: XCTestCase {
         if allowMicrophone.waitForExistence(timeout: 5) {
             allowMicrophone.tap()
         }
+        let skipCalendar = app.buttons["Not Now"]
+        if skipCalendar.waitForExistence(timeout: 5) {
+            skipCalendar.tap()
+        }
         installTranscription()
     }
 

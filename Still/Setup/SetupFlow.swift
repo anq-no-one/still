@@ -5,6 +5,7 @@ enum SetupStep: String, Codable, CaseIterable, Sendable {
     case privacy
     case microphone
     case systemAudio
+    case calendar
     case transcription
 }
 
@@ -24,8 +25,10 @@ protocol SetupProgressStore: Sendable {
 protocol SetupPermissions: AnyObject {
     var microphone: PermissionState { get }
     var systemAudio: PermissionState { get }
+    var calendar: PermissionState { get }
     func requestMicrophone() async
     func requestSystemAudio()
+    func requestCalendar() async
 }
 
 @MainActor
@@ -79,6 +82,11 @@ final class SetupFlow {
         return permissions.systemAudio
     }
 
+    var calendar: PermissionState {
+        _ = revision
+        return permissions.calendar
+    }
+
     func acknowledgePrivacy() {
         acknowledged.insert(.privacy)
         store.markCompleted(.privacy)
@@ -95,6 +103,17 @@ final class SetupFlow {
         refresh()
     }
 
+    func requestCalendar() async {
+        await permissions.requestCalendar()
+        refresh()
+    }
+
+    func skipCalendar() {
+        acknowledged.insert(.calendar)
+        store.markCompleted(.calendar)
+        refresh()
+    }
+
     func refresh() {
         revision += 1
     }
@@ -104,6 +123,7 @@ final class SetupFlow {
         case .privacy: acknowledged.contains(.privacy)
         case .microphone: permissions.microphone == .granted
         case .systemAudio: permissions.systemAudio == .granted
+        case .calendar: permissions.calendar != .notAsked || acknowledged.contains(.calendar)
         case .transcription: isTranscriptionReady()
         }
     }

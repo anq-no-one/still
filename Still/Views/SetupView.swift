@@ -17,6 +17,8 @@ struct SetupView: View {
                 microphoneStep
             case .systemAudio:
                 systemAudioStep
+            case .calendar:
+                calendarStep
             case .transcription:
                 transcriptionStep
             case nil:
@@ -71,6 +73,19 @@ struct SetupView: View {
             if flow.systemAudio == .denied {
                 secondary("I Allowed It — Reopen Still", action: SystemSetupPermissions.relaunch)
             }
+        }
+    }
+
+    private var calendarStep: some View {
+        step(
+            icon: "calendar",
+            title: "Know Who Is in the Meeting",
+            body: "Still can read the event you are in to put names on the people speaking in your recordings. The calendar stays on this device, and you can skip this."
+        ) {
+            primary("Allow Calendar") {
+                Task { await flow.requestCalendar() }
+            }
+            secondary("Not Now", action: flow.skipCalendar)
         }
     }
 
