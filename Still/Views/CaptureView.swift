@@ -60,7 +60,8 @@ struct CaptureView: View {
                 }
 
                 Button(action: save) {
-                    Image(systemName: "stop.fill")
+                    Label("Save Recording", systemImage: "stop.fill")
+                        .labelStyle(.iconOnly)
                         .font(.title2)
                         .foregroundStyle(.white)
                         .frame(width: 64, height: 64)
@@ -71,7 +72,6 @@ struct CaptureView: View {
                 .keyboardShortcut(.return, modifiers: .command)
                 .disabled(!coordinator.canStop)
                 .opacity(coordinator.canStop ? 1 : 0.4)
-                .accessibilityLabel("Save Recording")
             }
         }
         .padding(28)
