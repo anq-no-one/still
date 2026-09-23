@@ -15,6 +15,7 @@ struct LibraryServices {
     let audioRoot: URL
     let makeRepository: (SymmetricKey) -> RecordingRepository
     let makeRecorder: (SymmetricKey) -> AudioRecorder
+    let makeEmbeddingEngine: () async -> EmbeddingEngine?
 }
 
 @MainActor
@@ -34,6 +35,7 @@ final class Library: RecordingLibrary {
 
     private(set) var state: State = .locked
     private(set) var storedRecordings: [Recording] = []
+    private(set) var semanticIndex = SemanticIndex(engine: nil)
     var retentionPolicy: RetentionPolicy = .forever
 
     init(keyRing: LibraryKeyRing, services: LibraryServices) {
@@ -62,6 +64,8 @@ final class Library: RecordingLibrary {
             try recoverInterruptedAudio(cipher: LibraryCipher(key: key))
             try applyRetention()
             state = .unlocked
+            semanticIndex = SemanticIndex(engine: await services.makeEmbeddingEngine())
+            semanticIndex.rebuild(storedRecordings)
         } catch {
             repository = nil
             key = nil
@@ -124,6 +128,7 @@ final class Library: RecordingLibrary {
             try repository.delete(id)
             try? AudioChunkStore.discard(AudioChunkStore.directory(forRecording: id, in: services.audioRoot))
             storedRecordings.removeAll { $0.id == id }
+            semanticIndex.remove(id)
         }
     }
 
@@ -180,6 +185,8 @@ final class Library: RecordingLibrary {
             self.repository = repository
             self.key = key
             state = .unlocked
+            semanticIndex = SemanticIndex(engine: await services.makeEmbeddingEngine())
+            semanticIndex.rebuild(storedRecordings)
             return true
         } catch {
             state = .failed(error.localizedDescription)
@@ -383,6 +390,7 @@ final class Library: RecordingLibrary {
             storedRecordings.append(recording)
             storedRecordings.sort { $0.createdAt > $1.createdAt }
         }
+        semanticIndex.update(recording)
     }
 }
 

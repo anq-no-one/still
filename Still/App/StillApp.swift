@@ -73,6 +73,7 @@ struct StillApp: App {
             )
         }
         let speech = ParakeetEngine(pack: ModelCatalog.parakeetV3, root: modelRoot)
+        let installer = modelInstaller
 
         let recordingLibrary = MainActor.assumeIsolated {
             Library(
@@ -98,12 +99,18 @@ struct StillApp: App {
                             MicrophoneRecorder(root: audioRoot, cipher: LibraryCipher(key: key), input: microphone)
                             #endif
                         }
+                    },
+                    makeEmbeddingEngine: {
+                        guard proEntitlements.allows(.semanticSearch) else { return nil }
+                        // The transcription model pack is the one download the user has
+                        // already approved in Setup. Its presence stands in for that
+                        // approval here, so semantic search never triggers a download
+                        // of its own without a matching user action.
+                        return await AppleSemanticEmbedding.makeEngine(allowDownload: installer.state == .installed)
                     }
                 )
             )
         }
-
-        let installer = modelInstaller
         let setupFlow = MainActor.assumeIsolated {
             SetupFlow(
                 store: UserDefaultsSetupProgressStore(),

@@ -139,7 +139,11 @@ struct LibraryView: View {
     }
 
     private var results: [SearchResult] {
-        LibrarySearch.results(for: query, in: library.recordings)
+        LibrarySearch.results(
+            for: query,
+            in: library.recordings,
+            semanticIndex: entitlements.allows(.semanticSearch) ? library.semanticIndex : nil
+        )
     }
 
     private func open(_ result: SearchResult) {

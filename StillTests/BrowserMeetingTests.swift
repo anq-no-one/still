@@ -82,8 +82,9 @@ struct BrowserMeetingBridgeTests {
                 },
                 makeRecorder: { key in
                     MainActor.assumeIsolated { WritingRecorder(root: audioRoot, cipher: LibraryCipher(key: key)) }
-                }
-            )
+                },
+            makeEmbeddingEngine: { nil }
+        )
         )
         await library.unlock()
 

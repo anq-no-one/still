@@ -116,8 +116,9 @@ struct RecordingCoordinatorTests {
                     MainActor.assumeIsolated {
                         WritingRecorder(root: audioRoot, cipher: LibraryCipher(key: key))
                     }
-                }
-            )
+                },
+            makeEmbeddingEngine: { nil }
+        )
         )
     }
 

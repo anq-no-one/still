@@ -158,8 +158,9 @@ struct LibraryUnlockTests {
                 },
                 makeRecorder: { _ in
                     MainActor.assumeIsolated { SpyAudioRecorder() }
-                }
-            )
+                },
+            makeEmbeddingEngine: { nil }
+        )
         )
     }
 
@@ -244,8 +245,9 @@ struct LibraryAudioRecoveryTests {
                 },
                 makeRecorder: { _ in
                     MainActor.assumeIsolated { SpyAudioRecorder() }
-                }
-            )
+                },
+            makeEmbeddingEngine: { nil }
+        )
         )
     }
 

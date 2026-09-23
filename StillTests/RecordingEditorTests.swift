@@ -112,8 +112,9 @@ struct RecordingEditorTests {
                         EncryptedRecordingRepository(context: context, key: key)
                     }
                 },
-                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } }
-            )
+                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } },
+            makeEmbeddingEngine: { nil }
+        )
         )
         await library.unlock()
         return library
@@ -136,8 +137,9 @@ struct SpeakerRenameTests {
                 makeRepository: { key in
                     MainActor.assumeIsolated { EncryptedRecordingRepository(context: context, key: key) }
                 },
-                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } }
-            )
+                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } },
+            makeEmbeddingEngine: { nil }
+        )
         )
         await library.unlock()
 
