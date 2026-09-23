@@ -42,6 +42,8 @@ struct StillApp: App {
         let proEntitlements = MainActor.assumeIsolated { Entitlements(source: StoreKitEntitlementSource()) }
         entitlements = proEntitlements
 
+        let microphone = MainActor.assumeIsolated { MicrophoneInput() }
+
         let supportRoot = URL.applicationSupportDirectory.appending(path: "Still", directoryHint: .isDirectory)
 
         modelInstaller = MainActor.assumeIsolated {
@@ -68,10 +70,11 @@ struct StillApp: App {
                             MacAudioRecorder(
                                 root: audioRoot,
                                 cipher: LibraryCipher(key: key),
+                                microphoneInput: microphone,
                                 capturesSystemAudio: { proEntitlements.allows(.macSystemAudio) }
                             )
                             #else
-                            MicrophoneRecorder(root: audioRoot, cipher: LibraryCipher(key: key))
+                            MicrophoneRecorder(root: audioRoot, cipher: LibraryCipher(key: key), input: microphone)
                             #endif
                         }
                     }
@@ -99,7 +102,11 @@ struct StillApp: App {
             )
         }
         let recordingCoordinator = MainActor.assumeIsolated {
-            RecordingCoordinator(library: recordingLibrary, entitlements: proEntitlements)
+            RecordingCoordinator(
+                library: recordingLibrary,
+                entitlements: proEntitlements,
+                makeSession: { LiveTranscriber(input: microphone) }
+            )
         }
         coordinator = recordingCoordinator
 

@@ -6,9 +6,10 @@ final class MicrophoneRecorder: AudioRecorder {
     private let root: URL
     private let cipher: LibraryCipher
     private let format: AudioFormat
-    private let engine = AVAudioEngine()
+    private let input: MicrophoneInput
 
     private var writer: AudioChunkWriter?
+    private var consumer: UUID?
     private var directory: URL?
     private var interruptionObservers: [NSObjectProtocol] = []
 
@@ -16,9 +17,10 @@ final class MicrophoneRecorder: AudioRecorder {
         writer?.failure.map { _ in CaptureError.insufficientStorage.localizedDescription }
     }
 
-    init(root: URL, cipher: LibraryCipher, format: AudioFormat = .transcription) {
+    init(root: URL, cipher: LibraryCipher, input: MicrophoneInput, format: AudioFormat = .transcription) {
         self.root = root
         self.cipher = cipher
+        self.input = input
         self.format = format
     }
 
@@ -27,41 +29,23 @@ final class MicrophoneRecorder: AudioRecorder {
 
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         try AudioStorage.assertRoom(at: root, format: format)
-        try configureSession()
 
         let directory = AudioChunkStore.trackDirectory(forRecording: recordingID, track: .microphone, in: root)
         let writer = try AudioChunkWriter(directory: directory, cipher: cipher, format: format)
+        let format = format
+
+        do {
+            consumer = try input.attach { inputFormat in
+                try PCMSink(writer: writer, from: inputFormat, to: format).consumer
+            }
+        } catch {
+            try? writer.finish()
+            try? AudioChunkStore.discard(directory)
+            throw error
+        }
+
         self.directory = AudioChunkStore.directory(forRecording: recordingID, in: root)
         self.writer = writer
-
-        let input = engine.inputNode
-        let inputFormat = input.outputFormat(forBus: 0)
-        guard inputFormat.sampleRate > 0 else { throw CaptureError.inputUnavailable }
-        guard let target = AVAudioFormat(
-            commonFormat: .pcmFormatInt16,
-            sampleRate: Double(format.sampleRate),
-            channels: AVAudioChannelCount(format.channels),
-            interleaved: true
-        ), let converter = AVAudioConverter(from: inputFormat, to: target) else {
-            throw CaptureError.inputUnavailable
-        }
-
-        input.installTap(onBus: 0, bufferSize: 4_096, format: inputFormat) { buffer, _ in
-            guard let pcm = Self.convert(buffer, using: converter, to: target) else { return }
-            try? writer.append(pcm)
-        }
-
-        engine.prepare()
-        do {
-            try engine.start()
-        } catch {
-            input.removeTap(onBus: 0)
-            self.writer = nil
-            self.directory = nil
-            try? AudioChunkStore.discard(directory)
-            throw CaptureError.inputUnavailable
-        }
-
         observeInterruptions()
     }
 
@@ -83,28 +67,12 @@ final class MicrophoneRecorder: AudioRecorder {
     }
 
     private func stopEngine() {
-        guard engine.isRunning || writer != nil else { return }
-
-        engine.stop()
-        engine.inputNode.removeTap(onBus: 0)
+        if let consumer {
+            input.detach(consumer)
+            self.consumer = nil
+        }
         interruptionObservers.forEach(NotificationCenter.default.removeObserver)
         interruptionObservers.removeAll()
-
-        #if os(iOS)
-        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-        #endif
-    }
-
-    private func configureSession() throws {
-        #if os(iOS)
-        let session = AVAudioSession.sharedInstance()
-        do {
-            try session.setCategory(.playAndRecord, mode: .spokenAudio, options: [.allowBluetoothHFP, .defaultToSpeaker])
-            try session.setActive(true, options: .notifyOthersOnDeactivation)
-        } catch {
-            throw CaptureError.inputUnavailable
-        }
-        #endif
     }
 
     /// An interruption or a lost input seals what is already on disk instead of
@@ -127,12 +95,38 @@ final class MicrophoneRecorder: AudioRecorder {
     private func hasMicrophonePermission() async -> Bool {
         await MicrophonePermission.request()
     }
+}
 
-    private static func convert(
-        _ buffer: AVAudioPCMBuffer,
-        using converter: AVAudioConverter,
-        to target: AVAudioFormat
-    ) -> Data? {
+/// Converts the input's native buffers to the Library's format and seals them
+/// on the audio thread, without touching the main actor.
+private final class PCMSink: @unchecked Sendable {
+    private let writer: AudioChunkWriter
+    private let converter: AVAudioConverter
+    private let target: AVAudioFormat
+
+    init(writer: AudioChunkWriter, from source: AVAudioFormat, to format: AudioFormat) throws {
+        guard let target = AVAudioFormat(
+            commonFormat: .pcmFormatInt16,
+            sampleRate: Double(format.sampleRate),
+            channels: AVAudioChannelCount(format.channels),
+            interleaved: true
+        ), let converter = AVAudioConverter(from: source, to: target) else {
+            throw CaptureError.inputUnavailable
+        }
+
+        self.writer = writer
+        self.converter = converter
+        self.target = target
+    }
+
+    var consumer: MicrophoneInput.Consumer {
+        { [self] buffer in
+            guard let pcm = convert(buffer) else { return }
+            try? writer.append(pcm)
+        }
+    }
+
+    private func convert(_ buffer: AVAudioPCMBuffer) -> Data? {
         let capacity = AVAudioFrameCount(
             Double(buffer.frameLength) * target.sampleRate / buffer.format.sampleRate
         ) + 1_024
