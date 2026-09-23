@@ -8,8 +8,8 @@ struct LibraryView: View {
     let setup: SetupFlow
     let sync: SyncEngine
     let diagnostics: Diagnostics
+    @Bindable var navigation: LibraryNavigation
 
-    @State private var selection: Recording.ID?
     @State private var isCapturing = false
     @State private var isShowingSettings = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -19,7 +19,7 @@ struct LibraryView: View {
 
     var body: some View {
         NavigationSplitView {
-            List(selection: $selection) {
+            List(selection: $navigation.selection) {
                 if query.isEmpty {
                     ForEach(library.recordings) { recording in
                         RecordingRow(recording: recording)
@@ -101,10 +101,6 @@ struct LibraryView: View {
         .onChange(of: coordinator.isRecording) { _, isRecording in
             if isRecording { isCapturing = true }
         }
-        .task {
-            await library.unlock()
-            await entitlements.refresh()
-        }
     }
 
     @ViewBuilder
@@ -139,7 +135,7 @@ struct LibraryView: View {
     }
 
     private var selected: Recording? {
-        library.recordings.first { $0.id == selection }
+        library.recordings.first { $0.id == navigation.selection }
     }
 
     private var results: [SearchResult] {
@@ -147,7 +143,7 @@ struct LibraryView: View {
     }
 
     private func open(_ result: SearchResult) {
-        selection = result.recordingID
+        navigation.selection = result.recordingID
         evidenceTime = result.time
     }
 
@@ -163,7 +159,9 @@ struct LibraryView: View {
         .disabled(!coordinator.isRecording && !coordinator.canStart)
         .tint(.red)
         .symbolEffect(.pulse, isActive: coordinator.isRecording && !reduceMotion)
+        #if os(iOS)
         .keyboardShortcut("r", modifiers: [.command, .shift])
+        #endif
     }
 
     private func startRecording() {
@@ -185,7 +183,7 @@ struct LibraryView: View {
 
     private func delete(_ recording: Recording) {
         do {
-            if selection == recording.id { selection = nil }
+            if navigation.selection == recording.id { navigation.selection = nil }
             try library.delete(recording)
         } catch {
             actionError = error.localizedDescription

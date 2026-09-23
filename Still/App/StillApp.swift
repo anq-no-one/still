@@ -15,9 +15,12 @@ struct StillApp: App {
     private let browser: BrowserMeetingBridge
     #endif
 
+    private let navigation: LibraryNavigation
     #if os(macOS)
-    @State private var shortcut: GlobalRecordingShortcut?
+    private let shortcut: GlobalRecordingShortcut
     #endif
+
+    static let libraryWindowID = "library"
 
     init() {
         #if DEBUG
@@ -131,6 +134,16 @@ struct StillApp: App {
             )
         }
         coordinator = recordingCoordinator
+        navigation = MainActor.assumeIsolated { LibraryNavigation() }
+        Task { @MainActor in
+            await recordingLibrary.unlock()
+            await proEntitlements.refresh()
+        }
+        #if os(macOS)
+        shortcut = MainActor.assumeIsolated {
+            GlobalRecordingShortcut { Task { await recordingCoordinator.toggle() } }
+        }
+        #endif
 
         MainActor.assumeIsolated {
             StillIntentEnvironment.shared.install(library: recordingLibrary, coordinator: recordingCoordinator)
@@ -154,30 +167,13 @@ struct StillApp: App {
     }
 
     var body: some Scene {
-        WindowGroup {
-            LibraryView(
-                library: library,
-                modelInstaller: modelInstaller,
-                entitlements: entitlements,
-                coordinator: coordinator,
-                setup: setup,
-                sync: sync,
-                diagnostics: diagnostics
-            )
-            #if os(macOS)
-            .task {
-                guard shortcut == nil else { return }
-                let coordinator = coordinator
-                shortcut = GlobalRecordingShortcut { Task { await coordinator.toggle() } }
-            }
-            #endif
+        #if os(macOS)
+        Window("Still", id: Self.libraryWindowID) {
+            libraryView
         }
-
-        #if os(macOS)
         .defaultSize(width: 980, height: 680)
-        #endif
+        .defaultLaunchBehavior(setup.isComplete ? .suppressed : .presented)
 
-        #if os(macOS)
         Settings {
             SettingsView(
                 library: library,
@@ -191,10 +187,28 @@ struct StillApp: App {
         }
 
         MenuBarExtra {
-            RecordingMenuBarContent(coordinator: coordinator)
+            RecordingMenuBarPanel(coordinator: coordinator, library: library, automatic: automatic, navigation: navigation)
         } label: {
             RecordingMenuBarLabel(coordinator: coordinator)
         }
+        .menuBarExtraStyle(.window)
+        #else
+        WindowGroup {
+            libraryView
+        }
         #endif
+    }
+
+    private var libraryView: some View {
+        LibraryView(
+            library: library,
+            modelInstaller: modelInstaller,
+            entitlements: entitlements,
+            coordinator: coordinator,
+            setup: setup,
+            sync: sync,
+            diagnostics: diagnostics,
+            navigation: navigation
+        )
     }
 }
