@@ -1,8 +1,6 @@
 import FluidAudio
 import Foundation
 
-/// Still's own speech recognizer: Parakeet V3 running through Core ML on this
-/// device. The models load once, on first use, from the verified Model Pack.
 actor ParakeetEngine {
     static let sampleRate = 16_000
 
@@ -15,7 +13,6 @@ actor ParakeetEngine {
         self.root = root
     }
 
-    /// Mono samples at 16 kHz in, words with their timings out.
     func words(in samples: [Float]) async throws -> [SpokenWord] {
         guard samples.count >= Self.sampleRate / 4 else { return [] }
 

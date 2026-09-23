@@ -160,10 +160,6 @@ final class RecordingWorkflow {
         state = .idle
     }
 
-    /// The live draft is a preview. The saved transcript always comes from the
-    /// journaled audio, so it carries timings and survives a failed recognizer.
-    /// A device that cannot transcribe still keeps the audio: nil saves the
-    /// Recording without words rather than losing it.
     private func transcribeCapturedTracksIfPossible() async throws -> TranscriptionResult? {
         do {
             return try await finalTranscription.run(

@@ -1,7 +1,5 @@
 import Foundation
 
-/// Transcribes captured audio after a recording stops. The samples stay in
-/// memory, so no plaintext audio file is written to disk.
 protocol OfflineTranscriber: Sendable {
     func segments(of pcm: Data, format: AudioFormat) async throws -> [TranscriptSegment]
 }
@@ -17,8 +15,6 @@ struct ParakeetOfflineTranscriber: OfflineTranscriber {
 }
 
 enum PCMSamples {
-    /// Interleaved 16-bit audio as mono floats, which is what the recognizer
-    /// reads. The Library records at the recognizer's own 16 kHz.
     static func floats(fromInt16 pcm: Data, channels: Int) -> [Float] {
         let data = Data(pcm)
         let channelCount = max(1, channels)

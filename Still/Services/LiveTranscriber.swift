@@ -1,10 +1,6 @@
 import AVFoundation
 import Observation
 
-/// The draft shown while recording. It re-reads the open stretch of audio every
-/// couple of seconds and seals it every fifteen, so the work per update stays
-/// the same however long the meeting runs. The saved transcript comes from the
-/// journaled audio instead, so a rough draft never becomes the record.
 @MainActor
 @Observable
 final class LiveTranscriber: TranscriptionSession {
@@ -83,7 +79,6 @@ final class LiveTranscriber: TranscriptionSession {
     }
 }
 
-/// Collects the microphone at the recognizer's 16 kHz on the audio thread.
 private final class LiveSamples: @unchecked Sendable {
     private let lock = NSLock()
     private var buffered: [Float] = []
@@ -105,8 +100,6 @@ private final class LiveSamples: @unchecked Sendable {
         }
     }
 
-    /// The audio not yet sealed. Once it reaches the seal length it is handed
-    /// over for the last time and the next stretch starts empty.
     func openStretch(sealingAfter limit: Int) -> ([Float], Bool) {
         lock.withLock {
             guard buffered.count >= limit else { return (buffered, false) }

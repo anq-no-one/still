@@ -1,9 +1,5 @@
 import XCTest
 
-/// Drives the real app from a first launch, with Still's own recognizer. The
-/// microphone hears a recorded meeting, so every run transcribes the same words: "Good morning everyone.
-/// The quarterly budget review moves to Thursday. Maria will send the updated
-/// forecast by Friday."
 @MainActor
 final class StillEndToEndTests: XCTestCase {
     private let app = XCUIApplication()
@@ -84,8 +80,6 @@ final class StillEndToEndTests: XCTestCase {
         installTranscription()
     }
 
-    /// The first run on a Mac downloads the Model Pack through Still itself;
-    /// later runs find it already verified and continue at once.
     private func installTranscription() {
         let download = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Download'")).firstMatch
         let proceed = app.buttons["Continue"]
@@ -147,8 +141,6 @@ final class StillEndToEndTests: XCTestCase {
         XCTFail("Timed out waiting for \(what).")
     }
 
-    /// Speech recognition asks once per install, in a system alert the app
-    /// cannot answer for itself.
     private func allowSystemPrompts() {
         for label in ["Allow", "OK", "Allow While Using App"] {
             let button = springboard.alerts.buttons[label]

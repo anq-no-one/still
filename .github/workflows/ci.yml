@@ -11,11 +11,10 @@ concurrency:
 
 env:
   XCODE_VERSION: "26.6"
-  RESULT_BUNDLE: ${{ github.workspace }}/Artifacts/StillTests.xcresult
 
 jobs:
   verify:
-    name: Build iOS and macOS, run tests
+    name: bin/check.sh
     runs-on: macos-26
 
     steps:
@@ -32,35 +31,27 @@ jobs:
           sudo xcode-select --switch "/Applications/Xcode_${XCODE_VERSION}.app"
           xcodebuild -version
 
-      - name: Generate project
-        run: |
-          brew install xcodegen
-          xcodegen generate
+      - name: Install XcodeGen
+        run: brew install xcodegen
 
-      - name: Build iOS
-        run: |
-          xcodebuild build \
-            -project Still.xcodeproj \
-            -scheme Still-iOS \
-            -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO
+      - name: Restore the Model Pack
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/Library/Caches/Still-E2E/Models
+          key: parakeet-tdt-0.6b-v3-7dd20fe6
 
-      - name: Test macOS
-        run: |
-          xcodebuild test \
-            -project Still.xcodeproj \
-            -scheme Still-macOS \
-            -destination 'platform=macOS,arch=arm64' \
-            -parallel-testing-enabled NO \
-            -resultBundlePath "$RESULT_BUNDLE" \
-            CODE_SIGNING_ALLOWED=NO
+      - name: Run every check
+        run: bin/check.sh
 
-      - name: Upload test results
+      - name: Upload results
         if: failure()
         continue-on-error: true
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: still-test-results
-          path: ${{ env.RESULT_BUNDLE }}
+          name: still-check-results
+          path: |
+            Artifacts/check.log
+            Artifacts/E2E.log
+            Artifacts/E2E-screens
           if-no-files-found: warn
           retention-days: 3

@@ -1,12 +1,4 @@
 #!/bin/bash
-# Runs the end-to-end suite against a real Still build.
-#
-# On a simulator the run needs nobody: it creates its own device, keeps it
-# silent, enrolls Face ID and approves every Face ID request, then deletes the
-# device. The Model Pack lives in one folder on this Mac, so only the first run
-# downloads it. On a physical device Face ID is real, so reopening the Library after
-# relaunch waits for the person holding the phone.
-#
 # Usage: bin/e2e.sh [--device <udid>] [--only <test name>]
 
 set -euo pipefail

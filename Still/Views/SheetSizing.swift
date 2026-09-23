@@ -14,8 +14,6 @@ extension View {
 }
 
 extension View {
-    /// A Mac Settings window names itself after the selected tab, so only the
-    /// iPhone and iPad navigation stack takes the pane's own title.
     func settingsPaneTitle(_ title: LocalizedStringKey) -> some View {
         #if os(iOS)
         return navigationTitle(title)

@@ -1,9 +1,6 @@
 import AVFoundation
 import Foundation
 
-/// The one engine that owns the microphone. The recording and the live
-/// transcript attach to it and receive the same buffers, so they never compete
-/// for the input or reconfigure the audio session under each other.
 @MainActor
 final class MicrophoneInput {
     typealias Consumer = @Sendable (AVAudioPCMBuffer) -> Void
@@ -12,8 +9,6 @@ final class MicrophoneInput {
     private let consumers = ConsumerList()
     private let fixture: AudioFixture?
 
-    /// A fixture replaces the microphone with a recorded file played at real
-    /// speed, so an end-to-end run hears the same words every time.
     init(fixture: URL? = nil) {
         self.fixture = fixture.flatMap(AudioFixture.init(url:))
     }
@@ -22,8 +17,6 @@ final class MicrophoneInput {
         fixture?.isPlaying ?? engine.isRunning
     }
 
-    /// Hands the consumer the input's real format before the first buffer
-    /// arrives, so a consumer can build its converter once.
     func attach(_ makeConsumer: (AVAudioFormat) throws -> Consumer) throws -> UUID {
         if let fixture {
             let id = consumers.insert(try makeConsumer(fixture.format))
@@ -83,8 +76,6 @@ final class MicrophoneInput {
         deactivateSession()
     }
 
-    /// Built outside the main actor because the engine calls it on its own
-    /// audio thread.
     private nonisolated static func tap(delivering consumers: ConsumerList) -> AVAudioNodeTapBlock {
         { buffer, _ in consumers.deliver(buffer) }
     }
@@ -155,8 +146,6 @@ private final class AudioFixture: @unchecked Sendable {
         }
     }
 
-    /// Past the end of the file the fixture keeps delivering silence, as a
-    /// quiet room does, until the recording stops.
     private func nextBuffer() -> AVAudioPCMBuffer? {
         guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: Self.framesPerBuffer),
               let source = samples.floatChannelData,

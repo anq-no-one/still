@@ -1,8 +1,6 @@
 import Foundation
 import NaturalLanguage
 
-/// Turns recognized words into the phrases a reader scans: a phrase ends at a
-/// sentence mark or at a pause long enough to be a new thought.
 enum TranscriptPhrases {
     static let pauseSeconds: TimeInterval = 1.2
 

@@ -17,14 +17,17 @@ open Still.xcodeproj
 
 Use a physical device or a Mac with microphone access.
 
-## End-to-end tests
+## Checks
+
+`bin/check.sh` runs every check CI runs: the iOS build, the macOS unit tests, and the end-to-end suite. A green local run is enough; CI calls the same script.
 
 ```sh
-bin/e2e.sh                     # fresh silent simulator, deleted afterwards
+bin/check.sh                   # everything
+bin/e2e.sh                     # end-to-end only, on a fresh silent simulator
 bin/e2e.sh --device <udid>     # a connected iPhone with UI Automation enabled
 ```
 
-A Debug build hears `Still/DebugSupport/meeting.fixture.caf` instead of the microphone, so every run records the same meeting. The simulator has no on-device speech models, so there the suite proves that a Recording survives a device that cannot transcribe; the words themselves are checked on a device. The selected language must support on-device speech recognition.
+A Debug build hears `Still/DebugSupport/meeting.fixture.caf` instead of the microphone, so every run records the same meeting. Parakeet runs in the simulator too, so the suite checks the words it hears. The Model Pack is cached in `~/Library/Caches/Still-E2E/Models`, so only the first run downloads it. The selected language must support on-device speech recognition.
 
 ## Product path
 

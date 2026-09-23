@@ -75,8 +75,6 @@ final class MicrophoneRecorder: AudioRecorder {
         interruptionObservers.removeAll()
     }
 
-    /// An interruption or a lost input seals what is already on disk instead of
-    /// letting the engine drop audio silently.
     private func observeInterruptions() {
         #if os(iOS)
         let center = NotificationCenter.default
@@ -97,8 +95,6 @@ final class MicrophoneRecorder: AudioRecorder {
     }
 }
 
-/// Converts the input's native buffers to the Library's format and seals them
-/// on the audio thread, without touching the main actor.
 private final class PCMSink: @unchecked Sendable {
     private let writer: AudioChunkWriter
     private let converter: AVAudioConverter
