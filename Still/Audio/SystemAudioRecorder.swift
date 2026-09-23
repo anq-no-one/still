@@ -10,15 +10,17 @@ final class SystemAudioRecorder: NSObject {
     private let root: URL
     private let cipher: LibraryCipher
     private let format: AudioFormat
+    private let input: SystemAudioInput
     private let sampleQueue = DispatchQueue(label: "still.system-audio")
 
     private var stream: SCStream?
     private var writer: AudioChunkWriter?
     private var output: SystemAudioOutput?
 
-    init(root: URL, cipher: LibraryCipher, format: AudioFormat = .transcription) {
+    init(root: URL, cipher: LibraryCipher, input: SystemAudioInput, format: AudioFormat = .transcription) {
         self.root = root
         self.cipher = cipher
+        self.input = input
         self.format = format
     }
 
@@ -41,7 +43,7 @@ final class SystemAudioRecorder: NSObject {
             format: format,
             startOffset: startOffset
         )
-        let output = SystemAudioOutput(writer: writer, format: format)
+        let output = SystemAudioOutput(writer: writer, input: input)
         let stream = SCStream(
             filter: SCContentFilter(display: display, excludingWindows: []),
             configuration: configuration,
@@ -84,21 +86,24 @@ final class SystemAudioRecorder: NSObject {
 
 private final class SystemAudioOutput: NSObject, SCStreamOutput {
     private let writer: AudioChunkWriter
-    private let format: AudioFormat
+    private let input: SystemAudioInput
 
-    init(writer: AudioChunkWriter, format: AudioFormat) {
+    init(writer: AudioChunkWriter, input: SystemAudioInput) {
         self.writer = writer
-        self.format = format
+        self.input = input
     }
 
     func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
         guard type == .audio, sampleBuffer.isValid else { return }
-        guard let samples = Self.int16Samples(from: sampleBuffer, as: format) else { return }
+        guard let target = input.pcmFormat, let converted = Self.convert(sampleBuffer, to: target),
+              let channel = converted.int16ChannelData
+        else { return }
 
-        try? writer.append(samples)
+        try? writer.append(Data(bytes: channel[0], count: Int(converted.frameLength) * Int(target.streamDescription.pointee.mBytesPerFrame)))
+        input.deliver(converted)
     }
 
-    private static func int16Samples(from sampleBuffer: CMSampleBuffer, as format: AudioFormat) -> Data? {
+    private static func convert(_ sampleBuffer: CMSampleBuffer, to target: AVAudioFormat) -> AVAudioPCMBuffer? {
         guard var description = sampleBuffer.formatDescription?.audioStreamBasicDescription,
               let streamFormat = AVAudioFormat(streamDescription: &description)
         else { return nil }
@@ -123,12 +128,7 @@ private final class SystemAudioOutput: NSObject, SCStreamOutput {
               )
         else { return nil }
 
-        guard let target = AVAudioFormat(
-            commonFormat: .pcmFormatInt16,
-            sampleRate: Double(format.sampleRate),
-            channels: AVAudioChannelCount(format.channels),
-            interleaved: true
-        ), let converter = AVAudioConverter(from: streamFormat, to: target),
+        guard let converter = AVAudioConverter(from: streamFormat, to: target),
            let output = AVAudioPCMBuffer(
                pcmFormat: target,
                frameCapacity: AVAudioFrameCount(Double(buffer.frameLength) * target.sampleRate / streamFormat.sampleRate) + 1_024
@@ -147,8 +147,8 @@ private final class SystemAudioOutput: NSObject, SCStreamOutput {
             return buffer
         }
 
-        guard error == nil, output.frameLength > 0, let channel = output.int16ChannelData else { return nil }
-        return Data(bytes: channel[0], count: Int(output.frameLength) * MemoryLayout<Int16>.size)
+        guard error == nil, output.frameLength > 0 else { return nil }
+        return output
     }
 }
 #endif

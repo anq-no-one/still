@@ -25,12 +25,13 @@ final class MacAudioRecorder: AudioRecorder {
         root: URL,
         cipher: LibraryCipher,
         microphoneInput: MicrophoneInput,
+        systemAudioInput: SystemAudioInput,
         format: AudioFormat = .transcription,
         capturesSystemAudio: @escaping () -> Bool,
         now: @escaping () -> Date = Date.init
     ) {
         microphone = MicrophoneRecorder(root: root, cipher: cipher, input: microphoneInput, format: format)
-        systemAudio = SystemAudioRecorder(root: root, cipher: cipher, format: format)
+        systemAudio = SystemAudioRecorder(root: root, cipher: cipher, input: systemAudioInput, format: format)
         self.capturesSystemAudio = capturesSystemAudio
         self.now = now
     }

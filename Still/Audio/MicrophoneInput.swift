@@ -168,7 +168,7 @@ private final class AudioFixture: @unchecked Sendable {
     }
 }
 
-private final class ConsumerList: @unchecked Sendable {
+final class ConsumerList: @unchecked Sendable {
     private let lock = NSLock()
     private var consumers: [UUID: MicrophoneInput.Consumer] = [:]
 

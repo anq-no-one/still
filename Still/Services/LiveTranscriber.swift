@@ -8,8 +8,10 @@ final class LiveTranscriber: TranscriptionSession {
     static let sealSeconds = 15
 
     private let input: MicrophoneInput
+    private let systemAudio: SystemAudioInput?
     private let engine: ParakeetEngine
     private var consumer: UUID?
+    private var systemAudioConsumer: UUID?
     private var samples: LiveSamples?
     private var loop: Task<Void, Never>?
     private var sealed = ""
@@ -18,8 +20,9 @@ final class LiveTranscriber: TranscriptionSession {
     private(set) var isRecording = false
     private(set) var failure: String?
 
-    init(input: MicrophoneInput, engine: ParakeetEngine) {
+    init(input: MicrophoneInput, systemAudio: SystemAudioInput? = nil, engine: ParakeetEngine) {
         self.input = input
+        self.systemAudio = systemAudio
         self.engine = engine
     }
 
@@ -32,7 +35,10 @@ final class LiveTranscriber: TranscriptionSession {
 
         let samples = LiveSamples()
         consumer = try input.attach { format in
-            try samples.consumer(from: format)
+            try samples.consumer(from: format, source: .microphone)
+        }
+        systemAudioConsumer = try? systemAudio?.attach { format in
+            try samples.consumer(from: format, source: .systemAudio)
         }
         self.samples = samples
         isRecording = true
@@ -55,6 +61,10 @@ final class LiveTranscriber: TranscriptionSession {
             input.detach(consumer)
             self.consumer = nil
         }
+        if let systemAudioConsumer {
+            systemAudio?.detach(systemAudioConsumer)
+            self.systemAudioConsumer = nil
+        }
         samples = nil
         isRecording = false
     }
@@ -62,11 +72,11 @@ final class LiveTranscriber: TranscriptionSession {
     private func update() async {
         guard let samples else { return }
 
-        let (open, isFull) = samples.openStretch(sealingAfter: Self.sealSeconds * ParakeetEngine.sampleRate)
+        let stretch = samples.openStretch(sealingAfter: Self.sealSeconds * ParakeetEngine.sampleRate)
         do {
-            let words = try await engine.words(in: open)
+            let words = try await engine.words(in: stretch.samples)
             let text = TranscriptPhrases.plainText(of: words)
-            if isFull {
+            if stretch.isSealed {
                 sealed = [sealed, text].filter { !$0.isEmpty }.joined(separator: " ")
                 transcript = sealed
             } else {
@@ -81,9 +91,9 @@ final class LiveTranscriber: TranscriptionSession {
 
 private final class LiveSamples: @unchecked Sendable {
     private let lock = NSLock()
-    private var buffered: [Float] = []
+    private var mix = LiveMix(settle: ParakeetEngine.sampleRate, realignAfter: 2 * ParakeetEngine.sampleRate)
 
-    func consumer(from format: AVAudioFormat) throws -> MicrophoneInput.Consumer {
+    func consumer(from format: AVAudioFormat, source: LiveMix.Source) throws -> MicrophoneInput.Consumer {
         guard let target = AVAudioFormat(
             commonFormat: .pcmFormatFloat32,
             sampleRate: Double(ParakeetEngine.sampleRate),
@@ -96,18 +106,12 @@ private final class LiveSamples: @unchecked Sendable {
         nonisolated(unsafe) let unsafeConverter = converter
         return { [self] buffer in
             guard let floats = Self.convert(buffer, with: unsafeConverter, to: target) else { return }
-            lock.withLock { buffered += floats }
+            lock.withLock { mix.add(floats, from: source) }
         }
     }
 
-    func openStretch(sealingAfter limit: Int) -> ([Float], Bool) {
-        lock.withLock {
-            guard buffered.count >= limit else { return (buffered, false) }
-
-            let stretch = Array(buffered.prefix(limit))
-            buffered.removeFirst(limit)
-            return (stretch, true)
-        }
+    func openStretch(sealingAfter limit: Int) -> LiveMix.Stretch {
+        lock.withLock { mix.openStretch(sealingAfter: limit) }
     }
 
     private static func convert(_ buffer: AVAudioPCMBuffer, with converter: AVAudioConverter, to target: AVAudioFormat) -> [Float]? {
