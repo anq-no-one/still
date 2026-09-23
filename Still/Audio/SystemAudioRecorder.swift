@@ -93,12 +93,12 @@ private final class SystemAudioOutput: NSObject, SCStreamOutput {
 
     func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
         guard type == .audio, sampleBuffer.isValid else { return }
-        guard let samples = Self.int16Samples(from: sampleBuffer) else { return }
+        guard let samples = Self.int16Samples(from: sampleBuffer, as: format) else { return }
 
         try? writer.append(samples)
     }
 
-    private static func int16Samples(from sampleBuffer: CMSampleBuffer) -> Data? {
+    private static func int16Samples(from sampleBuffer: CMSampleBuffer, as format: AudioFormat) -> Data? {
         guard var description = sampleBuffer.formatDescription?.audioStreamBasicDescription,
               let streamFormat = AVAudioFormat(streamDescription: &description)
         else { return nil }
@@ -125,11 +125,14 @@ private final class SystemAudioOutput: NSObject, SCStreamOutput {
 
         guard let target = AVAudioFormat(
             commonFormat: .pcmFormatInt16,
-            sampleRate: streamFormat.sampleRate,
-            channels: 1,
+            sampleRate: Double(format.sampleRate),
+            channels: AVAudioChannelCount(format.channels),
             interleaved: true
         ), let converter = AVAudioConverter(from: streamFormat, to: target),
-           let output = AVAudioPCMBuffer(pcmFormat: target, frameCapacity: buffer.frameLength)
+           let output = AVAudioPCMBuffer(
+               pcmFormat: target,
+               frameCapacity: AVAudioFrameCount(Double(buffer.frameLength) * target.sampleRate / streamFormat.sampleRate) + 1_024
+           )
         else { return nil }
 
         var consumed = false
