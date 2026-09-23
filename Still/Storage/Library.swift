@@ -8,6 +8,7 @@ protocol RecordingLibrary: AnyObject {
     func capturedTracks(forRecording id: UUID) throws -> [CapturedTrack]
     func checkpointStore(forRecording id: UUID) throws -> TranscriptionCheckpointStore
     func tracks(forRecording id: UUID) -> [AudioTrack]
+    var speakerNaming: SpeakerNamingContext { get }
 }
 
 @MainActor
@@ -342,11 +343,14 @@ final class Library: RecordingLibrary {
     }
 
     func renameSpeaker(_ speaker: Speaker, to name: String, in recording: Recording) throws {
-        guard let index = recording.speakers.firstIndex(where: { $0.id == speaker.id }) else { return }
+        try write(recording.renamingSpeaker(speaker, to: name))
+    }
 
-        var updated = recording
-        updated.speakers[index].name = name
-        try write(updated)
+    var speakerNaming: SpeakerNamingContext {
+        SpeakerNamingContext(
+            profiles: VoiceProfiles.from(recordings),
+            ownerName: VoiceProfiles.ownerName(in: recordings)
+        )
     }
 
     /// Audio left behind by a termination becomes a Recording on the next unlock.

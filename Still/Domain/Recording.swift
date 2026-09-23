@@ -39,4 +39,13 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
     var isDeleted: Bool {
         deletedAt != nil
     }
+
+    func renamingSpeaker(_ speaker: Speaker, to name: String) -> Recording {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, let index = speakers.firstIndex(where: { $0.id == speaker.id }) else { return self }
+
+        var renamed = self
+        renamed.speakers[index] = speakers[index].named(trimmed, by: .user)
+        return renamed
+    }
 }

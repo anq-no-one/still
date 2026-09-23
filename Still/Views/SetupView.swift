@@ -2,7 +2,11 @@ import SwiftUI
 
 struct SetupView: View {
     let flow: SetupFlow
-    let installer: ModelPackInstaller
+    let models: ModelInstallers
+
+    private var installer: ModelPackInstaller {
+        models.transcription
+    }
 
     var body: some View {
         Group {
@@ -83,11 +87,11 @@ struct SetupView: View {
                 }
             case .failed:
                 primary("Try Again") {
-                    Task { await installer.approveAndInstall() }
+                    Task { await models.approveAndInstall() }
                 }
             default:
-                primary("Download \(installer.pack.downloadSizeText)") {
-                    Task { await installer.approveAndInstall() }
+                primary("Download \(models.downloadSizeText)") {
+                    Task { await models.approveAndInstall() }
                 }
             }
         }

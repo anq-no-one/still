@@ -228,6 +228,36 @@ struct RecordingWorkflowTests {
         #expect(workflow.elapsed == 12)
     }
 
+    @Test
+    func namesTheSpeakersAfterTheFinalTranscript() async throws {
+        let library = SpyRecordingLibrary()
+        library.speakerNaming = SpeakerNamingContext(ownerName: "Andrii D.")
+        let clock = StubClock(start: Date(timeIntervalSince1970: 500))
+        var askedAbout: Date?
+        let workflow = RecordingWorkflow(
+            session: FakeTranscriptionSession(),
+            finalTranscription: FinalTranscription(transcriber: StubOfflineTranscriber(), windowSeconds: 3_600),
+            speakerSeparation: SpeakerSeparation(diarizer: StubDiarizer(turns: [SpeakerTurn(speaker: 0, start: 0, end: 5)])),
+            expectedParticipants: { date in
+                askedAbout = date
+                return []
+            },
+            recorder: SpyAudioRecorder(),
+            library: library,
+            showsLiveDraft: false,
+            now: clock.now
+        )
+
+        await workflow.start()
+        clock.advance(by: 10)
+        await workflow.save()
+
+        let recording = try #require(library.recordings.first)
+        #expect(recording.speakers.map(\.name) == ["Andrii D."])
+        #expect(recording.segments.allSatisfy { $0.speakerID == recording.speakers[0].id })
+        #expect(askedAbout == Date(timeIntervalSince1970: 500))
+    }
+
     private func makeWorkflow(
         session: FakeTranscriptionSession = FakeTranscriptionSession(),
         recorder: SpyAudioRecorder = SpyAudioRecorder(),
@@ -313,6 +343,8 @@ final class SpyRecordingLibrary: RecordingLibrary {
     func tracks(forRecording id: UUID) -> [AudioTrack] {
         [.microphone]
     }
+
+    var speakerNaming = SpeakerNamingContext.none
 }
 
 final class StubOfflineTranscriber: OfflineTranscriber, @unchecked Sendable {

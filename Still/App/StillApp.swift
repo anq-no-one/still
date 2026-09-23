@@ -4,7 +4,7 @@ import SwiftUI
 @main
 struct StillApp: App {
     private let library: Library
-    private let modelInstaller: ModelPackInstaller
+    private let models: ModelInstallers
     private let entitlements: Entitlements
     private let coordinator: RecordingCoordinator
     private let setup: SetupFlow
@@ -65,13 +65,21 @@ struct StillApp: App {
         #else
         let modelRoot = supportRoot.appending(path: "Models", directoryHint: .isDirectory)
         #endif
-        modelInstaller = MainActor.assumeIsolated {
-            ModelPackInstaller(
-                pack: ModelCatalog.parakeetV3,
-                root: modelRoot,
-                downloader: URLSessionModelFileDownloader()
+        let installers = MainActor.assumeIsolated {
+            ModelInstallers(
+                transcription: ModelPackInstaller(
+                    pack: ModelCatalog.parakeetV3,
+                    root: modelRoot,
+                    downloader: URLSessionModelFileDownloader()
+                ),
+                speakers: ModelPackInstaller(
+                    pack: ModelCatalog.speakerSeparation,
+                    root: modelRoot,
+                    downloader: URLSessionModelFileDownloader()
+                )
             )
         }
+        models = installers
         let speech = ParakeetEngine(pack: ModelCatalog.parakeetV3, root: modelRoot)
 
         let recordingLibrary = MainActor.assumeIsolated {
@@ -103,7 +111,7 @@ struct StillApp: App {
             )
         }
 
-        let installer = modelInstaller
+        let installer = installers.transcription
         let setupFlow = MainActor.assumeIsolated {
             SetupFlow(
                 store: UserDefaultsSetupProgressStore(),
@@ -132,6 +140,15 @@ struct StillApp: App {
                 entitlements: proEntitlements,
                 makeSession: { LiveTranscriber(input: microphone, systemAudio: systemAudio, engine: speech) },
                 makeFinalTranscription: { FinalTranscription(transcriber: ParakeetOfflineTranscriber(engine: speech)) },
+                makeSpeakerSeparation: {
+                    SpeakerSeparation(
+                        diarizer: FluidSpeakerDiarizer(pack: ModelCatalog.speakerSeparation, root: modelRoot),
+                        voiceprints: FluidVoiceprintExtractor(pack: ModelCatalog.speakerSeparation, root: modelRoot)
+                    )
+                },
+                expectedParticipants: { date in
+                    await CalendarContext(source: EventKitCalendarSource()).suggestion(at: date)?.participants ?? []
+                },
                 isReady: { setupFlow.isComplete && recordingLibrary.state == .unlocked }
             )
         }
@@ -180,7 +197,7 @@ struct StillApp: App {
         Settings {
             SettingsView(
                 library: library,
-                modelInstaller: modelInstaller,
+                models: models,
                 entitlements: entitlements,
                 sync: sync,
                 diagnostics: diagnostics,
@@ -206,7 +223,7 @@ struct StillApp: App {
     private var libraryView: some View {
         LibraryView(
             library: library,
-            modelInstaller: modelInstaller,
+            models: models,
             entitlements: entitlements,
             coordinator: coordinator,
             setup: setup,

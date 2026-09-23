@@ -1,31 +1,44 @@
 import SwiftUI
 
 struct TranscriptionSettingsView: View {
-    let installer: ModelPackInstaller
+    let models: ModelInstallers
 
     var body: some View {
         Form {
             Section {
-                LabeledContent("Download Size", value: installer.pack.downloadSizeText)
+                LabeledContent("Download Size", value: models.transcription.pack.downloadSizeText)
                 LabeledContent("Runs On", value: "This Device Only")
-                status
+                ModelPackStatus(installer: models.transcription, ready: "Ready to Transcribe Offline")
             } footer: {
-                Text(installer.pack.purpose)
+                Text(models.transcription.pack.purpose)
+            }
+
+            Section {
+                LabeledContent("Download Size", value: models.speakers.pack.downloadSizeText)
+                ModelPackStatus(installer: models.speakers, ready: "Ready to Tell Speakers Apart")
+            } header: {
+                Text("Speakers")
+            } footer: {
+                Text(models.speakers.pack.purpose)
             }
         }
         .formStyle(.grouped)
         .settingsPaneTitle("Transcription")
     }
+}
 
-    @ViewBuilder
-    private var status: some View {
+private struct ModelPackStatus: View {
+    let installer: ModelPackInstaller
+    let ready: LocalizedStringKey
+
+    var body: some View {
         switch installer.state {
         case .needsApproval:
             Button("Download") { install() }
         case .installing, .verifying:
             ProgressView("Downloading…", value: installer.progress)
         case .installed:
-            Label("Ready to Transcribe Offline", systemImage: "checkmark.circle.fill")
+            Label(ready, systemImage: "checkmark.circle.fill")
                 .foregroundStyle(.green)
         case .failed(let message):
             VStack(alignment: .leading, spacing: 6) {

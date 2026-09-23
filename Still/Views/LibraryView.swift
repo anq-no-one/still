@@ -2,7 +2,7 @@ import SwiftUI
 
 struct LibraryView: View {
     let library: Library
-    let modelInstaller: ModelPackInstaller
+    let models: ModelInstallers
     let entitlements: Entitlements
     let coordinator: RecordingCoordinator
     let setup: SetupFlow
@@ -79,14 +79,14 @@ struct LibraryView: View {
             CaptureView(coordinator: coordinator)
         }
         .sheet(isPresented: showsSetup) {
-            SetupView(flow: setup, installer: modelInstaller)
+            SetupView(flow: setup, models: models)
                 .interactiveDismissDisabled()
         }
         #if os(iOS)
         .sheet(isPresented: $isShowingSettings) {
             SettingsView(
                 library: library,
-                modelInstaller: modelInstaller,
+                models: models,
                 entitlements: entitlements,
                 sync: sync,
                 diagnostics: diagnostics

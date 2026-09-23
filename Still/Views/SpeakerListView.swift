@@ -31,22 +31,35 @@ private struct SpeakerRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: speaker.isYou ? "person.fill" : "person.2")
+            Image(systemName: icon)
                 .foregroundStyle(.secondary)
 
             TextField("Speaker name", text: $name)
                 .textFieldStyle(.plain)
-                .accessibilityLabel("Name for this speaker group")
+                .accessibilityLabel("Name for this speaker")
                 .focused($isEditing)
                 .onChange(of: isEditing) { _, editing in
                     if !editing, !name.isEmpty { rename(name) }
                 }
 
-            if speaker.isYou {
-                Text("Your microphone")
+            if let caption {
+                Text(caption)
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
+        }
+    }
+
+    private var icon: String {
+        speaker.isYou ? "person.fill" : speaker.nameSource == .track ? "person.2" : "person"
+    }
+
+    private var caption: LocalizedStringKey? {
+        if speaker.isYou { return "Your microphone" }
+        switch speaker.nameSource {
+        case .voiceProfile: return "Recognized by voice"
+        case .calendar: return "From your calendar"
+        default: return nil
         }
     }
 }
