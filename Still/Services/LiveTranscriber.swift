@@ -21,7 +21,7 @@ final class LiveTranscriber: TranscriptionSession {
     func start() async throws {
         guard !isRecording else { return }
 
-        let authorization = await requestSpeechAuthorization()
+        let authorization = await Self.requestSpeechAuthorization()
         guard authorization == .authorized else {
             throw TranscriptionError.speechPermissionDenied
         }
@@ -85,7 +85,9 @@ final class LiveTranscriber: TranscriptionSession {
         isRecording = false
     }
 
-    private func requestSpeechAuthorization() async -> SFSpeechRecognizerAuthorizationStatus {
+    /// The system answers on its own queue, so the callback must not belong to
+    /// the main actor.
+    private nonisolated static func requestSpeechAuthorization() async -> SFSpeechRecognizerAuthorizationStatus {
         await withCheckedContinuation { continuation in
             SFSpeechRecognizer.requestAuthorization { status in
                 continuation.resume(returning: status)
@@ -98,6 +100,7 @@ enum TranscriptionError: LocalizedError {
     case speechPermissionDenied
     case recognizerUnavailable
     case onDeviceRecognitionUnavailable
+    case recognitionFailed
     case timedOut
 
     var errorDescription: String? {
@@ -108,6 +111,8 @@ enum TranscriptionError: LocalizedError {
             "Speech recognition is not available for the current language."
         case .onDeviceRecognitionUnavailable:
             "This language cannot be transcribed on this device without an internet connection."
+        case .recognitionFailed:
+            "Speech recognition could not finish on this device. Your recording and its audio are saved."
         case .timedOut:
             "Speech recognition stopped responding. Your recording and its audio are saved."
         }
