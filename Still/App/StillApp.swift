@@ -1,3 +1,4 @@
+import CryptoKit
 import SwiftData
 import SwiftUI
 
@@ -91,7 +92,8 @@ struct StillApp: App {
 
         let journal = MainActor.assumeIsolated {
             let journal = DiagnosticJournal(
-                fileURL: supportRoot.appending(path: "Diagnostics/journal.jsonl")
+                fileURL: supportRoot.appending(path: "Diagnostics/journal.jsonl"),
+                key: (try? KeychainDeviceKeySource().journalKey()) ?? SymmetricKey(size: .bits256)
             )
             journal.note(.appLaunched)
             try? journal.removeExpired()

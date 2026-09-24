@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import Observation
 
@@ -59,6 +60,7 @@ final class DiagnosticJournal {
     static let retention: TimeInterval = 90 * 24 * 60 * 60
 
     let fileURL: URL
+    let lines: JournalLines
     private let appVersion: String
     private let now: () -> Date
     private var breadcrumbs: [JournalBreadcrumb] = []
@@ -67,10 +69,12 @@ final class DiagnosticJournal {
 
     init(
         fileURL: URL,
+        key: SymmetricKey,
         appVersion: String = Diagnostics.systemEnvironment().appVersion,
         now: @escaping () -> Date = Date.init
     ) {
         self.fileURL = fileURL
+        lines = JournalLines(cipher: LibraryCipher(key: key))
         self.appVersion = appVersion
         self.now = now
     }
@@ -117,12 +121,12 @@ final class DiagnosticJournal {
 
     func entries() throws -> [JournalEntry] {
         var entries: [JournalEntry] = []
-        try JournalLines.forEach(in: fileURL) { entries.append($0) }
+        try lines.forEach(in: fileURL) { entries.append($0) }
         return entries
     }
 
     func export(to destination: URL) throws {
-        try JournalExport.write(from: fileURL, to: destination)
+        try JournalExport.write(from: fileURL, lines: lines, to: destination)
         note(.journalExported)
     }
 
@@ -134,9 +138,9 @@ final class DiagnosticJournal {
         FileManager.default.createFile(atPath: kept.path(percentEncoded: false), contents: nil)
         let output = try FileHandle(forWritingTo: kept)
         do {
-            try JournalLines.forEach(in: fileURL) { entry in
+            try lines.forEach(in: fileURL) { entry in
                 guard entry.at >= cutoff else { return }
-                try output.write(contentsOf: try JournalLines.encode(entry))
+                try output.write(contentsOf: try lines.encode(entry))
             }
             try output.close()
             _ = try FileManager.default.replaceItemAt(fileURL, withItemAt: kept)
@@ -149,7 +153,7 @@ final class DiagnosticJournal {
 
     private func append(_ entry: JournalEntry) {
         do {
-            let line = try JournalLines.encode(entry)
+            let line = try lines.encode(entry)
             try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
             if !FileManager.default.fileExists(atPath: fileURL.path(percentEncoded: false)) {
                 FileManager.default.createFile(atPath: fileURL.path(percentEncoded: false), contents: nil, attributes: Self.protection)
@@ -175,22 +179,26 @@ final class DiagnosticJournal {
     }
 }
 
-enum JournalLines {
-    static func encode(_ entry: JournalEntry) throws -> Data {
+struct JournalLines: Sendable {
+    let cipher: LibraryCipher
+
+    func encode(_ entry: JournalEntry) throws -> Data {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = .sortedKeys
-        return try encoder.encode(entry) + Data([UInt8(ascii: "\n")])
+        let sealed = try cipher.seal(try encoder.encode(entry))
+        return sealed.base64EncodedData() + Data([UInt8(ascii: "\n")])
     }
 
-    static func decode(_ line: Data) throws -> JournalEntry {
+    func decode(_ line: Data) throws -> JournalEntry {
+        guard let sealed = Data(base64Encoded: line) else { throw CocoaError(.coderReadCorrupt) }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(JournalEntry.self, from: line)
+        return try decoder.decode(JournalEntry.self, from: try cipher.open(sealed))
     }
 
     /// Reads the file a chunk at a time so a long journal never sits in memory whole.
-    static func forEach(in url: URL, chunkSize: Int = 64 * 1024, _ body: (JournalEntry) throws -> Void) throws {
+    func forEach(in url: URL, chunkSize: Int = 64 * 1024, _ body: (JournalEntry) throws -> Void) throws {
         guard FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) else { return }
         let handle = try FileHandle(forReadingFrom: url)
         defer { try? handle.close() }
@@ -213,13 +221,13 @@ enum JournalLines {
 }
 
 enum JournalExport {
-    static func write(from source: URL, to destination: URL) throws {
+    static func write(from source: URL, lines: JournalLines, to destination: URL) throws {
         FileManager.default.createFile(atPath: destination.path(percentEncoded: false), contents: nil)
         let output = try FileHandle(forWritingTo: destination)
         defer { try? output.close() }
 
         try output.write(contentsOf: Data("Still diagnostic journal\n".utf8))
-        try JournalLines.forEach(in: source) { entry in
+        try lines.forEach(in: source) { entry in
             try output.write(contentsOf: Data(text(for: entry).utf8))
         }
     }

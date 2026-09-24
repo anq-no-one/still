@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import Observation
 
@@ -50,7 +51,8 @@ final class Diagnostics {
         settings: DiagnosticsSettingsStore,
         sink: DiagnosticsSink,
         journal: DiagnosticJournal = DiagnosticJournal(
-            fileURL: URL.temporaryDirectory.appending(path: "still-journal-\(UUID().uuidString).jsonl")
+            fileURL: URL.temporaryDirectory.appending(path: "still-journal-\(UUID().uuidString).jsonl"),
+            key: SymmetricKey(size: .bits256)
         ),
         environment: @escaping () -> (appVersion: String, systemVersion: String, deviceClass: String) = Diagnostics.systemEnvironment,
         now: @escaping () -> Date = Date.init

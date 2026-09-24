@@ -15,6 +15,7 @@ struct KeychainDeviceKeySource: DeviceKeySource {
     private let masterKeyAccount = "library-master-key"
     private let recoveryAccount = "library-recovery"
     private let pendingMasterKeyAccount = "library-master-key-pending"
+    private let journalKeyAccount = "diagnostic-journal-key"
 
     static let defaultService = "com.andrii.still.library"
 
@@ -45,6 +46,15 @@ struct KeychainDeviceKeySource: DeviceKeySource {
             throw LibraryKeyError.authenticationUnavailable
         }
         delete(account: presenceDeviceKeyAccount)
+    }
+
+    func journalKey() throws -> SymmetricKey {
+        if let existing = try read(account: journalKeyAccount, context: nil) {
+            return SymmetricKey(data: existing)
+        }
+        let key = SymmetricKey(size: .bits256)
+        try write(key.rawBytes, account: journalKeyAccount)
+        return key
     }
 
     func wrappedMasterKey() throws -> Data? {

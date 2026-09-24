@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import SwiftData
 import Testing
@@ -5,10 +6,23 @@ import Testing
 
 @MainActor
 struct DiagnosticJournalTests {
+    private let key = SymmetricKey(size: .bits256)
+
+    @Test
+    func theJournalIsUnreadableWithoutThisDevicesKey() throws {
+        let scratch = try Scratch()
+        let url = scratch.directory.appending(path: "journal.jsonl")
+        DiagnosticJournal(fileURL: url, key: key).fail(.libraryUnlockFailed)
+
+        let raw = try String(contentsOf: url, encoding: .utf8)
+        #expect(!raw.contains("libraryUnlockFailed"))
+        #expect(try DiagnosticJournal(fileURL: url, key: key).entries().count == 1)
+        #expect(try DiagnosticJournal(fileURL: url, key: SymmetricKey(size: .bits256)).entries().isEmpty)
+    }
     @Test
     func aFailedUnlockWritesOneEventWithItsBreadcrumbs() async throws {
         let scratch = try Scratch()
-        let journal = DiagnosticJournal(fileURL: scratch.directory.appending(path: "journal.jsonl"), appVersion: "1.2")
+        let journal = DiagnosticJournal(fileURL: scratch.directory.appending(path: "journal.jsonl"), key: key, appVersion: "1.2")
         journal.note(.appLaunched)
         let source = FakeDeviceKeySource()
         source.deviceKeyError = NSError(
@@ -37,7 +51,7 @@ struct DiagnosticJournalTests {
     @Test
     func keepsOnlyTheLastHundredBreadcrumbs() throws {
         let scratch = try Scratch()
-        let journal = DiagnosticJournal(fileURL: scratch.directory.appending(path: "journal.jsonl"))
+        let journal = DiagnosticJournal(fileURL: scratch.directory.appending(path: "journal.jsonl"), key: key)
         for _ in 0..<150 { journal.note(.recordingStarted) }
         journal.note(.recordingSaved)
 
@@ -51,14 +65,14 @@ struct DiagnosticJournalTests {
     @Test
     func exportsEveryEntryAsPlainTextReadingInSmallChunks() throws {
         let scratch = try Scratch()
-        let journal = DiagnosticJournal(fileURL: scratch.directory.appending(path: "journal.jsonl"), appVersion: "2.0")
+        let journal = DiagnosticJournal(fileURL: scratch.directory.appending(path: "journal.jsonl"), key: key, appVersion: "2.0")
         for _ in 0..<40 {
             journal.note(.syncFailed)
             journal.fail(.syncFailed, error: CocoaError(.fileReadNoPermission))
         }
 
         var streamed = 0
-        try JournalLines.forEach(in: journal.fileURL, chunkSize: 17) { _ in streamed += 1 }
+        try journal.lines.forEach(in: journal.fileURL, chunkSize: 17) { _ in streamed += 1 }
         #expect(streamed == 40)
 
         let destination = scratch.directory.appending(path: "export.txt")
@@ -74,7 +88,7 @@ struct DiagnosticJournalTests {
     func dropsEntriesOlderThanNinetyDays() throws {
         let scratch = try Scratch()
         var clock = Date(timeIntervalSince1970: 0)
-        let journal = DiagnosticJournal(fileURL: scratch.directory.appending(path: "journal.jsonl"), now: { clock })
+        let journal = DiagnosticJournal(fileURL: scratch.directory.appending(path: "journal.jsonl"), key: key, now: { clock })
         journal.fail(.recordingFailed)
         clock += DiagnosticJournal.retention - 60
         journal.fail(.exportFailed)
@@ -90,7 +104,7 @@ struct DiagnosticJournalTests {
         let scratch = try Scratch()
         let blocker = scratch.directory.appending(path: "not-a-folder")
         try Data("x".utf8).write(to: blocker)
-        let journal = DiagnosticJournal(fileURL: blocker.appending(path: "journal.jsonl"))
+        let journal = DiagnosticJournal(fileURL: blocker.appending(path: "journal.jsonl"), key: key)
 
         journal.fail(.recordingFailed)
         journal.fail(.recordingFailed)
@@ -102,7 +116,7 @@ struct DiagnosticJournalTests {
     @Test
     func aRecordSaveAndExportJourneyAppearsInOrderWithoutAnyTypedText() async throws {
         let scratch = try Scratch()
-        let journal = DiagnosticJournal(fileURL: scratch.directory.appending(path: "journal.jsonl"))
+        let journal = DiagnosticJournal(fileURL: scratch.directory.appending(path: "journal.jsonl"), key: key)
         let library = try makeLibrary(source: FakeDeviceKeySource(), audioRoot: scratch.directory, journal: journal)
         await library.unlock()
         let session = FakeTranscriptionSession()
