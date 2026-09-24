@@ -332,7 +332,6 @@ struct LibraryProjectTests {
                 makeRecorder: { key in
                     MainActor.assumeIsolated { WritingRecorder(root: audioRoot, cipher: LibraryCipher(key: key)) }
                 },
-                makeEmbeddingEngine: { nil },
                 makeProjectRepository: { key in
                     MainActor.assumeIsolated { EncryptedProjectRepository(context: context, key: key) }
                 }

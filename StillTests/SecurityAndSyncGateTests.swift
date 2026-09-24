@@ -227,9 +227,8 @@ struct SecurityAndSyncGateTests {
                 makeRepository: { key in
                     MainActor.assumeIsolated { EncryptedRecordingRepository(context: context, key: key) }
                 },
-                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } },
-            makeEmbeddingEngine: { nil }
-        )
+                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } }
+            )
         )
         await library.unlock()
         return library

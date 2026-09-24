@@ -61,7 +61,7 @@ final class Library: RecordingLibrary {
     private(set) var projectSelection: ProjectSelection
     private(set) var settings = LibrarySettings()
     var retentionPolicy: RetentionPolicy = .forever
-    private let journal: DiagnosticJournal?
+    let journal: DiagnosticJournal?
 
     init(
         keyRing: LibraryKeyRing,
@@ -140,6 +140,7 @@ final class Library: RecordingLibrary {
             guard var recording = storedRecordings.first(where: { $0.id == id }), !recording.isProjectConfirmed else { continue }
             recording.assign(toProject: recording.projectID, at: date)
             try write(recording)
+            journal?.record(.projectConfirmed, correlationID: id)
         }
     }
 
@@ -209,6 +210,7 @@ final class Library: RecordingLibrary {
         deleted.deletedAt = date
         deleted.updatedAt = date
         try write(deleted)
+        journal?.record(.recordingDeleted, correlationID: recording.id)
     }
 
     func restore(_ recording: Recording) throws {
@@ -250,19 +252,34 @@ final class Library: RecordingLibrary {
     }
 
     func audio(for recording: Recording) throws -> Data {
-        let captured = try capturedAudio(forRecording: recording.id)
-        return WAVFile.data(pcm: captured.pcm, format: captured.format)
+        try journalingExport(of: recording) {
+            let captured = try capturedAudio(forRecording: recording.id)
+            return WAVFile.data(pcm: captured.pcm, format: captured.format)
+        }
     }
 
     func audio(for recording: Recording, track: AudioTrack) throws -> Data {
         guard let key else { throw LibraryError.locked }
 
-        return try AudioChunkStore.audio(
-            forRecording: recording.id,
-            track: track,
-            in: services.audioRoot,
-            cipher: LibraryCipher(key: key)
-        )
+        return try journalingExport(of: recording) {
+            try AudioChunkStore.audio(
+                forRecording: recording.id,
+                track: track,
+                in: services.audioRoot,
+                cipher: LibraryCipher(key: key)
+            )
+        }
+    }
+
+    private func journalingExport<Output>(of recording: Recording, _ work: () throws -> Output) throws -> Output {
+        do {
+            let output = try work()
+            journal?.record(.exportFinished, correlationID: recording.id)
+            return output
+        } catch {
+            journal?.fail(.exportFailed, error: error, correlationID: recording.id)
+            throw error
+        }
     }
 
     func tracks(forRecording id: UUID) -> [AudioTrack] {
@@ -410,6 +427,12 @@ final class Library: RecordingLibrary {
     func archive(_ recording: Recording, tracks: [AudioTrack]) throws -> Data {
         guard let key else { throw LibraryError.locked }
 
+        return try journalingExport(of: recording) {
+            try sealedArchive(of: recording, tracks: tracks, key: key)
+        }
+    }
+
+    private func sealedArchive(of recording: Recording, tracks: [AudioTrack], key: SymmetricKey) throws -> Data {
         let cipher = LibraryCipher(key: key)
         let archived = try tracks.map { track -> ArchivedTrack in
             let directory = AudioChunkStore.trackDirectory(

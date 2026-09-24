@@ -104,9 +104,8 @@ struct LibraryRecoveryTests {
                 makeRepository: { key in
                     MainActor.assumeIsolated { EncryptedRecordingRepository(context: context, key: key) }
                 },
-                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } },
-            makeEmbeddingEngine: { nil }
-        )
+                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } }
+            )
         )
         await library.unlock()
         return library
@@ -178,9 +177,8 @@ struct RotationSafetyTests {
                 makeRepository: { key in
                     MainActor.assumeIsolated { EncryptedRecordingRepository(context: context, key: key) }
                 },
-                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } },
-            makeEmbeddingEngine: { nil }
-        )
+                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } }
+            )
         )
         await library.unlock()
         let recording = Recording(title: "Confidential", transcript: "board notes", duration: 30)
@@ -207,9 +205,8 @@ struct RotationSafetyTests {
                 makeRepository: { key in
                     MainActor.assumeIsolated { EncryptedRecordingRepository(context: context, key: key) }
                 },
-                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } },
-            makeEmbeddingEngine: { nil }
-        )
+                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } }
+            )
         )
         await reopened.unlock()
 

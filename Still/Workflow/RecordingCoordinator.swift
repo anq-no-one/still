@@ -95,9 +95,11 @@ final class RecordingCoordinator {
             )
             self.workflow = workflow
             await workflow.start()
+            journal?.record(.recordingStarted, correlationID: workflow.recordingID)
         } catch {
             workflow = nil
             startFailure = error.localizedDescription
+            journal?.fail(.recordingFailed, error: error)
         }
     }
 
@@ -106,14 +108,24 @@ final class RecordingCoordinator {
 
         await workflow.save()
         if workflow.state == .saved {
+            journal?.record(.recordingSaved, correlationID: workflow.recordingID)
             self.workflow = nil
+        } else if case .failed = workflow.state {
+            journal?.fail(.recordingFailed, correlationID: workflow.recordingID)
         }
     }
 
     func cancel() async {
-        await workflow?.cancel()
+        if let workflow {
+            await workflow.cancel()
+            journal?.record(.recordingCancelled, correlationID: workflow.recordingID)
+        }
         workflow = nil
         startFailure = nil
+    }
+
+    private var journal: DiagnosticJournal? {
+        library.journal
     }
 
     func toggle() async {

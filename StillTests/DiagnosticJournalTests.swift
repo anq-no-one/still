@@ -99,7 +99,48 @@ struct DiagnosticJournalTests {
         #expect(try journal.entries().isEmpty)
     }
 
-    private func makeLibrary(source: FakeDeviceKeySource, audioRoot: URL, journal: DiagnosticJournal) throws -> Library {
+    @Test
+    func aRecordSaveAndExportJourneyAppearsInOrderWithoutAnyTypedText() async throws {
+        let scratch = try Scratch()
+        let journal = DiagnosticJournal(fileURL: scratch.directory.appending(path: "journal.jsonl"))
+        let library = try makeLibrary(source: FakeDeviceKeySource(), audioRoot: scratch.directory, journal: journal)
+        await library.unlock()
+        let session = FakeTranscriptionSession()
+        let transcriber = StubOfflineTranscriber()
+        transcriber.result = "Secret budget for Dana"
+        let coordinator = RecordingCoordinator(
+            library: library,
+            entitlements: Entitlements(source: FakeEntitlementSource(), cache: MemoryEntitlementCache()),
+            makeSession: { session },
+            makeFinalTranscription: {
+                FinalTranscription(transcriber: transcriber, windowSeconds: 3_600)
+            }
+        )
+
+        await coordinator.start()
+        await coordinator.stopAndSave()
+        var recording = try #require(library.recordings.first)
+        recording.title = "Acquisition of Contoso"
+        _ = try library.archive(recording, tracks: library.tracks(forRecording: recording.id))
+        try library.confirmProjects(of: [recording.id])
+
+        let entries = try journal.entries()
+        #expect(entries.map(\.code) == [.recordingStarted, .recordingSaved, .exportFinished, .projectConfirmed])
+        #expect(Set(entries.compactMap(\.correlationID)) == [recording.id])
+
+        let export = scratch.directory.appending(path: "journal.txt")
+        try journal.export(to: export)
+        let text = try String(contentsOf: export, encoding: .utf8)
+        for secret in ["Secret", "budget", "Dana", "Contoso", scratch.directory.path(percentEncoded: false)] {
+            #expect(!text.contains(secret))
+        }
+    }
+
+    private func makeLibrary(
+        source: FakeDeviceKeySource,
+        audioRoot: URL,
+        journal: DiagnosticJournal
+    ) throws -> Library {
         let container = try ModelContainer(
             for: EncryptedRecording.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
@@ -112,7 +153,9 @@ struct DiagnosticJournalTests {
                 makeRepository: { key in
                     MainActor.assumeIsolated { EncryptedRecordingRepository(context: context, key: key) }
                 },
-                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } }
+                makeRecorder: { key in
+                    MainActor.assumeIsolated { WritingRecorder(root: audioRoot, cipher: LibraryCipher(key: key)) }
+                }
             ),
             journal: journal
         )

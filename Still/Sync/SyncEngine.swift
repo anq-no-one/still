@@ -67,6 +67,8 @@ final class SyncEngine {
             return
         }
 
+        let correlationID = UUID()
+        library.journal?.record(.syncStarted, correlationID: correlationID)
         do {
             try await pull()
             try await push()
@@ -74,8 +76,10 @@ final class SyncEngine {
             settings.setLastSyncedAt(stamp)
             lastSyncedAt = stamp
             lastFailure = nil
+            library.journal?.record(.syncFinished, correlationID: correlationID)
         } catch {
             lastFailure = error.localizedDescription
+            library.journal?.fail(.syncFailed, error: error, correlationID: correlationID)
         }
     }
 

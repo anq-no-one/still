@@ -130,9 +130,8 @@ struct StillArchiveTests {
                         EncryptedRecordingRepository(context: context, key: key)
                     }
                 },
-                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } },
-            makeEmbeddingEngine: { nil }
-        )
+                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } }
+            )
         )
         await library.unlock()
         return library

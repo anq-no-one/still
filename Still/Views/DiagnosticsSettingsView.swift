@@ -14,6 +14,7 @@ struct DiagnosticsSettingsView: View {
     var body: some View {
         Form {
             Section {
+                LabeledContent("Size", value: Int64(journal.storedBytes), format: .byteCount(style: .file))
                 Button("Export Journal as Text", systemImage: "square.and.arrow.up", action: export)
                 if let problem = journal.writeProblem ?? exportProblem {
                     Label(problem, systemImage: "exclamationmark.triangle.fill")

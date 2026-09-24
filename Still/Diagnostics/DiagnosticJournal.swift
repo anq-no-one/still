@@ -14,9 +14,17 @@ enum JournalCode: String, Codable, CaseIterable, Sendable {
     case recordingSaved
     case recordingCancelled
     case recordingFailed
+    case recordingDeleted
+    case projectConfirmed
     case transcriptionFailed
     case modelDownloadFailed
+    case importStarted
+    case importSaved
+    case importFailed
+    case syncStarted
+    case syncFinished
     case syncFailed
+    case exportFinished
     case exportFailed
     case journalExported
 }
@@ -72,6 +80,24 @@ final class DiagnosticJournal {
         if breadcrumbs.count > Self.breadcrumbLimit {
             breadcrumbs.removeFirst(breadcrumbs.count - Self.breadcrumbLimit)
         }
+    }
+
+    func record(_ code: JournalCode, correlationID: UUID? = nil) {
+        note(code)
+        append(
+            JournalEntry(
+                at: now(),
+                appVersion: appVersion,
+                code: code,
+                errorCode: nil,
+                correlationID: correlationID,
+                breadcrumbs: []
+            )
+        )
+    }
+
+    var storedBytes: Int {
+        (try? FileManager.default.attributesOfItem(atPath: fileURL.path(percentEncoded: false))[.size] as? Int) ?? 0
     }
 
     @discardableResult

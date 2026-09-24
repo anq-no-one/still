@@ -24,7 +24,7 @@ final class RecordingWorkflow {
     private let suggestedProjectID: UUID?
     private let now: () -> Date
 
-    private var recordingID = UUID()
+    private(set) var recordingID = UUID()
     private var startedAt: Date?
     private var finishedAt: Date?
     private var draftStartFailure: String?
