@@ -605,7 +605,11 @@ final class Library: RecordingLibrary {
     /// Adoption is keyed by the recording id, so repeating it creates no duplicate.
     private func recoverInterruptedAudio(cipher: LibraryCipher) throws {
         let known = Set(storedRecordings.map(\.id))
-        let interrupted = try AudioChunkStore.interruptedRecordings(in: services.audioRoot, cipher: cipher)
+        let interrupted = try AudioChunkStore.interruptedRecordings(
+            in: services.audioRoot,
+            cipher: cipher,
+            unclaimedBesides: known
+        )
 
         for recovered in interrupted {
             try AudioChunkStore.markComplete(forRecording: recovered.id, in: services.audioRoot, cipher: cipher)

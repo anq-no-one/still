@@ -187,7 +187,11 @@ enum AudioChunkStore {
         return (clamped.withUnsafeBufferPointer { Data(buffer: $0) }, format)
     }
 
-    static func interruptedRecordings(in root: URL, cipher: LibraryCipher) throws -> [InterruptedRecording] {
+    static func interruptedRecordings(
+        in root: URL,
+        cipher: LibraryCipher,
+        unclaimedBesides known: Set<UUID>? = nil
+    ) throws -> [InterruptedRecording] {
         let directories = (try? FileManager.default.contentsOfDirectory(
             at: root,
             includingPropertiesForKeys: nil
@@ -196,22 +200,23 @@ enum AudioChunkStore {
         return directories.compactMap { directory -> InterruptedRecording? in
             guard let id = UUID(uuidString: directory.lastPathComponent) else { return nil }
 
-            let tracks = tracks(forRecording: id, in: root)
-            guard !tracks.isEmpty else { return nil }
+            let trackDirectories = tracks(forRecording: id, in: root).map {
+                trackDirectory(forRecording: id, track: $0, in: root)
+            }
+            let manifests = trackDirectories.compactMap { try? manifest(in: $0, cipher: cipher) }
+            guard !trackDirectories.isEmpty, manifests.count == trackDirectories.count else { return nil }
 
-            var unfinished = false
+            let unfinished = manifests.contains { !$0.isComplete }
+            let unclaimed = known.map { !$0.contains(id) } ?? false
+            guard unfinished || unclaimed else { return nil }
+
             var duration: TimeInterval = 0
-            for track in tracks {
-                let trackDirectory = trackDirectory(forRecording: id, track: track, in: root)
-                guard let manifest = try? manifest(in: trackDirectory, cipher: cipher),
-                      let pcm = try? pcm(in: trackDirectory, cipher: cipher)
-                else { return nil }
-
-                unfinished = unfinished || !manifest.isComplete
+            for (trackDirectory, manifest) in zip(trackDirectories, manifests) {
+                guard let pcm = try? pcm(in: trackDirectory, cipher: cipher) else { return nil }
                 duration = max(duration, manifest.startOffset + manifest.format.duration(ofBytes: pcm.count))
             }
 
-            guard unfinished, duration > 0 else { return nil }
+            guard duration > 0 else { return nil }
             return InterruptedRecording(id: id, directory: directory, duration: duration)
         }
         .sorted { $0.id.uuidString < $1.id.uuidString }

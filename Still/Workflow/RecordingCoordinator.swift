@@ -140,6 +140,35 @@ final class RecordingCoordinator {
         library.journal
     }
 
+    func finishInterruptedProcessing() async {
+        guard isReady(), workflow == nil else { return }
+
+        let finalizer = RecordingFinalizer(
+            finalTranscription: makeFinalTranscription(),
+            speakerSeparation: entitlements.allows(.speakerSeparation) ? makeSpeakerSeparation() : .trackBased,
+            noteBuilder: GroundedNoteBuilder(),
+            library: library
+        )
+        for recording in library.recordings where Self.awaitsProcessing(recording, tracks: library.tracks(forRecording: recording.id)) {
+            let untitled = recording.title == RecordingTitle.from(transcript: "", date: recording.createdAt)
+            _ = try? await finalizer.finalize(
+                RecordingFinalizer.Draft(
+                    id: recording.id,
+                    title: untitled ? nil : recording.title,
+                    createdAt: recording.createdAt,
+                    duration: recording.duration,
+                    participants: await expectedParticipants(recording.createdAt),
+                    suggestedProjectID: recording.projectID,
+                    requiresTranscript: true
+                )
+            )
+        }
+    }
+
+    static func awaitsProcessing(_ recording: Recording, tracks: [AudioTrack]) -> Bool {
+        recording.transcript.isEmpty && recording.note == nil && !recording.isProjectConfirmed && !tracks.isEmpty
+    }
+
     func toggle() async {
         if isRecording {
             await stopAndSave()

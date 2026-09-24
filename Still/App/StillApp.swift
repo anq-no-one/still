@@ -219,6 +219,7 @@ struct StillApp: App {
             await recordingLibrary.unlock()
             await proEntitlements.refresh()
             await syncEngine.syncIfEnabled()
+            await recordingCoordinator.finishInterruptedProcessing()
         }
         #if os(macOS)
         shortcut = MainActor.assumeIsolated {
