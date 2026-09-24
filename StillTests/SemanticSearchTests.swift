@@ -148,4 +148,20 @@ struct SemanticIndexUpdateTests {
 
         #expect(index.matches(for: update.displayText, threshold: 0.99).isEmpty)
     }
+
+    @Test @MainActor
+    func aBackgroundRebuildIndexesEveryLiveRecordingButNotOneDeletedMeanwhile() async {
+        let kept = segment("We shipped the beta on Tuesday")
+        let dropped = segment("The vendor call moved to Friday")
+        let keptRecording = Recording(title: "Update", transcript: kept.text, segments: [kept], duration: 60)
+        let droppedRecording = Recording(title: "Vendor", transcript: dropped.text, segments: [dropped], duration: 60)
+        let index = SemanticIndex(engine: FakeEmbeddingEngine([kept.displayText: [1, 0], dropped.displayText: [0, 1]]))
+
+        let rebuilding = index.rebuildInBackground([keptRecording, droppedRecording])
+        index.remove(droppedRecording.id)
+        await rebuilding.value
+
+        #expect(index.matches(for: kept.displayText, threshold: 0.99).map(\.recordingID) == [keptRecording.id])
+        #expect(index.matches(for: dropped.displayText, threshold: 0.99).isEmpty)
+    }
 }

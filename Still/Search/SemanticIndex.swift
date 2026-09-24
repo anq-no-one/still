@@ -18,6 +18,8 @@ final class SemanticIndex {
 
     private let engine: EmbeddingEngine?
     private var entriesByRecording: [UUID: [Entry]] = [:]
+    private var removedDuringRebuild: Set<UUID> = []
+    private var isRebuilding = false
 
     init(engine: EmbeddingEngine?) {
         self.engine = engine
@@ -34,6 +36,27 @@ final class SemanticIndex {
         }
     }
 
+    @MainActor
+    @discardableResult
+    func rebuildInBackground(_ recordings: [Recording]) -> Task<Void, Never> {
+        guard let engine else { return Task {} }
+
+        isRebuilding = true
+        let unchecked = UncheckedEngine(engine: engine)
+        let live = recordings.filter { !$0.isDeleted }
+        return Task { @MainActor in
+            let built = await Task.detached(priority: .utility) {
+                Dictionary(uniqueKeysWithValues: live.map { ($0.id, Self.entries(for: $0, engine: unchecked.engine)) })
+            }.value
+
+            entriesByRecording = built
+                .filter { !removedDuringRebuild.contains($0.key) }
+                .merging(entriesByRecording) { _, updatedMeanwhile in updatedMeanwhile }
+            removedDuringRebuild.removeAll()
+            isRebuilding = false
+        }
+    }
+
     func update(_ recording: Recording) {
         guard !recording.isDeleted else {
             remove(recording.id)
@@ -42,14 +65,21 @@ final class SemanticIndex {
 
         guard let engine else { return }
 
-        entriesByRecording[recording.id] = recording.segments.compactMap { segment in
-            guard let vector = engine.embed(segment.displayText) else { return nil }
-            return Entry(segmentID: segment.id, time: segment.start, text: segment.displayText, vector: vector)
-        }
+        entriesByRecording[recording.id] = Self.entries(for: recording, engine: engine)
     }
 
     func remove(_ recordingID: UUID) {
         entriesByRecording.removeValue(forKey: recordingID)
+        if isRebuilding {
+            removedDuringRebuild.insert(recordingID)
+        }
+    }
+
+    private static func entries(for recording: Recording, engine: EmbeddingEngine) -> [Entry] {
+        recording.segments.compactMap { segment in
+            guard let vector = engine.embed(segment.displayText) else { return nil }
+            return Entry(segmentID: segment.id, time: segment.start, text: segment.displayText, vector: vector)
+        }
     }
 
     func matches(for query: String, threshold: Float) -> [Match] {
@@ -63,6 +93,10 @@ final class SemanticIndex {
             }
         }
     }
+}
+
+private struct UncheckedEngine: @unchecked Sendable {
+    let engine: EmbeddingEngine
 }
 
 private func cosineSimilarity(_ a: [Float], _ b: [Float]) -> Float {

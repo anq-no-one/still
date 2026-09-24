@@ -208,7 +208,7 @@ final class Library: RecordingLibrary {
             state = .unlocked
             journal?.note(.libraryUnlocked)
             semanticIndex = SemanticIndex(engine: await services.makeEmbeddingEngine())
-            semanticIndex.rebuild(storedRecordings)
+            semanticIndex.rebuildInBackground(storedRecordings)
         } catch {
             repository = nil
             projectRepository = nil
@@ -356,7 +356,7 @@ final class Library: RecordingLibrary {
             self.key = key
             state = .unlocked
             semanticIndex = SemanticIndex(engine: await services.makeEmbeddingEngine())
-            semanticIndex.rebuild(storedRecordings)
+            semanticIndex.rebuildInBackground(storedRecordings)
             return true
         } catch {
             state = .failed(error.localizedDescription)
