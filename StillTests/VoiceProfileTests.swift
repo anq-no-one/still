@@ -192,14 +192,15 @@ struct SpeakerNamingTests {
     }
 
     @Test
-    func aRecognizedVoiceTakesItsProfileName() {
+    func aRecognizedVoiceOnlySuggestsItsProfileName() {
         let guest = diarized(voice(1, 0, 0))
         let profile = VoiceProfile(name: "Anna Kowalska", voiceprint: voice(1, 0, 0), evidence: 3)
 
         let named = SpeakerNaming.name([you, guest], context: SpeakerNamingContext(profiles: [profile]))
 
-        #expect(named[1].name == "Anna Kowalska")
-        #expect(named[1].nameSource == .voiceProfile)
+        #expect(named[1].name == guest.name)
+        #expect(named[1].nameSource == guest.nameSource)
+        #expect(named[1].suggestedName == "Anna Kowalska")
     }
 
     @Test
@@ -214,7 +215,8 @@ struct SpeakerNamingTests {
 
         let named = SpeakerNaming.name([you, anna, stranger], context: context)
 
-        #expect(named.map(\.name) == ["Andrii D.", "Anna Kowalska", "Ben Olsen"])
+        #expect(named[1].suggestedName == "Anna Kowalska")
+        #expect(named[2].name == "Ben Olsen")
         #expect(named[2].nameSource == .calendar)
     }
 

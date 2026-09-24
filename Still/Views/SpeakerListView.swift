@@ -6,6 +6,8 @@ struct SpeakerListView: View {
     let rename: (Speaker, String) -> Void
     let confirmSuggestedName: (Speaker) -> Void
     let rejectSuggestedName: (Speaker) -> Void
+    var remembersVoice: (Speaker) -> Bool = { _ in false }
+    var setRemembersVoice: (Speaker, Bool) -> Void = { _, _ in }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -18,7 +20,9 @@ struct SpeakerListView: View {
                     suggestions: speaker.isUnnamedGuest ? suggestions : [],
                     rename: { rename(speaker, $0) },
                     confirmSuggestedName: { confirmSuggestedName(speaker) },
-                    rejectSuggestedName: { rejectSuggestedName(speaker) }
+                    rejectSuggestedName: { rejectSuggestedName(speaker) },
+                    remembersVoice: remembersVoice(speaker),
+                    setRemembersVoice: { setRemembersVoice(speaker, $0) }
                 )
             }
         }
@@ -31,6 +35,8 @@ private struct SpeakerRow: View {
     let rename: (String) -> Void
     let confirmSuggestedName: () -> Void
     let rejectSuggestedName: () -> Void
+    let remembersVoice: Bool
+    let setRemembersVoice: (Bool) -> Void
 
     @State private var name: String
     @FocusState private var isEditing: Bool
@@ -40,13 +46,17 @@ private struct SpeakerRow: View {
         suggestions: [String],
         rename: @escaping (String) -> Void,
         confirmSuggestedName: @escaping () -> Void,
-        rejectSuggestedName: @escaping () -> Void
+        rejectSuggestedName: @escaping () -> Void,
+        remembersVoice: Bool,
+        setRemembersVoice: @escaping (Bool) -> Void
     ) {
         self.speaker = speaker
         self.suggestions = suggestions
         self.rename = rename
         self.confirmSuggestedName = confirmSuggestedName
         self.rejectSuggestedName = rejectSuggestedName
+        self.remembersVoice = remembersVoice
+        self.setRemembersVoice = setRemembersVoice
         _name = State(initialValue: speaker.name)
     }
 
@@ -55,6 +65,9 @@ private struct SpeakerRow: View {
             field
             if let suggested = speaker.suggestedName {
                 suggestedName(suggested)
+            }
+            if speaker.isNamedByUser, !speaker.isYou, speaker.voiceprint != nil {
+                voiceMemory
             }
             if !suggestions.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -97,6 +110,19 @@ private struct SpeakerRow: View {
             .accessibilityHint("Keeps the current name and drops the suggestion")
         }
         .buttonStyle(.bordered)
+        .controlSize(.small)
+    }
+
+    private var voiceMemory: some View {
+        Toggle(isOn: Binding(get: { remembersVoice }, set: setRemembersVoice)) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Remember \(speaker.name)'s Voice")
+                Text("Still suggests this name when the voice returns in a later meeting. You confirm each time.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .toggleStyle(.switch)
         .controlSize(.small)
     }
 

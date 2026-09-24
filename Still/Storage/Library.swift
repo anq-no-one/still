@@ -558,7 +558,33 @@ final class Library: RecordingLibrary {
     }
 
     var speakerNaming: SpeakerNamingContext {
-        SpeakerNamingContext(profiles: VoiceProfiles.from(recordings), ownerName: settings.ownerName)
+        SpeakerNamingContext(profiles: rememberedVoiceProfiles, ownerName: settings.ownerName)
+    }
+
+    var rememberedVoiceProfiles: [VoiceProfile] {
+        let keys = settings.rememberedVoiceKeys
+        return VoiceProfiles.from(recordings).filter { keys.contains(VoiceProfiles.key(for: $0.name)) }
+    }
+
+    func remembersVoice(of name: String) -> Bool {
+        settings.rememberedVoiceKeys.contains(VoiceProfiles.key(for: name))
+    }
+
+    func rememberVoice(of name: String) throws {
+        try updateSettings { $0.rememberedVoices = $0.rememberedVoiceKeys.union([VoiceProfiles.key(for: name)]) }
+    }
+
+    func forgetVoice(of name: String) throws {
+        try updateSettings { $0.rememberedVoices = $0.rememberedVoiceKeys.subtracting([VoiceProfiles.key(for: name)]) }
+    }
+
+    private func updateSettings(_ change: (inout LibrarySettings) -> Void) throws {
+        guard let key else { throw LibraryError.locked }
+
+        var updated = settings
+        change(&updated)
+        try updated.save(to: services.settingsFile, cipher: LibraryCipher(key: key))
+        settings = updated
     }
 
     var ownerName: String? {
@@ -566,13 +592,8 @@ final class Library: RecordingLibrary {
     }
 
     func setOwnerName(_ name: String) throws {
-        guard let key else { throw LibraryError.locked }
-
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        var updated = settings
-        updated.ownerName = trimmed.isEmpty ? nil : trimmed
-        try updated.save(to: services.settingsFile, cipher: LibraryCipher(key: key))
-        settings = updated
+        try updateSettings { $0.ownerName = trimmed.isEmpty ? nil : trimmed }
     }
 
     func rememberOwner(_ speaker: Speaker, as name: String) throws {

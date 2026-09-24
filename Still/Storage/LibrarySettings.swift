@@ -2,6 +2,11 @@ import Foundation
 
 struct LibrarySettings: Codable, Equatable, Sendable {
     var ownerName: String?
+    var rememberedVoices: Set<String>?
+
+    var rememberedVoiceKeys: Set<String> {
+        rememberedVoices ?? []
+    }
 
     static func load(from url: URL, cipher: LibraryCipher) -> LibrarySettings {
         guard let sealed = try? Data(contentsOf: url),

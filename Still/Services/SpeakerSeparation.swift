@@ -178,14 +178,15 @@ enum SpeakerNaming {
 
         let recognized = VoiceMatcher(profiles: context.profiles).matches(for: named.filter(\.isUnnamedGuest))
         named = named.map { speaker in
-            recognized[speaker.id].map { speaker.named($0.name, by: .voiceProfile) } ?? speaker
+            recognized[speaker.id].map { speaker.suggesting($0.name) } ?? speaker
         }
 
-        let taken = Set((named.map(\.name) + [context.ownerName].compactMap { $0 }).map(VoiceProfiles.key(for:)))
+        let claimed = named.map(\.name) + named.compactMap(\.suggestedName) + [context.ownerName].compactMap { $0 }
+        let taken = Set(claimed.map(VoiceProfiles.key(for:)))
         let expected = context.participants
             .filter { !taken.contains(VoiceProfiles.key(for: $0)) }
             .uniqued()
-        let guests = named.filter(\.isUnnamedGuest)
+        let guests = named.filter { $0.isUnnamedGuest && $0.suggestedName == nil }
         guard guests.count == 1, expected.count == 1, let guest = guests.first, let name = expected.first else {
             return named
         }

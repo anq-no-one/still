@@ -31,6 +31,24 @@ struct TranscriptionSettingsView: View {
             } footer: {
                 Text(models.speakers.pack.purpose)
             }
+
+            Section {
+                if library.rememberedVoiceProfiles.isEmpty {
+                    Text("No voices remembered")
+                        .foregroundStyle(.secondary)
+                }
+                ForEach(library.rememberedVoiceProfiles, id: \.name) { profile in
+                    LabeledContent(profile.name) {
+                        Button("Forget", role: .destructive) {
+                            try? library.forgetVoice(of: profile.name)
+                        }
+                    }
+                }
+            } header: {
+                Text("Remembered Voices")
+            } footer: {
+                Text("Still remembers a voice only when you turn it on for a named speaker. A remembered voice only suggests a name; you confirm it. Forgetting stops all future suggestions.")
+            }
         }
         .formStyle(.grouped)
         .settingsPaneTitle("Transcription")

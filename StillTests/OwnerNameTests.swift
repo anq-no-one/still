@@ -101,6 +101,28 @@ struct OwnerNameTests {
         }
     }
 
+    @Test
+    func namingAVoiceRemembersNothingWithoutConsent() async throws {
+        let scratch = try Scratch()
+        let library = await makeLibrary(source: FakeDeviceKeySource(), context: try makeContext(), audioRoot: scratch.directory)
+        let guest = Speaker(name: "Speaker 2", origin: .system, isYou: false, nameSource: .diarization, voiceprint: Voiceprint([1, 0, 0]))
+        let recording = Recording(title: "Call", transcript: "", speakers: [guest], duration: 60)
+        try library.add(recording)
+
+        try library.renameSpeaker(guest, to: "Dana Kim", in: recording)
+        #expect(library.speakerNaming.profiles.isEmpty)
+
+        try library.rememberVoice(of: "Dana Kim")
+        #expect(library.speakerNaming.profiles.map(\.name) == ["Dana Kim"])
+        #expect(library.remembersVoice(of: "dana kim"))
+
+        let settings = try Data(contentsOf: scratch.directory.appending(path: "Library.settings"))
+        #expect(!String(decoding: settings, as: UTF8.self).contains("Dana"))
+
+        try library.forgetVoice(of: "Dana Kim")
+        #expect(library.speakerNaming.profiles.isEmpty)
+    }
+
     private func makeLibrary(source: FakeDeviceKeySource, context: ModelContext, audioRoot: URL) async -> Library {
         let library = Library(
             keyRing: LibraryKeyRing(source: source),

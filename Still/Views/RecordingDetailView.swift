@@ -61,7 +61,11 @@ struct RecordingDetailView: View {
                         suggestions: recording.unclaimedParticipants,
                         rename: { editor.renameSpeaker($0, to: $1) },
                         confirmSuggestedName: editor.confirmSuggestedName(of:),
-                        rejectSuggestedName: editor.rejectSuggestedName(of:)
+                        rejectSuggestedName: editor.rejectSuggestedName(of:),
+                        remembersVoice: { library.remembersVoice(of: $0.name) },
+                        setRemembersVoice: { speaker, remembers in
+                            try? remembers ? library.rememberVoice(of: speaker.name) : library.forgetVoice(of: speaker.name)
+                        }
                     )
                 }
 
