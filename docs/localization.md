@@ -2,27 +2,26 @@
 
 ## Supported interface languages
 
-English (source), Polish, Ukrainian, Russian, German, French, Spanish, Italian, Japanese, Korean,
-Simplified Chinese, Traditional Chinese.
+English (source), German, Spanish, French, Italian, Dutch, Polish, Portuguese (Portugal), Russian,
+Swedish, Ukrainian. These match the App Store listing locales in `fastlane/metadata*`.
 
-`Still/Supporting/Localizable.xcstrings` is the string catalog. `SWIFT_EMIT_LOC_STRINGS` is on, so
-every `String(localized:)` and every SwiftUI text literal is extracted into it on build.
+## Files
 
-## What is done
+- `Still/Supporting/Localizable.xcstrings`: every string the app shows. `SWIFT_EMIT_LOC_STRINGS` extracts
+  SwiftUI literals and `String(localized:)` on build.
+- `Still/Supporting/InfoPlist.xcstrings`: the system permission prompts.
 
-- All user-facing text is a literal SwiftUI string or `String(localized:)`, so it extracts rather
-  than being built by string interpolation from fragments.
-- The catalog is in place with English as the source language.
+## Updating translations
 
-## What is not done
+1. Build (`bin/check.sh --skip-e2e`), then run `bin/localize.py sync` to add new strings and drop unused ones.
+2. `bin/localize.py missing <lang> <file.json>` writes the strings a language lacks.
+3. Translate the file, keeping format specifiers and Apple's own terms for the language.
+4. `bin/localize.py apply <lang> <file.json>` merges it back.
 
-**No language other than English has been translated.** Privacy wording, permission explanations,
-and recording-state text decide whether a user understands where their audio goes, so these need a
-professional translator, not machine output. Until that review lands, shipping a localized build
-would claim a guarantee Still cannot back.
+## Open checks
 
-The remaining localization gates are also outstanding: truncation at the longest translations,
-bidirectional-safe rendering, pluralization, and localized App Store metadata and screenshots.
+- Truncation at the longest translations and plural forms need a pass in each language.
+- Privacy and permission wording should get a native-speaker review before release.
 
 ## Accessibility
 
