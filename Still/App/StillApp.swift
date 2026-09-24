@@ -266,21 +266,6 @@ struct StillApp: App {
             PreferencesExporter(library: recordingLibrary, appLock: appLock)
             #endif
         }
-        preferencesImporter = MainActor.assumeIsolated {
-            #if os(macOS)
-            PreferencesImporter(
-                library: recordingLibrary,
-                appLock: appLock,
-                automaticRecording: UserDefaultsCallAppAllowList(),
-                meetingSites: UserDefaultsMeetingSiteAllowList(),
-                mediaHint: UserDefaultsMediaHintPreferencesStore(),
-                microphone: UserDefaultsMicrophoneChoiceStore(),
-                shortcut: UserDefaultsShortcutStore()
-            )
-            #else
-            PreferencesImporter(library: recordingLibrary, appLock: appLock)
-            #endif
-        }
         Task { @MainActor in
             await recordingLibrary.unlock()
             memoryExtraction.start()
@@ -344,7 +329,28 @@ struct StillApp: App {
             connections.refresh()
             return connections
         }
+        let reloadLiveSettings: @MainActor @Sendable () -> Void = { [automatic, microphones, shortcut] in
+            automatic.reload()
+            microphones.reload()
+            shortcut.reload()
+        }
         #endif
+        preferencesImporter = MainActor.assumeIsolated {
+            #if os(macOS)
+            PreferencesImporter(
+                library: recordingLibrary,
+                appLock: appLock,
+                automaticRecording: UserDefaultsCallAppAllowList(),
+                meetingSites: UserDefaultsMeetingSiteAllowList(),
+                mediaHint: UserDefaultsMediaHintPreferencesStore(),
+                microphone: UserDefaultsMicrophoneChoiceStore(),
+                shortcut: UserDefaultsShortcutStore(),
+                afterApply: reloadLiveSettings
+            )
+            #else
+            PreferencesImporter(library: recordingLibrary, appLock: appLock)
+            #endif
+        }
     }
 
     var body: some Scene {

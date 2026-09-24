@@ -46,6 +46,11 @@ final class MicrophoneChoice {
         source.observe { [weak self] in self?.refresh() }
     }
 
+    func reload() {
+        chosen = store.chosen
+        refresh()
+    }
+
     var active: AudioInputDevice? {
         chosenDevice ?? systemDefault
     }

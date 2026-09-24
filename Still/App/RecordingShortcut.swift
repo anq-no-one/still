@@ -105,6 +105,11 @@ final class RecordingShortcut {
         return true
     }
 
+    func reload() {
+        guard let saved = store.load(), saved != combo else { return }
+        change(to: saved)
+    }
+
     func resetToStandard() {
         change(to: .standard)
     }

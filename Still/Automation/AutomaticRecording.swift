@@ -107,6 +107,15 @@ final class AutomaticRecording {
         allowList.setWatching(false)
     }
 
+    func reload() {
+        apps = allowList.apps()
+        if allowList.watches, !isWatching {
+            startWatching()
+        } else if !allowList.watches, isWatching {
+            stopWatching()
+        }
+    }
+
     func setAllowed(_ allowed: Bool, for app: CallApp) {
         allowList.setAllowed(allowed, forBundleID: app.bundleID)
         apps = allowList.apps()

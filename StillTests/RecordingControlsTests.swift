@@ -64,6 +64,19 @@ struct RecordingShortcutTests {
     }
 
     @Test
+    func reloadingPicksUpAShortcutSavedElsewhere() {
+        let store = MemoryShortcutStore()
+        let registrar = FakeHotKeyRegistrar()
+        let shortcut = make(registrar: registrar, store: store)
+
+        store.save(commandShiftK)
+        shortcut.reload()
+
+        #expect(shortcut.combo == commandShiftK)
+        #expect(registrar.registered == commandShiftK)
+    }
+
+    @Test
     func pressingTheShortcutRunsTheAction() {
         let registrar = FakeHotKeyRegistrar()
         var pressed = 0

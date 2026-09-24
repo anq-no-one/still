@@ -246,6 +246,20 @@ struct PreferencesTests {
         )
     }
 
+    @Test
+    func importingTellsTheLiveSettingsToReloadOnlyAfterSuccess() async throws {
+        let library = try await makeUnlockedLibrary(context: try makeContext())
+        var reloads = 0
+        var importer = neutralImporter(library: library)
+        importer.afterApply = { reloads += 1 }
+
+        #expect(throws: (any Error).self) { try importer.apply(Data("not json".utf8)) }
+        #expect(reloads == 0)
+
+        try importer.apply(try PreferencesCoder.encode(PreferencesFile(retentionPolicy: .forever)))
+        #expect(reloads == 1)
+    }
+
     private func neutralImporter(library: Library, appLock: AppLock? = nil) -> PreferencesImporter {
         PreferencesImporter(
             library: library,

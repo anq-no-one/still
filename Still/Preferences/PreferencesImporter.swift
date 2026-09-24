@@ -25,6 +25,7 @@ struct PreferencesImporter {
     let mediaHint: MediaHintPreferencesStore
     let microphone: MicrophoneChoiceStore
     let shortcut: ShortcutStore
+    var afterApply: @MainActor () -> Void = {}
     #endif
 
     /// Decodes and validates before touching any store, so a malformed or
@@ -77,6 +78,7 @@ struct PreferencesImporter {
             shortcut.save(KeyCombo(keyCode: keyCode, modifiers: modifiers, key: key))
             summary.appliedShortcut = true
         }
+        afterApply()
         #endif
 
         return summary
