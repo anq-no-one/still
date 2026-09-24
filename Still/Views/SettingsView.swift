@@ -13,6 +13,7 @@ struct SettingsView: View {
     let browser: BrowserMeetingBridge
     let aiTools: MCPAccess
     let chromium: ChromiumConnections
+    let microphones: MicrophoneChoice
     #endif
 
     var body: some View {
@@ -26,6 +27,7 @@ struct SettingsView: View {
             }
             Tab("Recording", systemImage: "record.circle") {
                 Form {
+                    MicrophoneSettingsView(microphones: microphones)
                     AutomaticRecordingSettingsView(automatic: automatic)
                     BrowserMeetingSettingsView(bridge: browser, chromium: chromium)
                 }

@@ -25,6 +25,7 @@ struct RecordingMenuBarPanel: View {
     let coordinator: RecordingCoordinator
     let library: Library
     let automatic: AutomaticRecording
+    let microphones: MicrophoneChoice
     let navigation: LibraryNavigation
     let lock: AppLock
 
@@ -34,6 +35,7 @@ struct RecordingMenuBarPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             recordControl
+            microphoneStatus
 
             if coordinator.isRecording, let transcript = coordinator.workflow?.transcript, !transcript.isEmpty {
                 Text(transcript.suffix(220))
@@ -115,6 +117,24 @@ struct RecordingMenuBarPanel: View {
                     .monospacedDigit()
             }
         }
+    }
+
+    private var microphoneStatus: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Label(microphoneName, systemImage: "mic")
+                .accessibilityLabel(String(localized: "Microphone: \(microphoneName)"))
+            if let notice = microphones.fallbackNotice {
+                Label(notice, systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+            }
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var microphoneName: String {
+        microphones.active?.name ?? String(localized: "No Microphone")
     }
 
     private var elapsed: String {

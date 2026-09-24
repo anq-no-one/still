@@ -1,13 +1,20 @@
 import AVFoundation
+#if os(macOS)
+import CoreAudio
+#endif
 import Foundation
 
 @MainActor
 final class MicrophoneInput {
     typealias Consumer = @Sendable (AVAudioPCMBuffer) -> Void
 
-    private let engine = AVAudioEngine()
+    private var engine = AVAudioEngine()
     private let consumers = ConsumerList()
     private let fixture: AudioFixture?
+
+    #if os(macOS)
+    var preferredDevice: @MainActor () -> String? = { nil }
+    #endif
 
     init(fixture: URL? = nil) {
         self.fixture = fixture.flatMap(AudioFixture.init(url:))
@@ -26,7 +33,7 @@ final class MicrophoneInput {
 
         let wasRunning = engine.isRunning
         if !wasRunning {
-            try configureSession()
+            try prepareInput()
         }
 
         do {
@@ -80,8 +87,11 @@ final class MicrophoneInput {
         { buffer, _ in consumers.deliver(buffer) }
     }
 
-    private func configureSession() throws {
-        #if os(iOS)
+    private func prepareInput() throws {
+        #if os(macOS)
+        engine = AVAudioEngine()
+        selectPreferredDevice()
+        #else
         let session = AVAudioSession.sharedInstance()
         do {
             try session.setCategory(.playAndRecord, mode: .spokenAudio, options: [.allowBluetoothHFP, .defaultToSpeaker])
@@ -91,6 +101,24 @@ final class MicrophoneInput {
         }
         #endif
     }
+
+    #if os(macOS)
+    private func selectPreferredDevice() {
+        guard let uid = preferredDevice(),
+              var device = CoreAudioInputDevices.deviceID(forUID: uid),
+              let unit = engine.inputNode.audioUnit
+        else { return }
+
+        AudioUnitSetProperty(
+            unit,
+            kAudioOutputUnitProperty_CurrentDevice,
+            kAudioUnitScope_Global,
+            0,
+            &device,
+            UInt32(MemoryLayout<AudioDeviceID>.size)
+        )
+    }
+    #endif
 
     private func deactivateSession() {
         #if os(iOS)
