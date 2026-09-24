@@ -193,6 +193,23 @@ targets:
       path: StillNativeHost/StillNativeHost.entitlements
       properties:
         com.apple.security.app-sandbox: true
+  StillEval:
+    type: tool
+    platform: macOS
+    sources:
+      - path: Tools/StillEval
+      - path: Still/Evaluation/ErrorRates.swift
+    dependencies:
+      - package: FluidAudio
+    settings:
+      base:
+        PRODUCT_NAME: still-eval
+        PRODUCT_BUNDLE_IDENTIFIER: com.andrii.still.eval
+        GENERATE_INFOPLIST_FILE: YES
+        CREATE_INFOPLIST_SECTION_IN_BINARY: YES
+        SKIP_INSTALL: YES
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
   StillUITests:
     type: bundle.ui-testing
     platform: iOS

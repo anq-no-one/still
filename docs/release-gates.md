@@ -19,7 +19,30 @@ text, and `DiarizationErrorRate` is the share of spoken time attributed to the w
 group names matched by whichever pairing explains the most time. `ErrorRateTests` checks both
 against hand-worked cases, including the label-independence a real diarizer needs.
 
-## What is missing, and why no number can be reported yet
+## First measurement (2026-09-24, development Mac)
+
+`bin/eval-set.py 20` downloads fixed rows of public test splits into `~/Library/Caches/Still-Eval`:
+LibriSpeech test-clean (en), Multilingual LibriSpeech test (pl, de, fr, es, it), Golos crowd test (ru).
+`still-eval <set> <parakeet-dir> <report.md>` (the `StillEval` target) runs Parakeet V3 through
+FluidAudio over each clip and reports the median word error rate.
+
+Result on an Apple M2 Max, 32 GB, macOS 27, 20 clips per language:
+
+| Language | Median WER | Gate | Processing time ÷ audio time |
+|---|---|---|---|
+| en | 0.0% | pass | 0.23 |
+| de | 17.9% | pass | 0.21 |
+| es | 0.0% | pass | 0.21 |
+| fr | 5.9% | pass | 0.22 |
+| it | 12.8% | pass | 0.10 |
+| pl | 4.5% | pass | 0.11 |
+| ru | 0.0% | pass | 0.04 |
+
+Limits of this number: read audiobook speech, not meetings; 20 clips; not the minimum device;
+Ukrainian has no open test split reachable this way yet. It proves the engine and the harness, not
+the release gate.
+
+## What is still missing
 
 **No measurement has been taken.** Reporting one would require inventing it, and a fabricated
 benchmark is worse than an absent one because it would be believed.
