@@ -9,6 +9,7 @@ struct SettingsView: View {
     #if os(macOS)
     let automatic: AutomaticRecording
     let browser: BrowserMeetingBridge
+    let chromium: ChromiumConnections
     #endif
 
     var body: some View {
@@ -20,7 +21,7 @@ struct SettingsView: View {
             Tab("Recording", systemImage: "record.circle") {
                 Form {
                     AutomaticRecordingSettingsView(automatic: automatic)
-                    BrowserMeetingSettingsView(bridge: browser)
+                    BrowserMeetingSettingsView(bridge: browser, chromium: chromium)
                 }
                 .formStyle(.grouped)
             }

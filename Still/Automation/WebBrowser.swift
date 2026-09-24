@@ -39,4 +39,9 @@ struct WebBrowser: Identifiable, Equatable, Sendable {
     static let all: [WebBrowser] = [safari] + chromium + [
         WebBrowser(bundleID: "org.mozilla.firefox", name: "Firefox", nativeMessagingHostsPath: nil),
     ]
+
+    static func bundleID(owning processBundleID: String) -> String {
+        all.first { processBundleID == $0.bundleID || processBundleID.hasPrefix($0.bundleID + ".") }?.bundleID
+            ?? processBundleID
+    }
 }

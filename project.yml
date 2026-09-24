@@ -75,6 +75,11 @@ targets:
     dependencies:
       - target: StillBrowserExtension
         embed: true
+      - target: StillNativeHost
+        embed: true
+        codeSign: true
+        copy:
+          destination: executables
       - package: FluidAudio
     sources:
       - path: Still
@@ -88,14 +93,14 @@ targets:
         INFOPLIST_KEY_NSMicrophoneUsageDescription: Still uses the microphone to transcribe a meeting on this device.
         INFOPLIST_KEY_NSLocalNetworkUsageDescription: Still syncs directly with your other devices on this network when you turn on nearby sync.
         INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription: Still reads the event you are in to suggest a title and the people expected.
-        CODE_SIGN_ENTITLEMENTS: Still/Still.entitlements
+        CODE_SIGN_ENTITLEMENTS: Still/StillMac.entitlements
         ENABLE_APP_SANDBOX: YES
         ENABLE_HARDENED_RUNTIME: YES
       configs:
         Release:
           EXCLUDED_SOURCE_FILE_NAMES: "*.fixture.caf"
     entitlements:
-      path: Still/Still.entitlements
+      path: Still/StillMac.entitlements
       properties:
         com.apple.security.app-sandbox: true
         com.apple.security.device.audio-input: true
@@ -104,6 +109,11 @@ targets:
           - CloudKit
         com.apple.developer.icloud-container-identifiers:
           - iCloud.com.andrii.still
+        com.apple.security.temporary-exception.files.home-relative-path.read-write:
+          - /Library/Application Support/Google/Chrome/NativeMessagingHosts/
+          - /Library/Application Support/Microsoft Edge/NativeMessagingHosts/
+          - /Library/Application Support/BraveSoftware/Brave-Browser/NativeMessagingHosts/
+          - /Library/Application Support/Arc/User Data/NativeMessagingHosts/
   StillBrowserExtension:
     type: app-extension
     platform: macOS
@@ -120,6 +130,28 @@ targets:
         CODE_SIGN_ENTITLEMENTS: StillBrowserExtension/StillBrowserExtension.entitlements
     entitlements:
       path: StillBrowserExtension/StillBrowserExtension.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+  StillNativeHost:
+    type: tool
+    platform: macOS
+    sources:
+      - path: StillNativeHost
+      - path: Still/Automation/BrowserMeetingSignal.swift
+      - path: Still/Automation/NativeMessaging.swift
+      - path: Still/Automation/WebBrowser.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.andrii.still.native-host
+        PRODUCT_NAME: StillNativeHost
+        GENERATE_INFOPLIST_FILE: YES
+        CREATE_INFOPLIST_SECTION_IN_BINARY: YES
+        SKIP_INSTALL: YES
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_ENTITLEMENTS: StillNativeHost/StillNativeHost.entitlements
+    entitlements:
+      path: StillNativeHost/StillNativeHost.entitlements
       properties:
         com.apple.security.app-sandbox: true
   StillUITests:

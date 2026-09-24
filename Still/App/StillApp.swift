@@ -13,6 +13,7 @@ struct StillApp: App {
     #if os(macOS)
     private let automatic: AutomaticRecording
     private let browser: BrowserMeetingBridge
+    private let chromium: ChromiumConnections
     #endif
 
     private let navigation: LibraryNavigation
@@ -171,6 +172,14 @@ struct StillApp: App {
             bridge.listenForExtensions()
             return bridge
         }
+        chromium = MainActor.assumeIsolated {
+            let connections = ChromiumConnections(
+                registry: NativeMessagingHostInstaller(),
+                store: UserDefaultsChromiumBrowserStore()
+            )
+            connections.refresh()
+            return connections
+        }
         #endif
     }
 
@@ -190,7 +199,8 @@ struct StillApp: App {
                 sync: sync,
                 diagnostics: diagnostics,
                 automatic: automatic,
-                browser: browser
+                browser: browser,
+                chromium: chromium
             )
         }
 
