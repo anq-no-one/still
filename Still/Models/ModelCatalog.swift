@@ -4,9 +4,16 @@ import Foundation
 /// versions and digests inherit the app's code signature and no network request
 /// is needed to learn what Still would download.
 enum ModelCatalog {
+    static let parakeetLanguageCodes = [
+        "en", "bg", "hr", "cs", "da", "nl", "et", "fi", "fr", "de", "el", "hu", "it",
+        "lv", "lt", "mt", "pl", "pt", "ro", "sk", "sl", "es", "sv", "ru", "uk",
+    ]
+
     static let parakeetV3 = ModelPack(
         id: "parakeet-tdt-0.6b-v3",
+        name: String(localized: "Speech Recognition"),
         purpose: String(localized: "Turns speech into accurate text on this device, in English and 24 other European languages."),
+        languages: .only(parakeetLanguageCodes),
         version: "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
         baseURL: URL(string: "https://huggingface.co/FluidInference/parakeet-tdt-0.6b-v3-coreml/resolve/7dd20fe6b1797d35f5e3307e8b1732d9a178edfe/")!,
         minimumMemoryBytes: 4 * 1_024 * 1_024 * 1_024,
@@ -37,7 +44,9 @@ enum ModelCatalog {
 
     static let speakerSeparation = ModelPack(
         id: "speaker-separation",
+        name: String(localized: "Speaker Separation"),
         purpose: String(localized: "Tells apart the people speaking in a recording, on this device, and recognizes voices you have named before."),
+        languages: .any,
         version: "sortformer-ae9a27ab-lseend-28ce1b1f-wespeaker-df2625ac",
         baseURL: URL(string: "https://huggingface.co/FluidInference/diar-streaming-sortformer-coreml/resolve/ae9a27ab45dc0aa3abede7d2d6bad2b7a69aa6d1/v3/palettized/")!,
         minimumMemoryBytes: 4 * 1_024 * 1_024 * 1_024,
@@ -91,7 +100,9 @@ enum ModelCatalog {
     ) -> ModelPack {
         ModelPack(
             id: id,
+            name: String(localized: "Decisions and Tasks"),
             purpose: String(localized: "Finds decisions, facts and proposed tasks in your recordings, on this device. Without it, Still quotes the matching sentences instead."),
+            languages: .any,
             version: version,
             baseURL: URL(string: "https://huggingface.co/\(repository)/resolve/\(version)/")!,
             minimumMemoryBytes: minimumMemoryBytes,

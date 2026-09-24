@@ -170,7 +170,9 @@ extension ModelPack {
         }
         return ModelPack(
             id: "sample-pack",
+            name: "Sample",
             purpose: "Turns speech into text on this device.",
+            languages: .only(["en"]),
             version: "v1",
             baseURL: URL(string: "https://example.invalid/pack/")!,
             minimumMemoryBytes: 4_000,

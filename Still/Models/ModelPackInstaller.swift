@@ -21,6 +21,7 @@ final class ModelPackInstaller {
     private let approval: ModelApprovalStore
 
     private(set) var state: State
+    private var completedBytes = 0
 
     init(
         pack: ModelPack,
@@ -44,10 +45,11 @@ final class ModelPackInstaller {
     }
 
     var progress: Double {
-        guard case .installing(let completed) = state else {
-            return state == .installed ? 1 : 0
+        switch state {
+        case .installed: 1
+        case .installing, .verifying: Double(completedBytes) / Double(pack.totalBytes)
+        case .needsApproval, .failed: 0
         }
-        return Double(completed) / Double(pack.totalBytes)
     }
 
     /// The only entry point that touches the network. Nothing before the user
@@ -61,7 +63,7 @@ final class ModelPackInstaller {
             try createRoot()
             try checkStorage()
 
-            var completed = 0
+            completedBytes = 0
             state = .installing(completedBytes: 0)
 
             for file in pack.files {
@@ -72,8 +74,8 @@ final class ModelPackInstaller {
                 )
 
                 if try isIntact(file, at: destination) {
-                    completed += file.bytes
-                    state = .installing(completedBytes: completed)
+                    completedBytes += file.bytes
+                    state = .installing(completedBytes: completedBytes)
                     continue
                 }
 
@@ -88,8 +90,8 @@ final class ModelPackInstaller {
                     throw ModelPackError.corruptDownload(path: file.path)
                 }
 
-                completed += file.bytes
-                state = .installing(completedBytes: completed)
+                completedBytes += file.bytes
+                state = .installing(completedBytes: completedBytes)
             }
 
             state = .installed
