@@ -1601,9 +1601,198 @@
         }
       }
     },
-    "Approve": {},
-    "Approve on your %@": {},
-    "Approve only if the new device shows the same code. It then receives the projects it chooses to keep.": {},
+    "Approve": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genehmigen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aprobar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approuver"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approva"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Goedkeuren"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zatwierdź"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aprovar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подтвердить"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Godkänn"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підтвердити"
+          }
+        }
+      }
+    },
+    "Approve on your %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf deinem %@ genehmigen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aprobar en tu %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approuver sur votre %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approva sul tuo %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Goedkeuren op je %@"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zatwierdź na swoim %@"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aprovar no seu %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подтвердить на вашем %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Godkänn på din %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підтвердити на вашому %@"
+          }
+        }
+      }
+    },
+    "Approve only if the new device shows the same code. It then receives the projects it chooses to keep.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genehmige nur, wenn das neue Gerät denselben Code zeigt. Es erhält dann die Projekte, die es behalten soll."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aprueba solo si el nuevo dispositivo muestra el mismo código. Entonces recibirá los proyectos que elija conservar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approuvez uniquement si le nouvel appareil affiche le même code. Il reçoit alors les projets qu'il choisit de conserver."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approva solo se il nuovo dispositivo mostra lo stesso codice. Riceverà quindi i progetti che sceglie di conservare."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keur alleen goed als het nieuwe toestel dezelfde code toont. Het ontvangt dan de projecten die het kiest te behouden."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zatwierdź tylko wtedy, gdy nowe urządzenie pokazuje ten sam kod. Otrzyma wtedy projekty, które zdecyduje się zachować."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aprove apenas se o novo dispositivo mostrar o mesmo código. Recebe então os projetos que escolher manter."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подтверждайте, только если новое устройство показывает тот же код. Тогда оно получит проекты, которые решит сохранить."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Godkänn bara om den nya enheten visar samma kod. Den får då de projekt den väljer att behålla."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підтверджуйте, лише якщо новий пристрій показує той самий код. Тоді він отримає проєкти, які вирішить зберегти."
+          }
+        }
+      }
+    },
     "Archive": {
       "localizations": {
         "de": {
@@ -2564,7 +2753,70 @@
         }
       }
     },
-    "Code": {},
+    "Code": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Código"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codice"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kod"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Código"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Код"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kod"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Код"
+          }
+        }
+      }
+    },
     "Codex (~/.codex/config.toml)": {
       "localizations": {
         "de": {
@@ -3845,7 +4097,70 @@
         }
       }
     },
-    "Devices": {},
+    "Devices": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geräte"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dispositivos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appareils"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dispositivi"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toestellen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urządzenia"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dispositivos"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Устройства"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enheter"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пристрої"
+          }
+        }
+      }
+    },
     "Diagnostics": {
       "localizations": {
         "de": {
@@ -5702,10 +6017,262 @@
         }
       }
     },
-    "Join Library": {},
-    "Join Your Library": {},
-    "Join only if your other device shows the same code. Recordings on this device stay and move into the joined library.": {},
-    "Join your other device's Still Library": {},
+    "Join Library": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bibliothek beitreten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unirse a la biblioteca"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rejoindre la bibliothèque"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unisciti alla libreria"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toetreden tot bibliotheek"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dołącz do biblioteki"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Juntar-se à biblioteca"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Присоединиться к библиотеке"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gå med i biblioteket"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приєднатися до бібліотеки"
+          }
+        }
+      }
+    },
+    "Join Your Library": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deiner Bibliothek beitreten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unirte a tu biblioteca"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rejoindre votre bibliothèque"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unisciti alla tua libreria"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toetreden tot je bibliotheek"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dołącz do swojej biblioteki"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Juntar-se à sua biblioteca"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Присоединиться к вашей библиотеке"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gå med i ditt bibliotek"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приєднатися до вашої бібліотеки"
+          }
+        }
+      }
+    },
+    "Join only if your other device shows the same code. Recordings on this device stay and move into the joined library.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tritt nur bei, wenn dein anderes Gerät denselben Code zeigt. Aufnahmen auf diesem Gerät bleiben erhalten und wandern in die beigetretene Bibliothek."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Únete solo si tu otro dispositivo muestra el mismo código. Las grabaciones de este dispositivo permanecen y pasan a la biblioteca unida."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rejoignez uniquement si votre autre appareil affiche le même code. Les enregistrements sur cet appareil restent et rejoignent la bibliothèque."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unisciti solo se il tuo altro dispositivo mostra lo stesso codice. Le registrazioni su questo dispositivo restano e passano nella libreria unita."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Treed alleen toe als je andere toestel dezelfde code toont. Opnamen op dit toestel blijven behouden en gaan over naar de bibliotheek waartoe je toetreedt."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dołącz tylko wtedy, gdy twoje inne urządzenie pokazuje ten sam kod. Nagrania na tym urządzeniu pozostają i przechodzą do dołączonej biblioteki."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Junte-se apenas se o seu outro dispositivo mostrar o mesmo código. As gravações neste dispositivo permanecem e passam para a biblioteca à qual se junta."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Присоединяйтесь, только если ваше другое устройство показывает тот же код. Записи на этом устройстве останутся и перейдут в присоединённую библиотеку."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gå bara med om din andra enhet visar samma kod. Inspelningar på den här enheten finns kvar och flyttas till biblioteket du går med i."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приєднуйтесь, лише якщо ваш інший пристрій показує той самий код. Записи на цьому пристрої залишаться і перейдуть до приєднаної бібліотеки."
+          }
+        }
+      }
+    },
+    "Join your other device's Still Library": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Still-Bibliothek deines anderen Geräts beitreten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unirte a la biblioteca de Still de tu otro dispositivo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rejoindre la bibliothèque Still de votre autre appareil"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unisciti alla libreria Still del tuo altro dispositivo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toetreden tot de Still-bibliotheek van je andere toestel"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dołącz do biblioteki Still na swoim innym urządzeniu"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Juntar-se à biblioteca Still do seu outro dispositivo"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Присоединиться к библиотеке Still на вашем другом устройстве"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gå med i Still-biblioteket på din andra enhet"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приєднатися до бібліотеки Still на вашому іншому пристрої"
+          }
+        }
+      }
+    },
     "Journal on This Device": {
       "localizations": {
         "de": {
@@ -6602,7 +7169,70 @@
         }
       }
     },
-    "Mac": {},
+    "Mac": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac"
+          }
+        }
+      }
+    },
     "Mac system audio as a separate track": {
       "localizations": {
         "de": {
@@ -7307,7 +7937,70 @@
         }
       }
     },
-    "New %@ wants to join": {},
+    "New %@ wants to join": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neues %@ möchte beitreten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuevo %@ quiere unirse"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouveau %@ souhaite rejoindre"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuovo %@ vuole unirsi"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieuwe %@ wil toetreden"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nowe %@ chce dołączyć"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novo %@ pretende juntar-se"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новый %@ хочет присоединиться"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ny %@ vill gå med"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новий %@ хоче приєднатися"
+          }
+        }
+      }
+    },
     "New Project": {
       "localizations": {
         "de": {
@@ -7948,8 +8641,134 @@
         }
       }
     },
-    "Not stored on this Mac": {},
-    "Not stored on this device": {},
+    "Not stored on this Mac": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht auf diesem Mac gespeichert"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No almacenado en este Mac"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non stocké sur ce Mac"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non memorizzato su questo Mac"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet opgeslagen op deze Mac"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieprzechowywane na tym Macu"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não armazenado neste Mac"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не хранится на этом Mac"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sparas inte på den här Mac"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не зберігається на цьому Mac"
+          }
+        }
+      }
+    },
+    "Not stored on this device": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht auf diesem Gerät gespeichert"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No almacenado en este dispositivo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non stocké sur cet appareil"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non memorizzato su questo dispositivo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet opgeslagen op dit toestel"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieprzechowywane na tym urządzeniu"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não armazenado neste dispositivo"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не хранится на этом устройстве"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sparas inte på den här enheten"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не зберігається на цьому пристрої"
+          }
+        }
+      }
+    },
     "Not testing": {
       "localizations": {
         "de": {
@@ -8782,7 +9601,70 @@
         }
       }
     },
-    "Open Still on that device and approve this one when it shows the same code.": {},
+    "Open Still on that device and approve this one when it shows the same code.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffne Still auf diesem Gerät und genehmige dieses, wenn es denselben Code zeigt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre Still en ese dispositivo y aprueba este cuando muestre el mismo código."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrez Still sur cet appareil et approuvez celui-ci lorsqu'il affiche le même code."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apri Still su quel dispositivo e approva questo quando mostra lo stesso codice."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Still op dat toestel en keur dit toestel goed zodra het dezelfde code toont."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwórz Still na tamtym urządzeniu i zatwierdź to urządzenie, gdy pokaże ten sam kod."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abra o Still nesse dispositivo e aprove este quando mostrar o mesmo código."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Откройте Still на этом устройстве и подтвердите его, когда оно покажет тот же код."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öppna Still på den enheten och godkänn den här när den visar samma kod."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрийте Still на цьому пристрої та підтвердьте цей, коли він покаже той самий код."
+          }
+        }
+      }
+    },
     "Open System Settings": {
       "localizations": {
         "de": {
@@ -11855,8 +12737,134 @@
         }
       }
     },
-    "Removing from this Mac once another device keeps a copy": {},
-    "Removing from this device once another device keeps a copy": {},
+    "Removing from this Mac once another device keeps a copy": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird von diesem Mac entfernt, sobald ein anderes Gerät eine Kopie behält"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se eliminará de este Mac en cuanto otro dispositivo conserve una copia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sera supprimé de ce Mac dès qu'un autre appareil en conserve une copie"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verrà rimosso da questo Mac non appena un altro dispositivo ne conserva una copia"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wordt van deze Mac verwijderd zodra een ander toestel een kopie bewaart"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zostanie usunięte z tego Maca, gdy tylko inne urządzenie zachowa kopię"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Será removido deste Mac assim que outro dispositivo mantiver uma cópia"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Будет удалено с этого Mac, как только другое устройство сохранит копию"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tas bort från den här Mac så snart en annan enhet behåller en kopia"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Буде видалено з цього Mac, щойно інший пристрій збереже копію"
+          }
+        }
+      }
+    },
+    "Removing from this device once another device keeps a copy": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird von diesem Gerät entfernt, sobald ein anderes Gerät eine Kopie behält"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se eliminará de este dispositivo en cuanto otro dispositivo conserve una copia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sera supprimé de cet appareil dès qu'un autre appareil en conserve une copie"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verrà rimosso da questo dispositivo non appena un altro dispositivo ne conserva una copia"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wordt van dit toestel verwijderd zodra een ander toestel een kopie bewaart"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zostanie usunięte z tego urządzenia, gdy tylko inne urządzenie zachowa kopię"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Será removido deste dispositivo assim que outro dispositivo mantiver uma cópia"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Будет удалено с этого устройства, как только другое устройство сохранит копию"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tas bort från den här enheten så snart en annan enhet behåller en kopia"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Буде видалено з цього пристрою, щойно інший пристрій збереже копію"
+          }
+        }
+      }
+    },
     "Require Unlock": {
       "localizations": {
         "de": {
@@ -16017,8 +17025,135 @@
         }
       }
     },
-    "Stored on this Mac": {},
-    "Stored on this device": {},
+    "Stored on this Mac": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf diesem Mac gespeichert"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Almacenado en este Mac"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stocké sur ce Mac"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memorizzato su questo Mac"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opgeslagen op deze Mac"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przechowywane na tym Macu"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Armazenado neste Mac"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Хранится на этом Mac"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sparas på den här Mac"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберігається на цьому Mac"
+          }
+        }
+      }
+    },
+    "Stored on this device": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf diesem Gerät gespeichert"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Almacenado en este dispositivo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stocké sur cet appareil"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memorizzato su questo dispositivo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opgeslagen op dit toestel"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przechowywane na tym urządzeniu"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Armazenado neste dispositivo"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Хранится на этом устройстве"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sparas på den här enheten"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберігається на цьому пристрої"
+          }
+        }
+      }
+    },
+    "Suggest Speaker Names from Google Meet": {},
     "Suggested name from the call: %@": {
       "localizations": {
         "de": {
@@ -16339,7 +17474,70 @@
         }
       }
     },
-    "Sync sends your recordings to your own iCloud account, encrypted on this device first. Apple stores only ciphertext: no transcript, note, audio, or key ever leaves in readable form. Each project has its own key, so a device only receives the projects it keeps. Text and notes arrive on your other devices before the audio finishes.": {},
+    "Sync sends your recordings to your own iCloud account, encrypted on this device first. Apple stores only ciphertext: no transcript, note, audio, or key ever leaves in readable form. Each project has its own key, so a device only receives the projects it keeps. Text and notes arrive on your other devices before the audio finishes.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync sendet deine Aufnahmen an dein eigenes iCloud-Konto, zuerst auf diesem Gerät verschlüsselt. Apple speichert nur Chiffretext: Kein Transkript, keine Notiz, kein Audio und kein Schlüssel verlassen das Gerät je in lesbarer Form. Jedes Projekt hat seinen eigenen Schlüssel, sodass ein Gerät nur die Projekte erhält, die es behält. Text und Notizen erreichen deine anderen Geräte, bevor das Audio fertig ist."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync envía tus grabaciones a tu propia cuenta de iCloud, cifradas primero en este dispositivo. Apple solo almacena texto cifrado: ninguna transcripción, nota, audio o clave sale nunca en forma legible. Cada proyecto tiene su propia clave, así que un dispositivo solo recibe los proyectos que conserva. El texto y las notas llegan a tus otros dispositivos antes de que termine el audio."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La synchronisation envoie vos enregistrements vers votre propre compte iCloud, chiffrés d'abord sur cet appareil. Apple ne stocke que du texte chiffré : aucun transcript, aucune note, aucun audio ni aucune clé ne quitte jamais l'appareil sous une forme lisible. Chaque projet a sa propre clé, si bien qu'un appareil ne reçoit que les projets qu'il conserve. Le texte et les notes arrivent sur vos autres appareils avant que l'audio soit terminé."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La sincronizzazione invia le tue registrazioni al tuo account iCloud, cifrate prima su questo dispositivo. Apple memorizza solo testo cifrato: nessuna trascrizione, nota, audio o chiave esce mai in forma leggibile. Ogni progetto ha la propria chiave, quindi un dispositivo riceve solo i progetti che conserva. Il testo e le note arrivano sugli altri tuoi dispositivi prima che l'audio sia completo."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synchronisatie stuurt je opnamen naar je eigen iCloud-account, eerst versleuteld op dit toestel. Apple slaat alleen cijfertekst op: geen transcript, notitie, audio of sleutel verlaat het toestel ooit in leesbare vorm. Elk project heeft zijn eigen sleutel, zodat een toestel alleen de projecten ontvangt die het behoudt. Tekst en notities bereiken je andere toestellen voordat de audio klaar is."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synchronizacja wysyła twoje nagrania do twojego własnego konta iCloud, najpierw zaszyfrowane na tym urządzeniu. Apple przechowuje tylko zaszyfrowany tekst: żaden transkrypt, notatka, dźwięk ani klucz nigdy nie opuszczają urządzenia w czytelnej formie. Każdy projekt ma własny klucz, więc urządzenie otrzymuje tylko projekty, które zachowuje. Tekst i notatki docierają na twoje inne urządzenia, zanim dźwięk się dokończy."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A sincronização envia as suas gravações para a sua própria conta iCloud, encriptadas primeiro neste dispositivo. A Apple só guarda texto cifrado: nenhuma transcrição, nota, áudio ou chave sai alguma vez em forma legível. Cada projeto tem a sua própria chave, pelo que um dispositivo só recebe os projetos que mantém. O texto e as notas chegam aos seus outros dispositivos antes de o áudio terminar."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Синхронизация отправляет ваши записи в ваш собственный аккаунт iCloud, сначала зашифровав их на этом устройстве. Apple хранит только зашифрованный текст: ни транскрипт, ни заметка, ни звук, ни ключ никогда не покидают устройство в читаемом виде. У каждого проекта свой ключ, поэтому устройство получает только те проекты, которые сохраняет. Текст и заметки доходят до ваших других устройств раньше, чем завершится звук."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synkronisering skickar dina inspelningar till ditt eget iCloud-konto, krypterade på den här enheten först. Apple lagrar bara kryptotext: ingen transkription, anteckning, ljud eller nyckel lämnar någonsin enheten i läsbar form. Varje projekt har sin egen nyckel, så en enhet får bara de projekt den behåller. Text och anteckningar når dina andra enheter innan ljudet är klart."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Синхронізація надсилає ваші записи до вашого власного облікового запису iCloud, спочатку зашифровані на цьому пристрої. Apple зберігає лише зашифрований текст: жоден транскрипт, нотатка, звук чи ключ ніколи не залишають пристрій у читабельному вигляді. У кожного проєкту свій ключ, тож пристрій отримує лише ті проєкти, які зберігає. Текст і нотатки надходять на ваші інші пристрої раніше, ніж завершиться звук."
+          }
+        }
+      }
+    },
     "System Audio": {
       "localizations": {
         "de": {
@@ -16788,70 +17986,7 @@
         }
       }
     },
-    "The Still extension tells the app when a meeting on one of these sites starts and ends, and on Google Meet who is speaking. Still then records only the browser that holds the meeting, so music and videos in other apps stay out, and suggests speaker names you can confirm or reject. The extension reads nothing else from the page, and nothing from your Library ever reaches the browser. Turning the extension off leaves manual recording and allowed call apps working as before.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die Still-Erweiterung meldet der App, wann ein Meeting auf einer dieser Seiten beginnt und endet, und bei Google Meet, wer gerade spricht. Still nimmt dann nur den Browser auf, in dem das Meeting läuft, sodass Musik und Videos in anderen Apps außen vor bleiben, und schlägt Sprechernamen vor, die du bestätigen oder ablehnen kannst. Die Erweiterung liest nichts anderes von der Seite, und nichts aus deiner Bibliothek erreicht je den Browser. Wenn du die Erweiterung ausschaltest, funktionieren die manuelle Aufnahme und erlaubte Anruf-Apps wie gewohnt weiter."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La extensión de Still le indica a la app cuándo empieza y termina una reunión en uno de estos sitios, y en Google Meet, quién está hablando. Still graba entonces solo el navegador que aloja la reunión, de modo que la música y los vídeos de otras apps queden fuera, y sugiere nombres de interlocutores que puedes confirmar o rechazar. La extensión no lee nada más de la página, y nada de tu biblioteca llega nunca al navegador. Desactivar la extensión deja la grabación manual y las apps de llamadas permitidas funcionando como antes."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "L'extension Still indique à l'application quand une réunion sur l'un de ces sites commence et se termine, et sur Google Meet, qui est en train de parler. Still enregistre alors uniquement le navigateur qui héberge la réunion, afin que la musique et les vidéos des autres applications restent exclues, et suggère des noms d'intervenants que vous pouvez confirmer ou refuser. L'extension ne lit rien d'autre sur la page, et rien de votre bibliothèque n'atteint jamais le navigateur. Désactiver l'extension laisse l'enregistrement manuel et les applications d'appel autorisées fonctionner comme avant."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "L'estensione Still comunica all'app quando inizia e finisce una riunione su uno di questi siti e, su Google Meet, chi sta parlando. Still registra quindi solo il browser che ospita la riunione, così musica e video di altre app restano esclusi, e suggerisce nomi degli interlocutori che puoi confermare o rifiutare. L'estensione non legge nient'altro dalla pagina, e nulla della tua libreria raggiunge mai il browser. Disattivare l'estensione lascia la registrazione manuale e le app di chiamata consentite a funzionare come prima."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "De Still-extensie meldt de app wanneer een vergadering op een van deze sites begint en eindigt, en op Google Meet wie er spreekt. Still neemt dan alleen de browser op waarin de vergadering plaatsvindt, zodat muziek en video's in andere apps buiten beeld blijven, en stelt sprekersnamen voor die je kunt bevestigen of weigeren. De extensie leest verder niets van de pagina, en niets uit je bibliotheek bereikt ooit de browser. De extensie uitschakelen laat handmatig opnemen en toegestane gespreks-apps werken zoals voorheen."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rozszerzenie Still informuje aplikację, kiedy spotkanie na jednej z tych stron się zaczyna i kończy, a w Google Meet — kto mówi. Still nagrywa wtedy tylko przeglądarkę, w której trwa spotkanie, więc muzyka i filmy z innych aplikacji nie są nagrywane, i sugeruje imiona mówiących, które możesz potwierdzić lub odrzucić. Rozszerzenie nie odczytuje niczego więcej ze strony, a nic z twojej Biblioteki nigdy nie trafia do przeglądarki. Wyłączenie rozszerzenia pozostawia ręczne nagrywanie i dozwolone aplikacje do rozmów działające jak wcześniej."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A extensão Still informa a aplicação quando uma reunião num destes sites começa e termina e, no Google Meet, quem está a falar. O Still grava então apenas o navegador que tem a reunião, para que a música e os vídeos noutras aplicações fiquem de fora, e sugere nomes de oradores que pode confirmar ou rejeitar. A extensão não lê mais nada da página, e nada da sua Biblioteca chega alguma vez ao navegador. Desativar a extensão deixa a gravação manual e as aplicações de chamada permitidas a funcionar como antes."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Расширение Still сообщает приложению, когда встреча на одном из этих сайтов начинается и заканчивается, а в Google Meet — кто говорит. Still записывает только ту вкладку браузера, где идёт встреча, поэтому музыка и видео из других приложений не попадают в запись, и предлагает имена говорящих, которые вы можете подтвердить или отклонить. Расширение больше ничего не читает со страницы, а из вашей библиотеки в браузер ничего не попадает. Отключение расширения не влияет на ручную запись и разрешённые приложения для звонков — они продолжают работать как раньше."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still-tillägget berättar för appen när ett möte på en av de här webbplatserna börjar och slutar, och på Google Meet vem som talar. Still spelar sedan bara in webbläsaren som har mötet, så musik och video i andra appar hålls utanför, och föreslår talarnamn du kan bekräfta eller avvisa. Tillägget läser inget annat från sidan, och inget från ditt bibliotek når någonsin webbläsaren. Att stänga av tillägget lämnar manuell inspelning och tillåtna samtalsappar fungerande som förut."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Розширення Still повідомляє застосунок, коли зустріч на одному з цих сайтів починається й закінчується, а в Google Meet — хто говорить. Still записує лише ту вкладку браузера, де триває зустріч, тому музика й відео з інших застосунків не потрапляють у запис, і пропонує імена мовців, які ви можете підтвердити або відхилити. Розширення більше нічого не читає зі сторінки, а з вашої бібліотеки в браузер нічого не потрапляє. Вимкнення розширення не впливає на ручний запис і дозволені застосунки для дзвінків — вони й далі працюють як раніше."
-          }
-        }
-      }
-    },
+    "The Still extension tells the app when a meeting on one of these sites starts and ends, and, if you turn on speaker names, who is speaking on Google Meet. Still then records only the browser that holds the meeting, so music and videos in other apps stay out, and suggests speaker names you can confirm or reject. The extension reads nothing else from the page, and nothing from your Library ever reaches the browser. Turning the extension off leaves manual recording and allowed call apps working as before.": {},
     "The shortcut works while another app is in front. Still never pauses or changes another app's playback; it only tells you when sound might end up in a recording.": {
       "localizations": {
         "de": {
@@ -16916,8 +18051,134 @@
         }
       }
     },
-    "This choice stays on this Mac. A project you turn off leaves it: its recordings, audio, search entries, and key are removed here once another device keeps a copy, and nothing is deleted anywhere else. With exactly one project chosen, new recordings go into it.": {},
-    "This choice stays on this device. A project you turn off leaves it: its recordings, audio, search entries, and key are removed here once another device keeps a copy, and nothing is deleted anywhere else. With exactly one project chosen, new recordings go into it.": {},
+    "This choice stays on this Mac. A project you turn off leaves it: its recordings, audio, search entries, and key are removed here once another device keeps a copy, and nothing is deleted anywhere else. With exactly one project chosen, new recordings go into it.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Wahl bleibt auf diesem Mac. Ein Projekt, das du ausschaltest, verlässt es: Seine Aufnahmen, Audiodaten, Sucheinträge und sein Schlüssel werden hier entfernt, sobald ein anderes Gerät eine Kopie behält, und nirgendwo sonst wird etwas gelöscht. Ist genau ein Projekt ausgewählt, gehen neue Aufnahmen dorthin."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta elección permanece en este Mac. Un proyecto que desactives lo abandona: sus grabaciones, audio, entradas de búsqueda y clave se eliminan aquí en cuanto otro dispositivo conserve una copia, y no se elimina nada en ningún otro lugar. Con exactamente un proyecto elegido, las grabaciones nuevas van a él."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce choix reste sur ce Mac. Un projet que vous désactivez le quitte : ses enregistrements, l'audio, les entrées de recherche et la clé sont supprimés ici dès qu'un autre appareil en conserve une copie, et rien n'est supprimé ailleurs. Avec exactement un projet choisi, les nouveaux enregistrements y vont."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questa scelta resta su questo Mac. Un progetto che disattivi lo lascia: le sue registrazioni, l'audio, le voci di ricerca e la chiave vengono rimossi qui non appena un altro dispositivo ne conserva una copia, e non viene eliminato nulla altrove. Con esattamente un progetto scelto, le nuove registrazioni vanno lì."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze keuze blijft op deze Mac. Een project dat je uitschakelt, verlaat deze: de opnamen, audio, zoekvermeldingen en sleutel ervan worden hier verwijderd zodra een ander toestel een kopie bewaart, en nergens anders wordt iets verwijderd. Bij precies één gekozen project gaan nieuwe opnamen daarin."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ten wybór pozostaje na tym Macu. Projekt, który wyłączysz, go opuszcza: jego nagrania, dźwięk, wpisy wyszukiwania i klucz są tu usuwane, gdy tylko inne urządzenie zachowa kopię, a nigdzie indziej nic nie jest usuwane. Gdy wybrany jest dokładnie jeden projekt, nowe nagrania trafiają do niego."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta escolha permanece neste Mac. Um projeto que desative deixa-o: as suas gravações, áudio, entradas de pesquisa e chave são removidos aqui assim que outro dispositivo mantiver uma cópia, e nada é eliminado em mais lado nenhum. Com exatamente um projeto escolhido, as novas gravações vão para ele."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот выбор остаётся на этом Mac. Проект, который вы отключите, покидает его: его записи, звук, записи поиска и ключ удаляются здесь, как только другое устройство сохранит копию, а больше нигде ничего не удаляется. Если выбран ровно один проект, новые записи попадают в него."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Det här valet stannar på den här Mac. Ett projekt du stänger av lämnar den: dess inspelningar, ljud, sökposter och nyckel tas bort här så snart en annan enhet behåller en kopia, och inget tas bort någon annanstans. Med exakt ett valt projekt hamnar nya inspelningar i det."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цей вибір залишається на цьому Mac. Проєкт, який ви вимкнете, покидає його: його записи, звук, пошукові записи та ключ видаляються тут, щойно інший пристрій збереже копію, а більше ніде нічого не видаляється. Якщо вибрано рівно один проєкт, нові записи потрапляють у нього."
+          }
+        }
+      }
+    },
+    "This choice stays on this device. A project you turn off leaves it: its recordings, audio, search entries, and key are removed here once another device keeps a copy, and nothing is deleted anywhere else. With exactly one project chosen, new recordings go into it.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Wahl bleibt auf diesem Gerät. Ein Projekt, das du ausschaltest, verlässt es: Seine Aufnahmen, Audiodaten, Sucheinträge und sein Schlüssel werden hier entfernt, sobald ein anderes Gerät eine Kopie behält, und nirgendwo sonst wird etwas gelöscht. Ist genau ein Projekt ausgewählt, gehen neue Aufnahmen dorthin."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta elección permanece en este dispositivo. Un proyecto que desactives lo abandona: sus grabaciones, audio, entradas de búsqueda y clave se eliminan aquí en cuanto otro dispositivo conserve una copia, y no se elimina nada en ningún otro lugar. Con exactamente un proyecto elegido, las grabaciones nuevas van a él."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce choix reste sur cet appareil. Un projet que vous désactivez le quitte : ses enregistrements, l'audio, les entrées de recherche et la clé sont supprimés ici dès qu'un autre appareil en conserve une copie, et rien n'est supprimé ailleurs. Avec exactement un projet choisi, les nouveaux enregistrements y vont."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questa scelta resta su questo dispositivo. Un progetto che disattivi lo lascia: le sue registrazioni, l'audio, le voci di ricerca e la chiave vengono rimossi qui non appena un altro dispositivo ne conserva una copia, e non viene eliminato nulla altrove. Con esattamente un progetto scelto, le nuove registrazioni vanno lì."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze keuze blijft op dit toestel. Een project dat je uitschakelt, verlaat dit toestel: de opnamen, audio, zoekvermeldingen en sleutel ervan worden hier verwijderd zodra een ander toestel een kopie bewaart, en nergens anders wordt iets verwijderd. Bij precies één gekozen project gaan nieuwe opnamen daarin."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ten wybór pozostaje na tym urządzeniu. Projekt, który wyłączysz, je opuszcza: jego nagrania, dźwięk, wpisy wyszukiwania i klucz są tu usuwane, gdy tylko inne urządzenie zachowa kopię, a nigdzie indziej nic nie jest usuwane. Gdy wybrany jest dokładnie jeden projekt, nowe nagrania trafiają do niego."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta escolha permanece neste dispositivo. Um projeto que desative deixa-o: as suas gravações, áudio, entradas de pesquisa e chave são removidos aqui assim que outro dispositivo mantiver uma cópia, e nada é eliminado em mais lado nenhum. Com exatamente um projeto escolhido, as novas gravações vão para ele."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот выбор остаётся на этом устройстве. Проект, который вы отключите, покидает его: его записи, звук, записи поиска и ключ удаляются здесь, как только другое устройство сохранит копию, а больше нигде ничего не удаляется. Если выбран ровно один проект, новые записи попадают в него."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Det här valet stannar på den här enheten. Ett projekt du stänger av lämnar den: dess inspelningar, ljud, sökposter och nyckel tas bort här så snart en annan enhet behåller en kopia, och inget tas bort någon annanstans. Med exakt ett valt projekt hamnar nya inspelningar i det."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цей вибір залишається на цьому пристрої. Проєкт, який ви вимкнете, покидає його: його записи, звук, пошукові записи та ключ видаляються тут, щойно інший пристрій збереже копію, а більше ніде нічого не видаляється. Якщо вибрано рівно один проєкт, нові записи потрапляють у нього."
+          }
+        }
+      }
+    },
     "This device could not turn the recording into text. The audio is saved, so you can still play it.": {
       "localizations": {
         "de": {
@@ -18582,7 +19843,70 @@
         }
       }
     },
-    "Waiting for another device to share this project": {},
+    "Waiting for another device to share this project": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warten darauf, dass ein anderes Gerät dieses Projekt teilt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esperando a que otro dispositivo comparta este proyecto"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En attente qu'un autre appareil partage ce projet"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In attesa che un altro dispositivo condivida questo progetto"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wachten tot een ander toestel dit project deelt"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oczekiwanie, aż inne urządzenie udostępni ten projekt"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A aguardar que outro dispositivo partilhe este projeto"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ожидание, пока другое устройство поделится этим проектом"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Väntar på att en annan enhet ska dela det här projektet"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очікування, поки інший пристрій поділиться цим проєктом"
+          }
+        }
+      }
+    },
     "Waiting for approval. Still unlocks Pro as soon as it is approved.": {
       "localizations": {
         "de": {
@@ -19287,7 +20611,70 @@
         }
       }
     },
-    "Your %@ approved this device.": {},
+    "Your %@ approved this device.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein %@ hat dieses Gerät genehmigt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu %@ aprobó este dispositivo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre %@ a approuvé cet appareil."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il tuo %@ ha approvato questo dispositivo."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je %@ heeft dit toestel goedgekeurd."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twój %@ zatwierdził to urządzenie."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O seu %@ aprovou este dispositivo."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваш %@ подтвердил это устройство."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Din %@ godkände den här enheten."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваш %@ підтвердив цей пристрій."
+          }
+        }
+      }
+    },
     "Your Library is locked, so AI tools get an error until you unlock it.": {
       "localizations": {
         "de": {
@@ -19864,8 +21251,134 @@
         }
       }
     },
-    "iPad": {},
-    "iPhone": {},
+    "iPad": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPad"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPad"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPad"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPad"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPad"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPad"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPad"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPad"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPad"
+          }
+        }
+      }
+    },
+    "iPhone": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone"
+          }
+        }
+      }
+    },
     "macOS already uses this shortcut. Choose another one or turn it off in System Settings → Keyboard → Keyboard Shortcuts.": {
       "localizations": {
         "de": {
@@ -19930,7 +21443,70 @@
         }
       }
     },
-    "other device": {}
+    "other device": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "anderes Gerät"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "otro dispositivo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "autre appareil"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "altro dispositivo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ander toestel"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "inne urządzenie"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "outro dispositivo"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "другое устройство"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "annan enhet"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "інший пристрій"
+          }
+        }
+      }
+    }
   },
   "version": "1.0"
 }
