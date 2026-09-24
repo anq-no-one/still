@@ -8,6 +8,7 @@ struct StillApp: App {
     private let models: ModelInstallers
     private let entitlements: Entitlements
     private let coordinator: RecordingCoordinator
+    private let importer: AudioImporter
     private let setup: SetupFlow
     private let lock: AppLock
     private let sync: SyncEngine
@@ -166,18 +167,20 @@ struct StillApp: App {
             )
         }
         sync = syncEngine
+        let makeFinalTranscription = { FinalTranscription(transcriber: ParakeetOfflineTranscriber(engine: speech)) }
+        let makeSpeakerSeparation = {
+            SpeakerSeparation(
+                diarizer: FluidSpeakerDiarizer(pack: ModelCatalog.speakerSeparation, root: modelRoot),
+                voiceprints: FluidVoiceprintExtractor(pack: ModelCatalog.speakerSeparation, root: modelRoot)
+            )
+        }
         let recordingCoordinator = MainActor.assumeIsolated {
             RecordingCoordinator(
                 library: recordingLibrary,
                 entitlements: proEntitlements,
                 makeSession: { LiveTranscriber(input: microphone, systemAudio: systemAudio, engine: speech) },
-                makeFinalTranscription: { FinalTranscription(transcriber: ParakeetOfflineTranscriber(engine: speech)) },
-                makeSpeakerSeparation: {
-                    SpeakerSeparation(
-                        diarizer: FluidSpeakerDiarizer(pack: ModelCatalog.speakerSeparation, root: modelRoot),
-                        voiceprints: FluidVoiceprintExtractor(pack: ModelCatalog.speakerSeparation, root: modelRoot)
-                    )
-                },
+                makeFinalTranscription: makeFinalTranscription,
+                makeSpeakerSeparation: makeSpeakerSeparation,
                 expectedParticipants: { date in
                     await CalendarContext(source: EventKitCalendarSource()).suggestion(at: date)?.participants ?? []
                 },
@@ -186,6 +189,16 @@ struct StillApp: App {
             )
         }
         coordinator = recordingCoordinator
+        importer = MainActor.assumeIsolated {
+            AudioImporter(
+                library: recordingLibrary,
+                makeFinalTranscription: makeFinalTranscription,
+                makeSpeakerSeparation: {
+                    proEntitlements.allows(.speakerSeparation) ? makeSpeakerSeparation() : .trackBased
+                },
+                isReady: { setupFlow.isComplete && recordingLibrary.state == .unlocked }
+            )
+        }
         navigation = MainActor.assumeIsolated { LibraryNavigation() }
         Task { @MainActor in
             await recordingLibrary.unlock()
@@ -249,6 +262,11 @@ struct StillApp: App {
             libraryView
         }
         .defaultSize(width: 980, height: 680)
+        .commands {
+            CommandGroup(after: .newItem) {
+                AudioImportCommand(importer: importer, navigation: navigation)
+            }
+        }
         .defaultLaunchBehavior(.presented)
 
         Settings {
@@ -290,6 +308,7 @@ struct StillApp: App {
                 models: models,
                 entitlements: entitlements,
                 coordinator: coordinator,
+                importer: importer,
                 setup: setup,
                 sync: sync,
                 diagnostics: diagnostics,

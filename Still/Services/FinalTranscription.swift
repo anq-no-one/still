@@ -40,9 +40,11 @@ struct FinalTranscription: Sendable {
 
     func run(
         tracks: [CapturedTrack],
-        checkpoints: TranscriptionCheckpointStore
+        checkpoints: TranscriptionCheckpointStore,
+        progress: @Sendable (Double) -> Void = { _ in }
     ) async throws -> TranscriptionResult {
         var checkpoint = checkpoints.load()
+        let totalWindows = tracks.map(windowCount).reduce(0, +)
 
         for captured in tracks where !captured.pcm.isEmpty {
             let speaker = checkpoint.speakers.first { $0.origin == captured.track }
@@ -51,13 +53,15 @@ struct FinalTranscription: Sendable {
                 checkpoint.speakers.append(speaker)
             }
 
-            let windowBytes = Int(windowSeconds * TimeInterval(captured.format.bytesPerSecond))
-            let windowCount = max(1, Int(ceil(Double(captured.pcm.count) / Double(windowBytes))))
+            let bytesPerWindow = windowBytes(of: captured)
+            let windows = windowCount(of: captured)
 
-            while checkpoint.completedWindows[captured.track.rawValue, default: 0] < windowCount {
+            while checkpoint.completedWindows[captured.track.rawValue, default: 0] < windows {
+                try Task.checkCancellation()
+                progress(Double(checkpoint.completedWindows.values.reduce(0, +)) / Double(max(1, totalWindows)))
                 let index = checkpoint.completedWindows[captured.track.rawValue, default: 0]
-                let start = index * windowBytes
-                let window = captured.pcm[start..<min(start + windowBytes, captured.pcm.count)]
+                let start = index * bytesPerWindow
+                let window = captured.pcm[start..<min(start + bytesPerWindow, captured.pcm.count)]
                 let offset = captured.startOffset + TimeInterval(index) * windowSeconds
 
                 let produced = try await transcriber.segments(of: Data(window), format: captured.format)
@@ -73,7 +77,17 @@ struct FinalTranscription: Sendable {
             speakers: checkpoint.speakers
         )
         checkpoints.clear()
+        progress(1)
         return result
+    }
+
+    private func windowBytes(of captured: CapturedTrack) -> Int {
+        Int(windowSeconds * TimeInterval(captured.format.bytesPerSecond))
+    }
+
+    private func windowCount(of captured: CapturedTrack) -> Int {
+        guard !captured.pcm.isEmpty else { return 0 }
+        return max(1, Int(ceil(Double(captured.pcm.count) / Double(windowBytes(of: captured)))))
     }
 }
 

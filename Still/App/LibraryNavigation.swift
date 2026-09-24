@@ -4,4 +4,5 @@ import Observation
 @Observable
 final class LibraryNavigation {
     var selection: Recording.ID?
+    var isChoosingAudioFile = false
 }

@@ -14,12 +14,9 @@ final class RecordingWorkflow {
     }
 
     private let session: TranscriptionSession
-    private let finalTranscription: FinalTranscription
-    private let speakerSeparation: SpeakerSeparation
+    private let finalizer: RecordingFinalizer
     private let expectedParticipants: @MainActor (Date) async -> [String]
-    private let noteBuilder: GroundedNoteBuilder
     private let recorder: AudioRecorder
-    private let library: RecordingLibrary
     private let showsLiveDraft: Bool
     private let suggestedProjectID: UUID?
     private let now: () -> Date
@@ -44,12 +41,14 @@ final class RecordingWorkflow {
         now: @escaping () -> Date = Date.init
     ) {
         self.session = session
-        self.finalTranscription = finalTranscription
-        self.speakerSeparation = speakerSeparation
+        self.finalizer = RecordingFinalizer(
+            finalTranscription: finalTranscription,
+            speakerSeparation: speakerSeparation,
+            noteBuilder: noteBuilder,
+            library: library
+        )
         self.expectedParticipants = expectedParticipants
-        self.noteBuilder = noteBuilder
         self.recorder = recorder
-        self.library = library
         self.showsLiveDraft = showsLiveDraft
         self.suggestedProjectID = suggestedProjectID
         self.now = now
@@ -127,38 +126,20 @@ final class RecordingWorkflow {
 
         do {
             try await recorder.finish()
-            let participants = await expectedParticipants(startedAt ?? now())
-            let transcription = try await transcribeAndSeparateSpeakers(expecting: participants)
-            let segments = transcription?.segments ?? []
-            let transcript = segments.plainText
-            guard !transcript.isEmpty || transcription == nil else {
-                await recorder.discard()
-                state = .failed(RecordingWorkflowError.emptyTranscript.localizedDescription)
-                return
-            }
-
-            let note = await noteBuilder.note(
-                segments: segments,
-                duration: elapsed,
-                tracks: library.tracks(forRecording: recordingID)
-            )
-
             let startedAt = startedAt ?? now()
-            try library.add(
-                Recording(
+            try await finalizer.finalize(
+                RecordingFinalizer.Draft(
                     id: recordingID,
-                    title: RecordingTitle.from(transcript: transcript, date: startedAt),
-                    transcript: transcript,
-                    segments: segments,
-                    speakers: transcription?.speakers ?? [],
-                    expectedParticipants: participants.isEmpty ? nil : participants,
-                    note: note,
                     createdAt: startedAt,
                     duration: elapsed,
-                    projectID: suggestedProjectID
+                    participants: await expectedParticipants(startedAt),
+                    suggestedProjectID: suggestedProjectID
                 )
             )
             state = .saved
+        } catch RecordingWorkflowError.emptyTranscript {
+            await recorder.discard()
+            state = .failed(RecordingWorkflowError.emptyTranscript.localizedDescription)
         } catch {
             state = .failed(error.localizedDescription)
         }
@@ -172,29 +153,9 @@ final class RecordingWorkflow {
         state = .idle
     }
 
-    private func transcribeAndSeparateSpeakers(expecting participants: [String]) async throws -> TranscriptionResult? {
-        let tracks = try library.capturedTracks(forRecording: recordingID)
-        let transcription: TranscriptionResult
-        do {
-            transcription = try await finalTranscription.run(
-                tracks: tracks,
-                checkpoints: try library.checkpointStore(forRecording: recordingID)
-            )
-        } catch is TranscriptionError {
-            return nil
-        }
-        var naming = library.speakerNaming
-        naming.participants = participants
-        return await speakerSeparation.separate(transcription, tracks: tracks, naming: naming)
-    }
-
     private var isFailed: Bool {
         if case .failed = state { return true }
         return false
-    }
-
-    private var draftTranscript: String {
-        session.transcript.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private func fail(with error: Error) {

@@ -166,6 +166,7 @@ final class Library: RecordingLibrary {
             self.repository = repository
             self.key = key
             try recoverInterruptedAudio(cipher: LibraryCipher(key: key))
+            discardUnfinishedImports()
             try applyRetention()
             state = .unlocked
             journal?.note(.libraryUnlocked)
@@ -477,6 +478,52 @@ final class Library: RecordingLibrary {
 
         try write(archive.recording)
         return archive.recording
+    }
+
+    func importID(forContentDigest digest: Data) throws -> UUID {
+        guard let key else { throw LibraryError.locked }
+
+        return ImportIdentity.recordingID(forContentDigest: digest, key: key)
+    }
+
+    func hasRecording(withID id: UUID) -> Bool {
+        storedRecordings.contains { $0.id == id && !$0.isDeleted }
+    }
+
+    func stageImport(forRecording id: UUID, track: AudioTrack) throws -> AudioChunkWriter {
+        guard let key else { throw LibraryError.locked }
+
+        let staging = importStagingDirectory(forRecording: id)
+        try? FileManager.default.removeItem(at: staging)
+        return try AudioChunkWriter(
+            directory: staging.appendingPathComponent(track.rawValue, isDirectory: true),
+            cipher: LibraryCipher(key: key)
+        )
+    }
+
+    func commitImport(forRecording id: UUID) throws {
+        let destination = AudioChunkStore.directory(forRecording: id, in: services.audioRoot)
+        try? FileManager.default.removeItem(at: destination)
+        try FileManager.default.moveItem(at: importStagingDirectory(forRecording: id), to: destination)
+    }
+
+    func discardImport(forRecording id: UUID) {
+        try? FileManager.default.removeItem(at: importStagingDirectory(forRecording: id))
+        guard !storedRecordings.contains(where: { $0.id == id }) else { return }
+
+        try? AudioChunkStore.discard(AudioChunkStore.directory(forRecording: id, in: services.audioRoot))
+    }
+
+    private var importStagingRoot: URL {
+        services.audioRoot.appendingPathComponent(".imports", isDirectory: true)
+    }
+
+    private func importStagingDirectory(forRecording id: UUID) -> URL {
+        importStagingRoot.appendingPathComponent(id.uuidString, isDirectory: true)
+    }
+
+    private func discardUnfinishedImports() {
+        try? FileManager.default.removeItem(at: importStagingRoot)
     }
 
     func capturedAudio(forRecording id: UUID) throws -> (pcm: Data, format: AudioFormat) {
