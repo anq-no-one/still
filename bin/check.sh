@@ -46,9 +46,19 @@ unit_tests() {
     ${STILL_UNSIGNED:+CODE_SIGNING_ALLOWED=NO}
 }
 
+mcp_helper() {
+  local helper="${DERIVED_DATA}/Build/Products/Debug/Still.app/Contents/Helpers/still-mcp"
+  local reply
+  reply=$(echo '{"jsonrpc":"2.0","id":9,"method":"tools/list"}' \
+    | STILL_MCP_SOCKET="${TMPDIR:-/tmp}/still-mcp-missing.sock" "$helper")
+  echo "$reply"
+  [[ "$reply" == *'"code":-32001'* && "$reply" == *'"id":9'* ]]
+}
+
 step "Generate project" xcodegen generate --spec "${ROOT}/project.yml" --project "${ROOT}" --quiet
 step "Build iOS" build_ios
 step "macOS unit tests" unit_tests
+step "MCP helper without Still" mcp_helper
 xcrun xcresulttool get test-results summary --path "$UNIT_RESULT" \
   | python3 -c 'import json,sys; d=json.load(sys.stdin); print("  %s of %s passed" % (d["passedTests"], d["totalTestCount"]))'
 

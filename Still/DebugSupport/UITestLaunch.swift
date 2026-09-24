@@ -6,6 +6,11 @@ enum UITestLaunch {
     static let resetKey = "STILL_UI_TEST_RESET"
     static let audioFixtureKey = "STILL_AUDIO_FIXTURE"
     static let modelRootKey = "STILL_MODEL_ROOT"
+    static let allowAIToolsArgument = "--allow-ai-tools"
+
+    static var allowsAITools: Bool {
+        ProcessInfo.processInfo.arguments.contains(allowAIToolsArgument)
+    }
 
     static var modelRoot: URL? {
         ProcessInfo.processInfo.environment[modelRootKey].map { URL(filePath: $0, directoryHint: .isDirectory) }

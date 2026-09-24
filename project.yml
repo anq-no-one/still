@@ -27,6 +27,9 @@ targets:
       - package: FluidAudio
     sources:
       - path: Still
+        excludes:
+          - MCP/**
+          - Still-macOS.entitlements
     info:
       path: Still/Supporting/iOS-Info.plist
       properties:
@@ -77,6 +80,12 @@ targets:
     dependencies:
       - target: StillBrowserExtension
         embed: true
+      - target: StillMCPHelper
+        embed: true
+        codeSign: false
+        copy:
+          destination: wrapper
+          subpath: Contents/Helpers
       - package: FluidAudio
     sources:
       - path: Still
@@ -90,16 +99,18 @@ targets:
         INFOPLIST_KEY_NSMicrophoneUsageDescription: Still uses the microphone to transcribe a meeting on this device.
         INFOPLIST_KEY_NSLocalNetworkUsageDescription: Still syncs directly with your other devices on this network when you turn on nearby sync.
         INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription: Still reads the event you are in to suggest a title and the people expected.
-        CODE_SIGN_ENTITLEMENTS: Still/Still.entitlements
+        CODE_SIGN_ENTITLEMENTS: Still/Still-macOS.entitlements
         ENABLE_APP_SANDBOX: YES
         ENABLE_HARDENED_RUNTIME: YES
       configs:
         Release:
           EXCLUDED_SOURCE_FILE_NAMES: "*.fixture.caf"
     entitlements:
-      path: Still/Still.entitlements
+      path: Still/Still-macOS.entitlements
       properties:
         com.apple.security.app-sandbox: true
+        com.apple.security.application-groups:
+          - R3XFQ7K885.com.andrii.still
         com.apple.security.device.audio-input: true
         com.apple.security.network.client: true
         com.apple.security.personal-information.calendars: true
@@ -125,6 +136,30 @@ targets:
       path: StillBrowserExtension/StillBrowserExtension.entitlements
       properties:
         com.apple.security.app-sandbox: true
+  StillMCPHelper:
+    type: tool
+    platform: macOS
+    sources:
+      - path: StillMCPHelper
+      - path: Still/MCP/JSONValue.swift
+      - path: Still/MCP/MCPSocketLocation.swift
+    settings:
+      base:
+        PRODUCT_NAME: still-mcp
+        PRODUCT_BUNDLE_IDENTIFIER: com.andrii.still.mcp
+        GENERATE_INFOPLIST_FILE: YES
+        CREATE_INFOPLIST_SECTION_IN_BINARY: YES
+        SKIP_INSTALL: YES
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: StillMCPHelper/StillMCPHelper.entitlements
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_HARDENED_RUNTIME: YES
+    entitlements:
+      path: StillMCPHelper/StillMCPHelper.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.application-groups:
+          - R3XFQ7K885.com.andrii.still
   StillUITests:
     type: bundle.ui-testing
     platform: iOS

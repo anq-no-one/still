@@ -9,6 +9,7 @@ struct SettingsView: View {
     #if os(macOS)
     let automatic: AutomaticRecording
     let browser: BrowserMeetingBridge
+    let aiTools: MCPAccess
     #endif
 
     var body: some View {
@@ -35,6 +36,9 @@ struct SettingsView: View {
             }
             Tab("Storage", systemImage: "internaldrive") {
                 RetentionSettingsView(library: library)
+            }
+            Tab("AI Tools", systemImage: "sparkles.rectangle.stack") {
+                AIToolsSettingsView(access: aiTools, library: library)
             }
             Tab("Diagnostics", systemImage: "stethoscope") {
                 DiagnosticsSettingsView(diagnostics: diagnostics)
