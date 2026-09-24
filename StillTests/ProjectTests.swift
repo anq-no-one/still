@@ -233,6 +233,9 @@ struct LibraryProjectTests {
     func projectsTravelThroughSyncAndMerge() async throws {
         let library = try await makeUnlockedLibrary(context: try makeContext())
         let project = try library.createProject(named: "Acme", color: .blue, at: Date(timeIntervalSince1970: 0))
+        var renamed = project
+        renamed.rename(to: "Acme Corp", at: Date(timeIntervalSince1970: 50))
+        try library.saveProject(renamed)
         let transport = SpySyncTransport()
         let engine = SyncEngine(library: library, transport: transport, settings: MemorySyncSettings())
         var remote = project
@@ -240,30 +243,30 @@ struct LibraryProjectTests {
         let newcomer = Project(name: "Beta", color: .mint)
         transport.incoming = try [remote, newcomer].map { project in
             SyncChange(
-                recordingID: project.id,
+                id: project.id,
+                kind: .project,
                 updatedAt: project.updatedAt,
                 deviceID: UUID(),
-                sealedRecording: try library.sealForSync(project),
-                kind: .project
+                payload: try library.sealForSync(project)
             )
         }
 
         engine.enable()
         await engine.sync()
 
-        #expect(library.projects.map(\.name) == ["Acme", "Beta"])
+        #expect(library.projects.map(\.name) == ["Acme Corp", "Beta"])
         #expect(library.project(withID: project.id)?.color == .pink)
         let pushed = try #require(transport.pushed.first)
-        #expect(pushed.filter { $0.kind == .project }.count == 2)
-        #expect(pushed.allSatisfy { !String(decoding: $0.sealedRecording, as: UTF8.self).contains("Acme") })
+        #expect(pushed.filter { $0.kind == .project }.map(\.id) == [project.id])
+        #expect(pushed.allSatisfy { !String(decoding: $0.payload ?? Data(), as: UTF8.self).contains("Acme") })
     }
 
     @Test
-    func aRestrictedDeviceStillSyncsHiddenRecordingText() async throws {
+    func aLeavingProjectKeepsSyncingUntilAnotherDeviceKeepsIt() async throws {
         let library = try await makeUnlockedLibrary(context: try makeContext())
-        let hidden = UUID()
-        try library.add(Recording(title: "Elsewhere", transcript: "text", duration: 5, projectID: hidden, projectAssignedAt: .now))
-        library.setProjectSelection(ProjectSelection(mode: .except, scopes: [.project(hidden)]))
+        let hidden = try library.createProject(named: "Elsewhere", color: .red)
+        try library.add(Recording(title: "Elsewhere", transcript: "text", duration: 5, projectID: hidden.id, projectAssignedAt: .now))
+        library.setProjectSelection(ProjectSelection(mode: .except, scopes: [.project(hidden.id)]))
         let transport = SpySyncTransport()
         let engine = SyncEngine(library: library, transport: transport, settings: MemorySyncSettings())
 
@@ -271,7 +274,8 @@ struct LibraryProjectTests {
         await engine.sync()
 
         #expect(library.recordings.isEmpty)
-        #expect(transport.pushed.first?.count == 1)
+        #expect(library.storage(of: .project(hidden.id)) == .leaving)
+        #expect(transport.pushed.first?.filter { $0.kind == .recording }.count == 1)
     }
 
     @Test
@@ -287,17 +291,26 @@ struct LibraryProjectTests {
         let sender = try Scratch()
         let receiver = try Scratch()
         let transport = FakeChunkTransport()
-        for recording in [visible, elsewhere] {
+        let senderCipher = LibraryCipher(key: SymmetricKey(data: Data(repeating: 7, count: 32)))
+        let noProjectScope = try #require(library.scopeID(for: .noProject))
+        let noProjectKey = try #require(library.scopeKey(for: noProjectScope))
+        for (recording, scopeKey) in [(visible, noProjectKey), (elsewhere, SymmetricKey(size: .bits256))] {
             try writeAudio(forRecording: recording.id, in: sender.directory)
-            await AudioChunkSync(audioRoot: sender.directory, transport: transport, freeBytes: { _ in 1 << 30 })
-                .sync(recordingID: recording.id)
+            await AudioChunkSync(
+                audioRoot: sender.directory,
+                transport: transport,
+                freeBytes: { _ in 1 << 30 },
+                sealing: { _ in ScopeChunkSealing(local: senderCipher, scopeKey: scopeKey) }
+            )
+            .sync(recordingID: recording.id)
         }
 
         let receiving = AudioChunkSync(
             audioRoot: receiver.directory,
             transport: transport,
             freeBytes: { _ in 1 << 30 },
-            keepsAudio: library.keepsAudio(forRecording:)
+            keepsAudio: library.keepsAudio(forRecording:),
+            sealing: library.audioSealing(forRecording:)
         )
         await receiving.sync(recordingID: visible.id)
         await receiving.sync(recordingID: elsewhere.id)

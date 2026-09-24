@@ -84,7 +84,7 @@ struct LibraryRecoveryTests {
         #expect(library.recordings.map(\.title) == ["Confidential"])
         #expect(try library.capturedAudio(forRecording: recording.id).pcm.count == AudioFormat.transcription.bytesPerSecond)
 
-        let sealed = try library.sealForSync(library.recordings[0])
+        let sealed = try library.sealForAccount(Data("board notes".utf8))
 
         #expect(throws: LibraryCipherError.unreadable) {
             try LibraryCipher(key: oldKey).open(sealed)

@@ -12,7 +12,7 @@ struct AudioChunkSyncTests {
         let scratch = try Scratch()
         let id = try write(seconds: 12, in: scratch.directory)
         let transport = FakeChunkTransport()
-        let sync = AudioChunkSync(audioRoot: scratch.directory, transport: transport, freeBytes: { _ in 1 << 30 })
+        let sync = AudioChunkSync(audioRoot: scratch.directory, transport: transport, freeBytes: { _ in 1 << 30 }, sealing: { _ in sealing })
 
         await sync.sync(recordingID: id)
 
@@ -31,7 +31,7 @@ struct AudioChunkSyncTests {
         let id = try write(seconds: 25, in: scratch.directory)
         let transport = FakeChunkTransport()
         transport.failUploadsAfter = 2
-        let sync = AudioChunkSync(audioRoot: scratch.directory, transport: transport, freeBytes: { _ in 1 << 30 })
+        let sync = AudioChunkSync(audioRoot: scratch.directory, transport: transport, freeBytes: { _ in 1 << 30 }, sealing: { _ in sealing })
 
         await sync.sync(recordingID: id)
 
@@ -51,10 +51,10 @@ struct AudioChunkSyncTests {
         let second = try Scratch()
         let id = try write(seconds: 17, in: first.directory)
         let transport = FakeChunkTransport()
-        await AudioChunkSync(audioRoot: first.directory, transport: transport, freeBytes: { _ in 1 << 30 })
+        await AudioChunkSync(audioRoot: first.directory, transport: transport, freeBytes: { _ in 1 << 30 }, sealing: { _ in sealing })
             .sync(recordingID: id)
 
-        let receiving = AudioChunkSync(audioRoot: second.directory, transport: transport, freeBytes: { _ in 1 << 30 })
+        let receiving = AudioChunkSync(audioRoot: second.directory, transport: transport, freeBytes: { _ in 1 << 30 }, sealing: { _ in sealing })
         await receiving.sync(recordingID: id)
 
         #expect(receiving.state == .complete)
@@ -72,11 +72,11 @@ struct AudioChunkSyncTests {
         let second = try Scratch()
         let id = try write(seconds: 12, in: first.directory)
         let transport = FakeChunkTransport()
-        await AudioChunkSync(audioRoot: first.directory, transport: transport, freeBytes: { _ in 1 << 30 })
+        await AudioChunkSync(audioRoot: first.directory, transport: transport, freeBytes: { _ in 1 << 30 }, sealing: { _ in sealing })
             .sync(recordingID: id)
         transport.corruptsOnDownload = AudioChunkID(recordingID: id, track: .microphone, part: .chunk(1))
 
-        let receiving = AudioChunkSync(audioRoot: second.directory, transport: transport, freeBytes: { _ in 1 << 30 })
+        let receiving = AudioChunkSync(audioRoot: second.directory, transport: transport, freeBytes: { _ in 1 << 30 }, sealing: { _ in sealing })
         await receiving.sync(recordingID: id)
 
         let indices = AudioChunkStore.chunkIndices(forRecording: id, track: .microphone, in: second.directory)
@@ -89,18 +89,42 @@ struct AudioChunkSyncTests {
         let second = try Scratch()
         let id = try write(seconds: 12, in: first.directory)
         let transport = FakeChunkTransport()
-        await AudioChunkSync(audioRoot: first.directory, transport: transport, freeBytes: { _ in 1 << 30 })
+        await AudioChunkSync(audioRoot: first.directory, transport: transport, freeBytes: { _ in 1 << 30 }, sealing: { _ in sealing })
             .sync(recordingID: id)
 
-        let receiving = AudioChunkSync(audioRoot: second.directory, transport: transport, freeBytes: { _ in 1 })
+        let receiving = AudioChunkSync(audioRoot: second.directory, transport: transport, freeBytes: { _ in 1 }, sealing: { _ in sealing })
         await receiving.sync(recordingID: id)
 
         #expect(receiving.state == .storageBlocked)
     }
 
+    @Test
+    func anotherScopeKeyReplacesEveryChunkAndLocksOutTheOldScope() async throws {
+        let first = try Scratch()
+        let second = try Scratch()
+        let id = try write(seconds: 12, in: first.directory)
+        let transport = FakeChunkTransport()
+        let moved = ScopeChunkSealing(local: LibraryCipher(key: key), scopeKey: SymmetricKey(size: .bits256))
+        await AudioChunkSync(audioRoot: first.directory, transport: transport, freeBytes: { _ in 1 << 30 }, sealing: { _ in sealing })
+            .sync(recordingID: id)
+
+        await AudioChunkSync(audioRoot: first.directory, transport: transport, freeBytes: { _ in 1 << 30 }, sealing: { _ in moved })
+            .sync(recordingID: id)
+
+        #expect(transport.uploads == 8)
+        let receiving = AudioChunkSync(audioRoot: second.directory, transport: transport, freeBytes: { _ in 1 << 30 }, sealing: { _ in sealing })
+        await receiving.sync(recordingID: id)
+        #expect(AudioChunkStore.tracks(forRecording: id, in: second.directory).isEmpty)
+    }
+
     private var key: SymmetricKey {
         SymmetricKey(data: Data(repeating: 7, count: 32))
     }
+
+    private let sealing = ScopeChunkSealing(
+        local: LibraryCipher(key: SymmetricKey(data: Data(repeating: 7, count: 32))),
+        scopeKey: SymmetricKey(data: Data(repeating: 9, count: 32))
+    )
 
     private func write(seconds: Int, in root: URL) throws -> UUID {
         let id = UUID()

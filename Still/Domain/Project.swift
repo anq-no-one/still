@@ -91,6 +91,13 @@ enum ProjectScope: Hashable, Codable, Sendable {
     case project(UUID)
 }
 
+enum ScopeStorage: Equatable, Sendable {
+    case stored
+    case waitingForKey
+    case leaving
+    case notStored
+}
+
 extension Recording {
     var projectScope: ProjectScope {
         projectID.map(ProjectScope.project) ?? .noProject

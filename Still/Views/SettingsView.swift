@@ -38,7 +38,7 @@ struct SettingsView: View {
                 .formStyle(.grouped)
             }
             Tab("Projects", systemImage: "folder") {
-                ProjectsSettingsView(library: library)
+                ProjectsSettingsView(library: library, sync: sync)
             }
             Tab("Sync", systemImage: "arrow.triangle.2.circlepath") {
                 SyncSettingsView(engine: sync)
@@ -104,7 +104,7 @@ private struct SettingsList: View {
                         AccessSettingsView(setup: setup)
                     }
                     link("Projects", systemImage: "folder.fill", color: .orange) {
-                        ProjectsSettingsView(library: library)
+                        ProjectsSettingsView(library: library, sync: sync)
                     }
                     link("Transcription", systemImage: "waveform", color: .blue) {
                         TranscriptionSettingsView(models: models, library: library)
