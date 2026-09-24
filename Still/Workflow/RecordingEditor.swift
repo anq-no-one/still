@@ -38,6 +38,18 @@ final class RecordingEditor {
         scheduleSave()
     }
 
+    func apply(_ changes: [VocabularyChange]) {
+        for change in changes {
+            guard let index = recording.segments.firstIndex(where: { $0.id == change.segmentID }),
+                  !recording.segments[index].isCorrected,
+                  recording.segments[index].text == change.before
+            else { continue }
+            recording.segments[index].correction = change.after
+        }
+        recording.transcript = recording.segments.plainText
+        scheduleSave()
+    }
+
     func updateNoteText(_ text: String) {
         var note = note
         note.userText = text

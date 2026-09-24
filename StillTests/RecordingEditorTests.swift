@@ -24,6 +24,34 @@ struct RecordingEditorTests {
     }
 
     @Test
+    func applyingVocabularyToAnOldRecordingKeepsManualCorrectionsAndSources() async throws {
+        let library = try await makeLibrary()
+        let segments = [
+            TranscriptSegment(start: 0, end: 2, text: "we deploy on cooper netties", language: "en", confidence: 0.9),
+            TranscriptSegment(start: 2, end: 4, text: "cooper netties again", language: "en", confidence: 0.9, correction: "Kubernetes, said Dana"),
+        ]
+        let note = Note(template: .meeting, decisions: [NoteItem(text: "Deploy", sourceSegmentIDs: [segments[0].id])])
+        let recording = Recording(title: "Ops", transcript: segments.plainText, segments: segments, note: note, duration: 60)
+        try library.add(recording)
+        var vocabulary = ProjectVocabulary(projectID: UUID())
+        vocabulary.upsert(VocabularyTerm(term: "Kubernetes", variants: ["cooper netties"]))
+        let editor = RecordingEditor(recording: recording, library: library)
+
+        let changes = VocabularyCorrector.changes(vocabulary, for: recording.segments)
+        #expect(changes.map(\.segmentID) == [segments[0].id])
+        #expect(library.recordings.first?.segments[0].correction == nil)
+
+        editor.apply(changes)
+        editor.saveNow()
+
+        let saved = try #require(library.recordings.first)
+        #expect(saved.segments[0].displayText == "we deploy on Kubernetes")
+        #expect(saved.segments[0].text == "we deploy on cooper netties")
+        #expect(saved.segments[1].correction == "Kubernetes, said Dana")
+        #expect(saved.note?.decisions.first?.sourceSegmentIDs == [segments[0].id])
+    }
+
+    @Test
     func revertingACorrectionDropsIt() async throws {
         let library = try await makeLibrary()
         let segments = words("Ana .")

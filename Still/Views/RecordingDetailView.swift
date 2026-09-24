@@ -12,6 +12,8 @@ struct RecordingDetailView: View {
     @State private var noteText: String
     @State private var showsTranslation = false
     @State private var translationFailure: String?
+    @State private var vocabularyChanges: [VocabularyChange] = []
+    @State private var findsNoVocabularyChanges = false
 
     init(recording: Recording, library: Library, extraction: MemoryExtraction, startAt: TimeInterval? = nil) {
         self.library = library
@@ -129,6 +131,29 @@ struct RecordingDetailView: View {
             }
             ToolbarItem {
                 ExportMenu(recording: recording, library: library)
+            }
+            ToolbarItem {
+                Button("Apply Project Vocabulary", systemImage: "character.book.closed") {
+                    vocabularyChanges = VocabularyCorrector.changes(
+                        library.vocabulary(forProject: recording.projectID),
+                        for: recording.segments
+                    )
+                    findsNoVocabularyChanges = vocabularyChanges.isEmpty
+                }
+                .disabled(library.vocabulary(forProject: recording.projectID).activeTerms.isEmpty)
+            }
+        }
+        .alert("Nothing to Change", isPresented: $findsNoVocabularyChanges) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("The project vocabulary matches nothing in the lines you have not corrected yourself.")
+        }
+        .sheet(isPresented: Binding(get: { !vocabularyChanges.isEmpty }, set: { if !$0 { vocabularyChanges = [] } })) {
+            VocabularyReviewSheet(changes: vocabularyChanges) { accepted in
+                editor.apply(accepted)
+                vocabularyChanges = []
+            } cancel: {
+                vocabularyChanges = []
             }
         }
         .translationTask(translationConfiguration) { session in

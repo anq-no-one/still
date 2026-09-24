@@ -5,7 +5,22 @@ import Foundation
 /// diacritics before comparing so "cooper netties" or "КУБЕРНЕТЕС" both find
 /// their term. It only ever runs on a new recording's own segments, so an
 /// earlier recording is never rewritten when a term is added later.
+struct VocabularyChange: Identifiable, Equatable, Sendable {
+    let segmentID: UUID
+    let before: String
+    let after: String
+
+    var id: UUID { segmentID }
+}
+
 enum VocabularyCorrector {
+    static func changes(_ vocabulary: ProjectVocabulary, for segments: [TranscriptSegment]) -> [VocabularyChange] {
+        let untouched = segments.filter { !$0.isCorrected }
+        return apply(vocabulary, to: untouched).compactMap { segment in
+            segment.correction.map { VocabularyChange(segmentID: segment.id, before: segment.text, after: $0) }
+        }
+    }
+
     static func apply(_ vocabulary: ProjectVocabulary, to segments: [TranscriptSegment]) -> [TranscriptSegment] {
         let entries = matchEntries(for: vocabulary.activeTerms)
         guard !entries.isEmpty else { return segments }
