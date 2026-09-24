@@ -20,6 +20,7 @@ extension SettingsPage {
         case .storage: "Audio and Deletion"
         case .diagnostics: "Diagnostics"
         case .appearance: "Appearance"
+        case .transfer: "Transfer Settings"
         case .pro: "Still Pro"
         }
     }
@@ -40,6 +41,7 @@ extension SettingsPage {
         case .storage: "trash.fill"
         case .diagnostics: "stethoscope"
         case .appearance: "circle.lefthalf.filled"
+        case .transfer: "arrow.up.arrow.down.circle.fill"
         case .pro: "sparkles"
         }
     }
@@ -60,6 +62,7 @@ extension SettingsPage {
         case .storage: .red
         case .diagnostics: .green
         case .appearance: .blue
+        case .transfer: .mint
         case .pro: .purple
         }
     }

@@ -33,6 +33,7 @@ enum SettingsPage: String, CaseIterable, Identifiable, Sendable {
     case storage
     case diagnostics
     case appearance
+    case transfer
     case pro
 
     var id: Self { self }
@@ -60,7 +61,7 @@ enum SettingsSection: String, CaseIterable, Identifiable, Sendable {
         case .projects: [.projects, .vocabulary, .sync]
         case .intelligence: [.models, .speakers, .aiTools]
         case .privacy: [.access, .security, .storage, .diagnostics]
-        case .general: [.appearance, .pro]
+        case .general: [.appearance, .transfer, .pro]
         }
     }
 }

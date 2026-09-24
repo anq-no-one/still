@@ -13,6 +13,8 @@ struct LibraryView: View {
     let lock: AppLock
     let extraction: MemoryExtraction
     let preferences: SettingsPreferences
+    let preferencesExporter: PreferencesExporter
+    let preferencesImporter: PreferencesImporter
     @Bindable var navigation: LibraryNavigation
 
     @State private var isCapturing = false
@@ -150,7 +152,9 @@ struct LibraryView: View {
                 diagnostics: diagnostics,
                 setup: setup,
                 lock: lock,
-                preferences: preferences
+                preferences: preferences,
+                preferencesExporter: preferencesExporter,
+                preferencesImporter: preferencesImporter
             )
         }
         #endif
