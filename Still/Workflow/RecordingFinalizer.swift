@@ -25,7 +25,8 @@ struct RecordingFinalizer {
         progress: @escaping @Sendable (Double) -> Void = { _ in }
     ) async throws -> Recording {
         let transcription = try await transcribeAndSeparateSpeakers(draft, progress: progress)
-        let segments = transcription?.segments ?? []
+        let vocabulary = library.vocabulary(forProject: draft.suggestedProjectID)
+        let segments = VocabularyCorrector.apply(vocabulary, to: transcription?.segments ?? [])
         let transcript = segments.plainText
         guard !transcript.isEmpty || transcription == nil else {
             throw RecordingWorkflowError.emptyTranscript

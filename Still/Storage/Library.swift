@@ -9,6 +9,7 @@ protocol RecordingLibrary: AnyObject {
     func checkpointStore(forRecording id: UUID) throws -> TranscriptionCheckpointStore
     func tracks(forRecording id: UUID) -> [AudioTrack]
     var speakerNaming: SpeakerNamingContext { get }
+    func vocabulary(forProject id: UUID?) -> ProjectVocabulary
 }
 
 @MainActor
@@ -20,6 +21,7 @@ struct LibraryServices {
     let makeRecorder: (SymmetricKey) -> AudioRecorder
     let makeEmbeddingEngine: () async -> EmbeddingEngine?
     let makeProjectRepository: (SymmetricKey) -> ProjectRepository
+    let makeVocabularyRepository: (SymmetricKey) -> ProjectVocabularyRepository
 
     init(
         audioRoot: URL,
@@ -28,7 +30,8 @@ struct LibraryServices {
         makeRepository: @escaping (SymmetricKey) -> RecordingRepository,
         makeRecorder: @escaping (SymmetricKey) -> AudioRecorder,
         makeEmbeddingEngine: @escaping () async -> EmbeddingEngine? = { nil },
-        makeProjectRepository: @escaping (SymmetricKey) -> ProjectRepository = { _ in MemoryProjectRepository() }
+        makeProjectRepository: @escaping (SymmetricKey) -> ProjectRepository = { _ in MemoryProjectRepository() },
+        makeVocabularyRepository: @escaping (SymmetricKey) -> ProjectVocabularyRepository = { _ in MemoryProjectVocabularyRepository() }
     ) {
         self.audioRoot = audioRoot
         self.settingsFile = settingsFile ?? audioRoot.appending(path: "Library.settings")
@@ -37,6 +40,7 @@ struct LibraryServices {
         self.makeRecorder = makeRecorder
         self.makeEmbeddingEngine = makeEmbeddingEngine
         self.makeProjectRepository = makeProjectRepository
+        self.makeVocabularyRepository = makeVocabularyRepository
     }
 }
 
@@ -55,6 +59,7 @@ final class Library: RecordingLibrary {
     private let selectionStore: ProjectSelectionStore
     private var repository: RecordingRepository?
     private var projectRepository: ProjectRepository?
+    private var vocabularyRepository: ProjectVocabularyRepository?
     private var key: SymmetricKey?
     private var accountKeys: AccountKeys?
 
@@ -62,6 +67,7 @@ final class Library: RecordingLibrary {
     private(set) var storedRecordings: [Recording] = []
     private(set) var semanticIndex = SemanticIndex(engine: nil)
     private(set) var storedProjects: [Project] = []
+    private(set) var storedVocabularies: [ProjectVocabulary] = []
     private(set) var projectSelection: ProjectSelection
     private(set) var settings = LibrarySettings()
     var retentionPolicy: RetentionPolicy = .forever
@@ -150,6 +156,17 @@ final class Library: RecordingLibrary {
         try writeProject(project)
     }
 
+    func vocabulary(forProject id: UUID?) -> ProjectVocabulary {
+        guard let id, let stored = storedVocabularies.first(where: { $0.projectID == id }) else {
+            return ProjectVocabulary(projectID: id ?? UUID())
+        }
+        return stored
+    }
+
+    func saveVocabulary(_ vocabulary: ProjectVocabulary) throws {
+        try writeVocabulary(vocabulary)
+    }
+
     func confirmProjects(of recordingIDs: some Collection<UUID>, at date: Date = .now) throws {
         for id in recordingIDs {
             guard var recording = storedRecordings.first(where: { $0.id == id }), !recording.isProjectConfirmed else { continue }
@@ -177,6 +194,7 @@ final class Library: RecordingLibrary {
             let repository = services.makeRepository(key)
             storedRecordings = try repository.load()
             try loadProjects(with: key)
+            try loadVocabularies(with: key)
             settings = LibrarySettings.load(from: services.settingsFile, cipher: LibraryCipher(key: key))
             accountKeys = try loadAccountKeys(with: key)
             self.repository = repository
@@ -191,10 +209,12 @@ final class Library: RecordingLibrary {
         } catch {
             repository = nil
             projectRepository = nil
+            vocabularyRepository = nil
             key = nil
             accountKeys = nil
             storedRecordings = []
             storedProjects = []
+            storedVocabularies = []
             settings = LibrarySettings()
             state = .failed(error.localizedDescription)
             journal?.fail(.libraryUnlockFailed, error: error)
@@ -326,6 +346,7 @@ final class Library: RecordingLibrary {
             let repository = services.makeRepository(key)
             storedRecordings = try repository.load()
             try loadProjects(with: key)
+            try loadVocabularies(with: key)
             settings = LibrarySettings.load(from: services.settingsFile, cipher: LibraryCipher(key: key))
             accountKeys = try loadAccountKeys(with: key)
             self.repository = repository
@@ -365,6 +386,7 @@ final class Library: RecordingLibrary {
         let newCipher = LibraryCipher(key: newKey)
         let newRepository = services.makeRepository(newKey)
         let newProjectRepository = services.makeProjectRepository(newKey)
+        let newVocabularyRepository = services.makeVocabularyRepository(newKey)
 
         do {
             for recording in storedRecordings {
@@ -380,6 +402,9 @@ final class Library: RecordingLibrary {
             for project in storedProjects {
                 try newProjectRepository.save(project)
             }
+            for vocabulary in storedVocabularies {
+                try newVocabularyRepository.save(vocabulary)
+            }
             try settings.save(to: services.settingsFile, cipher: newCipher)
             try keys?.save(to: services.keysFile, cipher: newCipher)
         } catch {
@@ -390,6 +415,7 @@ final class Library: RecordingLibrary {
         try keyRing.completeRotation()
         repository = newRepository
         projectRepository = newProjectRepository
+        vocabularyRepository = newVocabularyRepository
         key = newKey
         accountKeys = keys
     }
@@ -560,6 +586,38 @@ final class Library: RecordingLibrary {
         let merged = local.map { Project.merge($0, remote) } ?? remote
         guard merged != local else { return }
         try writeProject(merged)
+    }
+
+    /// Sealed under the project's own scope key, exactly like a recording, so
+    /// a device excluded from a project never receives its vocabulary.
+    func syncChange(for vocabulary: ProjectVocabulary, deviceID: UUID) throws -> SyncChange? {
+        guard let scopeKey = accountKeys?.key(for: vocabulary.projectID) else { return nil }
+
+        return SyncChange(
+            id: vocabulary.projectID,
+            kind: .vocabulary,
+            updatedAt: vocabulary.terms.map(\.updatedAt).max() ?? .distantPast,
+            deviceID: deviceID,
+            scopeID: vocabulary.projectID,
+            payload: try LibraryCipher(key: scopeKey).seal(try JSONEncoder().encode(vocabulary))
+        )
+    }
+
+    func openVocabulary(from change: SyncChange) throws -> ProjectVocabulary {
+        guard let scope = change.scopeID, let scopeKey = accountKeys?.key(for: scope), let payload = change.payload else {
+            throw LibraryCipherError.unreadable
+        }
+
+        let vocabulary = try JSONDecoder().decode(ProjectVocabulary.self, from: try LibraryCipher(key: scopeKey).open(payload))
+        guard vocabulary.projectID == scope else { throw LibraryCipherError.unreadable }
+        return vocabulary
+    }
+
+    func applyRemote(_ remote: ProjectVocabulary) throws {
+        let local = storedVocabularies.first { $0.projectID == remote.projectID }
+        let merged = local.map { ProjectVocabulary.merge($0, remote) } ?? remote
+        guard merged != local else { return }
+        try writeVocabulary(merged)
     }
 
     /// Matched against every stored Recording, tombstones included, so a copy
@@ -804,6 +862,23 @@ final class Library: RecordingLibrary {
             storedProjects[index] = project
         } else {
             storedProjects.append(project)
+        }
+    }
+
+    private func loadVocabularies(with key: SymmetricKey) throws {
+        let vocabularyRepository = services.makeVocabularyRepository(key)
+        storedVocabularies = try vocabularyRepository.load()
+        self.vocabularyRepository = vocabularyRepository
+    }
+
+    private func writeVocabulary(_ vocabulary: ProjectVocabulary) throws {
+        guard let vocabularyRepository else { throw LibraryError.locked }
+
+        try vocabularyRepository.save(vocabulary)
+        if let index = storedVocabularies.firstIndex(where: { $0.projectID == vocabulary.projectID }) {
+            storedVocabularies[index] = vocabulary
+        } else {
+            storedVocabularies.append(vocabulary)
         }
     }
 

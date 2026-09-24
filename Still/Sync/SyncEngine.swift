@@ -194,6 +194,11 @@ final class SyncEngine {
                       let remote = try? library.openProjectSyncPayload(payload)
                 else { continue }
                 try library.applyRemote(remote)
+            case .vocabulary:
+                guard let scope = change.scopeID, held.contains(scope),
+                      let remote = try? library.openVocabulary(from: change)
+                else { continue }
+                try library.applyRemote(remote)
             case .recording:
                 if let scope = change.scopeID, held.contains(scope) {
                     guard let remote = try? library.openRecording(from: change) else { continue }
@@ -302,6 +307,13 @@ final class SyncEngine {
         for recording in library.storedRecordings where recording.isProjectConfirmed {
             guard server.recording(recording.id) != recording,
                   let change = try library.syncChange(for: recording, deviceID: identity.id)
+            else { continue }
+            outgoing.append(change)
+        }
+
+        for vocabulary in library.storedVocabularies where !vocabulary.terms.isEmpty {
+            guard server.vocabulary(vocabulary.projectID) != vocabulary,
+                  let change = try library.syncChange(for: vocabulary, deviceID: identity.id)
             else { continue }
             outgoing.append(change)
         }
@@ -415,6 +427,10 @@ private struct ServerState {
 
     func recording(_ id: UUID) -> Recording? {
         byKey[Self.key(.recording, id)].flatMap { try? library.openRecording(from: $0) }
+    }
+
+    func vocabulary(_ projectID: UUID) -> ProjectVocabulary? {
+        byKey[Self.key(.vocabulary, projectID)].flatMap { try? library.openVocabulary(from: $0) }
     }
 }
 

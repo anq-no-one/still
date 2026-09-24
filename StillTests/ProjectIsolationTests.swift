@@ -188,6 +188,28 @@ struct ProjectIsolationTests {
         #expect(trio.workMac.library.scopeKey(for: trio.acme) == nil)
         #expect(trio.workMac.library.storage(of: .project(trio.acme)) == .waitingForKey)
     }
+
+    @Test
+    func anExcludedMacReceivesNoVocabulary() async throws {
+        let trio = try await Trio.make()
+
+        var term = VocabularyTerm(term: "Kubernetes", variants: ["cooper netties"])
+        var vocabulary = ProjectVocabulary(projectID: trio.acme)
+        vocabulary.upsert(term)
+        try trio.phone.library.saveVocabulary(vocabulary)
+        try await trio.settle()
+
+        #expect(trio.workMac.library.vocabulary(forProject: trio.acme).activeTerms.map(\.term) == ["Kubernetes"])
+        #expect(trio.sideMac.library.vocabulary(forProject: trio.acme).activeTerms.isEmpty)
+        #expect(trio.sideMac.library.scopeKey(for: trio.acme) == nil)
+
+        term.rename(to: "Renamed")
+        vocabulary.upsert(term)
+        try trio.phone.library.saveVocabulary(vocabulary)
+        try await trio.settle()
+
+        #expect(trio.sideMac.library.vocabulary(forProject: trio.acme).activeTerms.isEmpty)
+    }
 }
 
 struct KeyGrantTests {
@@ -419,7 +441,9 @@ final class MemorySyncTransport: SyncTransport, @unchecked Sendable {
 
     func pull(payloadsFor scopes: Set<UUID>) async throws -> [SyncChange] {
         let changes = cloud.all().map { change in
-            guard change.kind == .recording, !(change.scopeID.map(scopes.contains) ?? false) else { return change }
+            guard change.kind == .recording || change.kind == .vocabulary,
+                  !(change.scopeID.map(scopes.contains) ?? false)
+            else { return change }
             var withheld = change
             withheld.payload = nil
             return withheld

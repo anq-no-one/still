@@ -347,6 +347,12 @@ final class SpyRecordingLibrary: RecordingLibrary {
     }
 
     var speakerNaming = SpeakerNamingContext.none
+    var vocabularies: [UUID: ProjectVocabulary] = [:]
+
+    func vocabulary(forProject id: UUID?) -> ProjectVocabulary {
+        guard let id else { return ProjectVocabulary(projectID: UUID()) }
+        return vocabularies[id] ?? ProjectVocabulary(projectID: id)
+    }
 }
 
 final class StubOfflineTranscriber: OfflineTranscriber, @unchecked Sendable {

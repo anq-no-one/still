@@ -44,7 +44,7 @@ struct StillApp: App {
         let container: ModelContainer
         do {
             container = try ModelContainer(
-                for: EncryptedRecording.self, EncryptedProject.self,
+                for: EncryptedRecording.self, EncryptedProject.self, EncryptedProjectVocabulary.self,
                 configurations: ModelConfiguration(cloudKitDatabase: .none)
             )
         } catch {
@@ -139,6 +139,11 @@ struct StillApp: App {
                     makeProjectRepository: { key in
                         MainActor.assumeIsolated {
                             EncryptedProjectRepository(context: context, key: key)
+                        }
+                    },
+                    makeVocabularyRepository: { key in
+                        MainActor.assumeIsolated {
+                            EncryptedProjectVocabularyRepository(context: context, key: key)
                         }
                     }
                 ),

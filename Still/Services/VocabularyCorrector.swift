@@ -1,0 +1,108 @@
+import Foundation
+
+/// Applies a project's vocabulary to a fresh transcript, whole word by whole
+/// word. It never touches text inside a larger word, and it folds case and
+/// diacritics before comparing so "cooper netties" or "КУБЕРНЕТЕС" both find
+/// their term. It only ever runs on a new recording's own segments, so an
+/// earlier recording is never rewritten when a term is added later.
+enum VocabularyCorrector {
+    static func apply(_ vocabulary: ProjectVocabulary, to segments: [TranscriptSegment]) -> [TranscriptSegment] {
+        let entries = matchEntries(for: vocabulary.activeTerms)
+        guard !entries.isEmpty else { return segments }
+
+        return segments.map { segment in
+            guard let corrected = correct(segment.text, using: entries), corrected != segment.text else {
+                return segment
+            }
+            var copy = segment
+            copy.correction = corrected
+            return copy
+        }
+    }
+
+    private struct Entry {
+        let words: [String]
+        let replacement: String
+    }
+
+    private struct Token {
+        let word: String
+        let range: Range<String.Index>
+    }
+
+    /// Longest word count first, so a two-word variant like "cooper netties"
+    /// wins over a one-word variant that happens to match part of it.
+    private static func matchEntries(for terms: [VocabularyTerm]) -> [Entry] {
+        var entries: [Entry] = []
+        for term in terms {
+            for pattern in Set([term.term] + term.variants) {
+                let words = foldedWords(of: pattern)
+                guard !words.isEmpty else { continue }
+                entries.append(Entry(words: words, replacement: term.term))
+            }
+        }
+        return entries.sorted { lhs, rhs in
+            lhs.words.count != rhs.words.count
+                ? lhs.words.count > rhs.words.count
+                : lhs.words.joined().count > rhs.words.joined().count
+        }
+    }
+
+    private static func correct(_ text: String, using entries: [Entry]) -> String? {
+        let tokens = wordTokens(in: text)
+        guard !tokens.isEmpty else { return nil }
+
+        var replacements: [(range: Range<String.Index>, text: String)] = []
+        var index = 0
+        while index < tokens.count {
+            guard let match = firstMatch(at: index, in: tokens, entries: entries) else {
+                index += 1
+                continue
+            }
+
+            let start = tokens[index].range.lowerBound
+            let end = tokens[match.end - 1].range.upperBound
+            if text[start..<end] != match.entry.replacement {
+                replacements.append((start..<end, match.entry.replacement))
+            }
+            index = match.end
+        }
+
+        guard !replacements.isEmpty else { return nil }
+
+        var result = text
+        for (range, replacement) in replacements.reversed() {
+            result.replaceSubrange(range, with: replacement)
+        }
+        return result
+    }
+
+    private static func firstMatch(at index: Int, in tokens: [Token], entries: [Entry]) -> (entry: Entry, end: Int)? {
+        for entry in entries {
+            let span = entry.words.count
+            guard index + span <= tokens.count else { continue }
+            let candidate = tokens[index..<(index + span)].map { fold($0.word) }
+            if candidate == entry.words {
+                return (entry, index + span)
+            }
+        }
+        return nil
+    }
+
+    private static func wordTokens(in text: String) -> [Token] {
+        var tokens: [Token] = []
+        text.enumerateSubstrings(in: text.startIndex..<text.endIndex, options: [.byWords, .substringNotRequired]) { substring, range, _, _ in
+            guard let substring else { return }
+            tokens.append(Token(word: substring, range: range))
+        }
+        return tokens
+    }
+
+    private static func foldedWords(of text: String) -> [String] {
+        wordTokens(in: text).map { fold($0.word) }
+    }
+
+    private static func fold(_ text: String) -> String {
+        text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
+    }
+}
