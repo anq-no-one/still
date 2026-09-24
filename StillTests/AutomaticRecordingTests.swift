@@ -12,13 +12,16 @@ struct AutomaticRecordingTests {
 
     @Test
     func savesTheRecordingWhenTheCallEnds() async throws {
-        let (automatic, watcher, coordinator) = try await make(allowed: [zoom])
+        let clock = TestClock()
+        let (automatic, watcher, coordinator) = try await make(allowed: [zoom], clock: clock)
         automatic.startWatching()
 
         watcher.activate(zoom)
         await settle()
         #expect(coordinator.isRecording)
+        #expect(automatic.triggeringApp?.name == "Zoom")
 
+        clock.advance(by: AutomaticRecording.meetingLength)
         watcher.terminate(zoom)
         await settle(until: { coordinator.workflow == nil })
 
@@ -151,6 +154,55 @@ struct AutomaticRecordingTests {
         #expect(!coordinator.isRecording)
     }
 
+    @Test
+    func throwsAwayAShortMicrophoneCheck() async throws {
+        let clock = TestClock()
+        let (automatic, watcher, coordinator) = try await make(allowed: [zoom], clock: clock)
+        automatic.startWatching()
+
+        watcher.activate(zoom)
+        await settle()
+        clock.advance(by: 12)
+        watcher.terminate(zoom)
+        await settle(until: { coordinator.workflow == nil })
+
+        #expect(coordinator.library.recordings.isEmpty)
+        #expect(automatic.discardedCheck == "Zoom")
+        #expect(automatic.triggeredBy == nil)
+    }
+
+    @Test
+    func aShortCallDuringACalendarMeetingIsKept() async throws {
+        let clock = TestClock()
+        let (automatic, watcher, coordinator) = try await make(allowed: [zoom], clock: clock, evidence: true)
+        automatic.startWatching()
+
+        watcher.activate(zoom)
+        await settle()
+        clock.advance(by: 12)
+        watcher.terminate(zoom)
+        await settle(until: { !coordinator.library.recordings.isEmpty })
+
+        #expect(coordinator.library.recordings.count == 1)
+        #expect(automatic.discardedCheck == nil)
+    }
+
+    @Test
+    func keepingAShortCallSavesIt() async throws {
+        let clock = TestClock()
+        let (automatic, watcher, coordinator) = try await make(allowed: [zoom], clock: clock)
+        automatic.startWatching()
+
+        watcher.activate(zoom)
+        await settle()
+        automatic.keep()
+        clock.advance(by: 5)
+        watcher.terminate(zoom)
+        await settle(until: { !coordinator.library.recordings.isEmpty })
+
+        #expect(coordinator.library.recordings.count == 1)
+    }
+
     private func settle() async {
         for _ in 0..<4 { await Task.yield() }
     }
@@ -162,13 +214,17 @@ struct AutomaticRecordingTests {
     }
 
     private func make(
-        allowed: [String]
+        allowed: [String],
+        clock: TestClock = TestClock(),
+        evidence: Bool = false
     ) async throws -> (AutomaticRecording, FakeCallAppWatcher, RecordingCoordinator) {
-        try await make(allowList: MemoryAllowList(allowed: Set(allowed)))
+        try await make(allowList: MemoryAllowList(allowed: Set(allowed)), clock: clock, evidence: evidence)
     }
 
     private func make(
-        allowList: MemoryAllowList
+        allowList: MemoryAllowList,
+        clock: TestClock = TestClock(),
+        evidence: Bool = false
     ) async throws -> (AutomaticRecording, FakeCallAppWatcher, RecordingCoordinator) {
         let container = try ModelContainer(
             for: EncryptedRecording.self,
@@ -185,9 +241,8 @@ struct AutomaticRecordingTests {
                 },
                 makeRecorder: { key in
                     MainActor.assumeIsolated { WritingRecorder(root: audioRoot, cipher: LibraryCipher(key: key)) }
-                },
-            makeEmbeddingEngine: { nil }
-        )
+                }
+            )
         )
         await library.unlock()
 
@@ -201,7 +256,9 @@ struct AutomaticRecordingTests {
         let automatic = AutomaticRecording(
             coordinator: coordinator,
             watcher: watcher,
-            allowList: allowList
+            allowList: allowList,
+            meetingEvidence: { _ in evidence },
+            now: { clock.now }
         )
         return (automatic, watcher, coordinator)
     }
@@ -264,5 +321,13 @@ final class Flag: @unchecked Sendable {
 
     func raise() {
         isRaised = true
+    }
+}
+
+final class TestClock: @unchecked Sendable {
+    private(set) var now = Date(timeIntervalSince1970: 1_000_000)
+
+    func advance(by seconds: TimeInterval) {
+        now += seconds
     }
 }

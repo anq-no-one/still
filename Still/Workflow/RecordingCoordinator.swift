@@ -16,7 +16,7 @@ final class RecordingCoordinator {
         case failed(String)
     }
 
-    private let library: Library
+    let library: Library
     private let entitlements: Entitlements
     private let makeSession: () -> TranscriptionSession
     private let makeFinalTranscription: () -> FinalTranscription

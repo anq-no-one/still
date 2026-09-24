@@ -10,15 +10,11 @@ struct AutomaticRecordingSettingsView: View {
             ForEach(automatic.apps) { app in
                 Toggle(app.name, isOn: allowed(app))
             }
-            if automatic.triggeredBy != nil {
-                Button("Throw Away This Recording", role: .destructive) {
-                    Task { await automatic.discardAutomaticRecording() }
-                }
-            }
+            AutomaticCaptureStatus(automatic: automatic)
         } header: {
             Text("Calls")
         } footer: {
-            Text("Still starts recording when an app you allow here joins a call, meaning it uses the microphone and plays sound at the same time. It saves the recording once the app lets go of the microphone. Music and other apps are not recorded. Recording always shows in the menu bar and can be stopped or thrown away at once. For meetings in a browser, use the Still extension below.")
+            Text("Still starts recording when an app you allow here joins a call, meaning it uses the microphone and plays sound at the same time. It saves the recording when the app lets go of the microphone, if the call lasted at least 45 seconds, matches a calendar event, or you chose Keep. Shorter checks, like a microphone test, are thrown away. Music and other apps are not recorded. Recording always shows in the menu bar and can be stopped or thrown away at once. For meetings in a browser, use the Still extension below.")
         }
     }
 

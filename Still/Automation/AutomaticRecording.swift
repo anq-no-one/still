@@ -53,18 +53,33 @@ protocol CallAppWatcher: AnyObject {
 @MainActor
 @Observable
 final class AutomaticRecording {
+    static let meetingLength: TimeInterval = 45
+
     private let coordinator: RecordingCoordinator
     private let watcher: CallAppWatcher
     private let allowList: CallAppAllowList
+    private let meetingEvidence: @MainActor (Date) async -> Bool
+    private let now: () -> Date
 
     private(set) var isWatching = false
     private(set) var triggeredBy: String?
+    private(set) var startedAt: Date?
+    private(set) var isKept = false
+    private(set) var discardedCheck: String?
     private(set) var apps: [CallApp]
 
-    init(coordinator: RecordingCoordinator, watcher: CallAppWatcher, allowList: CallAppAllowList) {
+    init(
+        coordinator: RecordingCoordinator,
+        watcher: CallAppWatcher,
+        allowList: CallAppAllowList,
+        meetingEvidence: @escaping @MainActor (Date) async -> Bool = { _ in false },
+        now: @escaping () -> Date = Date.init
+    ) {
         self.coordinator = coordinator
         self.watcher = watcher
         self.allowList = allowList
+        self.meetingEvidence = meetingEvidence
+        self.now = now
         apps = allowList.apps()
         if allowList.watches {
             startWatching()
@@ -101,9 +116,18 @@ final class AutomaticRecording {
         }
     }
 
+    var triggeringApp: CallApp? {
+        triggeredBy.flatMap { id in apps.first { $0.bundleID == id } }
+    }
+
+    func keep() {
+        guard triggeredBy != nil else { return }
+        isKept = true
+    }
+
     func discardAutomaticRecording() async {
         await coordinator.cancel()
-        triggeredBy = nil
+        finish()
     }
 
     private func appBecameActive(_ processBundleID: String) async {
@@ -115,16 +139,40 @@ final class AutomaticRecording {
         else { return }
 
         triggeredBy = app.bundleID
+        startedAt = now()
+        isKept = false
+        discardedCheck = nil
         await coordinator.start(capturing: .app(app))
     }
 
     private func appWentAway(_ processBundleID: String) async {
         guard let triggeredBy, CallApp.owner(of: processBundleID)?.bundleID == triggeredBy else { return }
 
-        self.triggeredBy = nil
-        if coordinator.isRecording {
+        let app = triggeringApp
+        let wasMeeting = await isMeeting()
+        finish()
+        guard coordinator.isRecording else { return }
+
+        if wasMeeting {
             await coordinator.stopAndSave()
+        } else {
+            await coordinator.cancel()
+            discardedCheck = app?.name
         }
+    }
+
+    private func isMeeting() async -> Bool {
+        guard let startedAt else { return false }
+        if isKept || now().timeIntervalSince(startedAt) >= Self.meetingLength {
+            return true
+        }
+        return await meetingEvidence(startedAt)
+    }
+
+    private func finish() {
+        triggeredBy = nil
+        startedAt = nil
+        isKept = false
     }
 }
 

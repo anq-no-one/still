@@ -205,7 +205,10 @@ struct StillApp: App {
             AutomaticRecording(
                 coordinator: recordingCoordinator,
                 watcher: CallActivityWatcher(),
-                allowList: UserDefaultsCallAppAllowList()
+                allowList: UserDefaultsCallAppAllowList(),
+                meetingEvidence: { date in
+                    await CalendarContext(source: EventKitCalendarSource()).suggestion(at: date) != nil
+                }
             )
         }
         browser = MainActor.assumeIsolated {

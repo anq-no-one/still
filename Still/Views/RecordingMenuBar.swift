@@ -35,6 +35,8 @@ struct RecordingMenuBarPanel: View {
         VStack(alignment: .leading, spacing: 14) {
             recordControl
 
+            AutomaticCaptureStatus(automatic: automatic)
+
             if coordinator.isRecording, let transcript = coordinator.workflow?.transcript, !transcript.isEmpty {
                 Text(transcript.suffix(220))
                     .font(.callout)
@@ -160,6 +162,38 @@ struct RecordingMenuBarPanel: View {
             String(localized: "Writing the Transcript…")
         case .failed(let message):
             message
+        }
+    }
+}
+
+struct AutomaticCaptureStatus: View {
+    let automatic: AutomaticRecording
+
+    var body: some View {
+        if let app = automatic.triggeringApp {
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Recording a \(app.name) call", systemImage: "phone.fill")
+                    .font(.callout.weight(.medium))
+                if !automatic.isKept {
+                    Text("Still keeps it once it looks like a meeting. A short microphone check is thrown away.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                HStack {
+                    if !automatic.isKept {
+                        Button("Keep", action: automatic.keep)
+                    }
+                    Button("Throw Away", role: .destructive) {
+                        Task { await automatic.discardAutomaticRecording() }
+                    }
+                }
+                .controlSize(.small)
+            }
+        } else if let name = automatic.discardedCheck {
+            Label("Threw away a short \(name) check that was not a meeting.", systemImage: "trash")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 }
