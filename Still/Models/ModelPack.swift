@@ -14,9 +14,23 @@ struct ModelFile: Equatable, Sendable {
     }
 }
 
+enum ModelLanguages: Equatable, Sendable {
+    case any
+    case only([String])
+
+    func names(in locale: Locale = .current) -> [String] {
+        guard case .only(let codes) = self else { return [] }
+        return codes
+            .compactMap { locale.localizedString(forLanguageCode: $0) }
+            .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+    }
+}
+
 struct ModelPack: Equatable, Sendable {
     let id: String
+    let name: String
     let purpose: String
+    let languages: ModelLanguages
     let version: String
     let baseURL: URL
     let minimumMemoryBytes: Int

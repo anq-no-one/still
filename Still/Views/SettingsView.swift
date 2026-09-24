@@ -8,6 +8,7 @@ struct SettingsView: View {
     let diagnostics: Diagnostics
     let setup: SetupFlow
     let lock: AppLock
+    let preferences: SettingsPreferences
     #if os(macOS)
     let automatic: AutomaticRecording
     let browser: BrowserMeetingBridge
@@ -17,112 +18,45 @@ struct SettingsView: View {
     let shortcut: RecordingShortcut
     let login: LaunchAtLogin
     let mediaHint: MediaPlaybackHint
+    #else
+    @Environment(\.dismiss) private var dismiss
     #endif
+
+    private var layout: SettingsLayout { preferences.layout }
 
     var body: some View {
         #if os(macOS)
-        TabView {
-            Tab("General", systemImage: "gearshape") {
-                TranscriptionSettingsView(models: models, library: library)
-            }
-            Tab("Access", systemImage: "hand.raised") {
-                AccessSettingsView(setup: setup)
-            }
-            Tab("Recording", systemImage: "record.circle") {
-                Form {
-                    RecordingControlsSettingsView(shortcut: shortcut, login: login, hint: mediaHint)
-                    MicrophoneSettingsView(microphones: microphones)
-                    AutomaticRecordingSettingsView(automatic: automatic)
-                    BrowserMeetingSettingsView(bridge: browser, chromium: chromium)
-                }
-                .formStyle(.grouped)
-            }
-            Tab("Projects", systemImage: "folder") {
-                ProjectsSettingsView(library: library, sync: sync)
-            }
-            Tab("Sync", systemImage: "arrow.triangle.2.circlepath") {
-                SyncSettingsView(engine: sync)
-            }
-            Tab("Security", systemImage: "key") {
-                SecuritySettingsView(library: library, lock: lock)
-            }
-            Tab("Storage", systemImage: "internaldrive") {
-                RetentionSettingsView(library: library)
-            }
-            Tab("AI Tools", systemImage: "sparkles.rectangle.stack") {
-                AIToolsSettingsView(access: aiTools, library: library)
-            }
-            Tab("Diagnostics", systemImage: "stethoscope") {
-                DiagnosticsSettingsView(diagnostics: diagnostics)
-            }
-            if !Entitlements.everythingIsFree {
-                Tab("Still Pro", systemImage: "sparkles") {
-                    ProUnlockView(entitlements: entitlements)
-                }
-            }
-        }
-        .frame(width: 520, height: 460)
-        #else
-        SettingsList(
-            library: library,
-            models: models,
-            entitlements: entitlements,
-            sync: sync,
-            diagnostics: diagnostics,
-            setup: setup,
-            lock: lock
-        )
-        #endif
-    }
-}
-
-#if os(iOS)
-private struct SettingsList: View {
-    let library: Library
-    let models: ModelInstallers
-    let entitlements: Entitlements
-    let sync: SyncEngine
-    let diagnostics: Diagnostics
-    let setup: SetupFlow
-    let lock: AppLock
-
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            List {
-                if !Entitlements.everythingIsFree {
-                    Section {
-                        link("Still Pro", systemImage: "sparkles", color: .purple) {
-                            ProUnlockView(entitlements: entitlements)
+        NavigationSplitView {
+            List(selection: selectedPage) {
+                ForEach(layout.sections) { section in
+                    Section(section.title) {
+                        ForEach(layout.pages(in: section)) { page in
+                            SettingsPageLabel(page: page)
+                                .tag(page)
                         }
                     }
                 }
-
-                Section {
-                    link("Access", systemImage: "hand.raised.fill", color: .indigo) {
-                        AccessSettingsView(setup: setup)
-                    }
-                    link("Projects", systemImage: "folder.fill", color: .orange) {
-                        ProjectsSettingsView(library: library, sync: sync)
-                    }
-                    link("Transcription", systemImage: "waveform", color: .blue) {
-                        TranscriptionSettingsView(models: models, library: library)
-                    }
-                    link("Sync", systemImage: "arrow.triangle.2.circlepath", color: .cyan) {
-                        SyncSettingsView(engine: sync)
-                    }
-                }
-
-                Section {
-                    link("Keys and Devices", systemImage: "key.fill", color: .gray) {
-                        SecuritySettingsView(library: library, lock: lock)
-                    }
-                    link("Audio and Deletion", systemImage: "trash.fill", color: .red) {
-                        RetentionSettingsView(library: library)
-                    }
-                    link("Diagnostics", systemImage: "stethoscope", color: .green) {
-                        DiagnosticsSettingsView(diagnostics: diagnostics)
+            }
+            .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
+            .toolbar(removing: .sidebarToggle)
+        } detail: {
+            destination(for: preferences.page)
+                .navigationTitle(preferences.page.title)
+        }
+        .frame(minWidth: 760, idealWidth: 860, minHeight: 520, idealHeight: 620)
+        .stillAppearance(preferences)
+        #else
+        NavigationStack {
+            List {
+                ForEach(layout.sections) { section in
+                    Section(section.title) {
+                        ForEach(layout.pages(in: section)) { page in
+                            NavigationLink {
+                                destination(for: page)
+                            } label: {
+                                SettingsPageLabel(page: page)
+                            }
+                        }
                     }
                 }
             }
@@ -134,25 +68,76 @@ private struct SettingsList: View {
                 }
             }
         }
+        .stillAppearance(preferences)
+        #endif
     }
 
-    private func link<Destination: View>(
-        _ title: LocalizedStringKey,
-        systemImage: String,
-        color: Color,
-        @ViewBuilder destination: () -> Destination
-    ) -> some View {
-        NavigationLink(destination: destination()) {
-            Label {
-                Text(title)
-            } icon: {
-                Image(systemName: systemImage)
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 29, height: 29)
-                    .background(color.gradient, in: .rect(cornerRadius: 7))
-            }
+    @ViewBuilder
+    private func destination(for page: SettingsPage) -> some View {
+        switch page {
+        case .capture, .audio, .shortcuts, .aiTools:
+            macDestination(for: page)
+        case .projects:
+            ProjectsSettingsView(library: library, sync: sync)
+        case .vocabulary:
+            VocabularySettingsView(library: library)
+        case .sync:
+            SyncSettingsView(engine: sync)
+        case .models:
+            ModelsSettingsView(models: models)
+        case .speakers:
+            SpeakersSettingsView(library: library)
+        case .access:
+            AccessSettingsView(setup: setup)
+        case .security:
+            SecuritySettingsView(library: library, lock: lock)
+        case .storage:
+            RetentionSettingsView(library: library)
+        case .diagnostics:
+            DiagnosticsSettingsView(diagnostics: diagnostics)
+        case .appearance:
+            AppearanceSettingsView(preferences: preferences)
+        case .pro:
+            ProUnlockView(entitlements: entitlements)
         }
     }
+
+    @ViewBuilder
+    private func macDestination(for page: SettingsPage) -> some View {
+        #if os(macOS)
+        switch page {
+        case .capture:
+            Form {
+                AutomaticRecordingSettingsView(automatic: automatic)
+                BrowserMeetingSettingsView(bridge: browser, chromium: chromium)
+            }
+            .formStyle(.grouped)
+        case .audio:
+            Form {
+                MicrophoneSettingsView(microphones: microphones)
+            }
+            .formStyle(.grouped)
+        case .shortcuts:
+            Form {
+                RecordingControlsSettingsView(shortcut: shortcut, login: login, hint: mediaHint)
+            }
+            .formStyle(.grouped)
+        case .aiTools:
+            AIToolsSettingsView(access: aiTools, library: library)
+        default:
+            EmptyView()
+        }
+        #endif
+    }
+
+    #if os(macOS)
+    private var selectedPage: Binding<SettingsPage?> {
+        Binding(
+            get: { preferences.page },
+            set: { page in
+                if let page { preferences.page = page }
+            }
+        )
+    }
+    #endif
 }
-#endif
