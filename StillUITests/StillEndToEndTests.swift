@@ -38,6 +38,24 @@ final class StillEndToEndTests: XCTestCase {
         waitFor(app.collectionViews.cells.firstMatch, timeout: 30, "the encrypted Library to reopen after relaunch")
     }
 
+    func testImportAVideoOpenedInStillAndFindIt() {
+        launch(resetting: true, handingOver: "meeting")
+        completeOnboarding()
+
+        waitForText("Team meeting.mov", timeout: 180, "the opened video to become a Recording that names its file")
+        waitForText("forecast", timeout: 20, "the transcript of the video's sound")
+        keepScreenshot("4 Imported video")
+        navigateBack()
+        waitFor(app.collectionViews.cells.firstMatch, "the imported Recording in the Library")
+        waitFor(app.buttons["Import Audio or Video…"], "the import action in the Library")
+
+        let search = app.searchFields["Search Recordings"]
+        waitFor(search, "the search field")
+        search.tap()
+        search.typeText("Thursday")
+        waitForText("Thursday", timeout: 10, "a search result for a word spoken in the video", excluding: search)
+    }
+
     func testSettingsShowARecoveryCode() {
         launch(resetting: true)
         completeOnboarding()
@@ -53,13 +71,14 @@ final class StillEndToEndTests: XCTestCase {
         waitFor(app.staticTexts["Keep Audio"], "the retention choices")
     }
 
-    private func launch(resetting: Bool) {
+    private func launch(resetting: Bool, handingOver fixture: String? = nil) {
         continueAfterFailure = false
         app.launchArguments = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         var environment = [
             "STILL_AUDIO_FIXTURE": "meeting",
             "STILL_UI_TEST_RESET": resetting ? "1" : "0",
         ]
+        environment["STILL_HAND_OVER_FIXTURE"] = fixture
         if let modelRoot = ProcessInfo.processInfo.environment["STILL_MODEL_ROOT"] {
             environment["STILL_MODEL_ROOT"] = modelRoot
         }
