@@ -1,10 +1,12 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct LibraryView: View {
     let library: Library
     let models: ModelInstallers
     let entitlements: Entitlements
     let coordinator: RecordingCoordinator
+    let importer: AudioImporter
     let setup: SetupFlow
     let sync: SyncEngine
     let diagnostics: Diagnostics
@@ -42,6 +44,11 @@ struct LibraryView: View {
             }
             #if os(macOS)
             .navigationSplitViewColumnWidth(min: 220, ideal: 260)
+            .dropDestination(for: URL.self) { urls, _ in
+                guard let url = urls.first, importer.canStart else { return false }
+                importer.start(url)
+                return true
+            }
             .onChange(of: selectedIDs) { _, ids in
                 navigation.selection = ids.count == 1 ? ids.first : nil
             }
@@ -56,6 +63,14 @@ struct LibraryView: View {
                         projectFilterMenu
                     }
                 }
+                #if os(macOS)
+                ToolbarItem {
+                    Button("Import Audio…", systemImage: "square.and.arrow.down") {
+                        navigation.isChoosingAudioFile = true
+                    }
+                    .disabled(!importer.canStart)
+                }
+                #endif
                 #if os(iOS)
                 ToolbarItem(placement: .bottomBar) {
                     recordButton
@@ -87,6 +102,23 @@ struct LibraryView: View {
         .sheet(isPresented: $isCapturing) {
             CaptureView(coordinator: coordinator)
         }
+        #if os(macOS)
+        .sheet(isPresented: showsImport) {
+            AudioImportView(importer: importer)
+        }
+        .fileImporter(isPresented: $navigation.isChoosingAudioFile, allowedContentTypes: [.audio]) { result in
+            if case .success(let url) = result {
+                importer.start(url)
+            }
+        }
+        .onChange(of: importer.phase) { _, phase in
+            guard case .imported(let id) = phase else { return }
+            query = ""
+            projectFilter = nil
+            navigation.selection = id
+            importer.dismiss()
+        }
+        #endif
         .sheet(isPresented: showsSetup) {
             SetupView(flow: setup, models: models)
                 .interactiveDismissDisabled()
@@ -274,6 +306,13 @@ struct LibraryView: View {
 
     private var showsSetup: Binding<Bool> {
         Binding(get: { !setup.isComplete }, set: { _ in })
+    }
+
+    private var showsImport: Binding<Bool> {
+        Binding(
+            get: { importer.isImporting || importer.isFailed },
+            set: { if !$0 { importer.dismiss() } }
+        )
     }
 
     private var showsActionError: Binding<Bool> {
