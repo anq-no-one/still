@@ -37,9 +37,21 @@ struct SearchResult: Identifiable, Equatable, Sendable {
 enum LibrarySearch {
     static let defaultSemanticThreshold: Float = 0.6
 
-    /// Exact matches rank first because a word the user actually typed is the
-    /// strongest signal available. Semantic hits fill the gaps below them,
-    /// standing in for a result exact search would have missed entirely.
+    static func results(
+        for query: String,
+        in recordings: [Recording],
+        visibleTo visibility: any RecordingVisibility,
+        semanticIndex: SemanticIndex? = nil,
+        semanticThreshold: Float = defaultSemanticThreshold
+    ) -> [SearchResult] {
+        results(
+            for: query,
+            in: recordings.filter(visibility.isVisible),
+            semanticIndex: semanticIndex,
+            semanticThreshold: semanticThreshold
+        )
+    }
+
     static func results(
         for query: String,
         in recordings: [Recording],

@@ -17,6 +17,7 @@ struct LibraryServices {
     let makeRepository: (SymmetricKey) -> RecordingRepository
     let makeRecorder: (SymmetricKey) -> AudioRecorder
     let makeEmbeddingEngine: () async -> EmbeddingEngine?
+    var makeProjectRepository: (SymmetricKey) -> ProjectRepository = { _ in MemoryProjectRepository() }
 }
 
 @MainActor
@@ -31,25 +32,94 @@ final class Library: RecordingLibrary {
 
     private let keyRing: LibraryKeyRing
     private let services: LibraryServices
+    private let selectionStore: ProjectSelectionStore
     private var repository: RecordingRepository?
+    private var projectRepository: ProjectRepository?
     private var key: SymmetricKey?
 
     private(set) var state: State = .locked
     private(set) var storedRecordings: [Recording] = []
     private(set) var semanticIndex = SemanticIndex(engine: nil)
+    private(set) var storedProjects: [Project] = []
+    private(set) var projectSelection: ProjectSelection
     var retentionPolicy: RetentionPolicy = .forever
 
-    init(keyRing: LibraryKeyRing, services: LibraryServices) {
+    init(
+        keyRing: LibraryKeyRing,
+        services: LibraryServices,
+        selectionStore: ProjectSelectionStore = MemoryProjectSelectionStore()
+    ) {
         self.keyRing = keyRing
         self.services = services
+        self.selectionStore = selectionStore
+        projectSelection = selectionStore.load()
     }
 
+    /// Only what this device shows. Every surface that reads recordings goes
+    /// through this list, so a project hidden here stays hidden everywhere.
     var recordings: [Recording] {
-        storedRecordings.filter { !$0.isDeleted }
+        storedRecordings.filter { !$0.isDeleted && projectSelection.isVisible($0) }
     }
 
     var deletedRecordings: [Recording] {
-        storedRecordings.filter(\.isDeleted)
+        storedRecordings.filter { $0.isDeleted && projectSelection.isVisible($0) }
+    }
+
+    var recordingsInEveryProject: [Recording] {
+        storedRecordings.filter { !$0.isDeleted }
+    }
+
+    var visibility: RecordingVisibility {
+        projectSelection
+    }
+
+    var projects: [Project] {
+        storedProjects.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
+    var activeProjects: [Project] {
+        projects.filter { !$0.isArchived }
+    }
+
+    func project(withID id: UUID?) -> Project? {
+        guard let id else { return nil }
+        return storedProjects.first { $0.id == id }
+    }
+
+    /// A Mac narrowed to one project files every new recording there.
+    var defaultProjectID: UUID? {
+        guard let id = projectSelection.soleProjectID, project(withID: id)?.isArchived == false else { return nil }
+        return id
+    }
+
+    func setProjectSelection(_ selection: ProjectSelection) {
+        projectSelection = selection
+        selectionStore.save(selection)
+    }
+
+    /// Audio for a recording this device hides is left in iCloud, so a
+    /// restricted Mac never holds another project's voices.
+    func keepsAudio(forRecording id: UUID) -> Bool {
+        storedRecordings.contains { $0.id == id && projectSelection.isVisible($0) }
+    }
+
+    @discardableResult
+    func createProject(named name: String, color: ProjectColor, at date: Date = .now) throws -> Project {
+        let project = Project(name: name, color: color, createdAt: date)
+        try writeProject(project)
+        return project
+    }
+
+    func saveProject(_ project: Project) throws {
+        try writeProject(project)
+    }
+
+    func assign(_ recordingIDs: some Collection<UUID>, toProject projectID: UUID?, at date: Date = .now) throws {
+        for id in recordingIDs {
+            guard var recording = storedRecordings.first(where: { $0.id == id }) else { continue }
+            recording.assign(toProject: projectID, at: date)
+            try write(recording)
+        }
     }
 
     func unlock(reason: String = String(localized: "Unlock your Still Library")) async {
@@ -60,6 +130,7 @@ final class Library: RecordingLibrary {
             let key = try await keyRing.unlock(reason: reason)
             let repository = services.makeRepository(key)
             storedRecordings = try repository.load()
+            try loadProjects(with: key)
             self.repository = repository
             self.key = key
             try recoverInterruptedAudio(cipher: LibraryCipher(key: key))
@@ -69,8 +140,10 @@ final class Library: RecordingLibrary {
             semanticIndex.rebuild(storedRecordings)
         } catch {
             repository = nil
+            projectRepository = nil
             key = nil
             storedRecordings = []
+            storedProjects = []
             state = .failed(error.localizedDescription)
         }
     }
@@ -183,6 +256,7 @@ final class Library: RecordingLibrary {
             let key = try keyRing.restore(using: code)
             let repository = services.makeRepository(key)
             storedRecordings = try repository.load()
+            try loadProjects(with: key)
             self.repository = repository
             self.key = key
             state = .unlocked
@@ -204,6 +278,7 @@ final class Library: RecordingLibrary {
         let oldCipher = LibraryCipher(key: oldKey)
         let newCipher = LibraryCipher(key: newKey)
         let newRepository = services.makeRepository(newKey)
+        let newProjectRepository = services.makeProjectRepository(newKey)
 
         do {
             for recording in storedRecordings {
@@ -215,6 +290,10 @@ final class Library: RecordingLibrary {
             for recording in storedRecordings {
                 try newRepository.save(recording)
             }
+
+            for project in storedProjects {
+                try newProjectRepository.save(project)
+            }
         } catch {
             // Nothing has replaced the Library key yet, so the old one still
             // opens whatever was not re-sealed.
@@ -225,6 +304,7 @@ final class Library: RecordingLibrary {
         try keyRing.completeRotation()
         _ = repository
         self.repository = newRepository
+        projectRepository = newProjectRepository
         key = newKey
     }
 
@@ -261,6 +341,23 @@ final class Library: RecordingLibrary {
         guard let key else { throw LibraryError.locked }
 
         return try JSONDecoder().decode(Recording.self, from: try LibraryCipher(key: key).open(sealed))
+    }
+
+    func sealForSync(_ project: Project) throws -> Data {
+        guard let key else { throw LibraryError.locked }
+
+        return try LibraryCipher(key: key).seal(try JSONEncoder().encode(project))
+    }
+
+    func openProjectSyncPayload(_ sealed: Data) throws -> Project {
+        guard let key else { throw LibraryError.locked }
+
+        return try JSONDecoder().decode(Project.self, from: try LibraryCipher(key: key).open(sealed))
+    }
+
+    func applyRemote(_ remote: Project) throws {
+        let local = project(withID: remote.id)
+        try writeProject(local.map { Project.merge($0, remote) } ?? remote)
     }
 
     /// Matched against every stored Recording, tombstones included, so a copy
@@ -384,9 +481,28 @@ final class Library: RecordingLibrary {
         }
     }
 
-    private func write(_ recording: Recording) throws {
+    private func loadProjects(with key: SymmetricKey) throws {
+        let projectRepository = services.makeProjectRepository(key)
+        storedProjects = try projectRepository.load()
+        self.projectRepository = projectRepository
+    }
+
+    private func writeProject(_ project: Project) throws {
+        guard let projectRepository else { throw LibraryError.locked }
+
+        try projectRepository.save(project)
+        if let index = storedProjects.firstIndex(where: { $0.id == project.id }) {
+            storedProjects[index] = project
+        } else {
+            storedProjects.append(project)
+        }
+    }
+
+    private func write(_ incoming: Recording) throws {
         guard let repository else { throw LibraryError.locked }
 
+        let recording = storedRecordings.first { $0.id == incoming.id }
+            .map { incoming.keepingLatestProject(of: $0) } ?? incoming
         try repository.save(recording)
         if let index = storedRecordings.firstIndex(where: { $0.id == recording.id }) {
             storedRecordings[index] = recording

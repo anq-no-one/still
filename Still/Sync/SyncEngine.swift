@@ -80,17 +80,20 @@ final class SyncEngine {
     }
 
     private func pull() async throws {
-        for change in try await transport.pull(since: lastSyncedAt) {
-            guard change.deviceID != deviceID,
-                  let remote = try? library.openSyncPayload(change.sealedRecording)
-            else { continue }
-
-            try library.applyRemote(remote)
+        for change in try await transport.pull(since: lastSyncedAt) where change.deviceID != deviceID {
+            switch change.kind {
+            case .recording:
+                guard let remote = try? library.openSyncPayload(change.sealedRecording) else { continue }
+                try library.applyRemote(remote)
+            case .project:
+                guard let remote = try? library.openProjectSyncPayload(change.sealedRecording) else { continue }
+                try library.applyRemote(remote)
+            }
         }
     }
 
     private func push() async throws {
-        let changes = try library.recordings.map { recording in
+        let recordings = try library.recordingsInEveryProject.map { recording in
             SyncChange(
                 recordingID: recording.id,
                 updatedAt: recording.updatedAt,
@@ -98,6 +101,16 @@ final class SyncEngine {
                 sealedRecording: try library.sealForSync(recording)
             )
         }
+        let projects = try library.storedProjects.map { project in
+            SyncChange(
+                recordingID: project.id,
+                updatedAt: project.updatedAt,
+                deviceID: deviceID,
+                sealedRecording: try library.sealForSync(project),
+                kind: .project
+            )
+        }
+        let changes = recordings + projects
 
         guard !changes.isEmpty else { return }
         try await transport.push(changes)

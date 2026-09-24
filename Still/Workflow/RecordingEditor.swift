@@ -72,6 +72,11 @@ final class RecordingEditor {
         scheduleSave()
     }
 
+    func assign(toProject projectID: UUID?) {
+        recording.assign(toProject: projectID)
+        scheduleSave()
+    }
+
     func speaker(of segment: TranscriptSegment) -> Speaker? {
         guard let id = segment.speakerID else { return nil }
         return recording.speakers.first { $0.id == id }

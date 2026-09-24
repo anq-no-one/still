@@ -23,4 +23,6 @@ struct RecordingContent: Codable {
     var speakers: [Speaker] = []
     var expectedParticipants: [String]?
     var note: Note?
+    var projectID: UUID?
+    var projectAssignedAt: Date?
 }

@@ -21,6 +21,7 @@ final class RecordingWorkflow {
     private let recorder: AudioRecorder
     private let library: RecordingLibrary
     private let showsLiveDraft: Bool
+    private let projectID: UUID?
     private let now: () -> Date
 
     private var recordingID = UUID()
@@ -39,6 +40,7 @@ final class RecordingWorkflow {
         recorder: AudioRecorder,
         library: RecordingLibrary,
         showsLiveDraft: Bool,
+        projectID: UUID? = nil,
         now: @escaping () -> Date = Date.init
     ) {
         self.session = session
@@ -49,6 +51,7 @@ final class RecordingWorkflow {
         self.recorder = recorder
         self.library = library
         self.showsLiveDraft = showsLiveDraft
+        self.projectID = projectID
         self.now = now
     }
 
@@ -151,7 +154,9 @@ final class RecordingWorkflow {
                     expectedParticipants: participants.isEmpty ? nil : participants,
                     note: note,
                     createdAt: startedAt,
-                    duration: elapsed
+                    duration: elapsed,
+                    projectID: projectID,
+                    projectAssignedAt: projectID.map { _ in startedAt }
                 )
             )
             state = .saved

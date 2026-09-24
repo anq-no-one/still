@@ -36,7 +36,7 @@ struct StillApp: App {
         let container: ModelContainer
         do {
             container = try ModelContainer(
-                for: EncryptedRecording.self,
+                for: EncryptedRecording.self, EncryptedProject.self,
                 configurations: ModelConfiguration(cloudKitDatabase: .none)
             )
         } catch {
@@ -110,13 +110,15 @@ struct StillApp: App {
                     },
                     makeEmbeddingEngine: {
                         guard proEntitlements.allows(.semanticSearch) else { return nil }
-                        // The transcription model pack is the one download the user has
-                        // already approved in Setup. Its presence stands in for that
-                        // approval here, so semantic search never triggers a download
-                        // of its own without a matching user action.
                         return await AppleSemanticEmbedding.makeEngine(allowDownload: installer.state == .installed)
+                    },
+                    makeProjectRepository: { key in
+                        MainActor.assumeIsolated {
+                            EncryptedProjectRepository(context: context, key: key)
+                        }
                     }
-                )
+                ),
+                selectionStore: UserDefaultsProjectSelectionStore()
             )
         }
         let setupFlow = MainActor.assumeIsolated {

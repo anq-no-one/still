@@ -12,6 +12,8 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
     let duration: TimeInterval
     var updatedAt: Date
     var deletedAt: Date?
+    var projectID: UUID?
+    var projectAssignedAt: Date?
 
     init(
         id: UUID = UUID(),
@@ -24,7 +26,9 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         createdAt: Date = .now,
         duration: TimeInterval,
         updatedAt: Date = .now,
-        deletedAt: Date? = nil
+        deletedAt: Date? = nil,
+        projectID: UUID? = nil,
+        projectAssignedAt: Date? = nil
     ) {
         self.id = id
         self.title = title
@@ -37,6 +41,8 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         self.duration = duration
         self.updatedAt = updatedAt
         self.deletedAt = deletedAt
+        self.projectID = projectID
+        self.projectAssignedAt = projectAssignedAt
     }
 
     var isDeleted: Bool {
