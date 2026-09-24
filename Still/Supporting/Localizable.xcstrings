@@ -65,6 +65,134 @@
         }
       }
     },
+    "%@ at %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ um %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ a las %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ à %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ alle %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ om %@"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ o %@"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ às %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ в %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kl. %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ о %@"
+          }
+        }
+      }
+    },
+    "%@ becomes %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ wird zu %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ pasa a ser %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ devient %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ diventa %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ wordt %@"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ zmienia się w %@"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ passa a %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ становится %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ blir %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ стає %@"
+          }
+        }
+      }
+    },
     "%@ is unavailable and no other microphone is connected.": {
       "localizations": {
         "de": {
@@ -321,6 +449,134 @@
         }
       }
     },
+    "%lld Languages": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Sprachen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld idiomas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld langues"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld lingue"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld talen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Języki: %lld"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld idiomas"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Языков: %lld"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld språk"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мов: %lld"
+          }
+        }
+      }
+    },
+    "%lld terms": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Begriffe"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld términos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld termes"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld termini"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld termen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminy: %lld"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld termos"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Терминов: %lld"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld termer"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Термінів: %lld"
+          }
+        }
+      }
+    },
     "A recovery code lets you open this Library again if this device is lost. Still never stores the code itself.": {
       "localizations": {
         "de": {
@@ -381,6 +637,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Код відновлення дозволяє знову відкрити цю бібліотеку, якщо ви загубите цей пристрій. Still ніколи не зберігає сам код."
+          }
+        }
+      }
+    },
+    "A tool reads nothing until you approve it here. After approval it can read transcripts, confirmed and extracted facts, decisions, and accepted tasks from the projects on this Mac, never audio, and it cannot change anything.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Tool liest nichts, bevor du es hier genehmigst. Nach der Genehmigung kann es Transkripte, bestätigte und extrahierte Fakten, Entscheidungen und akzeptierte Aufgaben aus den Projekten auf diesem Mac lesen, niemals Audio, und es kann nichts ändern."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una herramienta no lee nada hasta que la apruebas aquí. Tras la aprobación, puede leer transcripciones, hechos confirmados y extraídos, decisiones y tareas aceptadas de los proyectos de este Mac, nunca audio, y no puede cambiar nada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un outil ne lit rien tant que tu ne l'as pas approuvé ici. Une fois approuvé, il peut lire les transcriptions, les faits confirmés et extraits, les décisions et les tâches acceptées des projets sur ce Mac, jamais l'audio, et il ne peut rien modifier."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uno strumento non legge nulla finché non lo approvi qui. Dopo l'approvazione può leggere trascrizioni, fatti confermati ed estratti, decisioni e attività accettate dai progetti su questo Mac, mai l'audio, e non può modificare nulla."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een tool leest niets totdat je dit hier goedkeurt. Na goedkeuring kan het transcripten, bevestigde en geëxtraheerde feiten, beslissingen en geaccepteerde taken uit de projecten op deze Mac lezen, nooit audio, en het kan niets wijzigen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narzędzie nic nie odczytuje, dopóki go tu nie zatwierdzisz. Po zatwierdzeniu może odczytywać transkrypcje, potwierdzone i wyodrębnione fakty, decyzje oraz zaakceptowane zadania z projektów na tym Macu, nigdy dźwięk, i nie może niczego zmienić."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma ferramenta não lê nada até a aprovares aqui. Depois da aprovação, pode ler transcrições, factos confirmados e extraídos, decisões e tarefas aceites dos projetos neste Mac, nunca áudio, e não pode alterar nada."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Инструмент ничего не читает, пока ты не одобришь его здесь. После одобрения он может читать транскрипты, подтверждённые и извлечённые факты, решения и принятые задачи из проектов на этом Mac, но никогда не аудио, и не может ничего изменить."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ett verktyg läser ingenting förrän du godkänner det här. Efter godkännande kan det läsa transkriptioner, bekräftade och extraherade fakta, beslut och accepterade uppgifter från projekten på den här Mac-datorn, aldrig ljud, och det kan inte ändra något."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Інструмент нічого не читає, доки ти не схвалиш його тут. Після схвалення він може читати транскрипти, підтверджені та вилучені факти, рішення й прийняті завдання з проєктів на цьому Mac, але ніколи аудіо, і не може нічого змінити."
           }
         }
       }
@@ -513,6 +833,134 @@
         }
       }
     },
+    "Accept": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akzeptieren"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aceptar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accepter"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accetta"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accepteren"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akceptuj"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aceitar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Принять"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acceptera"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прийняти"
+          }
+        }
+      }
+    },
+    "Accepted": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akzeptiert"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aceptada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acceptée"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accettata"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geaccepteerd"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaakceptowane"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aceite"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Принято"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accepterad"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прийнято"
+          }
+        }
+      }
+    },
     "Access": {
       "localizations": {
         "de": {
@@ -637,6 +1085,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Додати"
+          }
+        }
+      }
+    },
+    "Add Term": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begriff hinzufügen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir término"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter un terme"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiungi termine"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Term toevoegen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj termin"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar termo"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить термин"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lägg till term"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати термін"
           }
         }
       }
@@ -1537,6 +2049,70 @@
         }
       }
     },
+    "Any Language": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beliebige Sprache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cualquier idioma"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toutes les langues"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qualsiasi lingua"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elke taal"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dowolny język"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qualquer idioma"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Любой язык"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alla språk"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Будь-яка мова"
+          }
+        }
+      }
+    },
     "App Lock": {
       "localizations": {
         "de": {
@@ -1597,6 +2173,262 @@
           "stringUnit": {
             "state": "translated",
             "value": "Блокування застосунку"
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erscheinungsbild"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aspecto"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apparence"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aspetto"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weergave"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wygląd"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aparência"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Внешний вид"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utseende"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оформлення"
+          }
+        }
+      }
+    },
+    "Apply %lld Changes": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Änderungen anwenden"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplicar %lld cambios"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appliquer %lld modifications"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applica %lld modifiche"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld wijzigingen toepassen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zastosuj zmiany: %lld"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplicar %lld alterações"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Применить изменения (%lld)"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tillämpa %lld ändringar"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Застосувати зміни (%lld)"
+          }
+        }
+      }
+    },
+    "Apply Project Vocabulary": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projektvokabular anwenden"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplicar vocabulario del proyecto"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appliquer le vocabulaire du projet"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applica il vocabolario del progetto"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projectwoordenlijst toepassen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zastosuj słownik projektu"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplicar vocabulário do projeto"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Применить словарь проекта"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tillämpa projektets ordlista"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Застосувати словник проєкту"
+          }
+        }
+      }
+    },
+    "Apply Vocabulary": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vokabular anwenden"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplicar vocabulario"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appliquer le vocabulaire"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applica vocabolario"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Woordenlijst toepassen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zastosuj słownik"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplicar vocabulário"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Применить словарь"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tillämpa ordlista"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Застосувати словник"
           }
         }
       }
@@ -1793,6 +2625,70 @@
         }
       }
     },
+    "Approved": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genehmigt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aprobada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approuvée"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approvata"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Goedgekeurd"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zatwierdzone"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aprovada"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Одобрено"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Godkänd"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Схвалено"
+          }
+        }
+      }
+    },
     "Archive": {
       "localizations": {
         "de": {
@@ -1853,6 +2749,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "В архів"
+          }
+        }
+      }
+    },
+    "Audio Input": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audioeingang"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrada de audio"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrée audio"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingresso audio"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio-ingang"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wejście audio"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrada de áudio"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Аудиовход"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ljudingång"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Аудіовхід"
           }
         }
       }
@@ -1981,6 +2941,134 @@
           "stringUnit": {
             "state": "translated",
             "value": "Аудіо- або відеофайл"
+          }
+        }
+      }
+    },
+    "Authenticate to open your recordings.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Authentifiziere dich, um deine Aufnahmen zu öffnen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autentícate para abrir tus grabaciones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Authentifie-toi pour ouvrir tes enregistrements."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autenticati per aprire le tue registrazioni."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verifieer jezelf om je opnamen te openen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uwierzytelnij się, aby otworzyć swoje nagrania."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autentica-te para abrir as tuas gravações."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подтверди личность, чтобы открыть свои записи."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autentisera dig för att öppna dina inspelningar."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підтверди особу, щоб відкрити свої записи."
+          }
+        }
+      }
+    },
+    "Automatically extracted": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatisch extrahiert"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extraído automáticamente"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extrait automatiquement"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estratto automaticamente"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatisch geëxtraheerd"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyodrębnione automatycznie"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extraído automaticamente"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Извлечено автоматически"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatiskt extraherat"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вилучено автоматично"
           }
         }
       }
@@ -2365,6 +3453,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Скасувати"
+          }
+        }
+      }
+    },
+    "Capture": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufnahme"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Captura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capture"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cattura"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opname"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagrywanie"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Captura"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запись"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspelning"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запис"
           }
         }
       }
@@ -3201,6 +4353,70 @@
         }
       }
     },
+    "Confirmed": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bestätigt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmé"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confermato"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bevestigd"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Potwierdzone"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmado"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подтверждено"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekräftat"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підтверджено"
+          }
+        }
+      }
+    },
     "Connect": {
       "localizations": {
         "de": {
@@ -3329,66 +4545,66 @@
         }
       }
     },
-    "Connected": {
+    "Connected since %@": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Verbunden"
+            "value": "Verbunden seit %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Conectado"
+            "value": "Conectado desde %@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Connecté"
+            "value": "Connecté depuis %@"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Connesso"
+            "value": "Connesso da %@"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Verbonden"
+            "value": "Verbonden sinds %@"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Połączono"
+            "value": "Połączono od %@"
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ligado"
+            "value": "Ligado desde %@"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Подключено"
+            "value": "Подключено с %@"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ansluten"
+            "value": "Ansluten sedan %@"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Під'єднано"
+            "value": "Підключено з %@"
           }
         }
       }
@@ -3453,6 +4669,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Продовжити"
+          }
+        }
+      }
+    },
+    "Continue in Background": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Hintergrund fortsetzen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar en segundo plano"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuer en arrière-plan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continua in background"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doorgaan op de achtergrond"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontynuuj w tle"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar em segundo plano"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Продолжить в фоне"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fortsätt i bakgrunden"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Продовжити у фоні"
           }
         }
       }
@@ -3649,6 +4929,198 @@
         }
       }
     },
+    "Dark": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkel"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscuro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sombre"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scuro"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Donker"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ciemny"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escuro"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тёмная"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mörkt"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Темна"
+          }
+        }
+      }
+    },
+    "Decisions": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entscheidungen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decisiones"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décisions"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decisioni"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beslissingen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decyzje"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decisões"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Решения"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beslut"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рішення"
+          }
+        }
+      }
+    },
+    "Decisions and Tasks": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entscheidungen und Aufgaben"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decisiones y tareas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décisions et tâches"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decisioni e attività"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beslissingen en taken"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decyzje i zadania"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decisões e tarefas"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Решения и задачи"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beslut och uppgifter"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рішення та завдання"
+          }
+        }
+      }
+    },
     "Delete": {
       "localizations": {
         "de": {
@@ -3709,6 +5181,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Видалити"
+          }
+        }
+      }
+    },
+    "Delete %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ löschen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ verwijderen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń %@"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta bort %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити %@"
           }
         }
       }
@@ -4097,6 +5633,70 @@
         }
       }
     },
+    "Dismiss": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schließen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignorer"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignora"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sluiten"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zamknij"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dispensar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрыть"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avfärda"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрити"
+          }
+        }
+      }
+    },
     "Don't Warn Again": {
       "localizations": {
         "de": {
@@ -4481,6 +6081,198 @@
         }
       }
     },
+    "Each project keeps its own spellings of names and terms. Still applies them to new recordings in that project.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jedes Projekt behält seine eigene Schreibweise von Namen und Begriffen. Still wendet sie auf neue Aufnahmen in diesem Projekt an."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada proyecto mantiene su propia forma de escribir nombres y términos. Still la aplica a las nuevas grabaciones de ese proyecto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque projet conserve sa propre orthographe des noms et des termes. Still l'applique aux nouveaux enregistrements de ce projet."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ogni progetto mantiene la propria grafia di nomi e termini. Still la applica alle nuove registrazioni di quel progetto."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elk project bewaart zijn eigen schrijfwijze van namen en termen. Still past die toe op nieuwe opnamen binnen dat project."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Każdy projekt zachowuje własną pisownię nazw i terminów. Still stosuje ją w nowych nagraniach tego projektu."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada projeto mantém a sua própria grafia de nomes e termos. O Still aplica-a às novas gravações desse projeto."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Каждый проект хранит собственное написание имён и терминов. Still применяет его к новым записям в этом проекте."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varje projekt behåller sin egen stavning av namn och termer. Still tillämpar den på nya inspelningar i det projektet."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кожен проєкт зберігає власне написання імен і термінів. Still застосовує його до нових записів у цьому проєкті."
+          }
+        }
+      }
+    },
+    "Edit": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bearbeiten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifier"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifica"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewerken"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edytuj"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изменить"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redigera"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Редагувати"
+          }
+        }
+      }
+    },
+    "Edit Vocabulary for %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vokabular für %@ bearbeiten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar vocabulario de %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifier le vocabulaire de %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifica vocabolario per %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Woordenlijst voor %@ bewerken"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edytuj słownik dla %@"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar vocabulário de %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изменить словарь для %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redigera ordlista för %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Редагувати словник для %@"
+          }
+        }
+      }
+    },
     "Encrypted Still Archive": {
       "localizations": {
         "de": {
@@ -4673,6 +6465,70 @@
         }
       }
     },
+    "Facts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fakten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hechos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faits"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fatti"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feiten"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fakty"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Factos"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Факты"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fakta"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Факти"
+          }
+        }
+      }
+    },
     "Filter by Project": {
       "localizations": {
         "de": {
@@ -4733,6 +6589,198 @@
           "stringUnit": {
             "state": "translated",
             "value": "Фільтр за проєктом"
+          }
+        }
+      }
+    },
+    "Find Again": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erneut suchen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar de nuevo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher à nouveau"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca di nuovo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opnieuw zoeken"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szukaj ponownie"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Procurar novamente"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Искать снова"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sök igen"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Шукати знову"
+          }
+        }
+      }
+    },
+    "Finding decisions and tasks…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entscheidungen und Aufgaben werden gesucht…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscando decisiones y tareas…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherche des décisions et des tâches…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ricerca di decisioni e attività in corso…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beslissingen en taken zoeken…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyszukiwanie decyzji i zadań…"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A procurar decisões e tarefas…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поиск решений и задач…"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Söker beslut och uppgifter…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пошук рішень і завдань…"
+          }
+        }
+      }
+    },
+    "Finds decisions, facts and proposed tasks in your recordings, on this device. Without it, Still quotes the matching sentences instead.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Findet Entscheidungen, Fakten und vorgeschlagene Aufgaben in deinen Aufnahmen, auf diesem Gerät. Ohne diese Funktion zitiert Still stattdessen die passenden Sätze."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encuentra decisiones, hechos y tareas propuestas en tus grabaciones, en este dispositivo. Sin ella, Still cita las frases correspondientes en su lugar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trouve les décisions, les faits et les tâches proposées dans tes enregistrements, sur cet appareil. Sans cette fonction, Still cite à la place les phrases correspondantes."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trova decisioni, fatti e attività proposte nelle tue registrazioni, su questo dispositivo. Senza questa funzione, Still cita invece le frasi corrispondenti."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoekt beslissingen, feiten en voorgestelde taken in je opnamen, op dit apparaat. Zonder deze functie citeert Still in plaats daarvan de bijbehorende zinnen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Znajduje decyzje, fakty i proponowane zadania w Twoich nagraniach, na tym urządzeniu. Bez tej funkcji Still zamiast tego cytuje pasujące zdania."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encontra decisões, factos e tarefas propostas nas tuas gravações, neste dispositivo. Sem esta função, o Still cita antes as frases correspondentes."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Находит решения, факты и предложенные задачи в твоих записях на этом устройстве. Без этой функции Still вместо этого цитирует подходящие предложения."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hittar beslut, fakta och föreslagna uppgifter i dina inspelningar, på den här enheten. Utan den citerar Still i stället de matchande meningarna."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Знаходить рішення, факти й запропоновані завдання в твоїх записах на цьому пристрої. Без цієї функції Still натомість цитує відповідні речення."
           }
         }
       }
@@ -5889,6 +7937,70 @@
         }
       }
     },
+    "Intelligence": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intelligenz"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inteligencia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intelligence"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intelligenza"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intelligentie"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inteligencja"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inteligência"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Интеллект"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intelligens"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Інтелект"
+          }
+        }
+      }
+    },
     "Interview": {
       "localizations": {
         "de": {
@@ -6657,6 +8769,70 @@
         }
       }
     },
+    "Languages": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprachen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idiomas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Langues"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lingue"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Talen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Języki"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idiomas"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Языки"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Språk"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мови"
+          }
+        }
+      }
+    },
     "Last Synced": {
       "localizations": {
         "de": {
@@ -6849,6 +9025,70 @@
         }
       }
     },
+    "Let Still Hear the Room": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still den Raum hören lassen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dejar que Still escuche la sala"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laisser Still écouter la pièce"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lascia che Still ascolti la stanza"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laat Still de ruimte horen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pozwól Still słyszeć pomieszczenie"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deixar o Still ouvir a sala"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить Still слышать помещение"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Låt Still höra rummet"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дозволити Still чути кімнату"
+          }
+        }
+      }
+    },
     "Library Locked": {
       "localizations": {
         "de": {
@@ -6909,6 +9149,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Бібліотека заблокована"
+          }
+        }
+      }
+    },
+    "Light": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hell"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clair"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chiaro"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Licht"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jasny"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claro"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Светлая"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ljust"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Світла"
           }
         }
       }
@@ -7489,6 +9793,70 @@
         }
       }
     },
+    "Models": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelle"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modèles"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelli"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modellen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modele"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelos"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Модели"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modeller"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Моделі"
+          }
+        }
+      }
+    },
     "Move to Project": {
       "localizations": {
         "de": {
@@ -7677,6 +10045,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ім'я для цього мовця"
+          }
+        }
+      }
+    },
+    "Name for this speaker group": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name für diese Sprechergruppe"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre para este grupo de interlocutores"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom de ce groupe d'intervenants"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome per questo gruppo di interlocutori"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naam voor deze sprekersgroep"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nazwa dla tej grupy mówiących"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome para este grupo de oradores"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Имя для этой группы говорящих"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Namn för den här talargruppen"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ім'я для цієї групи мовців"
           }
         }
       }
@@ -7873,66 +10305,194 @@
         }
       }
     },
-    "No AI tool is connected.": {
+    "New Term": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kein KI-Tool ist verbunden."
+            "value": "Neuer Begriff"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No hay ninguna herramienta de IA conectada."
+            "value": "Nuevo término"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucun outil d'IA n'est connecté."
+            "value": "Nouveau terme"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessuno strumento IA è connesso."
+            "value": "Nuovo termine"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Er is geen AI-tool verbonden."
+            "value": "Nieuwe term"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Żadne narzędzie AI nie jest połączone."
+            "value": "Nowy termin"
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nenhuma ferramenta de IA está ligada."
+            "value": "Novo termo"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ни один инструмент ИИ не подключён."
+            "value": "Новый термин"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Inget AI-verktyg är anslutet."
+            "value": "Ny term"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Жоден інструмент ШІ не під'єднано."
+            "value": "Новий термін"
+          }
+        }
+      }
+    },
+    "No AI tool is approved.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein KI-Tool ist genehmigt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ninguna herramienta de IA está aprobada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun outil d'IA n'est approuvé."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessuno strumento IA è approvato."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen enkele AI-tool is goedgekeurd."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Żadne narzędzie AI nie jest zatwierdzone."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma ferramenta de IA está aprovada."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ни один ИИ-инструмент не одобрен."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inget AI-verktyg är godkänt."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Жоден інструмент ШІ не схвалено."
+          }
+        }
+      }
+    },
+    "No Accepted Tasks": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine akzeptierten Aufgaben"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin tareas aceptadas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune tâche acceptée"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessuna attività accettata"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen geaccepteerde taken"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brak zaakceptowanych zadań"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem tarefas aceites"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет принятых задач"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inga accepterade uppgifter"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Немає прийнятих завдань"
           }
         }
       }
@@ -8193,6 +10753,70 @@
         }
       }
     },
+    "No projects yet": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Projekte"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay proyectos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun projet pour l'instant"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ancora nessun progetto"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog geen projecten"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brak projektów"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ainda sem projetos"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока нет проектов"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inga projekt ännu"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поки що немає проєктів"
+          }
+        }
+      }
+    },
     "No voices remembered": {
       "localizations": {
         "de": {
@@ -8317,6 +10941,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Немає"
+          }
+        }
+      }
+    },
+    "Not Downloaded": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht heruntergeladen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No descargado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non téléchargé"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non scaricato"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet gedownload"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niepobrany"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não transferido"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не загружено"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inte hämtad"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не завантажено"
           }
         }
       }
@@ -8897,6 +11585,70 @@
         }
       }
     },
+    "Nothing to Change": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nichts zu ändern"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada que cambiar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien à modifier"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niente da modificare"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niets te wijzigen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nic do zmiany"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada a alterar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нечего менять"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inget att ändra"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нічого змінювати"
+          }
+        }
+      }
+    },
     "OK": {
       "localizations": {
         "de": {
@@ -9213,6 +11965,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Лише ці проєкти"
+          }
+        }
+      }
+    },
+    "Only the lines above change. Your own corrections, the audio and note sources stay as they are.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur die obigen Zeilen ändern sich. Deine eigenen Korrekturen, das Audio und die Notizquellen bleiben unverändert."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo cambian las líneas anteriores. Tus propias correcciones, el audio y las fuentes de las notas se mantienen igual."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seules les lignes ci-dessus changent. Tes propres corrections, l'audio et les sources des notes restent tels quels."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambiano solo le righe sopra. Le tue correzioni, l'audio e le fonti delle note restano invariati."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen de bovenstaande regels veranderen. Je eigen correcties, de audio en de notitiebronnen blijven zoals ze zijn."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zmieniają się tylko powyższe wiersze. Twoje własne poprawki, dźwięk i źródła notatek pozostają bez zmian."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Só as linhas acima mudam. As tuas próprias correções, o áudio e as fontes das notas mantêm-se como estão."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Меняются только строки выше. Твои собственные правки, аудио и источники заметок остаются как есть."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endast raderna ovan ändras. Dina egna rättelser, ljudet och anteckningskällorna förblir som de är."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Змінюються лише рядки вище. Твої власні правки, аудіо та джерела нотаток залишаються без змін."
           }
         }
       }
@@ -9725,6 +12541,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Відкриває запис у Still."
+          }
+        }
+      }
+    },
+    "Opens the recording where this task was agreed": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnet die Aufnahme, in der diese Aufgabe vereinbart wurde"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre la grabación donde se acordó esta tarea"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre l'enregistrement où cette tâche a été convenue"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apre la registrazione in cui questa attività è stata concordata"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opent de opname waarin deze taak is afgesproken"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwiera nagranie, w którym uzgodniono to zadanie"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre a gravação onde esta tarefa foi acordada"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открывает запись, в которой была согласована эта задача"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öppnar inspelningen där uppgiften avtalades"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкриває запис, у якому було погоджено це завдання"
           }
         }
       }
@@ -10497,6 +13377,70 @@
         }
       }
     },
+    "Privacy and Security": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datenschutz und Sicherheit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacidad y seguridad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confidentialité et sécurité"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy e sicurezza"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy en beveiliging"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prywatność i bezpieczeństwo"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacidade e segurança"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Конфиденциальность и безопасность"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sekretess och säkerhet"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Конфіденційність і безпека"
+          }
+        }
+      }
+    },
     "Project": {
       "localizations": {
         "de": {
@@ -10817,6 +13761,70 @@
         }
       }
     },
+    "Projects and Sync": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projekte und Synchronisierung"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proyectos y sincronización"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projets et synchronisation"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progetti e sincronizzazione"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projecten en synchronisatie"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projekty i synchronizacja"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projetos e sincronização"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проекты и синхронизация"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projekt och synkronisering"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проєкти й синхронізація"
+          }
+        }
+      }
+    },
     "Projects sync to your other devices, encrypted like your recordings.": {
       "localizations": {
         "de": {
@@ -10877,6 +13885,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Проєкти синхронізуються з іншими вашими пристроями, зашифровані так само, як і записи."
+          }
+        }
+      }
+    },
+    "Proposed Tasks": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorgeschlagene Aufgaben"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tareas propuestas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tâches proposées"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attività proposte"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voorgestelde taken"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proponowane zadania"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarefas propostas"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предложенные задачи"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Föreslagna uppgifter"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запропоновані завдання"
           }
         }
       }
@@ -11137,6 +14209,70 @@
         }
       }
     },
+    "Ready Offline": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline bereit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lista sin conexión"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prêt hors ligne"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronto offline"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline gereed"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gotowe offline"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronto offline"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово офлайн"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klar offline"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово офлайн"
+          }
+        }
+      }
+    },
     "Ready to Record": {
       "localizations": {
         "de": {
@@ -11197,70 +14333,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Готовий до запису"
-          }
-        }
-      }
-    },
-    "Ready to Tell Speakers Apart": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bereit, Sprecher zu unterscheiden"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Listo para distinguir interlocutores"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prêt à distinguer les intervenants"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pronto a distinguere gli interlocutori"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Klaar om sprekers te onderscheiden"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gotowy do rozróżniania mówiących"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pronto para distinguir oradores"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Готов различать говорящих"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Redo att skilja talare åt"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Готовий розрізняти мовців"
           }
         }
       }
@@ -13185,70 +16257,6 @@
         }
       }
     },
-    "Revoked": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Widerrufen"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Revocado"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Révoqué"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Revocato"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ingetrokken"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Odwołano"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Revogado"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Отозвано"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Återkallad"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Відкликано"
-          }
-        }
-      }
-    },
     "Revoking rotates the key and re-seals everything on this device. A device you no longer have cannot read anything written afterwards.": {
       "localizations": {
         "de": {
@@ -13437,6 +16445,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Працює на"
+          }
+        }
+      }
+    },
+    "Save": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sichern"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrer"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salva"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewaren"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapisz"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранить"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spara"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберегти"
           }
         }
       }
@@ -13697,66 +16769,66 @@
         }
       }
     },
-    "Security": {
+    "See Still Pro": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sicherheit"
+            "value": "Still Pro ansehen"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seguridad"
+            "value": "Ver Still Pro"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sécurité"
+            "value": "Voir Still Pro"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sicurezza"
+            "value": "Vedi Still Pro"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Beveiliging"
+            "value": "Bekijk Still Pro"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bezpieczeństwo"
+            "value": "Zobacz Still Pro"
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Segurança"
+            "value": "Ver Still Pro"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Безопасность"
+            "value": "Посмотреть Still Pro"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Säkerhet"
+            "value": "Se Still Pro"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Безпека"
+            "value": "Переглянути Still Pro"
           }
         }
       }
@@ -14013,6 +17085,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Поділитися діагностикою"
+          }
+        }
+      }
+    },
+    "Shortcuts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tastenkürzel"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atajos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raccourcis"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scorciatoie"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sneltoetsen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skróty"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atalhos"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сочетания клавиш"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genvägar"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сполучення клавіш"
           }
         }
       }
@@ -14337,6 +17473,70 @@
         }
       }
     },
+    "Speaker Separation": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprechertrennung"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Separación de interlocutores"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Séparation des intervenants"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Separazione degli interlocutori"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprekersscheiding"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rozdzielanie mówiących"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Separação de oradores"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разделение говорящих"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Talarseparering"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розділення мовців"
+          }
+        }
+      }
+    },
     "Speaker name": {
       "localizations": {
         "de": {
@@ -14525,6 +17725,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Мовці, переклад і нотатки"
+          }
+        }
+      }
+    },
+    "Speech Recognition": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spracherkennung"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reconocimiento de voz"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reconnaissance vocale"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riconoscimento vocale"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spraakherkenning"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rozpoznawanie mowy"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reconhecimento de voz"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Распознавание речи"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taligenkänning"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розпізнавання мовлення"
           }
         }
       }
@@ -14785,6 +18049,70 @@
         }
       }
     },
+    "Status": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "État"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stato"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stan"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estado"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Статус"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Статус"
+          }
+        }
+      }
+    },
     "Step %lld of %lld": {
       "localizations": {
         "de": {
@@ -15037,6 +18365,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Still Pro"
+          }
+        }
+      }
+    },
+    "Still Pro Is Optional": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still Pro ist optional"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still Pro es opcional"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still Pro est facultatif"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still Pro è facoltativo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still Pro is optioneel"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still Pro jest opcjonalny"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Still Pro é opcional"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still Pro необязателен"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still Pro är valfritt"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still Pro не є обов'язковим"
           }
         }
       }
@@ -16001,6 +19393,70 @@
         }
       }
     },
+    "Still left out %lld statements it could not trace to the transcript.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still hat %lld Aussagen ausgelassen, die sich nicht im Transkript nachweisen ließen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still omitió %lld afirmaciones que no pudo relacionar con la transcripción."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still a écarté %lld affirmations qu'il n'a pas pu relier à la transcription."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still ha escluso %lld affermazioni che non è riuscito a ricondurre alla trascrizione."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still heeft %lld uitspraken weggelaten die niet naar het transcript te herleiden waren."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still pominął wypowiedzi, których nie udało się powiązać z transkrypcją (%lld)."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Still deixou de fora %lld afirmações que não conseguiu associar à transcrição."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still не учёл высказывания, которые не удалось связать с транскриптом (%lld)."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still uteslöt %lld påståenden som inte gick att spåra till transkriptionen."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still не врахував твердження, які не вдалося пов'язати з транскриптом (%lld)."
+          }
+        }
+      }
+    },
     "Still needs the microphone to record you. Everything it hears stays on this device.": {
       "localizations": {
         "de": {
@@ -16061,6 +19517,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Still потребує доступу до мікрофона, щоб записувати вас. Усе, що він чує, залишається на цьому пристрої."
+          }
+        }
+      }
+    },
+    "Still picks the right model for each recording by itself. Models run only on this device and work offline once downloaded.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still wählt selbst das passende Modell für jede Aufnahme. Modelle laufen nur auf diesem Gerät und funktionieren nach dem Herunterladen offline."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still elige por sí mismo el modelo adecuado para cada grabación. Los modelos se ejecutan solo en este dispositivo y funcionan sin conexión una vez descargados."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still choisit lui-même le bon modèle pour chaque enregistrement. Les modèles s'exécutent uniquement sur cet appareil et fonctionnent hors ligne une fois téléchargés."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still sceglie da solo il modello giusto per ogni registrazione. I modelli funzionano solo su questo dispositivo e, una volta scaricati, lavorano offline."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still kiest zelf het juiste model voor elke opname. Modellen draaien alleen op dit apparaat en werken offline zodra ze gedownload zijn."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still sam wybiera odpowiedni model dla każdego nagrania. Modele działają wyłącznie na tym urządzeniu i po pobraniu pracują offline."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Still escolhe sozinho o modelo certo para cada gravação. Os modelos funcionam apenas neste dispositivo e, depois de transferidos, funcionam offline."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still сам выбирает подходящую модель для каждой записи. Модели работают только на этом устройстве и после загрузки работают офлайн."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still väljer själv rätt modell för varje inspelning. Modeller körs bara på den här enheten och fungerar offline när de har hämtats."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still сам обирає відповідну модель для кожного запису. Моделі працюють лише на цьому пристрої й після завантаження працюють офлайн."
           }
         }
       }
@@ -16253,6 +19773,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Still починає запис, коли дозволений тут застосунок приєднується до дзвінка, тобто одночасно використовує мікрофон і відтворює звук. Запис зберігається, коли застосунок звільняє мікрофон, якщо дзвінок тривав щонайменше 45 секунд, збігся з подією в календарі або ви вибрали «Зберегти». Коротші перевірки, як-от тест мікрофона, видаляються. Музика та інші застосунки не записуються. Запис завжди видно в рядку меню, і його можна одразу зупинити або видалити. Для зустрічей у браузері використовуйте розширення Still нижче."
+          }
+        }
+      }
+    },
+    "Still suggests this name for your own voice in recordings.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still schlägt diesen Namen für deine eigene Stimme in Aufnahmen vor."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still sugiere este nombre para tu propia voz en las grabaciones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still suggère ce nom pour ta propre voix dans les enregistrements."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still suggerisce questo nome per la tua voce nelle registrazioni."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still stelt deze naam voor je eigen stem in opnamen voor."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still proponuje tę nazwę dla Twojego własnego głosu w nagraniach."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Still sugere este nome para a tua própria voz nas gravações."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still предлагает это имя для твоего собственного голоса в записях."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still föreslår det här namnet för din egen röst i inspelningar."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still пропонує це ім'я для твого власного голосу в записах."
           }
         }
       }
@@ -16641,70 +20225,6 @@
         }
       }
     },
-    "Storage": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Speicher"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Almacenamiento"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stockage"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Archiviazione"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Opslag"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pamięć"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Armazenamento"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Хранилище"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lagring"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сховище"
-          }
-        }
-      }
-    },
     "Stored on this Mac": {
       "localizations": {
         "de": {
@@ -16833,7 +20353,70 @@
         }
       }
     },
-    "Suggest Speaker Names from Google Meet": {},
+    "Suggest Speaker Names from Google Meet": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprechernamen aus Google Meet vorschlagen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sugerir nombres de interlocutores desde Google Meet"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suggérer des noms d'intervenants depuis Google Meet"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suggerisci nomi degli interlocutori da Google Meet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprekersnamen voorstellen vanuit Google Meet"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proponuj nazwy mówiących z Google Meet"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sugerir nomes de oradores a partir do Google Meet"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предлагать имена говорящих из Google Meet"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Föreslå talarnamn från Google Meet"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пропонувати імена мовців з Google Meet"
+          }
+        }
+      }
+    },
     "Suggested name from the call: %@": {
       "localizations": {
         "de": {
@@ -17090,6 +20673,70 @@
         }
       }
     },
+    "Sync is part of Still Pro.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synchronisierung ist Teil von Still Pro."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La sincronización forma parte de Still Pro."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La synchronisation fait partie de Still Pro."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La sincronizzazione fa parte di Still Pro."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synchronisatie maakt deel uit van Still Pro."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synchronizacja jest częścią Still Pro."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A sincronização faz parte do Still Pro."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Синхронизация входит в Still Pro."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synkronisering ingår i Still Pro."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Синхронізація входить до Still Pro."
+          }
+        }
+      }
+    },
     "Sync sends your recordings to your own iCloud account, encrypted on this device first. Apple stores only ciphertext: no transcript, note, audio, or key ever leaves in readable form. Each project has its own key, so a device only receives the projects it keeps. Text and notes arrive on your other devices before the audio finishes.": {
       "localizations": {
         "de": {
@@ -17150,6 +20797,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Синхронізація надсилає ваші записи до вашого власного облікового запису iCloud, спочатку зашифровані на цьому пристрої. Apple зберігає лише зашифрований текст: жоден транскрипт, нотатка, звук чи ключ ніколи не залишають пристрій у читабельному вигляді. У кожного проєкту свій ключ, тож пристрій отримує лише ті проєкти, які зберігає. Текст і нотатки надходять на ваші інші пристрої раніше, ніж завершиться звук."
+          }
+        }
+      }
+    },
+    "System": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistema"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Système"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistema"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Systeem"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistema"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Системная"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Системна"
           }
         }
       }
@@ -17346,6 +21057,262 @@
         }
       }
     },
+    "System follows the light or dark setting of this device.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System folgt der hellen oder dunklen Einstellung dieses Geräts."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El sistema sigue el ajuste claro u oscuro de este dispositivo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Système suit le réglage clair ou sombre de cet appareil."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistema segue l'impostazione chiara o scura di questo dispositivo."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Systeem volgt de lichte of donkere instelling van dit apparaat."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System podąża za jasnym lub ciemnym ustawieniem tego urządzenia."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistema segue a definição clara ou escura deste dispositivo."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Системная тема следует светлой или тёмной настройке этого устройства."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System följer den ljusa eller mörka inställningen på den här enheten."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Системна тема слідує світлому або темному налаштуванню цього пристрою."
+          }
+        }
+      }
+    },
+    "Task": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufgabe"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarea"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tâche"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attività"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taak"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zadanie"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarefa"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Задача"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uppgift"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завдання"
+          }
+        }
+      }
+    },
+    "Tasks": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufgaben"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tareas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tâches"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attività"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taken"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zadania"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarefas"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Задачи"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uppgifter"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завдання"
+          }
+        }
+      }
+    },
+    "Tasks you accept in a recording appear here with their source.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufgaben, die du in einer Aufnahme akzeptierst, erscheinen hier mit ihrer Quelle."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las tareas que aceptas en una grabación aparecen aquí con su origen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les tâches que tu acceptes dans un enregistrement apparaissent ici avec leur source."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le attività che accetti in una registrazione compaiono qui con la loro origine."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taken die je in een opname accepteert, verschijnen hier met hun bron."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zadania, które akceptujesz w nagraniu, pojawiają się tutaj wraz z ich źródłem."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As tarefas que aceitas numa gravação aparecem aqui com a sua origem."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Задачи, которые ты принимаешь в записи, появляются здесь вместе с их источником."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uppgifter du accepterar i en inspelning visas här tillsammans med sin källa."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завдання, які ти приймаєш у записі, з'являються тут разом з їхнім джерелом."
+          }
+        }
+      }
+    },
     "Teal": {
       "localizations": {
         "de": {
@@ -17470,6 +21437,134 @@
           "stringUnit": {
             "state": "translated",
             "value": "Розрізняє людей, які говорять у записі, на цьому пристрої, і розпізнає голоси, які ви вже називали."
+          }
+        }
+      }
+    },
+    "Term": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begriff"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Término"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terme"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termine"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Term"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termin"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termo"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Термин"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Term"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Термін"
+          }
+        }
+      }
+    },
+    "Terms": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begriffe"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Términos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termes"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termini"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminy"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termos"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Термины"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termer"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Терміни"
           }
         }
       }
@@ -17602,7 +21697,134 @@
         }
       }
     },
-    "The Still extension tells the app when a meeting on one of these sites starts and ends, and, if you turn on speaker names, who is speaking on Google Meet. Still then records only the browser that holds the meeting, so music and videos in other apps stay out, and suggests speaker names you can confirm or reject. The extension reads nothing else from the page, and nothing from your Library ever reaches the browser. Turning the extension off leaves manual recording and allowed call apps working as before.": {},
+    "The Still extension tells the app when a meeting on one of these sites starts and ends, and, if you turn on speaker names, who is speaking on Google Meet. Still then records only the browser that holds the meeting, so music and videos in other apps stay out, and suggests speaker names you can confirm or reject. The extension reads nothing else from the page, and nothing from your Library ever reaches the browser. Turning the extension off leaves manual recording and allowed call apps working as before.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Still-Erweiterung teilt der App mit, wenn ein Meeting auf einer dieser Websites beginnt und endet, und, wenn du Sprechernamen aktivierst, wer bei Google Meet spricht. Still nimmt dann nur den Browser auf, der das Meeting enthält, sodass Musik und Videos in anderen Apps außen vor bleiben, und schlägt Sprechernamen vor, die du bestätigen oder ablehnen kannst. Die Erweiterung liest sonst nichts von der Seite, und nichts aus deiner Bibliothek gelangt je zum Browser. Wenn du die Erweiterung ausschaltest, funktionieren manuelle Aufnahme und erlaubte Anruf-Apps weiterhin wie bisher."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La extensión de Still indica a la app cuándo empieza y termina una reunión en uno de estos sitios y, si activas los nombres de interlocutores, quién habla en Google Meet. Still graba entonces solo el navegador que contiene la reunión, de modo que la música y los vídeos de otras apps quedan fuera, y sugiere nombres de interlocutores que puedes confirmar o rechazar. La extensión no lee nada más de la página, y nada de tu Biblioteca llega nunca al navegador. Desactivar la extensión deja la grabación manual y las apps de llamadas permitidas funcionando como antes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'extension Still indique à l'app quand une réunion sur l'un de ces sites commence et se termine, et, si tu actives les noms des intervenants, qui parle sur Google Meet. Still n'enregistre alors que le navigateur qui contient la réunion, de sorte que la musique et les vidéos d'autres apps restent exclues, et suggère des noms d'intervenants que tu peux confirmer ou rejeter. L'extension ne lit rien d'autre sur la page, et rien de ta Bibliothèque n'atteint jamais le navigateur. Désactiver l'extension laisse l'enregistrement manuel et les apps d'appel autorisées fonctionner comme avant."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'estensione Still comunica all'app quando una riunione su uno di questi siti inizia e finisce e, se attivi i nomi degli interlocutori, chi sta parlando su Google Meet. Still registra quindi solo il browser che contiene la riunione, così musica e video di altre app restano esclusi, e suggerisce nomi degli interlocutori che puoi confermare o rifiutare. L'estensione non legge nient'altro dalla pagina, e nulla della tua Libreria raggiunge mai il browser. Disattivare l'estensione lascia la registrazione manuale e le app di chiamata consentite funzionanti come prima."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De Still-extensie laat de app weten wanneer een vergadering op een van deze sites begint en eindigt en, als je sprekersnamen inschakelt, wie er spreekt op Google Meet. Still neemt dan alleen de browser op die de vergadering bevat, zodat muziek en video's in andere apps buiten beschouwing blijven, en stelt sprekersnamen voor die je kunt bevestigen of afwijzen. De extensie leest verder niets van de pagina, en niets uit je Bibliotheek bereikt ooit de browser. De extensie uitschakelen laat handmatig opnemen en toegestane belapps gewoon werken zoals voorheen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rozszerzenie Still informuje aplikację, kiedy spotkanie na jednej z tych stron się zaczyna i kończy, a jeśli włączysz nazwy mówiących, kto mówi w Google Meet. Still nagrywa wtedy tylko przeglądarkę, w której trwa spotkanie, dzięki czemu muzyka i filmy w innych aplikacjach pozostają poza nagraniem, i proponuje nazwy mówiących, które możesz potwierdzić lub odrzucić. Rozszerzenie nie odczytuje niczego innego ze strony, a nic z Twojej Biblioteki nigdy nie trafia do przeglądarki. Wyłączenie rozszerzenia pozostawia ręczne nagrywanie i dozwolone aplikacje do połączeń działające jak wcześniej."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A extensão Still informa a app quando uma reunião num destes sites começa e termina e, se ativares os nomes dos oradores, quem está a falar no Google Meet. O Still grava então apenas o navegador que contém a reunião, pelo que a música e os vídeos noutras apps ficam de fora, e sugere nomes de oradores que podes confirmar ou rejeitar. A extensão não lê mais nada da página, e nada da tua Biblioteca chega alguma vez ao navegador. Desativar a extensão deixa a gravação manual e as apps de chamadas permitidas a funcionar como antes."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Расширение Still сообщает приложению, когда встреча на одном из этих сайтов начинается и заканчивается, а если ты включишь имена говорящих, то и кто говорит в Google Meet. Still записывает при этом только браузер с встречей, поэтому музыка и видео в других приложениях не попадают в запись, и предлагает имена говорящих, которые можно подтвердить или отклонить. Расширение не читает со страницы ничего другого, и ничто из твоей Библиотеки никогда не попадает в браузер. Отключение расширения оставляет ручную запись и разрешённые приложения для звонков работать как прежде."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still-tillägget talar om för appen när ett möte på en av dessa webbplatser börjar och slutar, och, om du slår på talarnamn, vem som talar i Google Meet. Still spelar då bara in webbläsaren som håller mötet, så musik och videor i andra appar hålls utanför, och föreslår talarnamn du kan bekräfta eller avvisa. Tillägget läser inget annat från sidan, och inget från ditt bibliotek når någonsin webbläsaren. Att stänga av tillägget lämnar manuell inspelning och tillåtna samtalsappar fungerande som förut."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розширення Still повідомляє застосунку, коли зустріч на одному з цих сайтів починається й закінчується, а якщо ти увімкнеш імена мовців, то й хто говорить у Google Meet. Still записує при цьому лише той браузер, у якому триває зустріч, тож музика та відео в інших застосунках не потрапляють у запис, і пропонує імена мовців, які можна підтвердити або відхилити. Розширення не читає зі сторінки нічого іншого, і ніщо з твоєї Бібліотеки ніколи не потрапляє в браузер. Вимкнення розширення залишає ручний запис і дозволені застосунки для дзвінків працювати як раніше."
+          }
+        }
+      }
+    },
+    "The project vocabulary matches nothing in the lines you have not corrected yourself.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Projektvokabular stimmt mit nichts in den Zeilen überein, die du nicht selbst korrigiert hast."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El vocabulario del proyecto no coincide con nada en las líneas que no has corregido tú mismo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le vocabulaire du projet ne correspond à rien dans les lignes que tu n'as pas corrigées toi-même."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il vocabolario del progetto non corrisponde a nulla nelle righe che non hai corretto tu stesso."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De projectwoordenlijst komt met niets overeen in de regels die je niet zelf hebt gecorrigeerd."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Słownik projektu niczego nie dopasowuje w wierszach, których sam nie poprawiłeś."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O vocabulário do projeto não corresponde a nada nas linhas que não corrigiste tu mesmo."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Словарь проекта не находит совпадений в строках, которые ты не исправлял сам."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projektets ordlista matchar ingenting i raderna du inte själv har rättat."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Словник проєкту не збігається з жодним рядком, який ти не виправляв сам."
+          }
+        }
+      }
+    },
     "The shortcut works while another app is in front. Still never pauses or changes another app's playback; it only tells you when sound might end up in a recording.": {
       "localizations": {
         "de": {
@@ -17727,6 +21949,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "На цьому пристрої недостатньо вільного місця, щоб імпортувати файл. Звільніть місце й спробуйте ще раз."
+          }
+        }
+      }
+    },
+    "This Device Only": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur dieses Gerät"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo este dispositivo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cet appareil uniquement"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo questo dispositivo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen dit apparaat"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tylko to urządzenie"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apenas este dispositivo"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Только это устройство"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endast den här enheten"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Лише цей пристрій"
           }
         }
       }
@@ -18947,6 +23233,70 @@
         }
       }
     },
+    "Turning on sync sends your recordings to your own iCloud account, encrypted on this device first. Apple stores only ciphertext: no transcript, note, audio, or key ever leaves in readable form. Text and notes arrive on your other devices before the audio finishes.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wenn du die Synchronisierung aktivierst, werden deine Aufnahmen an dein eigenes iCloud-Konto gesendet, zuvor auf diesem Gerät verschlüsselt. Apple speichert nur Chiffretext, kein Transkript, keine Notiz, kein Audio und kein Schlüssel verlässt jemals in lesbarer Form das Gerät. Text und Notizen erreichen deine anderen Geräte, bevor das Audio fertig ist."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activar la sincronización envía tus grabaciones a tu propia cuenta de iCloud, cifradas primero en este dispositivo. Apple solo almacena texto cifrado: ninguna transcripción, nota, audio o clave sale nunca en forma legible. El texto y las notas llegan a tus otros dispositivos antes de que termine el audio."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activer la synchronisation envoie tes enregistrements vers ton propre compte iCloud, chiffrés d'abord sur cet appareil. Apple ne stocke que du texte chiffré : aucune transcription, note, audio ou clé ne sort jamais sous une forme lisible. Le texte et les notes arrivent sur tes autres appareils avant que l'audio ne soit terminé."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attivare la sincronizzazione invia le tue registrazioni al tuo account iCloud, prima cifrate su questo dispositivo. Apple memorizza solo testo cifrato: nessuna trascrizione, nota, audio o chiave esce mai in forma leggibile. Testo e note arrivano sugli altri tuoi dispositivi prima che l'audio sia completo."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synchronisatie inschakelen stuurt je opnamen naar je eigen iCloud-account, eerst versleuteld op dit apparaat. Apple bewaart alleen cijfertekst: geen transcript, notitie, audio of sleutel verlaat ooit in leesbare vorm dit apparaat. Tekst en notities komen op je andere apparaten aan voordat de audio klaar is."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Włączenie synchronizacji wysyła Twoje nagrania do Twojego własnego konta iCloud, najpierw zaszyfrowane na tym urządzeniu. Apple przechowuje wyłącznie szyfrogram, żaden transkrypt, notatka, dźwięk ani klucz nigdy nie opuszczają urządzenia w czytelnej postaci. Tekst i notatki docierają na Twoje pozostałe urządzenia, zanim dźwięk się dokończy."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ativar a sincronização envia as tuas gravações para a tua própria conta iCloud, primeiro cifradas neste dispositivo. A Apple armazena apenas texto cifrado: nenhuma transcrição, nota, áudio ou chave sai alguma vez em forma legível. O texto e as notas chegam aos teus outros dispositivos antes de o áudio terminar."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включение синхронизации отправляет твои записи в твой собственный аккаунт iCloud, предварительно зашифровав их на этом устройстве. Apple хранит только шифротекст: ни транскрипт, ни заметка, ни аудио, ни ключ никогда не покидают устройство в читаемом виде. Текст и заметки приходят на другие твои устройства раньше, чем аудио."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Att slå på synkronisering skickar dina inspelningar till ditt eget iCloud-konto, krypterade på den här enheten först. Apple lagrar endast chiffertext: ingen transkription, anteckning, ljud eller nyckel lämnar någonsin enheten i läsbar form. Text och anteckningar når dina andra enheter innan ljudet är klart."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Увімкнення синхронізації надсилає твої записи до твого власного облікового запису iCloud, попередньо зашифрувавши їх на цьому пристрої. Apple зберігає лише шифротекст: жоден транскрипт, нотатка, аудіо чи ключ ніколи не залишають пристрій у читабельному вигляді. Текст і нотатки надходять на інші твої пристрої раніше, ніж аудіо."
+          }
+        }
+      }
+    },
     "Turns speech into accurate text on this device, in English and 24 other European languages.": {
       "localizations": {
         "de": {
@@ -19459,6 +23809,198 @@
         }
       }
     },
+    "Variants, comma or line separated": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varianten, durch Komma oder Zeilenumbruch getrennt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variantes, separadas por comas o saltos de línea"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variantes, séparées par des virgules ou des retours à la ligne"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varianti, separate da virgole o a capo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varianten, gescheiden door komma's of regels"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warianty oddzielone przecinkami lub wierszami"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variantes, separadas por vírgulas ou linhas"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Варианты через запятую или с новой строки"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varianter, kommaseparerade eller på egna rader"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Варіанти через кому або з нового рядка"
+          }
+        }
+      }
+    },
+    "Verifying…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird überprüft…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificando…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verifica in corso…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verifiëren…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weryfikacja…"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A verificar…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверка…"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verifierar…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перевірка…"
+          }
+        }
+      }
+    },
+    "Vocabulary": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vokabular"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vocabulario"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vocabulaire"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vocabolario"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Woordenlijst"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Słownik"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vocabulário"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Словарь"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordlista"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Словник"
+          }
+        }
+      }
+    },
     "Voice note": {
       "localizations": {
         "de": {
@@ -19519,6 +24061,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Голосова нотатка"
+          }
+        }
+      }
+    },
+    "Waiting for Approval": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wartet auf Genehmigung"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esperando aprobación"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En attente d'approbation"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In attesa di approvazione"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wacht op goedkeuring"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oczekuje na zatwierdzenie"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A aguardar aprovação"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ожидает одобрения"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Väntar på godkännande"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очікує схвалення"
           }
         }
       }
@@ -20287,6 +24893,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ви виправили ці слова"
+          }
+        }
+      }
+    },
+    "You edited this": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du hast dies bearbeitet"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tú editaste esto"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu as modifié ceci"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hai modificato questo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jij hebt dit bewerkt"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ty to edytowałeś"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu editaste isto"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ты изменил это"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du redigerade det här"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ти відредагував це"
           }
         }
       }
