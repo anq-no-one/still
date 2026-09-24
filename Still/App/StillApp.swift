@@ -8,7 +8,7 @@ struct StillApp: App {
     private let models: ModelInstallers
     private let entitlements: Entitlements
     private let coordinator: RecordingCoordinator
-    private let importer: AudioImporter
+    private let importer: MediaImporter
     private let setup: SetupFlow
     private let lock: AppLock
     private let sync: SyncEngine
@@ -210,7 +210,7 @@ struct StillApp: App {
         }
         coordinator = recordingCoordinator
         importer = MainActor.assumeIsolated {
-            AudioImporter(
+            MediaImporter(
                 library: recordingLibrary,
                 makeFinalTranscription: makeFinalTranscription,
                 makeSpeakerSeparation: {
@@ -231,7 +231,13 @@ struct StillApp: App {
             return choice
         }
         #endif
-        navigation = MainActor.assumeIsolated { LibraryNavigation() }
+        navigation = MainActor.assumeIsolated {
+            let navigation = LibraryNavigation()
+            #if DEBUG
+            if let fixture = UITestLaunch.handedOverFixture { navigation.handOver(fixture) }
+            #endif
+            return navigation
+        }
         let memoryInstaller = installers.meetingMemory
         let memoryExtractor = LocalModelExtractor(pack: memoryInstaller.pack, root: modelRoot)
         let memoryExtraction = MainActor.assumeIsolated {
@@ -314,7 +320,7 @@ struct StillApp: App {
         .defaultSize(width: 980, height: 680)
         .commands {
             CommandGroup(after: .newItem) {
-                AudioImportCommand(importer: importer, navigation: navigation)
+                MediaImportCommand(importer: importer, navigation: navigation)
             }
         }
         .defaultLaunchBehavior(.presented)
@@ -360,6 +366,7 @@ struct StillApp: App {
         #else
         WindowGroup {
             libraryView
+                .onOpenURL { navigation.handOver($0) }
         }
         #endif
     }

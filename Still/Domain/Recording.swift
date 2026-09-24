@@ -16,6 +16,7 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
     var projectAssignedAt: Date?
     var mixedMediaSpans: [TimeSpan]?
     var memory: RecordingMemory?
+    var importedFrom: ImportedFile?
 
     init(
         id: UUID = UUID(),
@@ -32,7 +33,8 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         projectID: UUID? = nil,
         projectAssignedAt: Date? = nil,
         mixedMediaSpans: [TimeSpan]? = nil,
-        memory: RecordingMemory? = nil
+        memory: RecordingMemory? = nil,
+        importedFrom: ImportedFile? = nil
     ) {
         self.id = id
         self.title = title
@@ -49,6 +51,7 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         self.projectAssignedAt = projectAssignedAt
         self.mixedMediaSpans = mixedMediaSpans
         self.memory = memory
+        self.importedFrom = importedFrom
     }
 
     var isDeleted: Bool {

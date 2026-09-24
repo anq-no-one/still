@@ -42,7 +42,8 @@ struct EncryptedRecordingRepository: RecordingRepository {
                 projectID: content.projectID,
                 projectAssignedAt: content.projectAssignedAt,
                 mixedMediaSpans: content.mixedMediaSpans,
-                memory: content.memory
+                memory: content.memory,
+                importedFrom: content.importedFrom
             )
         }
     }
@@ -60,7 +61,8 @@ struct EncryptedRecordingRepository: RecordingRepository {
                     projectID: recording.projectID,
                     projectAssignedAt: recording.projectAssignedAt,
                     mixedMediaSpans: recording.mixedMediaSpans,
-                    memory: recording.memory
+                    memory: recording.memory,
+                    importedFrom: recording.importedFrom
                 )
             )
         )

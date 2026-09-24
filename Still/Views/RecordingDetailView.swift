@@ -35,6 +35,11 @@ struct RecordingDetailView: View {
                 HStack(spacing: 14) {
                     Label(recording.createdAt.formatted(date: .long, time: .shortened), systemImage: "calendar")
                     Label(recording.duration.recordingDurationText, systemImage: "clock")
+                    if let file = recording.importedFrom {
+                        Label(file.name, systemImage: file.kind == .video ? "film" : "waveform")
+                            .lineLimit(1)
+                            .accessibilityLabel("Imported from \(file.name)")
+                    }
                     if player.isPlaying {
                         Button("Pause", systemImage: "pause.fill") { player.pause() }
                             .buttonStyle(.borderless)

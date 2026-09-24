@@ -12,6 +12,7 @@ struct RecordingFinalizer {
         var mixedMedia: [TimeSpan] = []
         var suggestedProjectID: UUID?
         var requiresTranscript = false
+        var importedFrom: ImportedFile?
     }
 
     let finalTranscription: FinalTranscription
@@ -50,7 +51,8 @@ struct RecordingFinalizer {
             createdAt: draft.createdAt,
             duration: draft.duration,
             projectID: draft.suggestedProjectID,
-            mixedMediaSpans: draft.mixedMedia.isEmpty ? nil : draft.mixedMedia
+            mixedMediaSpans: draft.mixedMedia.isEmpty ? nil : draft.mixedMedia,
+            importedFrom: draft.importedFrom
         )
         try library.add(recording)
         return recording

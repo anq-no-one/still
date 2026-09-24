@@ -6,7 +6,7 @@ struct LibraryView: View {
     let models: ModelInstallers
     let entitlements: Entitlements
     let coordinator: RecordingCoordinator
-    let importer: AudioImporter
+    let importer: MediaImporter
     let setup: SetupFlow
     let sync: SyncEngine
     let diagnostics: Diagnostics
@@ -73,14 +73,12 @@ struct LibraryView: View {
                         Button("Tasks", systemImage: "checklist") { isShowingTasks = true }
                     }
                 }
-                #if os(macOS)
                 ToolbarItem {
-                    Button("Import Audio…", systemImage: "square.and.arrow.down") {
-                        navigation.isChoosingAudioFile = true
+                    Button("Import Audio or Video…", systemImage: "square.and.arrow.down") {
+                        navigation.isChoosingMediaFile = true
                     }
                     .disabled(!importer.canStart)
                 }
-                #endif
                 #if os(iOS)
                 ToolbarItem(placement: .bottomBar) {
                     recordButton
@@ -120,11 +118,10 @@ struct LibraryView: View {
         .sheet(isPresented: $isCapturing) {
             CaptureView(coordinator: coordinator)
         }
-        #if os(macOS)
         .sheet(isPresented: showsImport) {
-            AudioImportView(importer: importer)
+            MediaImportView(importer: importer)
         }
-        .fileImporter(isPresented: $navigation.isChoosingAudioFile, allowedContentTypes: [.audio]) { result in
+        .fileImporter(isPresented: $navigation.isChoosingMediaFile, allowedContentTypes: MediaImporter.contentTypes) { result in
             if case .success(let url) = result {
                 importer.start(url)
             }
@@ -136,7 +133,8 @@ struct LibraryView: View {
             navigation.selection = id
             importer.dismiss()
         }
-        #endif
+        .onChange(of: importer.canStart, initial: true) { startHandedOverImport() }
+        .onChange(of: navigation.handedOverFile) { startHandedOverImport() }
         .sheet(isPresented: showsSetup) {
             SetupView(flow: setup, models: models)
                 .interactiveDismissDisabled()
@@ -336,6 +334,13 @@ struct LibraryView: View {
 
     private var showsSetup: Binding<Bool> {
         Binding(get: { !setup.isComplete }, set: { _ in })
+    }
+
+    private func startHandedOverImport() {
+        guard let url = navigation.handedOverFile, importer.canStart else { return }
+
+        navigation.handedOverFile = nil
+        importer.start(url)
     }
 
     private var showsImport: Binding<Bool> {

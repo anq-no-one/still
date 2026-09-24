@@ -6,6 +6,7 @@ enum UITestLaunch {
     static let resetKey = "STILL_UI_TEST_RESET"
     static let audioFixtureKey = "STILL_AUDIO_FIXTURE"
     static let modelRootKey = "STILL_MODEL_ROOT"
+    static let handOverFixtureKey = "STILL_HAND_OVER_FIXTURE"
     static let allowAIToolsArgument = "--allow-ai-tools"
 
     static var allowsAITools: Bool {
@@ -19,6 +20,19 @@ enum UITestLaunch {
     static var audioFixture: URL? {
         guard let name = ProcessInfo.processInfo.environment[audioFixtureKey] else { return nil }
         return Bundle.main.url(forResource: name, withExtension: "fixture.caf")
+    }
+
+    static var handedOverFixture: URL? {
+        guard let name = ProcessInfo.processInfo.environment[handOverFixtureKey],
+              let fixture = Bundle.main.url(forResource: name, withExtension: "fixture.mov")
+        else { return nil }
+
+        let inbox = URL.temporaryDirectory.appending(path: "\(Bundle.main.bundleIdentifier ?? "Still")-Inbox")
+        let copy = inbox.appending(path: "Team meeting.mov")
+        try? FileManager.default.createDirectory(at: inbox, withIntermediateDirectories: true)
+        try? FileManager.default.removeItem(at: copy)
+        guard (try? FileManager.default.copyItem(at: fixture, to: copy)) != nil else { return nil }
+        return copy
     }
 
     static func resetIfRequested(keychainService: String) {

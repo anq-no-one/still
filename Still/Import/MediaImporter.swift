@@ -1,10 +1,12 @@
 import Foundation
 import Observation
+import UniformTypeIdentifiers
 
 @MainActor
-protocol AudioImportLibrary: RecordingLibrary {
+protocol MediaImportLibrary: RecordingLibrary {
     var defaultProjectID: UUID? { get }
     var journal: DiagnosticJournal? { get }
+    var availableImportCapacity: Int64? { get }
 
     func importID(forContentDigest digest: Data) throws -> UUID
     func hasRecording(withID id: UUID) -> Bool
@@ -13,11 +15,11 @@ protocol AudioImportLibrary: RecordingLibrary {
     func discardImport(forRecording id: UUID)
 }
 
-extension Library: AudioImportLibrary {}
+extension Library: MediaImportLibrary {}
 
 @MainActor
 @Observable
-final class AudioImporter {
+final class MediaImporter {
     enum Phase: Equatable {
         case idle
         case reading
@@ -28,13 +30,24 @@ final class AudioImporter {
     }
 
     static let track = AudioTrack.system
+    static let contentTypes: [UTType] = [.audio, .movie]
+    static let spaceReserve: Int64 = 50_000_000
+    #if os(iOS)
+    nonisolated static let handOverFolders = [
+        URL.documentsDirectory.appending(path: "Inbox", directoryHint: .isDirectory),
+        URL.temporaryDirectory,
+    ]
+    #else
+    nonisolated static let handOverFolders: [URL] = []
+    #endif
 
-    private let library: AudioImportLibrary
+    private let library: MediaImportLibrary
     private let makeFinalTranscription: () -> FinalTranscription
     private let makeSpeakerSeparation: () -> SpeakerSeparation
     private let noteBuilder: GroundedNoteBuilder
     private let isReady: @MainActor () -> Bool
     private let now: () -> Date
+    private let handOverFolders: [URL]
 
     private(set) var phase: Phase = .idle
     private(set) var fileName: String?
@@ -42,12 +55,13 @@ final class AudioImporter {
     private var task: Task<Void, Never>?
 
     init(
-        library: AudioImportLibrary,
+        library: MediaImportLibrary,
         makeFinalTranscription: @escaping () -> FinalTranscription,
         makeSpeakerSeparation: @escaping () -> SpeakerSeparation = { .trackBased },
         noteBuilder: GroundedNoteBuilder = GroundedNoteBuilder(),
         isReady: @escaping @MainActor () -> Bool = { true },
-        now: @escaping () -> Date = Date.init
+        now: @escaping () -> Date = Date.init,
+        handOverFolders: [URL] = MediaImporter.handOverFolders
     ) {
         self.library = library
         self.makeFinalTranscription = makeFinalTranscription
@@ -55,6 +69,7 @@ final class AudioImporter {
         self.noteBuilder = noteBuilder
         self.isReady = isReady
         self.now = now
+        self.handOverFolders = handOverFolders
     }
 
     var isImporting: Bool {
@@ -77,6 +92,7 @@ final class AudioImporter {
     func start(_ url: URL) -> Task<Void, Never>? {
         guard canStart else { return nil }
 
+        if let failedFile, failedFile != url { releaseHandedOver(failedFile) }
         fileName = url.lastPathComponent
         failedFile = nil
         phase = .reading
@@ -97,6 +113,7 @@ final class AudioImporter {
 
     func dismiss() {
         guard !isImporting else { return }
+        if let failedFile { releaseHandedOver(failedFile) }
         phase = .idle
         fileName = nil
         failedFile = nil
@@ -108,16 +125,19 @@ final class AudioImporter {
 
         var recordingID: UUID?
         do {
-            let source = try AudioFileSource.inspect(url)
+            let source = try MediaFile.inspect(url)
             let id = try library.importID(forContentDigest: try await source.contentDigest())
             guard !library.hasRecording(withID: id) else {
+                releaseHandedOver(url)
                 phase = .imported(id)
                 return
             }
 
+            let sound = try await source.soundTrack()
+            try ensureSpace(for: sound)
             recordingID = id
             library.journal?.record(.importStarted, correlationID: id)
-            let duration = try await decode(source, as: id)
+            let duration = try await decode(sound, as: id)
             try Task.checkCancellation()
             try library.commitImport(forRecording: id)
 
@@ -129,14 +149,17 @@ final class AudioImporter {
                     createdAt: source.createdAt ?? now(),
                     duration: duration,
                     suggestedProjectID: library.defaultProjectID,
-                    requiresTranscript: true
+                    requiresTranscript: true,
+                    importedFrom: source.imported
                 ),
                 progress: report { .transcribing($0) }
             )
             library.journal?.record(.importSaved, correlationID: id)
+            releaseHandedOver(url)
             phase = .imported(id)
         } catch is CancellationError {
             discard(recordingID)
+            releaseHandedOver(url)
             phase = .idle
             fileName = nil
         } catch {
@@ -147,10 +170,26 @@ final class AudioImporter {
         }
     }
 
-    private func decode(_ source: AudioFileSource, as id: UUID) async throws -> TimeInterval {
+    private func ensureSpace(for sound: SoundTrack) throws {
+        guard let available = library.availableImportCapacity else { return }
+        guard available >= sound.decodedSize() + Self.spaceReserve else { throw MediaImportError.insufficientSpace }
+    }
+
+    private func decode(_ sound: SoundTrack, as id: UUID) async throws -> TimeInterval {
         phase = .decoding(0)
         let writer = try library.stageImport(forRecording: id, track: Self.track)
-        return try await source.decode(into: writer, progress: report { .decoding($0) })
+        return try await sound.decode(into: writer, progress: report { .decoding($0) })
+    }
+
+    private func releaseHandedOver(_ url: URL) {
+        guard handOverFolders.contains(where: { Self.isInside($0, url) }) else { return }
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    private static func isInside(_ directory: URL, _ url: URL) -> Bool {
+        let folder = directory.resolvingSymlinksInPath().standardizedFileURL.pathComponents
+        let file = url.resolvingSymlinksInPath().standardizedFileURL.pathComponents
+        return file.count > folder.count && Array(file.prefix(folder.count)) == folder
     }
 
     private func discard(_ recordingID: UUID?) {

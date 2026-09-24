@@ -27,4 +27,5 @@ struct RecordingContent: Codable {
     var projectAssignedAt: Date?
     var mixedMediaSpans: [TimeSpan]?
     var memory: RecordingMemory?
+    var importedFrom: ImportedFile?
 }

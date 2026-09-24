@@ -1,14 +1,14 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct AudioImportView: View {
-    let importer: AudioImporter
+struct MediaImportView: View {
+    let importer: MediaImporter
 
     @State private var isChoosingFile = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Label(importer.fileName ?? String(localized: "Audio File"), systemImage: "waveform")
+            Label(importer.fileName ?? String(localized: "Audio or Video File"), systemImage: "waveform")
                 .font(.headline)
                 .lineLimit(2)
 
@@ -21,7 +21,7 @@ struct AudioImportView: View {
         .padding(24)
         .stillSheetWidth(mac: 420)
         .interactiveDismissDisabled()
-        .fileImporter(isPresented: $isChoosingFile, allowedContentTypes: [.audio]) { result in
+        .fileImporter(isPresented: $isChoosingFile, allowedContentTypes: MediaImporter.contentTypes) { result in
             if case .success(let url) = result {
                 importer.start(url)
             }
@@ -35,7 +35,7 @@ struct AudioImportView: View {
             }
             .accessibilityValue(fraction.map { $0.formatted(.percent.precision(.fractionLength(0))) } ?? "")
 
-            Text("Still reads the file without changing it and transcribes it on this device.")
+            Text("Still reads the file without changing it, keeps only its sound, and transcribes it on this device.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
@@ -82,16 +82,16 @@ struct AudioImportView: View {
 }
 
 #if os(macOS)
-struct AudioImportCommand: View {
-    let importer: AudioImporter
+struct MediaImportCommand: View {
+    let importer: MediaImporter
     let navigation: LibraryNavigation
 
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        Button("Import Audio…") {
+        Button("Import Audio or Video…") {
             openWindow(id: StillApp.libraryWindowID)
-            navigation.isChoosingAudioFile = true
+            navigation.isChoosingMediaFile = true
         }
         .keyboardShortcut("i", modifiers: [.command, .shift])
         .disabled(!importer.canStart)
