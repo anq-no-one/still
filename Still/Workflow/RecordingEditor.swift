@@ -69,6 +69,11 @@ final class RecordingEditor {
 
     func renameSpeaker(_ speaker: Speaker, to name: String) {
         recording = recording.renamingSpeaker(speaker, to: name)
+        do {
+            try library.rememberOwner(speaker, as: name)
+        } catch {
+            saveFailure = error.localizedDescription
+        }
         scheduleSave()
     }
 

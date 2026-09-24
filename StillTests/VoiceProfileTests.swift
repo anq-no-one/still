@@ -119,16 +119,6 @@ struct VoiceProfileLearningTests {
         #expect(before.renamingSpeaker(speaker, to: "  ") == before)
     }
 
-    @Test
-    func theOwnersNameComesFromTheNewestRecordingWhereTheyNamedThemselves() {
-        let old = recording(Speaker.forTrack(.microphone).named("Andrii", by: .user), at: 1)
-        let new = recording(Speaker.forTrack(.microphone).named("Andrii D.", by: .user), at: 2)
-        let unnamed = recording(Speaker.forTrack(.microphone), at: 3)
-
-        #expect(VoiceProfiles.ownerName(in: [old, unnamed, new]) == "Andrii D.")
-        #expect(VoiceProfiles.ownerName(in: [unnamed]) == nil)
-    }
-
     private func guest(_ voiceprint: Voiceprint) -> Speaker {
         Speaker(name: "Speaker 1", origin: .system, isYou: false, nameSource: .diarization, voiceprint: voiceprint)
     }

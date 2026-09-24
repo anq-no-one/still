@@ -89,6 +89,7 @@ struct StillApp: App {
                 keyRing: LibraryKeyRing(source: KeychainDeviceKeySource()),
                 services: LibraryServices(
                     audioRoot: audioRoot,
+                    settingsFile: supportRoot.appending(path: "Library.settings"),
                     makeRepository: { key in
                         MainActor.assumeIsolated {
                             EncryptedRecordingRepository(context: context, key: key)

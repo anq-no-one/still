@@ -15,7 +15,7 @@ struct SettingsView: View {
         #if os(macOS)
         TabView {
             Tab("General", systemImage: "gearshape") {
-                TranscriptionSettingsView(models: models)
+                TranscriptionSettingsView(models: models, library: library)
             }
             Tab("Recording", systemImage: "record.circle") {
                 Form {
@@ -84,7 +84,7 @@ private struct SettingsList: View {
                         ProjectsSettingsView(library: library)
                     }
                     link("Transcription", systemImage: "waveform", color: .blue) {
-                        TranscriptionSettingsView(models: models)
+                        TranscriptionSettingsView(models: models, library: library)
                     }
                     link("Sync", systemImage: "arrow.triangle.2.circlepath", color: .cyan) {
                         SyncSettingsView(engine: sync)

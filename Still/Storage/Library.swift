@@ -14,10 +14,27 @@ protocol RecordingLibrary: AnyObject {
 @MainActor
 struct LibraryServices {
     let audioRoot: URL
+    let settingsFile: URL
     let makeRepository: (SymmetricKey) -> RecordingRepository
     let makeRecorder: (SymmetricKey) -> AudioRecorder
     let makeEmbeddingEngine: () async -> EmbeddingEngine?
-    var makeProjectRepository: (SymmetricKey) -> ProjectRepository = { _ in MemoryProjectRepository() }
+    let makeProjectRepository: (SymmetricKey) -> ProjectRepository
+
+    init(
+        audioRoot: URL,
+        settingsFile: URL? = nil,
+        makeRepository: @escaping (SymmetricKey) -> RecordingRepository,
+        makeRecorder: @escaping (SymmetricKey) -> AudioRecorder,
+        makeEmbeddingEngine: @escaping () async -> EmbeddingEngine? = { nil },
+        makeProjectRepository: @escaping (SymmetricKey) -> ProjectRepository = { _ in MemoryProjectRepository() }
+    ) {
+        self.audioRoot = audioRoot
+        self.settingsFile = settingsFile ?? audioRoot.appending(path: "Library.settings")
+        self.makeRepository = makeRepository
+        self.makeRecorder = makeRecorder
+        self.makeEmbeddingEngine = makeEmbeddingEngine
+        self.makeProjectRepository = makeProjectRepository
+    }
 }
 
 @MainActor
@@ -42,6 +59,7 @@ final class Library: RecordingLibrary {
     private(set) var semanticIndex = SemanticIndex(engine: nil)
     private(set) var storedProjects: [Project] = []
     private(set) var projectSelection: ProjectSelection
+    private(set) var settings = LibrarySettings()
     var retentionPolicy: RetentionPolicy = .forever
 
     init(
@@ -131,6 +149,7 @@ final class Library: RecordingLibrary {
             let repository = services.makeRepository(key)
             storedRecordings = try repository.load()
             try loadProjects(with: key)
+            settings = LibrarySettings.load(from: services.settingsFile, cipher: LibraryCipher(key: key))
             self.repository = repository
             self.key = key
             try recoverInterruptedAudio(cipher: LibraryCipher(key: key))
@@ -144,6 +163,7 @@ final class Library: RecordingLibrary {
             key = nil
             storedRecordings = []
             storedProjects = []
+            settings = LibrarySettings()
             state = .failed(error.localizedDescription)
         }
     }
@@ -257,6 +277,7 @@ final class Library: RecordingLibrary {
             let repository = services.makeRepository(key)
             storedRecordings = try repository.load()
             try loadProjects(with: key)
+            settings = LibrarySettings.load(from: services.settingsFile, cipher: LibraryCipher(key: key))
             self.repository = repository
             self.key = key
             state = .unlocked
@@ -294,6 +315,7 @@ final class Library: RecordingLibrary {
             for project in storedProjects {
                 try newProjectRepository.save(project)
             }
+            try settings.save(to: services.settingsFile, cipher: newCipher)
         } catch {
             // Nothing has replaced the Library key yet, so the old one still
             // opens whatever was not re-sealed.
@@ -448,13 +470,30 @@ final class Library: RecordingLibrary {
 
     func renameSpeaker(_ speaker: Speaker, to name: String, in recording: Recording) throws {
         try write(recording.renamingSpeaker(speaker, to: name))
+        try rememberOwner(speaker, as: name)
     }
 
     var speakerNaming: SpeakerNamingContext {
-        SpeakerNamingContext(
-            profiles: VoiceProfiles.from(recordings),
-            ownerName: VoiceProfiles.ownerName(in: recordings)
-        )
+        SpeakerNamingContext(profiles: VoiceProfiles.from(recordings), ownerName: settings.ownerName)
+    }
+
+    var ownerName: String? {
+        settings.ownerName
+    }
+
+    func setOwnerName(_ name: String) throws {
+        guard let key else { throw LibraryError.locked }
+
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        var updated = settings
+        updated.ownerName = trimmed.isEmpty ? nil : trimmed
+        try updated.save(to: services.settingsFile, cipher: LibraryCipher(key: key))
+        settings = updated
+    }
+
+    func rememberOwner(_ speaker: Speaker, as name: String) throws {
+        guard speaker.isYou, settings.ownerName == nil else { return }
+        try setOwnerName(name)
     }
 
     /// Audio left behind by a termination becomes a Recording on the next unlock.
