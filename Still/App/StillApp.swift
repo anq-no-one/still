@@ -14,6 +14,8 @@ struct StillApp: App {
     private let sync: SyncEngine
     private let diagnostics: Diagnostics
     private let extraction: MemoryExtraction
+    private let preferencesExporter: PreferencesExporter
+    private let preferencesImporter: PreferencesImporter
     #if os(macOS)
     private let automatic: AutomaticRecording
     private let browser: BrowserMeetingBridge
@@ -248,6 +250,37 @@ struct StillApp: App {
             }
         }
         extraction = memoryExtraction
+        let appLock = lock
+        preferencesExporter = MainActor.assumeIsolated {
+            #if os(macOS)
+            PreferencesExporter(
+                library: recordingLibrary,
+                appLock: appLock,
+                automaticRecording: UserDefaultsCallAppAllowList(),
+                meetingSites: UserDefaultsMeetingSiteAllowList(),
+                mediaHint: UserDefaultsMediaHintPreferencesStore(),
+                microphone: UserDefaultsMicrophoneChoiceStore(),
+                shortcut: UserDefaultsShortcutStore()
+            )
+            #else
+            PreferencesExporter(library: recordingLibrary, appLock: appLock)
+            #endif
+        }
+        preferencesImporter = MainActor.assumeIsolated {
+            #if os(macOS)
+            PreferencesImporter(
+                library: recordingLibrary,
+                appLock: appLock,
+                automaticRecording: UserDefaultsCallAppAllowList(),
+                meetingSites: UserDefaultsMeetingSiteAllowList(),
+                mediaHint: UserDefaultsMediaHintPreferencesStore(),
+                microphone: UserDefaultsMicrophoneChoiceStore(),
+                shortcut: UserDefaultsShortcutStore()
+            )
+            #else
+            PreferencesImporter(library: recordingLibrary, appLock: appLock)
+            #endif
+        }
         Task { @MainActor in
             await recordingLibrary.unlock()
             memoryExtraction.start()
@@ -338,6 +371,8 @@ struct StillApp: App {
                     setup: setup,
                     lock: lock,
                     preferences: preferences,
+                    preferencesExporter: preferencesExporter,
+                    preferencesImporter: preferencesImporter,
                     automatic: automatic,
                     browser: browser,
                     aiTools: aiTools,
@@ -390,6 +425,8 @@ struct StillApp: App {
                 lock: lock,
                 extraction: extraction,
                 preferences: preferences,
+                preferencesExporter: preferencesExporter,
+                preferencesImporter: preferencesImporter,
                 navigation: navigation
             )
         }

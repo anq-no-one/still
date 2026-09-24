@@ -9,6 +9,8 @@ struct SettingsView: View {
     let setup: SetupFlow
     let lock: AppLock
     let preferences: SettingsPreferences
+    let preferencesExporter: PreferencesExporter
+    let preferencesImporter: PreferencesImporter
     #if os(macOS)
     let automatic: AutomaticRecording
     let browser: BrowserMeetingBridge
@@ -97,6 +99,8 @@ struct SettingsView: View {
             DiagnosticsSettingsView(diagnostics: diagnostics)
         case .appearance:
             AppearanceSettingsView(preferences: preferences)
+        case .transfer:
+            PreferencesTransferSettingsView(exporter: preferencesExporter, importer: preferencesImporter)
         case .pro:
             ProUnlockView(entitlements: entitlements)
         }
