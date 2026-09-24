@@ -77,6 +77,11 @@ final class RecordingEditor {
         scheduleSave()
     }
 
+    func confirmProject() {
+        recording.assign(toProject: recording.projectID)
+        scheduleSave()
+    }
+
     func assign(toProject projectID: UUID?) {
         recording.assign(toProject: projectID)
         scheduleSave()

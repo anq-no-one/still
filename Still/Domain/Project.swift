@@ -96,6 +96,10 @@ extension Recording {
         projectID.map(ProjectScope.project) ?? .noProject
     }
 
+    var isProjectConfirmed: Bool {
+        projectAssignedAt != nil
+    }
+
     mutating func assign(toProject projectID: UUID?, at date: Date = .now) {
         self.projectID = projectID
         projectAssignedAt = date

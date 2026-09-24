@@ -39,6 +39,15 @@ struct RecordingDetailView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
+                if !recording.isProjectConfirmed {
+                    ProjectConfirmationBar(
+                        suggested: library.project(withID: recording.projectID),
+                        projects: library.activeProjects,
+                        confirm: editor.confirmProject,
+                        assign: editor.assign(toProject:)
+                    )
+                }
+
                 if let message = editor.saveFailure ?? playbackMessage ?? translationFailure {
                     Label(message, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(.red)

@@ -24,6 +24,11 @@ struct LibraryView: View {
         NavigationSplitView {
             recordingList
             .contextMenu(forSelectionType: Recording.ID.self) { ids in
+                if hasUnconfirmed(ids) {
+                    Button("Confirm Project", systemImage: "checkmark.circle") {
+                        confirmProjects(of: ids)
+                    }
+                }
                 if !ids.isEmpty {
                     Menu("Move to Project", systemImage: "folder") {
                         ProjectAssignmentButtons(
@@ -233,6 +238,18 @@ struct LibraryView: View {
         return projects.count == 1 ? projects.first ?? nil : nil
     }
 
+    private func hasUnconfirmed(_ ids: Set<Recording.ID>) -> Bool {
+        library.recordings.contains { ids.contains($0.id) && !$0.isProjectConfirmed }
+    }
+
+    private func confirmProjects(of ids: Set<Recording.ID>) {
+        do {
+            try library.confirmProjects(of: ids)
+        } catch {
+            actionError = error.localizedDescription
+        }
+    }
+
     private func assign(_ ids: Set<Recording.ID>, to projectID: UUID?) {
         do {
             try library.assign(ids, toProject: projectID)
@@ -330,7 +347,10 @@ private struct RecordingRow: View {
                 .font(.headline)
                 .lineLimit(2)
 
-            if let project {
+            if !recording.isProjectConfirmed {
+                UnconfirmedProjectBadge(suggested: project)
+                    .font(.caption)
+            } else if let project {
                 ProjectBadge(project: project)
                     .font(.caption)
             }

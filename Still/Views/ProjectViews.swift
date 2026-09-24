@@ -97,3 +97,62 @@ struct ProjectAssignmentButtons: View {
         }
     }
 }
+
+struct ProjectConfirmationBar: View {
+    let suggested: Project?
+    let projects: [Project]
+    let confirm: () -> Void
+    let assign: (UUID?) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Confirm the Project", systemImage: "questionmark.folder")
+                .font(.headline)
+            Text("This recording stays on this device until you confirm its project. Then it syncs to your other devices.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack {
+                Menu {
+                    ProjectAssignmentButtons(projects: projects, current: suggested?.id, assign: assign)
+                } label: {
+                    if let suggested {
+                        ProjectBadge(project: suggested)
+                    } else {
+                        Text("No Project")
+                    }
+                }
+                .fixedSize()
+                .accessibilityLabel(Text("Change Project"))
+
+                Spacer()
+
+                Button("Confirm", action: confirm)
+                    .buttonStyle(.borderedProminent)
+            }
+        }
+        .padding()
+        .background(.orange.opacity(0.12), in: .rect(cornerRadius: 12))
+    }
+}
+
+struct UnconfirmedProjectBadge: View {
+    let suggested: Project?
+
+    var body: some View {
+        Label {
+            if let suggested {
+                Text("\(suggested.name)?")
+                    .lineLimit(1)
+            } else {
+                Text("Project?")
+            }
+        } icon: {
+            Image(systemName: "questionmark.folder")
+        }
+        .foregroundStyle(.orange)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text("Project not confirmed. Not syncing yet."))
+    }
+}

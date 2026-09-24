@@ -121,7 +121,7 @@ struct SyncEngineTests {
         let library = try await makeLibrary()
         let engine = makeEngine(library: library, transport: transport)
         try library.add(
-            Recording(title: "Budget review", transcript: "We agreed to delay hiring", duration: 60)
+            Recording(title: "Budget review", transcript: "We agreed to delay hiring", duration: 60, projectAssignedAt: .now)
         )
 
         engine.enable()
@@ -200,6 +200,61 @@ struct SyncEngineTests {
         #expect(library.recordings.map(\.title) == ["Kept"])
     }
 
+    @Test
+    func keepsAnUnconfirmedRecordingOnThisDevice() async throws {
+        let transport = SpySyncTransport()
+        let library = try await makeLibrary()
+        let engine = makeEngine(library: library, transport: transport)
+        let project = try library.createProject(named: "Acme", color: .blue)
+        try library.add(Recording(title: "Suggested", transcript: "text", duration: 60, projectID: project.id))
+
+        engine.enable()
+        await engine.sync()
+
+        #expect(transport.pushed.flatMap { $0 }.allSatisfy { $0.kind == .project })
+    }
+
+    @Test
+    func confirmingReleasesTheRecordingOnceEvenAfterAnInterruptedSync() async throws {
+        let transport = SpySyncTransport()
+        let library = try await makeLibrary()
+        let engine = makeEngine(library: library, transport: transport)
+        let recording = Recording(title: "Standup", transcript: "text", duration: 60)
+        try library.add(recording)
+        engine.enable()
+
+        try library.confirmProjects(of: [recording.id])
+        transport.failure = SyncError.unreachable
+        await engine.sync()
+        transport.failure = nil
+        await engine.sync()
+
+        let sent = transport.pushed.flatMap { $0 }.filter { $0.recordingID == recording.id }
+        #expect(sent.count == 1)
+        #expect(library.recordings.first?.isProjectConfirmed == true)
+    }
+
+    @Test
+    func aCorrectedProjectCountsAsConfirmed() async throws {
+        let transport = SpySyncTransport()
+        let library = try await makeLibrary()
+        let engine = makeEngine(library: library, transport: transport)
+        let wrong = try library.createProject(named: "Wrong", color: .red)
+        let right = try library.createProject(named: "Right", color: .green)
+        let recording = Recording(title: "Review", transcript: "text", duration: 60, projectID: wrong.id)
+        try library.add(recording)
+        engine.enable()
+
+        await engine.sync()
+        #expect(!transport.pushed.flatMap { $0 }.contains { $0.recordingID == recording.id })
+
+        try library.assign([recording.id], toProject: right.id)
+        await engine.sync()
+
+        let sent = try #require(transport.pushed.flatMap { $0 }.first { $0.recordingID == recording.id })
+        #expect(try library.openSyncPayload(sent.sealedRecording).projectID == right.id)
+    }
+
     private func makeEngine(
         library: Library? = nil,
         transport: SyncTransport,
@@ -230,9 +285,8 @@ struct SyncEngineTests {
                 makeRepository: { key in
                     MainActor.assumeIsolated { EncryptedRecordingRepository(context: context, key: key) }
                 },
-                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } },
-            makeEmbeddingEngine: { nil }
-        )
+                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } }
+            )
         )
         await library.unlock()
         return library

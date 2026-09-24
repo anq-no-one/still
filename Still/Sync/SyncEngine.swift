@@ -93,7 +93,7 @@ final class SyncEngine {
     }
 
     private func push() async throws {
-        let recordings = try library.recordingsInEveryProject.map { recording in
+        let recordings = try library.recordingsInEveryProject.filter(\.isProjectConfirmed).map { recording in
             SyncChange(
                 recordingID: recording.id,
                 updatedAt: recording.updatedAt,

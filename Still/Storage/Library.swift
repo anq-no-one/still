@@ -135,6 +135,14 @@ final class Library: RecordingLibrary {
         try writeProject(project)
     }
 
+    func confirmProjects(of recordingIDs: some Collection<UUID>, at date: Date = .now) throws {
+        for id in recordingIDs {
+            guard var recording = storedRecordings.first(where: { $0.id == id }), !recording.isProjectConfirmed else { continue }
+            recording.assign(toProject: recording.projectID, at: date)
+            try write(recording)
+        }
+    }
+
     func assign(_ recordingIDs: some Collection<UUID>, toProject projectID: UUID?, at date: Date = .now) throws {
         for id in recordingIDs {
             guard var recording = storedRecordings.first(where: { $0.id == id }) else { continue }

@@ -262,7 +262,7 @@ struct LibraryProjectTests {
     func aRestrictedDeviceStillSyncsHiddenRecordingText() async throws {
         let library = try await makeUnlockedLibrary(context: try makeContext())
         let hidden = UUID()
-        try library.add(Recording(title: "Elsewhere", transcript: "text", duration: 5, projectID: hidden))
+        try library.add(Recording(title: "Elsewhere", transcript: "text", duration: 5, projectID: hidden, projectAssignedAt: .now))
         library.setProjectSelection(ProjectSelection(mode: .except, scopes: [.project(hidden)]))
         let transport = SpySyncTransport()
         let engine = SyncEngine(library: library, transport: transport, settings: MemorySyncSettings())

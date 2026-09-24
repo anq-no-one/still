@@ -91,7 +91,7 @@ final class RecordingCoordinator {
                 recorder: try library.makeRecorder(),
                 library: library,
                 showsLiveDraft: entitlements.allows(.liveTranscript),
-                projectID: library.defaultProjectID
+                suggestedProjectID: library.defaultProjectID
             )
             self.workflow = workflow
             await workflow.start()
