@@ -16,25 +16,21 @@ struct LibraryView: View {
     @State private var actionError: String?
     @State private var query = ""
     @State private var evidenceTime: TimeInterval?
+    @State private var projectFilter: ProjectScope?
+    @State private var selectedIDs: Set<Recording.ID> = []
 
     var body: some View {
         NavigationSplitView {
-            List(selection: $navigation.selection) {
-                if query.isEmpty {
-                    ForEach(library.recordings) { recording in
-                        RecordingRow(recording: recording)
-                            .tag(recording.id)
-                            .swipeActions {
-                                Button("Delete", systemImage: "trash", role: .destructive) {
-                                    delete(recording)
-                                }
-                            }
-                    }
-                } else {
-                    ForEach(results) { result in
-                        SearchResultRow(result: result)
-                            .tag(result.recordingID)
-                            .onTapGesture { open(result) }
+            recordingList
+            .contextMenu(forSelectionType: Recording.ID.self) { ids in
+                if !ids.isEmpty {
+                    Menu("Move to Project", systemImage: "folder") {
+                        ProjectAssignmentButtons(
+                            projects: library.activeProjects,
+                            current: sharedProjectID(of: ids)
+                        ) { projectID in
+                            assign(ids, to: projectID)
+                        }
                     }
                 }
             }
@@ -45,8 +41,20 @@ struct LibraryView: View {
             }
             #if os(macOS)
             .navigationSplitViewColumnWidth(min: 220, ideal: 260)
+            .onChange(of: selectedIDs) { _, ids in
+                navigation.selection = ids.count == 1 ? ids.first : nil
+            }
+            .onChange(of: navigation.selection, initial: true) { _, id in
+                guard let id, !selectedIDs.contains(id) else { return }
+                selectedIDs = [id]
+            }
             #endif
             .toolbar {
+                if !library.projects.isEmpty {
+                    ToolbarItem {
+                        projectFilterMenu
+                    }
+                }
                 #if os(iOS)
                 ToolbarItem(placement: .bottomBar) {
                     recordButton
@@ -138,12 +146,96 @@ struct LibraryView: View {
         library.recordings.first { $0.id == navigation.selection }
     }
 
+    private var shownRecordings: [Recording] {
+        guard let projectFilter else { return library.recordings }
+        return library.recordings.filter { $0.projectScope == projectFilter }
+    }
+
     private var results: [SearchResult] {
         LibrarySearch.results(
             for: query,
-            in: library.recordings,
+            in: shownRecordings,
             semanticIndex: entitlements.allows(.semanticSearch) ? library.semanticIndex : nil
         )
+    }
+
+    @ViewBuilder
+    private var listRows: some View {
+        if query.isEmpty {
+            ForEach(shownRecordings) { recording in
+                RecordingRow(recording: recording, project: library.project(withID: recording.projectID))
+                    .tag(recording.id)
+                    .swipeActions {
+                        Button("Delete", systemImage: "trash", role: .destructive) {
+                            delete(recording)
+                        }
+                    }
+            }
+        } else {
+            ForEach(results) { result in
+                SearchResultRow(result: result)
+                    .tag(result.recordingID)
+                    .onTapGesture { open(result) }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var recordingList: some View {
+        #if os(macOS)
+        List(selection: $selectedIDs) {
+            listRows
+        }
+        #else
+        List(selection: $navigation.selection) {
+            listRows
+        }
+        #endif
+    }
+
+    private var filterableProjects: [Project] {
+        library.projects.filter { library.projectSelection.includes(.project($0.id)) }
+    }
+
+    private var projectFilterMenu: some View {
+        Menu {
+            Picker("Project", selection: $projectFilter) {
+                Text("All Projects").tag(ProjectScope?.none)
+                if library.projectSelection.includes(.noProject) {
+                    Text("No Project").tag(ProjectScope?.some(.noProject))
+                }
+                ForEach(filterableProjects) { project in
+                    Label {
+                        Text(project.name)
+                    } icon: {
+                        Image(systemName: "circle.fill")
+                            .foregroundStyle(project.color.color)
+                    }
+                    .tag(ProjectScope?.some(.project(project.id)))
+                }
+            }
+            .pickerStyle(.inline)
+        } label: {
+            Label(
+                "Filter by Project",
+                systemImage: projectFilter == nil
+                    ? "line.3.horizontal.decrease.circle"
+                    : "line.3.horizontal.decrease.circle.fill"
+            )
+        }
+    }
+
+    private func sharedProjectID(of ids: Set<Recording.ID>) -> UUID? {
+        let projects = Set(library.recordings.filter { ids.contains($0.id) }.map(\.projectID))
+        return projects.count == 1 ? projects.first ?? nil : nil
+    }
+
+    private func assign(_ ids: Set<Recording.ID>, to projectID: UUID?) {
+        do {
+            try library.assign(ids, toProject: projectID)
+        } catch {
+            actionError = error.localizedDescription
+        }
     }
 
     private func open(_ result: SearchResult) {
@@ -227,12 +319,18 @@ private struct SearchResultRow: View {
 
 private struct RecordingRow: View {
     let recording: Recording
+    let project: Project?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(recording.title)
                 .font(.headline)
                 .lineLimit(2)
+
+            if let project {
+                ProjectBadge(project: project)
+                    .font(.caption)
+            }
 
             HStack {
                 Text(recording.createdAt, format: .dateTime.day().month().hour().minute())
