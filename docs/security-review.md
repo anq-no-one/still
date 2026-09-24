@@ -23,6 +23,8 @@ against.
 | A forged or replayed key grant | Grants use HPKE in authenticated mode, bound to the recipient and project. A device accepts a project key only from a device the account vouches for | `aTamperedGrantIsRejected`, `aGrantFromAnUntrustedDeviceIsIgnored` |
 | A new device joining the wrong account | Both screens show a nine-digit code derived from both device keys, and both users confirm it before any key moves | `bothScreensShowTheSameCodeBeforeJoining` |
 | A project turned off before its only copy left the Mac | The Mac keeps the project's recordings and key until another device holds the project and the cloud has every confirmed copy. No deletion is ever pushed | `aProjectLeavesAMacOnlyAfterAnotherDeviceHasEveryCopy`, `aLoneHolderNeverDropsItsOnlyCopy` |
+| A generated statement with no evidence | Extracted decisions, facts and tasks are kept only when every cited segment exists and its words support the statement; the rest are withheld and only counted. They are sealed inside the Recording and stay marked automatically extracted until the user confirms them | `ProvenanceTests`, `MemoryExtractionTests` |
+| A reprocessed or synced Recording erasing a user's review | Each extracted item has a stable identity; reviews and edits merge field by field by their own timestamps and survive a newer extraction pass | `aUserEditSurvivesReprocessing`, `aRegeneratedRunFromAnotherDeviceKeepsTheUsersDecisions` |
 | Content leaking through diagnostics | Reports have no free-text field; the event name comes from a closed set | `DiagnosticsTests` |
 | Unnoticed network use | A test names every file allowed to reach the network and fails on any other | `NetworkBoundaryTests` |
 

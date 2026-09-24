@@ -69,7 +69,8 @@ xcodebuild test -project Still.xcodeproj -scheme Still-macOS \
 2. `RecordingWorkflow` runs one capture: it starts the recorder and a `LiveTranscriber` draft, then saves or cancels.
 3. Audio/ records microphone (and ScreenCaptureKit system audio on Mac) into encrypted chunks via `AudioChunkStore`, so a crash can be recovered.
 4. Services/`FinalTranscription` runs the accurate Parakeet pass over captured tracks in windows, checkpointing progress so it resumes after interruption. `LiveMix` and `EchoFilter` merge mic and system tracks; tracks become speaker groups.
-5. Notes/ builds notes extractively from the transcript. There is no local LLM yet.
+5. Notes/ builds notes extractively from the transcript.
+6. Intelligence/`MemoryExtraction` turns a Recording with a confirmed project into sourced decisions, facts and proposed tasks. It uses the optional, approval-gated local MLX model (`LocalModelExtractor`) when installed and falls back to `ExtractiveExtractor`. `ProvenanceValidator` withholds anything not supported by its cited segments; progress is checkpointed in the sealed `RecordingMemory`.
 
 ### Storage and encryption
 
