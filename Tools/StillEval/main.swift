@@ -32,8 +32,20 @@ func median(_ values: [Double]) -> Double {
 }
 
 let arguments = CommandLine.arguments
+if arguments.count == 4, arguments[1] == "hour" {
+    let audio = try samples(of: arguments[2])
+    let manager = AsrManager()
+    try await manager.loadModels(try AsrModels.loadLocal(from: URL(fileURLWithPath: arguments[3])))
+    var state = TdtDecoderState.make(decoderLayers: await manager.decoderLayerCount)
+    let started = Date()
+    let result = try await manager.transcribe(audio, decoderState: &state)
+    let seconds = Date().timeIntervalSince(started)
+    print(String(format: "%.0f s of audio processed in %.1f s (%d words)", Double(audio.count) / 16_000, seconds, result.text.split(separator: " ").count))
+    exit(0)
+}
 guard arguments.count == 4 else {
     print("usage: still-eval <eval-set-dir> <parakeet-model-dir> <report.md>")
+    print("       still-eval hour <audio.wav> <parakeet-model-dir>")
     exit(64)
 }
 

@@ -38,7 +38,11 @@ Result on an Apple M2 Max, 32 GB, macOS 27, 20 clips per language:
 | pl | 4.5% | pass | 0.11 |
 | ru | 0.0% | pass | 0.04 |
 
-Limits of this number: read audiobook speech, not meetings; 20 clips; not the minimum device;
+One hour of English (the same clips repeated, `still-eval hour`) finished in 159 s on the same Mac
+while other builds ran, against the 240 s gate for a base M1. A base M1 is slower, so this shows
+headroom, not a pass.
+
+Limits of these numbers: read audiobook speech, not meetings; 20 clips; not the minimum device;
 Ukrainian has no open test split reachable this way yet. It proves the engine and the harness, not
 the release gate.
 
