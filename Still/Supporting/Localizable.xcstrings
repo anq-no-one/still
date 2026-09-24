@@ -1857,70 +1857,6 @@
         }
       }
     },
-    "Audio File": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Audiodatei"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Archivo de audio"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fichier audio"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "File audio"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Audiobestand"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plik audio"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ficheiro de áudio"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Аудиофайл"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ljudfil"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Аудіофайл"
-          }
-        }
-      }
-    },
     "Audio and Deletion": {
       "localizations": {
         "de": {
@@ -1985,66 +1921,66 @@
         }
       }
     },
-    "Authenticate to open your recordings.": {
+    "Audio or Video File": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Authentifiziere dich, um deine Aufnahmen zu öffnen."
+            "value": "Audio- oder Videodatei"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autentícate para abrir tus grabaciones."
+            "value": "Archivo de audio o vídeo"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Authentifiez-vous pour ouvrir vos enregistrements."
+            "value": "Fichier audio ou vidéo"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autenticati per aprire le tue registrazioni."
+            "value": "File audio o video"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Verifieer je identiteit om je opnamen te openen."
+            "value": "Audio- of videobestand"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Uwierzytelnij się, aby otworzyć swoje nagrania."
+            "value": "Plik audio lub wideo"
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autentique-se para abrir as suas gravações."
+            "value": "Ficheiro de áudio ou vídeo"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Подтвердите личность, чтобы открыть записи."
+            "value": "Аудио- или видеофайл"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autentisera för att öppna dina inspelningar."
+            "value": "Ljud- eller videofil"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Підтвердьте особу, щоб відкрити записи."
+            "value": "Аудіо- або відеофайл"
           }
         }
       }
@@ -3517,70 +3453,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Продовжити"
-          }
-        }
-      }
-    },
-    "Continue in Background": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Im Hintergrund fortsetzen"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continuar en segundo plano"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continuer en arrière-plan"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continua in background"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Doorgaan op de achtergrond"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kontynuuj w tle"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continuar em segundo plano"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Продолжить в фоне"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fortsätt i bakgrunden"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Продовжити у фоні"
           }
         }
       }
@@ -5697,66 +5569,130 @@
         }
       }
     },
-    "Import Audio…": {
+    "Import Audio or Video…": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Audio importieren…"
+            "value": "Audio oder Video importieren…"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Importar audio…"
+            "value": "Importar audio o vídeo…"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Importer un audio…"
+            "value": "Importer un audio ou une vidéo…"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Importa audio…"
+            "value": "Importa audio o video…"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Audio importeren…"
+            "value": "Audio of video importeren…"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Importuj dźwięk…"
+            "value": "Importuj dźwięk lub wideo…"
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Importar áudio…"
+            "value": "Importar áudio ou vídeo…"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Импортировать звук…"
+            "value": "Импортировать звук или видео…"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Importera ljud…"
+            "value": "Importera ljud eller video…"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Імпортувати звук…"
+            "value": "Імпортувати звук або відео…"
+          }
+        }
+      }
+    },
+    "Imported from %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importiert aus %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importado de %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importé depuis %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importato da %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geïmporteerd uit %@"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaimportowano z %@"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importado de %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Импортировано из %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importerad från %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Імпортовано з %@"
           }
         }
       }
@@ -6913,70 +6849,6 @@
         }
       }
     },
-    "Let Still Hear the Room": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still den Raum hören lassen"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dejar que Still escuche la sala"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Laisser Still entendre la pièce"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consenti a Still di ascoltare l'ambiente"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Laat Still de ruimte horen"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pozwól, by Still słyszał pomieszczenie"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deixar o Still ouvir a sala"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Разрешить Still слышать помещение"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Låt Still höra rummet"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дозволити Still чути приміщення"
-          }
-        }
-      }
-    },
     "Library Locked": {
       "localizations": {
         "de": {
@@ -7805,70 +7677,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ім'я для цього мовця"
-          }
-        }
-      }
-    },
-    "Name for this speaker group": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Name für diese Sprechergruppe"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nombre de este grupo de interlocutores"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nom pour ce groupe d'intervenants"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nome per questo gruppo di interlocutori"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Naam voor deze sprekersgroep"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nazwa dla tej grupy mówiących"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nome deste grupo de oradores"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Имя для этой группы говорящих"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Namn för den här talargruppen"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ім'я для цієї групи мовців"
           }
         }
       }
@@ -13953,70 +13761,6 @@
         }
       }
     },
-    "See Still Pro": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still Pro ansehen"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ver Still Pro"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Découvrir Still Pro"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scopri Still Pro"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bekijk Still Pro"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zobacz Still Pro"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ver o Still Pro"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Узнать про Still Pro"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Se Still Pro"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дізнатися про Still Pro"
-          }
-        }
-      }
-    },
     "Set a passcode for this device in Settings, then unlock Still with it.": {
       "localizations": {
         "de": {
@@ -15297,70 +15041,6 @@
         }
       }
     },
-    "Still Pro Is Optional": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still Pro ist optional"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still Pro es opcional"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still Pro est facultatif"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still Pro è facoltativo"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still Pro is optioneel"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still Pro jest opcjonalny"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Still Pro é opcional"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still Pro необязателен"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still Pro är valfritt"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still Pro необов’язковий"
-          }
-        }
-      }
-    },
     "Still Pro is active on this device": {
       "localizations": {
         "de": {
@@ -16065,66 +15745,66 @@
         }
       }
     },
-    "Still imports audio files such as M4A, MP3, WAV, AIFF and CAF. This file is not one of them.": {
+    "Still imports audio such as M4A, MP3, WAV, AIFF and CAF, and video such as MOV, MP4 and M4V. This file is not one of them.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still importiert Audiodateien wie M4A, MP3, WAV, AIFF und CAF. Diese Datei gehört nicht dazu."
+            "value": "Still importiert Audio wie M4A, MP3, WAV, AIFF und CAF sowie Video wie MOV, MP4 und M4V. Diese Datei gehört nicht dazu."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still importa archivos de audio como M4A, MP3, WAV, AIFF y CAF. Este archivo no es de ese tipo."
+            "value": "Still importa audio como M4A, MP3, WAV, AIFF y CAF, y vídeo como MOV, MP4 y M4V. Este archivo no es ninguno de ellos."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still importe des fichiers audio tels que M4A, MP3, WAV, AIFF et CAF. Ce fichier n'en fait pas partie."
+            "value": "Still importe l'audio comme M4A, MP3, WAV, AIFF et CAF, et la vidéo comme MOV, MP4 et M4V. Ce fichier n'en fait pas partie."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still importa file audio come M4A, MP3, WAV, AIFF e CAF. Questo file non è tra questi."
+            "value": "Still importa audio come M4A, MP3, WAV, AIFF e CAF e video come MOV, MP4 e M4V. Questo file non è tra questi."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still importeert audiobestanden zoals M4A, MP3, WAV, AIFF en CAF. Dit bestand is daar geen van."
+            "value": "Still importeert audio zoals M4A, MP3, WAV, AIFF en CAF, en video zoals MOV, MP4 en M4V. Dit bestand hoort daar niet bij."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still importuje pliki audio takie jak M4A, MP3, WAV, AIFF i CAF. Ten plik nie jest jednym z nich."
+            "value": "Still importuje dźwięk, np. M4A, MP3, WAV, AIFF i CAF, oraz wideo, np. MOV, MP4 i M4V. Ten plik nie jest żadnym z nich."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "O Still importa ficheiros de áudio como M4A, MP3, WAV, AIFF e CAF. Este ficheiro não é um deles."
+            "value": "O Still importa áudio como M4A, MP3, WAV, AIFF e CAF, e vídeo como MOV, MP4 e M4V. Este ficheiro não é nenhum deles."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still импортирует аудиофайлы форматов M4A, MP3, WAV, AIFF и CAF. Этот файл не относится к ним."
+            "value": "Still импортирует звук в форматах M4A, MP3, WAV, AIFF и CAF и видео в форматах MOV, MP4 и M4V. Этот файл не из их числа."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still importerar ljudfiler som M4A, MP3, WAV, AIFF och CAF. Den här filen är ingen av dem."
+            "value": "Still importerar ljud som M4A, MP3, WAV, AIFF och CAF och video som MOV, MP4 och M4V. Den här filen är ingen av dem."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still імпортує аудіофайли форматів M4A, MP3, WAV, AIFF і CAF. Цей файл не належить до них."
+            "value": "Still імпортує звук у форматах M4A, MP3, WAV, AIFF і CAF та відео у форматах MOV, MP4 і M4V. Цей файл не з їх числа."
           }
         }
       }
@@ -16385,66 +16065,66 @@
         }
       }
     },
-    "Still reads the file without changing it and transcribes it on this device.": {
+    "Still reads the file without changing it, keeps only its sound, and transcribes it on this device.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still liest die Datei, ohne sie zu verändern, und transkribiert sie auf diesem Gerät."
+            "value": "Still liest die Datei, ohne sie zu verändern, behält nur ihren Ton und transkribiert ihn auf diesem Gerät."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still lee el archivo sin modificarlo y lo transcribe en este dispositivo."
+            "value": "Still lee el archivo sin modificarlo, conserva solo su sonido y lo transcribe en este dispositivo."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still lit le fichier sans le modifier et le transcrit sur cet appareil."
+            "value": "Still lit le fichier sans le modifier, n'en garde que le son et le transcrit sur cet appareil."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still legge il file senza modificarlo e lo trascrive su questo dispositivo."
+            "value": "Still legge il file senza modificarlo, ne conserva solo l'audio e lo trascrive su questo dispositivo."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still leest het bestand zonder het te wijzigen en transcribeert het op dit toestel."
+            "value": "Still leest het bestand zonder het te wijzigen, bewaart alleen het geluid en transcribeert het op dit toestel."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still odczytuje plik bez zmieniania go i transkrybuje go na tym urządzeniu."
+            "value": "Still odczytuje plik bez zmieniania go, zachowuje tylko jego dźwięk i transkrybuje go na tym urządzeniu."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "O Still lê o ficheiro sem o alterar e transcreve-o neste dispositivo."
+            "value": "O Still lê o ficheiro sem o alterar, guarda apenas o som e transcreve-o neste dispositivo."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still читает файл, не изменяя его, и транскрибирует его на этом устройстве."
+            "value": "Still читает файл, не изменяя его, сохраняет только звук и транскрибирует его на этом устройстве."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still läser filen utan att ändra den och transkriberar den på den här enheten."
+            "value": "Still läser filen utan att ändra den, behåller bara ljudet och transkriberar det på den här enheten."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Still читає файл, не змінюючи його, і транскрибує на цьому пристрої."
+            "value": "Still читає файл, не змінюючи його, зберігає лише звук і транскрибує його на цьому пристрої."
           }
         }
       }
@@ -17410,70 +17090,6 @@
         }
       }
     },
-    "Sync is part of Still Pro.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synchronisierung ist Teil von Still Pro."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La sincronización forma parte de Still Pro."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La synchronisation fait partie de Still Pro."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La sincronizzazione fa parte di Still Pro."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synchronisatie maakt deel uit van Still Pro."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synchronizacja jest częścią Still Pro."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A sincronização faz parte do Still Pro."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Синхронизация входит в Still Pro."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synkronisering ingår i Still Pro."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Синхронізація входить у Still Pro."
-          }
-        }
-      }
-    },
     "Sync sends your recordings to your own iCloud account, encrypted on this device first. Apple stores only ciphertext: no transcript, note, audio, or key ever leaves in readable form. Each project has its own key, so a device only receives the projects it keeps. Text and notes arrive on your other devices before the audio finishes.": {
       "localizations": {
         "de": {
@@ -18051,6 +17667,70 @@
         }
       }
     },
+    "There is not enough free space on this device to import this file. Free up some space, then try again.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf diesem Gerät ist nicht genug freier Speicher, um diese Datei zu importieren. Gib etwas Speicher frei und versuche es dann erneut."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay suficiente espacio libre en este dispositivo para importar este archivo. Libera algo de espacio y vuelve a intentarlo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il n'y a pas assez d'espace libre sur cet appareil pour importer ce fichier. Libérez de l'espace, puis réessayez."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non c'è abbastanza spazio libero su questo dispositivo per importare questo file. Libera un po' di spazio, poi riprova."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er is niet genoeg vrije ruimte op dit toestel om dit bestand te importeren. Maak wat ruimte vrij en probeer het opnieuw."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Na tym urządzeniu brakuje wolnego miejsca, aby zaimportować ten plik. Zwolnij trochę miejsca i spróbuj ponownie."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não há espaço livre suficiente neste dispositivo para importar este ficheiro. Liberte algum espaço e tente novamente."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На этом устройстве недостаточно свободного места, чтобы импортировать файл. Освободите место и попробуйте снова."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Det finns inte tillräckligt med ledigt utrymme på den här enheten för att importera filen. Frigör lite utrymme och försök sedan igen."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На цьому пристрої недостатньо вільного місця, щоб імпортувати файл. Звільніть місце й спробуйте ще раз."
+          }
+        }
+      }
+    },
     "This choice stays on this Mac. A project you turn off leaves it: its recordings, audio, search entries, and key are removed here once another device keeps a copy, and nothing is deleted anywhere else. With exactly one project chosen, new recordings go into it.": {
       "localizations": {
         "de": {
@@ -18243,66 +17923,66 @@
         }
       }
     },
-    "This file is too long to import. Still imports up to three hours of audio at a time.": {
+    "This file is too large to import. Still imports up to three hours at a time.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Diese Datei ist zu lang zum Importieren. Still importiert bis zu drei Stunden Audio auf einmal."
+            "value": "Diese Datei ist zu groß zum Importieren. Still importiert bis zu drei Stunden auf einmal."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Este archivo es demasiado largo para importarlo. Still importa hasta tres horas de audio a la vez."
+            "value": "Este archivo es demasiado grande para importarlo. Still importa hasta tres horas a la vez."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ce fichier est trop long pour être importé. Still importe jusqu'à trois heures d'audio à la fois."
+            "value": "Ce fichier est trop volumineux pour être importé. Still importe jusqu'à trois heures à la fois."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Questo file è troppo lungo per essere importato. Still importa fino a tre ore di audio alla volta."
+            "value": "Questo file è troppo grande per essere importato. Still importa fino a tre ore alla volta."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dit bestand is te lang om te importeren. Still importeert maximaal drie uur audio per keer."
+            "value": "Dit bestand is te groot om te importeren. Still importeert maximaal drie uur per keer."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ten plik jest zbyt długi, aby go zaimportować. Still importuje naraz do trzech godzin dźwięku."
+            "value": "Ten plik jest zbyt duży, aby go zaimportować. Still importuje naraz do trzech godzin."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Este ficheiro é demasiado longo para importar. O Still importa até três horas de áudio de cada vez."
+            "value": "Este ficheiro é demasiado grande para importar. O Still importa até três horas de cada vez."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Этот файл слишком длинный для импорта. Still импортирует за раз не более трёх часов звука."
+            "value": "Этот файл слишком большой для импорта. Still импортирует за раз не более трёх часов."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Den här filen är för lång för att importera. Still importerar upp till tre timmars ljud åt gången."
+            "value": "Den här filen är för stor för att importera. Still importerar upp till tre timmar åt gången."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Цей файл занадто довгий для імпорту. Still імпортує за раз не більше трьох годин звуку."
+            "value": "Цей файл завеликий для імпорту. Still імпортує за раз не більше трьох годин."
           }
         }
       }
@@ -18367,6 +18047,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Цей запис залишається на цьому пристрої, поки ви не підтвердите його проєкт. Після цього він синхронізується з іншими вашими пристроями."
+          }
+        }
+      }
+    },
+    "This video has no sound, so there is nothing to transcribe.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieses Video hat keinen Ton, daher gibt es nichts zu transkribieren."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este vídeo no tiene sonido, así que no hay nada que transcribir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette vidéo n'a pas de son, il n'y a donc rien à transcrire."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questo video non ha audio, quindi non c'è nulla da trascrivere."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze video heeft geen geluid, dus er valt niets te transcriberen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To wideo nie ma dźwięku, więc nie ma czego transkrybować."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este vídeo não tem som, por isso não há nada para transcrever."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В этом видео нет звука, поэтому транскрибировать нечего."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den här videon har inget ljud, så det finns inget att transkribera."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У цьому відео немає звуку, тож транскрибувати нічого."
           }
         }
       }
@@ -19199,70 +18943,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Увімкніть блокування для ваших записів."
-          }
-        }
-      }
-    },
-    "Turning on sync sends your recordings to your own iCloud account, encrypted on this device first. Apple stores only ciphertext: no transcript, note, audio, or key ever leaves in readable form. Text and notes arrive on your other devices before the audio finishes.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wenn du die Synchronisierung aktivierst, werden deine Aufnahmen an dein eigenes iCloud-Konto gesendet, zuvor auf diesem Gerät verschlüsselt. Apple speichert nur Chiffretext: Kein Transkript, keine Notiz, kein Audio und kein Schlüssel verlässt jemals lesbar das Gerät. Text und Notizen kommen auf deinen anderen Geräten an, bevor das Audio fertig ist."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Activar la sincronización envía tus grabaciones a tu propia cuenta de iCloud, cifradas antes en este dispositivo. Apple solo almacena texto cifrado: ninguna transcripción, nota, audio o clave sale nunca en forma legible. El texto y las notas llegan a tus otros dispositivos antes de que termine el audio."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Activer la synchronisation envoie vos enregistrements vers votre propre compte iCloud, chiffrés sur cet appareil au préalable. Apple ne stocke que du texte chiffré : aucune transcription, note, audio ou clé ne quitte jamais l'appareil sous une forme lisible. Le texte et les notes arrivent sur vos autres appareils avant que l'audio ne soit terminé."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Attivare la sincronizzazione invia le tue registrazioni al tuo account iCloud, crittografate prima su questo dispositivo. Apple memorizza solo testo cifrato: nessuna trascrizione, nota, audio o chiave esce mai in forma leggibile. Il testo e le note arrivano sui tuoi altri dispositivi prima che l'audio sia completato."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synchronisatie inschakelen stuurt je opnamen naar je eigen iCloud-account, eerst versleuteld op dit toestel. Apple bewaart alleen cijfertekst: geen transcript, notitie, audio of sleutel verlaat ooit in leesbare vorm dit toestel. Tekst en notities komen op je andere toestellen aan voordat de audio klaar is."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Włączenie synchronizacji wysyła twoje nagrania do twojego własnego konta iCloud, zaszyfrowane najpierw na tym urządzeniu. Apple przechowuje tylko zaszyfrowane dane — żadna transkrypcja, notatka, dźwięk ani klucz nigdy nie opuszczają urządzenia w czytelnej formie. Tekst i notatki docierają na inne urządzenia, zanim skończy się dźwięk."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ao ativar a sincronização, as suas gravações são enviadas para a sua própria conta iCloud, encriptadas primeiro neste dispositivo. A Apple guarda apenas texto cifrado: nenhuma transcrição, nota, áudio ou chave sai alguma vez em formato legível. O texto e as notas chegam aos seus outros dispositivos antes de o áudio terminar."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Включение синхронизации отправляет ваши записи в ваш собственный аккаунт iCloud, предварительно зашифровав их на этом устройстве. Apple хранит только зашифрованные данные — ни транскрипт, ни заметка, ни звук, ни ключ никогда не покидают устройство в читаемом виде. Текст и заметки приходят на другие устройства раньше, чем догружается звук."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Att aktivera synkronisering skickar dina inspelningar till ditt eget iCloud-konto, krypterade på den här enheten först. Apple lagrar endast chiffertext. Ingen transkription, anteckning, ljud eller nyckel lämnar någonsin enheten i läsbar form. Text och anteckningar kommer till dina andra enheter innan ljudet är klart."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Увімкнення синхронізації надсилає ваші записи у ваш власний обліковий запис iCloud, попередньо зашифрувавши їх на цьому пристрої. Apple зберігає лише зашифровані дані — жоден транскрипт, нотатка, звук чи ключ ніколи не покидають пристрій у читабельному вигляді. Текст і нотатки з’являються на інших пристроях раніше, ніж довантажиться звук."
           }
         }
       }

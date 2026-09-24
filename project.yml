@@ -55,6 +55,14 @@ targets:
           - _still-sync._tcp
         UIBackgroundModes:
           - audio
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Audio or Video
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes:
+              - public.audio
+              - public.movie
+        LSSupportsOpeningDocumentsInPlace: false
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
@@ -76,7 +84,7 @@ targets:
         ENABLE_HARDENED_RUNTIME: YES
       configs:
         Release:
-          EXCLUDED_SOURCE_FILE_NAMES: "*.fixture.caf"
+          EXCLUDED_SOURCE_FILE_NAMES: "*.fixture.caf *.fixture.mov"
     entitlements:
       path: Still/Still.entitlements
       properties:
@@ -131,7 +139,7 @@ targets:
         ENABLE_HARDENED_RUNTIME: YES
       configs:
         Release:
-          EXCLUDED_SOURCE_FILE_NAMES: "*.fixture.caf"
+          EXCLUDED_SOURCE_FILE_NAMES: "*.fixture.caf *.fixture.mov"
     entitlements:
       path: Still/Still-macOS.entitlements
       properties:

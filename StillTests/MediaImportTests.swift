@@ -6,11 +6,15 @@ import Testing
 @testable import Still
 
 @MainActor
-struct AudioImportTests {
+struct MediaImportTests {
     private let folder = URL.temporaryDirectory.appending(path: "still-import-tests/\(UUID().uuidString)")
 
     private var audioRoot: URL {
         folder.appending(path: "Audio", directoryHint: .isDirectory)
+    }
+
+    private var inbox: URL {
+        folder.appending(path: "Inbox", directoryHint: .isDirectory)
     }
 
     @Test(arguments: ["m4a", "wav", "aiff", "caf"])
@@ -28,6 +32,7 @@ struct AudioImportTests {
         #expect(library.recordings.count == 1)
         #expect(importer.phase == .imported(recording.id))
         #expect(recording.title == "Weekly sync")
+        #expect(recording.importedFrom == ImportedFile(name: "Weekly sync.\(fileExtension)", kind: .audio))
         #expect(recording.transcript == "Ship the private beta on Friday")
         #expect(recording.segments.first?.start == 0)
         let note = try #require(recording.note)
@@ -35,7 +40,7 @@ struct AudioImportTests {
         #expect(!sources.isEmpty)
         #expect(sources.isSubset(of: recording.segments.map(\.id)))
         #expect(abs(recording.duration - 3) < 0.2)
-        #expect(library.tracks(forRecording: recording.id) == [AudioImporter.track])
+        #expect(library.tracks(forRecording: recording.id) == [MediaImporter.track])
         #expect(try library.audio(for: recording).count > 2 * AudioFormat.transcription.bytesPerSecond)
         #expect(!LibrarySearch.results(for: "private beta", in: library.recordings).isEmpty)
         #expect(try Data(contentsOf: source) == original)
@@ -125,7 +130,7 @@ struct AudioImportTests {
         let importer = makeImporter(library: try await makeLibrary(), transcriber: StubOfflineTranscriber())
         await importer.start(notes)?.value
 
-        #expect(importer.phase == .failed(AudioImportError.unsupported.localizedDescription))
+        #expect(importer.phase == .failed(MediaImportError.unsupported.localizedDescription))
         #expect(importer.failedFile == notes)
     }
 
@@ -138,7 +143,7 @@ struct AudioImportTests {
         let importer = makeImporter(library: library, transcriber: StubOfflineTranscriber())
         await importer.start(damaged)?.value
 
-        #expect(importer.phase == .failed(AudioImportError.damaged.localizedDescription))
+        #expect(importer.phase == .failed(MediaImportError.damaged.localizedDescription))
         #expect(library.recordings.isEmpty)
         #expect(recordingAudio.isEmpty)
         #expect(stagedImports.isEmpty)
@@ -151,20 +156,16 @@ struct AudioImportTests {
         let importer = makeImporter(library: try await makeLibrary(), transcriber: StubOfflineTranscriber())
         await importer.start(missing)?.value
 
-        #expect(importer.phase == .failed(AudioImportError.inaccessible.localizedDescription))
+        #expect(importer.phase == .failed(MediaImportError.inaccessible.localizedDescription))
         #expect(importer.failedFile == missing)
     }
 
     @Test
     func refusesAudioLongerThanTheLimit() async throws {
-        let source = try AudioFileSource.inspect(try tone(named: "lecture.wav", seconds: 2))
-        let writer = try AudioChunkWriter(
-            directory: folder.appending(path: "staged", directoryHint: .isDirectory),
-            cipher: LibraryCipher(key: .init(size: .bits256))
-        )
+        let source = try MediaFile.inspect(try tone(named: "lecture.wav", seconds: 2))
 
-        await #expect(throws: AudioImportError.tooLarge) {
-            try await source.decode(into: writer, longest: 1)
+        await #expect(throws: MediaImportError.tooLarge) {
+            try await source.soundTrack(longest: 1)
         }
     }
 
@@ -204,6 +205,147 @@ struct AudioImportTests {
             != ImportIdentity.recordingID(forContentDigest: digest, key: SymmetricKey(size: .bits256)))
     }
 
+    @Test(arguments: ["mov", "mp4", "m4v"])
+    func importsTheSoundOfAVideoAsOneSearchableRecording(_ fileExtension: String) async throws {
+        let source = try await movie(named: "Design review.\(fileExtension)", seconds: 3)
+        let original = try Data(contentsOf: source)
+        let library = try await makeLibrary()
+        let transcriber = StubOfflineTranscriber()
+        transcriber.result = "Ship the private beta on Friday"
+        let importer = makeImporter(library: library, transcriber: transcriber)
+
+        await importer.start(source)?.value
+
+        let recording = try #require(library.recordings.first)
+        #expect(library.recordings.count == 1)
+        #expect(importer.phase == .imported(recording.id))
+        #expect(recording.title == "Design review")
+        #expect(recording.importedFrom == ImportedFile(name: "Design review.\(fileExtension)", kind: .video))
+        #expect(!recording.isProjectConfirmed)
+        #expect(recording.transcript == "Ship the private beta on Friday")
+        let note = try #require(recording.note)
+        let sources = Set((note.summary + note.decisions + note.actions).flatMap(\.sourceSegmentIDs))
+        #expect(!sources.isEmpty)
+        #expect(sources.isSubset(of: recording.segments.map(\.id)))
+        #expect(abs(recording.duration - 3) < 0.3)
+        #expect(try library.audio(for: recording).count > 2 * AudioFormat.transcription.bytesPerSecond)
+        #expect(!LibrarySearch.results(for: "private beta", in: library.recordings).isEmpty)
+        #expect(try Data(contentsOf: source) == original)
+        #expect(stagedImports.isEmpty)
+        #expect(try storedFiles().allSatisfy { try Data(contentsOf: $0).range(of: original.prefix(64)) == nil })
+        #expect(try storedFiles().allSatisfy { !["mov", "mp4", "m4v"].contains($0.pathExtension) })
+    }
+
+    @Test
+    func explainsThatAVideoWithoutSoundHasNothingToTranscribe() async throws {
+        let source = try await movie(named: "screen capture.mov", seconds: 1, withSound: false)
+        let library = try await makeLibrary()
+
+        let importer = makeImporter(library: library, transcriber: StubOfflineTranscriber())
+        await importer.start(source)?.value
+
+        #expect(importer.phase == .failed(MediaImportError.silentVideo.localizedDescription))
+        #expect(library.recordings.isEmpty)
+        #expect(recordingAudio.isEmpty)
+        #expect(stagedImports.isEmpty)
+    }
+
+    @Test
+    func explainsAVideoCutShortWithoutKeepingAnything() async throws {
+        let source = try await movie(named: "call.mov", seconds: 2)
+        let whole = try Data(contentsOf: source)
+        try whole.prefix(whole.count / 2).write(to: source)
+        let library = try await makeLibrary()
+
+        let importer = makeImporter(library: library, transcriber: StubOfflineTranscriber())
+        await importer.start(source)?.value
+
+        #expect(importer.phase == .failed(MediaImportError.damaged.localizedDescription))
+        #expect(library.recordings.isEmpty)
+        #expect(recordingAudio.isEmpty)
+        #expect(stagedImports.isEmpty)
+    }
+
+    @Test
+    func explainsAVideoThatIsNotAVideo() async throws {
+        let source = try file(named: "garbled.mp4")
+        try Data(repeating: 3, count: 8_192).write(to: source)
+
+        let importer = makeImporter(library: try await makeLibrary(), transcriber: StubOfflineTranscriber())
+        await importer.start(source)?.value
+
+        #expect(importer.phase == .failed(MediaImportError.damaged.localizedDescription))
+    }
+
+    @Test
+    func waitsForFreeSpaceAndThenImportsExactlyOnce() async throws {
+        let source = try await movie(named: "retro.mov", seconds: 2)
+        let capacity = Capacity(bytes: 1_000)
+        let library = try await makeLibrary(capacity: capacity)
+        let importer = makeImporter(library: library, transcriber: StubOfflineTranscriber())
+
+        await importer.start(source)?.value
+
+        #expect(importer.phase == .failed(MediaImportError.insufficientSpace.localizedDescription))
+        #expect(library.recordings.isEmpty)
+        #expect(recordingAudio.isEmpty)
+        #expect(stagedImports.isEmpty)
+
+        capacity.bytes = nil
+        await importer.retry()?.value
+        importer.dismiss()
+        await importer.start(source)?.value
+
+        #expect(library.recordings.count == 1)
+        #expect(library.recordings.first.map { importer.phase == .imported($0.id) } == true)
+    }
+
+    @Test
+    func cancellingAVideoImportLeavesNothingBehind() async throws {
+        let source = try await movie(named: "kickoff.mp4", seconds: 2)
+        let original = try Data(contentsOf: source)
+        let library = try await makeLibrary()
+        let transcriber = HookedTranscriber()
+        let importer = makeImporter(library: library, transcriber: transcriber)
+        transcriber.onTranscribe = { importer.cancel() }
+
+        await importer.start(source)?.value
+
+        #expect(importer.phase == .idle)
+        #expect(library.recordings.isEmpty)
+        #expect(recordingAudio.isEmpty)
+        #expect(stagedImports.isEmpty)
+        #expect(try Data(contentsOf: source) == original)
+    }
+
+    @Test
+    func aHandedOverCopyIsDeletedOnceItsSoundIsImported() async throws {
+        try FileManager.default.createDirectory(at: inbox, withIntermediateDirectories: true)
+        let copy = inbox.appending(path: "Shared call.mov")
+        try await MediaFixtures.movie(at: copy, seconds: 1, withSound: true)
+        let library = try await makeLibrary()
+
+        await makeImporter(library: library, transcriber: StubOfflineTranscriber()).start(copy)?.value
+
+        #expect(library.recordings.map(\.title) == ["Shared call"])
+        #expect(!FileManager.default.fileExists(atPath: copy.path(percentEncoded: false)))
+    }
+
+    @Test
+    func aHandedOverCopyStaysForTryAgainUntilTheImportIsClosed() async throws {
+        try FileManager.default.createDirectory(at: inbox, withIntermediateDirectories: true)
+        let copy = inbox.appending(path: "Muted call.mov")
+        try await MediaFixtures.movie(at: copy, seconds: 1, withSound: false)
+        let importer = makeImporter(library: try await makeLibrary(), transcriber: StubOfflineTranscriber())
+
+        await importer.start(copy)?.value
+        #expect(importer.failedFile == copy)
+        #expect(FileManager.default.fileExists(atPath: copy.path(percentEncoded: false)))
+
+        importer.dismiss()
+        #expect(!FileManager.default.fileExists(atPath: copy.path(percentEncoded: false)))
+    }
+
     private var recordingAudio: [URL] {
         contents(of: audioRoot).filter { UUID(uuidString: $0.lastPathComponent) != nil }
     }
@@ -212,18 +354,25 @@ struct AudioImportTests {
         contents(of: audioRoot.appending(path: ".imports"))
     }
 
+    private func storedFiles() throws -> [URL] {
+        let files = FileManager.default.enumerator(at: audioRoot, includingPropertiesForKeys: [.isRegularFileKey])?
+            .compactMap { $0 as? URL } ?? []
+        return try files.filter { try $0.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile == true }
+    }
+
     private func contents(of directory: URL) -> [URL] {
         (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
     }
 
-    private func makeImporter(library: Library, transcriber: OfflineTranscriber) -> AudioImporter {
-        AudioImporter(
+    private func makeImporter(library: Library, transcriber: OfflineTranscriber) -> MediaImporter {
+        MediaImporter(
             library: library,
-            makeFinalTranscription: { FinalTranscription(transcriber: transcriber) }
+            makeFinalTranscription: { FinalTranscription(transcriber: transcriber) },
+            handOverFolders: [inbox]
         )
     }
 
-    private func makeLibrary() async throws -> Library {
+    private func makeLibrary(capacity: Capacity = Capacity(bytes: nil)) async throws -> Library {
         let container = try ModelContainer(
             for: EncryptedRecording.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
@@ -236,7 +385,8 @@ struct AudioImportTests {
                 makeRepository: { key in
                     MainActor.assumeIsolated { EncryptedRecordingRepository(context: context, key: key) }
                 },
-                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } }
+                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } },
+                availableCapacity: { url in capacity.bytes ?? StorageCapacity.available(at: url) }
             )
         )
         await library.unlock()
@@ -248,42 +398,24 @@ struct AudioImportTests {
         return folder.appending(path: name)
     }
 
-    private func tone(named name: String, seconds: Double) throws -> URL {
+    private func movie(named name: String, seconds: Int, withSound: Bool = true) async throws -> URL {
         let url = try file(named: name)
-        let sampleRate = 44_100.0
-        let format = try #require(AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 2))
-        let file = try AVAudioFile(
-            forWriting: url,
-            settings: settings(for: url.pathExtension, sampleRate: sampleRate),
-            commonFormat: .pcmFormatFloat32,
-            interleaved: false
-        )
-        let frames = AVAudioFrameCount(seconds * sampleRate)
-        let buffer = try #require(AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frames))
-        buffer.frameLength = frames
-        for channel in 0..<2 {
-            for frame in 0..<Int(frames) {
-                buffer.floatChannelData?[channel][frame] = 0.3 * sin(2 * .pi * 440 * Float(frame) / Float(sampleRate))
-            }
-        }
-        try file.write(from: buffer)
-        file.close()
+        try await MediaFixtures.movie(at: url, seconds: seconds, withSound: withSound)
         return url
     }
 
-    private func settings(for fileExtension: String, sampleRate: Double) -> [String: Any] {
-        guard fileExtension != "m4a" else {
-            return [AVFormatIDKey: kAudioFormatMPEG4AAC, AVSampleRateKey: sampleRate, AVNumberOfChannelsKey: 2]
-        }
+    private func tone(named name: String, seconds: Double) throws -> URL {
+        let url = try file(named: name)
+        try MediaFixtures.tone(at: url, seconds: seconds)
+        return url
+    }
+}
 
-        return [
-            AVFormatIDKey: kAudioFormatLinearPCM,
-            AVSampleRateKey: sampleRate,
-            AVNumberOfChannelsKey: 2,
-            AVLinearPCMBitDepthKey: 16,
-            AVLinearPCMIsFloatKey: false,
-            AVLinearPCMIsBigEndianKey: fileExtension == "aiff",
-        ]
+final class Capacity {
+    var bytes: Int64?
+
+    init(bytes: Int64?) {
+        self.bytes = bytes
     }
 }
 

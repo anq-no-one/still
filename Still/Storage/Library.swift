@@ -22,6 +22,7 @@ struct LibraryServices {
     let makeEmbeddingEngine: () async -> EmbeddingEngine?
     let makeProjectRepository: (SymmetricKey) -> ProjectRepository
     let makeVocabularyRepository: (SymmetricKey) -> ProjectVocabularyRepository
+    let availableCapacity: (URL) -> Int64?
 
     init(
         audioRoot: URL,
@@ -31,7 +32,8 @@ struct LibraryServices {
         makeRecorder: @escaping (SymmetricKey) -> AudioRecorder,
         makeEmbeddingEngine: @escaping () async -> EmbeddingEngine? = { nil },
         makeProjectRepository: @escaping (SymmetricKey) -> ProjectRepository = { _ in MemoryProjectRepository() },
-        makeVocabularyRepository: @escaping (SymmetricKey) -> ProjectVocabularyRepository = { _ in MemoryProjectVocabularyRepository() }
+        makeVocabularyRepository: @escaping (SymmetricKey) -> ProjectVocabularyRepository = { _ in MemoryProjectVocabularyRepository() },
+        availableCapacity: @escaping (URL) -> Int64? = StorageCapacity.available(at:)
     ) {
         self.audioRoot = audioRoot
         self.settingsFile = settingsFile ?? audioRoot.appending(path: "Library.settings")
@@ -41,6 +43,7 @@ struct LibraryServices {
         self.makeEmbeddingEngine = makeEmbeddingEngine
         self.makeProjectRepository = makeProjectRepository
         self.makeVocabularyRepository = makeVocabularyRepository
+        self.availableCapacity = availableCapacity
     }
 }
 
@@ -692,6 +695,10 @@ final class Library: RecordingLibrary {
         guard let key else { throw LibraryError.locked }
 
         return ImportIdentity.recordingID(forContentDigest: digest, key: key)
+    }
+
+    var availableImportCapacity: Int64? {
+        services.availableCapacity(services.audioRoot)
     }
 
     func hasRecording(withID id: UUID) -> Bool {
