@@ -21,7 +21,6 @@ struct LibraryView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var actionError: String?
     @State private var query = ""
-    @State private var evidenceTime: TimeInterval?
     @State private var projectFilter: ProjectScope?
     @State private var selectedIDs: Set<Recording.ID> = []
 
@@ -71,7 +70,7 @@ struct LibraryView: View {
                         projectFilterMenu
                     }
                     ToolbarItem {
-                        Button("Tasks", systemImage: "checklist") { isShowingTasks = true }
+                        Button("Tasks and Decisions", systemImage: "checklist") { isShowingTasks = true }
                     }
                 }
                 ToolbarItem {
@@ -94,8 +93,10 @@ struct LibraryView: View {
         } detail: {
             Group {
                 if let recording = selected {
-                    RecordingDetailView(recording: recording, library: library, extraction: extraction, startAt: evidenceTime)
+                    RecordingDetailView(recording: recording, library: library, extraction: extraction, startAt: navigation.startTime)
                         .id(recording.id)
+                } else if let dashboard = detailDashboard {
+                    DashboardView(dashboard: dashboard, library: library, open: openSource)
                 } else {
                     PrivacyWelcomeView(canRecord: coordinator.canStart, startRecording: startRecording)
                 }
@@ -109,12 +110,7 @@ struct LibraryView: View {
             #endif
         }
         .sheet(isPresented: $isShowingTasks) {
-            ProjectTasksView(library: library, projects: filterableProjects) { recordingID, time in
-                query = ""
-                projectFilter = nil
-                navigation.selection = recordingID
-                evidenceTime = time
-            }
+            ProjectTasksView(library: library, projects: filterableProjects, open: openSource)
         }
         .sheet(isPresented: $isCapturing) {
             CaptureView(coordinator: coordinator)
@@ -214,22 +210,42 @@ struct LibraryView: View {
 
     @ViewBuilder
     private var listRows: some View {
-        if query.isEmpty {
-            ForEach(shownRecordings) { recording in
-                RecordingRow(recording: recording, project: library.project(withID: recording.projectID))
-                    .tag(recording.id)
-                    .swipeActions {
-                        Button("Delete", systemImage: "trash", role: .destructive) {
-                            delete(recording)
-                        }
-                    }
+        #if os(iOS)
+        if query.isEmpty, projectFilter == nil, let dashboard = shownDashboard {
+            DashboardSections(dashboard: dashboard, library: library, open: openSource)
+            Section("Recordings") {
+                recordingRows
             }
+        } else {
+            recordingOrResultRows
+        }
+        #else
+        recordingOrResultRows
+        #endif
+    }
+
+    @ViewBuilder
+    private var recordingOrResultRows: some View {
+        if query.isEmpty {
+            recordingRows
         } else {
             ForEach(results) { result in
                 SearchResultRow(result: result)
                     .tag(result.recordingID)
                     .onTapGesture { open(result) }
             }
+        }
+    }
+
+    private var recordingRows: some View {
+        ForEach(shownRecordings) { recording in
+            RecordingRow(recording: recording, project: library.project(withID: recording.projectID))
+                .tag(recording.id)
+                .swipeActions {
+                    Button("Delete", systemImage: "trash", role: .destructive) {
+                        delete(recording)
+                    }
+                }
         }
     }
 
@@ -304,8 +320,28 @@ struct LibraryView: View {
     }
 
     private func open(_ result: SearchResult) {
-        navigation.selection = result.recordingID
-        evidenceTime = result.time
+        navigation.open(result.recordingID, at: result.time)
+    }
+
+    private func openSource(_ recordingID: UUID, at time: TimeInterval?) {
+        query = ""
+        projectFilter = nil
+        navigation.open(recordingID, at: time)
+    }
+
+    private var shownDashboard: Dashboard? {
+        guard !library.projects.isEmpty else { return nil }
+
+        let dashboard = library.dashboard()
+        return dashboard.isEmpty ? nil : dashboard
+    }
+
+    private var detailDashboard: Dashboard? {
+        #if os(macOS)
+        shownDashboard
+        #else
+        nil
+        #endif
     }
 
     private var recordButton: some View {
