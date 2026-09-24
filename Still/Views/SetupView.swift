@@ -67,13 +67,21 @@ struct SetupView: View {
             icon: "mic.fill",
             title: "Let Still Hear You",
             body: flow.microphone == .denied
-                ? String(localized: "Still cannot record without the microphone. Turn on Still in Privacy & Security → Microphone, then come back.")
+                ? Self.microphoneDeniedText
                 : String(localized: "Still needs the microphone to record you. Everything it hears stays on this device.")
         ) {
             primary(flow.microphone == .denied ? "Open Settings" : "Allow Microphone") {
                 Task { await flow.requestMicrophone() }
             }
         }
+    }
+
+    private static var microphoneDeniedText: String {
+        #if os(macOS)
+        String(localized: "Still cannot record without the microphone. Turn on Still in Privacy & Security → Microphone, then come back.")
+        #else
+        String(localized: "Still cannot record without the microphone. Turn on Microphone for Still in Settings, then come back.")
+        #endif
     }
 
     private var systemAudioStep: some View {

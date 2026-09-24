@@ -58,27 +58,31 @@ struct AccessSettingsView: View {
         missing: LocalizedStringKey,
         request: @escaping () -> Void
     ) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            LabeledContent {
-                switch state {
-                case .granted:
-                    Label("Allowed", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                case .notAsked:
-                    Button("Allow", action: request)
-                case .denied:
-                    Button("Open Settings", action: request)
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Image(systemName: systemImage)
+                .foregroundStyle(.tint)
+                .frame(width: 24)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                if state != .granted {
+                    Text(missing)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-            } label: {
-                Label(title, systemImage: systemImage)
             }
-
-            if state != .granted {
-                Text(missing)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+            Spacer(minLength: 8)
+            switch state {
+            case .granted:
+                Label("Allowed", systemImage: "checkmark.circle.fill")
+                    .labelStyle(.titleAndIcon)
+                    .foregroundStyle(.green)
+            case .notAsked:
+                Button("Allow", action: request)
+            case .denied:
+                Button("Open Settings", action: request)
             }
         }
-        .accessibilityElement(children: .combine)
     }
 }
