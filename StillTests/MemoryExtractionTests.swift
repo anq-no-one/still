@@ -135,7 +135,7 @@ struct MemoryExtractionTests {
     }
 
     @Test
-    func unconfirmedOrUnfiledRecordingsAreNotProcessed() async throws {
+    func onlyRecordingsWithAConfirmedProjectOrNoProjectAreProcessed() async throws {
         let library = try await makeLibrary()
         let counter = CallCounter()
         let segments = words("We agreed to ship on Friday .")
@@ -147,8 +147,9 @@ struct MemoryExtractionTests {
 
         await MemoryExtraction(library: library, preferred: { FakeExtractor(counter: counter) }).processPending()
 
-        #expect(await counter.calls == 0)
-        #expect(library.recordings.allSatisfy { $0.memory == nil })
+        #expect(await counter.calls == 1)
+        #expect(library.recordings.first { $0.id == suggested.id }?.memory == nil)
+        #expect(library.recordings.first { $0.id == unfiled.id }?.memory != nil)
     }
 
     @Test

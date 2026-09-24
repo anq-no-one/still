@@ -15,7 +15,7 @@ struct Dashboard: Equatable, Sendable {
     ) {
         let kept = recordings.filter { !$0.isDeleted }
         let sorted = kept.sorted { ($0.createdAt, $0.id.uuidString) > ($1.createdAt, $1.id.uuidString) }
-        let assigned = sorted.filter { $0.isProjectConfirmed && $0.projectID != nil }
+        let assigned = sorted.filter(\.isProjectConfirmed)
 
         awaitingProject = sorted.filter { !$0.isProjectConfirmed }
 

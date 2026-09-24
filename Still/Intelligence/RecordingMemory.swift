@@ -99,7 +99,7 @@ struct RecordingMemory: Codable, Equatable, Sendable {
 
 extension Recording {
     var isReadyForExtraction: Bool {
-        isProjectConfirmed && projectID != nil && !isDeleted && !segments.isEmpty
+        isProjectConfirmed && !isDeleted && !segments.isEmpty
     }
 
     var needsExtraction: Bool {
