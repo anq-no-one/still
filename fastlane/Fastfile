@@ -39,6 +39,8 @@ def provisioning_xcargs
   [
     "DEVELOPMENT_TEAM=#{team_id}",
     "-allowProvisioningUpdates",
+    "-skipPackagePluginValidation",
+    "-skipMacroValidation",
     "-authenticationKeyPath #{@key_path.shellescape}",
     "-authenticationKeyID #{key[:key_id]}",
     "-authenticationKeyIssuerID #{key[:issuer_id]}"

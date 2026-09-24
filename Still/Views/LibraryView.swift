@@ -11,10 +11,12 @@ struct LibraryView: View {
     let sync: SyncEngine
     let diagnostics: Diagnostics
     let lock: AppLock
+    let extraction: MemoryExtraction
     @Bindable var navigation: LibraryNavigation
 
     @State private var isCapturing = false
     @State private var isShowingSettings = false
+    @State private var isShowingTasks = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var actionError: String?
     @State private var query = ""
@@ -67,6 +69,9 @@ struct LibraryView: View {
                     ToolbarItem {
                         projectFilterMenu
                     }
+                    ToolbarItem {
+                        Button("Tasks", systemImage: "checklist") { isShowingTasks = true }
+                    }
                 }
                 #if os(macOS)
                 ToolbarItem {
@@ -90,7 +95,7 @@ struct LibraryView: View {
         } detail: {
             Group {
                 if let recording = selected {
-                    RecordingDetailView(recording: recording, library: library, startAt: evidenceTime)
+                    RecordingDetailView(recording: recording, library: library, extraction: extraction, startAt: evidenceTime)
                         .id(recording.id)
                 } else {
                     PrivacyWelcomeView(canRecord: coordinator.canStart, startRecording: startRecording)
@@ -103,6 +108,14 @@ struct LibraryView: View {
                 }
             }
             #endif
+        }
+        .sheet(isPresented: $isShowingTasks) {
+            ProjectTasksView(library: library, projects: filterableProjects) { recordingID, time in
+                query = ""
+                projectFilter = nil
+                navigation.selection = recordingID
+                evidenceTime = time
+            }
         }
         .sheet(isPresented: $isCapturing) {
             CaptureView(coordinator: coordinator)

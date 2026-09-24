@@ -15,6 +15,7 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
     var projectID: UUID?
     var projectAssignedAt: Date?
     var mixedMediaSpans: [TimeSpan]?
+    var memory: RecordingMemory?
 
     init(
         id: UUID = UUID(),
@@ -30,7 +31,8 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         deletedAt: Date? = nil,
         projectID: UUID? = nil,
         projectAssignedAt: Date? = nil,
-        mixedMediaSpans: [TimeSpan]? = nil
+        mixedMediaSpans: [TimeSpan]? = nil,
+        memory: RecordingMemory? = nil
     ) {
         self.id = id
         self.title = title
@@ -46,6 +48,7 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         self.projectID = projectID
         self.projectAssignedAt = projectAssignedAt
         self.mixedMediaSpans = mixedMediaSpans
+        self.memory = memory
     }
 
     var isDeleted: Bool {

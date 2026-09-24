@@ -85,6 +85,8 @@ xcodebuild test \
   -resultBundlePath "$RESULT" \
   -parallel-testing-enabled NO \
   -allowProvisioningUpdates \
+  -skipPackagePluginValidation \
+  -skipMacroValidation \
   "${SELECTION[@]+"${SELECTION[@]}"}" \
   > "${ROOT}/Artifacts/E2E.log" 2>&1
 STATUS=$?

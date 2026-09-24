@@ -9,6 +9,12 @@ packages:
   FluidAudio:
     url: https://github.com/FluidInference/FluidAudio
     revision: 87a39dfe4068fef0f1c69bfe704b2b3ef4fbc5bc
+  MLXSwiftLM:
+    url: https://github.com/ml-explore/mlx-swift-lm
+    revision: ee673d6a71d76e67b532dc7eaf91d92edc3bb8bb
+  SwiftTransformers:
+    url: https://github.com/huggingface/swift-transformers
+    revision: c21fdcde390313a6d98d8e33a346f2c3486c3ab0
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -25,6 +31,14 @@ targets:
     platform: iOS
     dependencies:
       - package: FluidAudio
+      - package: MLXSwiftLM
+        product: MLXLLM
+      - package: MLXSwiftLM
+        product: MLXLMCommon
+      - package: MLXSwiftLM
+        product: MLXGuidedGeneration
+      - package: SwiftTransformers
+        product: Tokenizers
     sources:
       - path: Still
         excludes:
@@ -92,6 +106,14 @@ targets:
         copy:
           destination: executables
       - package: FluidAudio
+      - package: MLXSwiftLM
+        product: MLXLLM
+      - package: MLXSwiftLM
+        product: MLXLMCommon
+      - package: MLXSwiftLM
+        product: MLXGuidedGeneration
+      - package: SwiftTransformers
+        product: Tokenizers
     sources:
       - path: Still
     settings:

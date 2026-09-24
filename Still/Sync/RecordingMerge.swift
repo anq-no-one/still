@@ -17,6 +17,7 @@ enum RecordingMerge {
         merged.title = union(local.title, remote.title)
         merged.segments = mergeSegments(newer.segments, older.segments)
         merged.note = mergeNote(newer.note, older.note)
+        merged.memory = RecordingMemory.merge(newer.memory, older.memory)
         merged.updatedAt = max(local.updatedAt, remote.updatedAt)
         merged.deletedAt = earliest(local.deletedAt, remote.deletedAt)
         return merged.keepingLatestProject(of: older)

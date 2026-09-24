@@ -58,6 +58,51 @@ enum ModelCatalog {
             ModelFile(path: "\(SpeakerModels.voiceprint)/weights/weight.bin", bytes: 7243904, sha256: "34004f6798d35cad7071e2fdc67e63faaa782f53697e1cb49bcb452cf81ae151", source: SpeakerModels.voiceprintSource),
         ]
     )
+
+    static let meetingMemorySmall = meetingMemory(
+        id: "qwen3-1.7b-4bit",
+        repository: "mlx-community/Qwen3-1.7B-4bit",
+        version: "3b1b1768f8f8cf8351c712464f906e86c2b8269e",
+        minimumMemoryBytes: 6 * 1_024 * 1_024 * 1_024,
+        config: ModelFile(path: "config.json", bytes: 937, sha256: "507a6701220524eb8b283425bf0856a9ae4f21f4052e563896ddd668994b1dc7"),
+        weights: ModelFile(path: "model.safetensors", bytes: 968_080_210, sha256: "0e86d9677e519323849eac1bc272caae88567a481ff188c431f70be543d9995f")
+    )
+
+    static let meetingMemoryLarge = meetingMemory(
+        id: "qwen3-4b-4bit",
+        repository: "mlx-community/Qwen3-4B-4bit",
+        version: "4dcb3d101c2a062e5c1d4bb173588c54ea6c4d25",
+        minimumMemoryBytes: 12 * 1_024 * 1_024 * 1_024,
+        config: ModelFile(path: "config.json", bytes: 937, sha256: "b5efdcf3b0035a3638e7228dad4d85f5c4a23f156eb7cdb0b44c8366a5d34d9b"),
+        weights: ModelFile(path: "model.safetensors", bytes: 2_263_022_529, sha256: "e240c0bdc0ebb0681bf0da0f98d9719fd6ebe269a3633f81542c13e81345651d")
+    )
+
+    static func meetingMemory(forMemory bytes: Int) -> ModelPack {
+        bytes >= meetingMemoryLarge.minimumMemoryBytes ? meetingMemoryLarge : meetingMemorySmall
+    }
+
+    private static func meetingMemory(
+        id: String,
+        repository: String,
+        version: String,
+        minimumMemoryBytes: Int,
+        config: ModelFile,
+        weights: ModelFile
+    ) -> ModelPack {
+        ModelPack(
+            id: id,
+            purpose: String(localized: "Finds decisions, facts and proposed tasks in your recordings, on this device. Without it, Still quotes the matching sentences instead."),
+            version: version,
+            baseURL: URL(string: "https://huggingface.co/\(repository)/resolve/\(version)/")!,
+            minimumMemoryBytes: minimumMemoryBytes,
+            files: [
+                config,
+                ModelFile(path: "tokenizer_config.json", bytes: 9706, sha256: "253153d0738ceb4c668d2eff957714dd2bea0b56de772a9fdccd96cbf517e6a0"),
+                ModelFile(path: "tokenizer.json", bytes: 11_422_654, sha256: "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"),
+                weights,
+            ]
+        )
+    }
 }
 
 enum SpeakerModels {

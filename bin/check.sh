@@ -31,6 +31,8 @@ build_ios() {
     -scheme Still-iOS \
     -destination 'generic/platform=iOS Simulator' \
     -derivedDataPath "$DERIVED_DATA" \
+    -skipPackagePluginValidation \
+    -skipMacroValidation \
     CODE_SIGNING_ALLOWED=NO
 }
 
@@ -43,6 +45,8 @@ unit_tests() {
     -parallel-testing-enabled NO \
     -derivedDataPath "$DERIVED_DATA" \
     -resultBundlePath "$UNIT_RESULT" \
+    -skipPackagePluginValidation \
+    -skipMacroValidation \
     ${STILL_UNSIGNED:+CODE_SIGNING_ALLOWED=NO}
 }
 

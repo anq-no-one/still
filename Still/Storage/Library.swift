@@ -702,6 +702,34 @@ final class Library: RecordingLibrary {
         }
     }
 
+    func review(_ itemID: String, inRecording recordingID: UUID, as review: MemoryReview, at date: Date = .now) throws {
+        try updateMemoryItem(itemID, inRecording: recordingID, at: date) { $0.reviewed(review, at: date) }
+    }
+
+    func edit(_ itemID: String, inRecording recordingID: UUID, to text: String, at date: Date = .now) throws {
+        try updateMemoryItem(itemID, inRecording: recordingID, at: date) { $0.edited(to: text, at: date) }
+    }
+
+    func acceptedTasks(inProject projectID: UUID) -> [ProjectTask] {
+        ProjectTask.accepted(in: recordings, project: projectID)
+    }
+
+    private func updateMemoryItem(
+        _ itemID: String,
+        inRecording recordingID: UUID,
+        at date: Date,
+        _ change: (MemoryItem) -> MemoryItem
+    ) throws {
+        guard var recording = storedRecordings.first(where: { $0.id == recordingID }),
+              let memory = recording.memory,
+              memory.item(withID: itemID) != nil
+        else { return }
+
+        recording.memory = memory.updating(itemID, change)
+        recording.updatedAt = max(recording.updatedAt, date)
+        try write(recording)
+    }
+
     func renameSpeaker(_ speaker: Speaker, to name: String, in recording: Recording) throws {
         try write(recording.renamingSpeaker(speaker, to: name))
         try rememberOwner(speaker, as: name)
@@ -811,7 +839,7 @@ final class Library: RecordingLibrary {
         guard let repository else { throw LibraryError.locked }
 
         let recording = storedRecordings.first { $0.id == incoming.id }
-            .map { incoming.keepingLatestProject(of: $0) } ?? incoming
+            .map { incoming.keepingLatestProject(of: $0).keepingMemory(of: $0) } ?? incoming
         try repository.save(recording)
         if let index = storedRecordings.firstIndex(where: { $0.id == recording.id }) {
             storedRecordings[index] = recording
