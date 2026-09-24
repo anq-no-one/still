@@ -90,7 +90,7 @@ struct MCPSessionTests {
         let tools = try #require(try call(session, id: 2, "tools/list", nil)["result"]?["tools"]?.arrayValue)
 
         #expect(tools.compactMap { $0["name"]?.stringValue } == [
-            "list_meetings", "get_meeting", "get_transcript", "search_meetings", "list_action_items", "list_decisions",
+            "list_meetings", "get_meeting", "get_transcript", "search_meetings", "list_action_items", "list_decisions", "list_facts", "list_tasks",
         ])
         for tool in tools {
             #expect(tool["inputSchema"]?["type"] == "object")
@@ -153,6 +153,31 @@ struct MCPSessionTests {
 
 @MainActor
 struct MeetingToolTests {
+    @Test
+    func factsCarryTheirSourceAndStatusAndTaskDraftsStayPrivate() throws {
+        var planning = Fixture.planning()
+        let segment = try #require(planning.segments.first)
+        let fact = MemoryItem(kind: .fact, text: "Beta ships Friday", sourceSegmentIDs: [segment.id], sourceStart: segment.start)
+        let confirmed = MemoryItem(kind: .decision, text: "Ship the beta", sourceSegmentIDs: [segment.id], sourceStart: segment.start)
+            .reviewed(.approved)
+        let rejected = MemoryItem(kind: .fact, text: "Beta ships Monday", sourceSegmentIDs: [segment.id], sourceStart: segment.start)
+            .reviewed(.declined)
+        let draft = MemoryItem(kind: .task, text: "Email the vendor", sourceSegmentIDs: [segment.id], sourceStart: segment.start)
+        let accepted = MemoryItem(kind: .task, text: "Book the launch room", sourceSegmentIDs: [segment.id], sourceStart: segment.start)
+            .reviewed(.approved)
+        planning.memory = RecordingMemory(items: [fact, confirmed, rejected, draft, accepted])
+        let tools = MeetingTools(source: FakeMeetingSource(recordings: [planning]))
+
+        let facts = try #require(tools.call("list_facts", arguments: [:])["structuredContent"]?["facts"]?.arrayValue)
+        let tasks = try #require(tools.call("list_tasks", arguments: [:])["structuredContent"]?["tasks"]?.arrayValue)
+
+        #expect(facts.compactMap { $0["text"]?.stringValue }.sorted() == ["Beta ships Friday", "Ship the beta"])
+        #expect(facts.first { $0["text"] == "Beta ships Friday" }?["verification"] == "automatically_extracted")
+        #expect(facts.first { $0["text"] == "Ship the beta" }?["verification"] == "user_confirmed")
+        #expect(facts.allSatisfy { $0["meeting_id"]?.stringValue == planning.id.uuidString && $0["time_seconds"] != nil })
+        #expect(tasks.compactMap { $0["text"]?.stringValue } == ["Book the launch room"])
+    }
+
     @Test
     func listsMeetingsNewestFirstAndPages() throws {
         let tools = MeetingTools(source: FakeMeetingSource(recordings: [Fixture.planning(), Fixture.retro()]))
@@ -283,22 +308,37 @@ struct MCPAccessTests {
     }
 
     @Test
-    func revokingAClientBlocksItUntilAllowedAgain() {
+    func eachToolReadsNothingUntilApprovedAndStopsWhenRevoked() {
         let settings = MemoryMCPAccessSettings()
         let access = MCPAccess(settings: settings, source: FakeMeetingSource(), socketURL: Fixture.socketURL())
         access.enable()
         defer { access.disable() }
-        let client = MCPConnectedClient(id: UUID(), name: "codex-mcp-client", version: "0.40", connectedAt: .now)
+        let codex = MCPClientInfo(name: "codex-mcp-client", version: "0.40")
+        let claude = MCPClientInfo(name: "claude-code", version: nil)
 
-        access.revoke(client)
+        #expect(!access.isAllowed(codex))
 
-        #expect(!access.isAllowed(MCPClientInfo(name: "codex-mcp-client", version: nil)))
-        #expect(access.isAllowed(MCPClientInfo(name: "claude-code", version: nil)))
-        #expect(settings.blockedClients() == ["codex-mcp-client"])
+        access.approve(codex.name)
+        #expect(access.isAllowed(codex))
+        #expect(!access.isAllowed(claude))
+        #expect(settings.approvedClients() == ["codex-mcp-client"])
 
-        access.allow("codex-mcp-client")
+        access.revoke(codex.name)
+        #expect(!access.isAllowed(codex))
+        #expect(settings.approvedClients().isEmpty)
+    }
 
-        #expect(access.isAllowed(MCPClientInfo(name: "codex-mcp-client", version: nil)))
+    @Test
+    func anUnapprovedToolIsToldHowToGetApproved() throws {
+        let session = MCPSession(source: FakeMeetingSource(recordings: [Fixture.planning()]), isAllowed: { _ in false }, onInitialize: { _ in })
+
+        let request = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"claude-code","version":"2"}}}"#
+        let reply = try #require(session.handle(line: Data(request.utf8)))
+        let decoded = try JSONDecoder().decode(JSONValue.self, from: reply)
+
+        #expect(decoded["error"]?["code"] == .int(JSONRPCError.accessDenied))
+        #expect(decoded["error"]?["message"]?.stringValue?.contains("claude-code") == true)
+        #expect(decoded["result"] == nil)
     }
 
     @Test
@@ -338,12 +378,12 @@ final class FakeMeetingSource: MeetingSource {
 
 final class MemoryMCPAccessSettings: MCPAccessSettingsStore, @unchecked Sendable {
     private var enabled = false
-    private var blocked: [String] = []
+    private var approved: [String] = []
 
     func isEnabled() -> Bool { enabled }
     func setEnabled(_ value: Bool) { enabled = value }
-    func blockedClients() -> [String] { blocked }
-    func setBlockedClients(_ names: [String]) { blocked = names }
+    func approvedClients() -> [String] { approved }
+    func setApprovedClients(_ names: [String]) { approved = names }
 }
 
 private enum Fixture {

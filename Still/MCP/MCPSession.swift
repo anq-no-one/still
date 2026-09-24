@@ -14,6 +14,11 @@ final class MCPSession {
     static let supportedProtocolVersions: Set<String> = ["2025-06-18", "2025-03-26", "2024-11-05"]
     static let accessOffMessage = "AI tool access is off. Turn on \"Allow AI tools to read meetings\" in Still Settings."
 
+    static func deniedMessage(for client: MCPClientInfo?) -> String {
+        guard let client else { return accessOffMessage }
+        return "Still has not approved \"\(client.name)\". In Still, open Settings > AI Tools, turn on access and approve it, then reconnect."
+    }
+
     private let tools: MeetingTools
     private let isAllowed: (MCPClientInfo?) -> Bool
     private let onInitialize: (MCPClientInfo) -> Void
@@ -65,10 +70,11 @@ final class MCPSession {
 
         if request.method == "initialize" {
             client = Self.clientInfo(in: request.params)
+            if let client { onInitialize(client) }
         }
 
         guard isAllowed(client) else {
-            throw JSONRPCError(code: JSONRPCError.accessDenied, message: Self.accessOffMessage)
+            throw JSONRPCError(code: JSONRPCError.accessDenied, message: Self.deniedMessage(for: client))
         }
 
         switch request.method {
@@ -97,8 +103,6 @@ final class MCPSession {
     private func initialize(_ params: JSONValue?) -> JSONValue {
         let requested = params?["protocolVersion"]?.stringValue
         let version = requested.flatMap { Self.supportedProtocolVersions.contains($0) ? $0 : nil } ?? Self.protocolVersion
-        if let client { onInitialize(client) }
-
         return [
             "protocolVersion": .string(version),
             "capabilities": [

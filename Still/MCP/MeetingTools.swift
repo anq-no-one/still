@@ -30,6 +30,8 @@ struct MeetingTools {
         case .searchMeetings: try searchMeetings(arguments)
         case .listActionItems: try listNoteItems(arguments, key: "action_items", items: \.actionItems)
         case .listDecisions: try listNoteItems(arguments, key: "decisions", items: \.decisions)
+        case .listFacts: try listMemory(arguments, key: "facts", kinds: [.fact, .decision])
+        case .listTasks: try listMemory(arguments, key: "tasks", kinds: [.task])
         }
     }
 
@@ -127,6 +129,30 @@ struct MeetingTools {
         return ["query": .string(query), "results": .array(results)]
     }
 
+    private func listMemory(_ arguments: ToolArguments, key: String, kinds: Set<MemoryKind>) throws -> JSONValue {
+        let limit = try arguments.int("limit", default: 50, range: 1...500)
+        let entries = try meetings(in: arguments).flatMap { meeting in
+            meeting.memory.filter { kinds.contains($0.kind) }.map { item -> JSONValue in
+                var entry: [String: JSONValue] = [
+                    "id": .string(item.id),
+                    "kind": .string(item.kind.rawValue),
+                    "text": .string(item.text),
+                    "verification": .string(item.verification),
+                    "time_seconds": .double(item.timeSeconds),
+                    "source_segment_ids": .array(item.sourceSegmentIDs.map { .string($0.uuidString) }),
+                    "meeting_id": .string(meeting.id.uuidString),
+                    "meeting_title": .string(meeting.title),
+                    "started_at": Self.date(meeting.startedAt),
+                ]
+                if let owner = item.owner { entry["owner"] = .string(owner) }
+                if let due = item.due { entry["due"] = .string(due) }
+                return .object(entry)
+            }
+        }
+
+        return [key: .array(Array(entries.prefix(limit))), "total": .int(entries.count)]
+    }
+
     private func listNoteItems(
         _ arguments: ToolArguments,
         key: String,
@@ -174,6 +200,8 @@ extension MeetingTools {
         case searchMeetings = "search_meetings"
         case listActionItems = "list_action_items"
         case listDecisions = "list_decisions"
+        case listFacts = "list_facts"
+        case listTasks = "list_tasks"
 
         var title: String {
             switch self {
@@ -183,6 +211,8 @@ extension MeetingTools {
             case .searchMeetings: "Search meetings"
             case .listActionItems: "List action items"
             case .listDecisions: "List decisions"
+            case .listFacts: "List facts and decisions"
+            case .listTasks: "List accepted tasks"
             }
         }
 
@@ -200,6 +230,10 @@ extension MeetingTools {
                 "Lists action items from meeting notes across meetings, newest meeting first, each with its meeting and the time it was said."
             case .listDecisions:
                 "Lists decisions from meeting notes across meetings, newest meeting first, each with its meeting and the time it was said."
+            case .listFacts:
+                "Lists facts and decisions Still found in meetings, each with the meeting, the time in the recording, its source segments, and whether the user confirmed it or it was automatically extracted. Rejected items are left out."
+            case .listTasks:
+                "Lists tasks the user accepted after review, each with the meeting, the time it was said and its source segments. Unreviewed task proposals are never included."
             }
         }
 
@@ -233,7 +267,7 @@ extension MeetingTools {
                     ],
                     required: ["query"]
                 )
-            case .listActionItems, .listDecisions:
+            case .listActionItems, .listDecisions, .listFacts, .listTasks:
                 Self.schema([
                     "since": Self.dateProperty("Only meetings that started at or after this ISO 8601 date or time."),
                     "until": Self.dateProperty("Only meetings that started at or before this ISO 8601 date or time."),

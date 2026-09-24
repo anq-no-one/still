@@ -29,26 +29,33 @@ struct AIToolsSettingsView: View {
                     snippet("Codex (~/.codex/config.toml)", MCPClientConfig.codex(helperPath: helperPath))
                 }
 
-                Section("Connected") {
-                    if access.clients.isEmpty {
-                        Text("No AI tool is connected.")
-                            .foregroundStyle(.secondary)
-                    }
-                    ForEach(access.clients) { client in
-                        LabeledContent {
-                            Button("Revoke", role: .destructive) { access.revoke(client) }
-                        } label: {
-                            Text(client.version.map { "\(client.name) \($0)" } ?? client.name)
-                            Text(client.connectedAt, format: .dateTime.hour().minute())
+                if !access.waitingClients.isEmpty {
+                    Section {
+                        ForEach(access.waitingClients, id: \.self) { name in
+                            LabeledContent(name) {
+                                Button("Approve") { access.approve(name) }
+                                    .buttonStyle(.borderedProminent)
+                            }
                         }
+                    } header: {
+                        Text("Waiting for Approval")
+                    } footer: {
+                        Text("A tool reads nothing until you approve it here. After approval it can read transcripts, confirmed and extracted facts, decisions, and accepted tasks from the projects on this Mac, never audio, and it cannot change anything.")
                     }
                 }
 
-                if !access.blockedClients.isEmpty {
-                    Section("Revoked") {
-                        ForEach(access.blockedClients, id: \.self) { name in
-                            LabeledContent(name) {
-                                Button("Allow") { access.allow(name) }
+                Section("Approved") {
+                    if access.approvedClients.isEmpty {
+                        Text("No AI tool is approved.")
+                            .foregroundStyle(.secondary)
+                    }
+                    ForEach(access.approvedClients, id: \.self) { name in
+                        LabeledContent {
+                            Button("Revoke", role: .destructive) { access.revoke(name) }
+                        } label: {
+                            Text(name)
+                            if let client = access.clients.first(where: { $0.name == name }) {
+                                Text("Connected since \(client.connectedAt.formatted(.dateTime.hour().minute()))")
                             }
                         }
                     }

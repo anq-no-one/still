@@ -5,13 +5,13 @@ import Observation
 protocol MCPAccessSettingsStore: Sendable {
     func isEnabled() -> Bool
     func setEnabled(_ enabled: Bool)
-    func blockedClients() -> [String]
-    func setBlockedClients(_ names: [String])
+    func approvedClients() -> [String]
+    func setApprovedClients(_ names: [String])
 }
 
 struct UserDefaultsMCPAccessSettings: MCPAccessSettingsStore {
     private static let enabledKey = "mcp.enabled"
-    private static let blockedKey = "mcp.blockedClients"
+    private static let approvedKey = "mcp.approvedClients"
 
     func isEnabled() -> Bool {
         UserDefaults.standard.bool(forKey: Self.enabledKey)
@@ -21,12 +21,12 @@ struct UserDefaultsMCPAccessSettings: MCPAccessSettingsStore {
         UserDefaults.standard.set(enabled, forKey: Self.enabledKey)
     }
 
-    func blockedClients() -> [String] {
-        UserDefaults.standard.stringArray(forKey: Self.blockedKey) ?? []
+    func approvedClients() -> [String] {
+        UserDefaults.standard.stringArray(forKey: Self.approvedKey) ?? []
     }
 
-    func setBlockedClients(_ names: [String]) {
-        UserDefaults.standard.set(names, forKey: Self.blockedKey)
+    func setApprovedClients(_ names: [String]) {
+        UserDefaults.standard.set(names, forKey: Self.approvedKey)
     }
 }
 
@@ -37,9 +37,6 @@ struct MCPConnectedClient: Identifiable, Equatable, Sendable {
     let connectedAt: Date
 }
 
-/// Lets AI tools such as Claude Code and Codex read the Library through the
-/// bundled `still-mcp` helper. Off until the user turns it on; turning it off
-/// closes the socket and every open connection.
 @MainActor
 @Observable
 final class MCPAccess {
@@ -50,7 +47,8 @@ final class MCPAccess {
 
     private(set) var isEnabled: Bool
     private(set) var clients: [MCPConnectedClient] = []
-    private(set) var blockedClients: [String]
+    private(set) var approvedClients: [String]
+    private(set) var waitingClients: [String] = []
     private(set) var failure: String?
 
     init(settings: MCPAccessSettingsStore, source: MeetingSource, socketURL: URL = MCPSocketLocation.defaultURL) {
@@ -58,7 +56,7 @@ final class MCPAccess {
         self.source = source
         server = MCPSocketServer(url: socketURL)
         isEnabled = settings.isEnabled()
-        blockedClients = settings.blockedClients()
+        approvedClients = settings.approvedClients()
     }
 
     var helperURL: URL {
@@ -83,29 +81,29 @@ final class MCPAccess {
         connections.values.forEach { $0.close() }
         connections.removeAll()
         clients.removeAll()
+        waitingClients.removeAll()
         failure = nil
     }
 
-    func revoke(_ client: MCPConnectedClient) {
-        if !blockedClients.contains(client.name) {
-            blockedClients.append(client.name)
-            settings.setBlockedClients(blockedClients)
-        }
-        for other in clients where other.name == client.name {
-            connections[other.id]?.close()
-        }
-        clients.removeAll { $0.name == client.name }
+    func approve(_ name: String) {
+        waitingClients.removeAll { $0 == name }
+        guard !approvedClients.contains(name) else { return }
+        approvedClients.append(name)
+        settings.setApprovedClients(approvedClients)
     }
 
-    func allow(_ name: String) {
-        blockedClients.removeAll { $0 == name }
-        settings.setBlockedClients(blockedClients)
+    func revoke(_ name: String) {
+        approvedClients.removeAll { $0 == name }
+        settings.setApprovedClients(approvedClients)
+        for client in clients where client.name == name {
+            connections[client.id]?.close()
+        }
+        clients.removeAll { $0.name == name }
     }
 
     func isAllowed(_ client: MCPClientInfo?) -> Bool {
-        guard isEnabled else { return false }
-        guard let client else { return true }
-        return !blockedClients.contains(client.name)
+        guard isEnabled, let client else { return false }
+        return approvedClients.contains(client.name)
     }
 
     private func startListening() {
@@ -145,7 +143,12 @@ final class MCPAccess {
     }
 
     private func register(_ client: MCPClientInfo, on connectionID: UUID) {
-        guard isAllowed(client) else { return }
+        guard isAllowed(client) else {
+            if isEnabled, !waitingClients.contains(client.name) {
+                waitingClients.append(client.name)
+            }
+            return
+        }
         clients.removeAll { $0.id == connectionID }
         clients.append(MCPConnectedClient(id: connectionID, name: client.name, version: client.version, connectedAt: .now))
     }

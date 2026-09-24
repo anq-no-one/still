@@ -24,6 +24,33 @@ struct MeetingNoteItem: Equatable, Sendable {
     let isUserAuthored: Bool
 }
 
+struct MeetingMemoryItem: Equatable, Sendable {
+    let id: String
+    let kind: MemoryKind
+    let text: String
+    let timeSeconds: TimeInterval
+    let sourceSegmentIDs: [UUID]
+    let verification: String
+    let owner: String?
+    let due: String?
+
+    init?(_ item: MemoryItem) {
+        switch item.status {
+        case .extracted: verification = "automatically_extracted"
+        case .confirmed: verification = "user_confirmed"
+        case .accepted: verification = "user_accepted"
+        case .proposed, .rejected, .dismissed: return nil
+        }
+        id = item.id
+        kind = item.kind
+        text = item.text
+        timeSeconds = item.sourceStart
+        sourceSegmentIDs = item.sourceSegmentIDs
+        owner = item.owner
+        due = item.due
+    }
+}
+
 struct MeetingNotes: Equatable, Sendable {
     let kind: String
     let summary: [MeetingNoteItem]
@@ -42,6 +69,7 @@ struct MeetingRecord: Equatable, Sendable {
     let transcript: String
     let segments: [MeetingSegment]
     let notes: MeetingNotes?
+    var memory: [MeetingMemoryItem] = []
 }
 
 struct MeetingSearchHit: Equatable, Sendable {
@@ -129,7 +157,8 @@ extension MeetingRecord {
                     actionItems: note.actions.map(item),
                     userNotes: note.userText
                 )
-            }
+            },
+            memory: (recording.memory?.items ?? []).compactMap(MeetingMemoryItem.init)
         )
     }
 }
