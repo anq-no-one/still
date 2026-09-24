@@ -23,7 +23,9 @@ struct StillApp: App {
 
     private let navigation: LibraryNavigation
     #if os(macOS)
-    private let shortcut: GlobalRecordingShortcut
+    private let shortcut: RecordingShortcut
+    private let login: LaunchAtLogin
+    private let mediaHint: MediaPlaybackHint
     @NSApplicationDelegateAdaptor private var reopener: LibraryWindowReopener
     #endif
 
@@ -220,8 +222,16 @@ struct StillApp: App {
         }
         #if os(macOS)
         shortcut = MainActor.assumeIsolated {
-            GlobalRecordingShortcut { Task { await recordingCoordinator.toggle() } }
+            RecordingShortcut(
+                registrar: GlobalRecordingShortcut(),
+                system: CarbonSystemShortcuts(),
+                store: UserDefaultsShortcutStore()
+            ) {
+                Task { await recordingCoordinator.toggle() }
+            }
         }
+        login = MainActor.assumeIsolated { LaunchAtLogin(service: MainAppLoginItem()) }
+        mediaHint = MainActor.assumeIsolated { MediaPlaybackHint(source: CoreAudioActivitySource()) }
         #endif
 
         MainActor.assumeIsolated {
@@ -296,7 +306,10 @@ struct StillApp: App {
                     browser: browser,
                     aiTools: aiTools,
                     chromium: chromium,
-                    microphones: microphones
+                    microphones: microphones,
+                    shortcut: shortcut,
+                    login: login,
+                    mediaHint: mediaHint
                 )
             }
         }
@@ -308,10 +321,12 @@ struct StillApp: App {
                 automatic: automatic,
                 microphones: microphones,
                 navigation: navigation,
-                lock: lock
+                lock: lock,
+                shortcut: shortcut,
+                hint: mediaHint
             )
         } label: {
-            RecordingMenuBarLabel(coordinator: coordinator)
+            RecordingMenuBarLabel(coordinator: coordinator, hint: mediaHint, automatic: automatic)
                 .modifier(LibraryWindowOpenerInstaller(reopener: reopener))
         }
         .menuBarExtraStyle(.window)

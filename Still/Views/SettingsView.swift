@@ -14,6 +14,9 @@ struct SettingsView: View {
     let aiTools: MCPAccess
     let chromium: ChromiumConnections
     let microphones: MicrophoneChoice
+    let shortcut: RecordingShortcut
+    let login: LaunchAtLogin
+    let mediaHint: MediaPlaybackHint
     #endif
 
     var body: some View {
@@ -27,6 +30,7 @@ struct SettingsView: View {
             }
             Tab("Recording", systemImage: "record.circle") {
                 Form {
+                    RecordingControlsSettingsView(shortcut: shortcut, login: login, hint: mediaHint)
                     MicrophoneSettingsView(microphones: microphones)
                     AutomaticRecordingSettingsView(automatic: automatic)
                     BrowserMeetingSettingsView(bridge: browser, chromium: chromium)

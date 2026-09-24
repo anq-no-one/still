@@ -5,17 +5,22 @@ import Foundation
 /// A Carbon hot key, because it reaches Still while another app is frontmost
 /// without asking for Accessibility or Input Monitoring access.
 @MainActor
-final class GlobalRecordingShortcut {
-    static let keyCode = UInt32(kVK_ANSI_R)
-    static let modifiers = UInt32(cmdKey | optionKey)
-
+final class GlobalRecordingShortcut: HotKeyRegistrar {
     private var hotKey: EventHotKeyRef?
     private var handler: EventHandlerRef?
-    private let action: @MainActor () -> Void
+    private var action: @MainActor () -> Void = {}
 
-    init(action: @escaping @MainActor () -> Void) {
+    func register(_ combo: KeyCombo, action: @escaping @MainActor () -> Void) -> Bool {
+        unregister()
         self.action = action
-        register()
+        installHandler()
+        let id = EventHotKeyID(signature: OSType(0x53_54_4C_4C), id: 1)
+        let status = RegisterEventHotKey(combo.keyCode, combo.modifiers, id, GetApplicationEventTarget(), 0, &hotKey)
+        guard status == noErr else {
+            unregister()
+            return false
+        }
+        return true
     }
 
     func unregister() {
@@ -25,7 +30,7 @@ final class GlobalRecordingShortcut {
         handler = nil
     }
 
-    private func register() {
+    private func installHandler() {
         var type = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
         let context = Unmanaged.passUnretained(self).toOpaque()
 
@@ -42,9 +47,6 @@ final class GlobalRecordingShortcut {
             context,
             &handler
         )
-
-        let id = EventHotKeyID(signature: OSType(0x53_54_4C_4C), id: 1)
-        RegisterEventHotKey(Self.keyCode, Self.modifiers, id, GetApplicationEventTarget(), 0, &hotKey)
     }
 }
 #endif

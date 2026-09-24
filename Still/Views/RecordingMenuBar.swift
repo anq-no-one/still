@@ -3,11 +3,16 @@ import SwiftUI
 
 struct RecordingMenuBarLabel: View {
     let coordinator: RecordingCoordinator
+    let hint: MediaPlaybackHint
+    let automatic: AutomaticRecording
 
     var body: some View {
         Image(systemName: symbol)
             .symbolRenderingMode(.hierarchical)
             .accessibilityLabel(RecordingMenuBarPanel.statusText(for: coordinator))
+            .onChange(of: coordinator.isRecording) { _, isRecording in
+                isRecording ? hint.check(ignoring: automatic.triggeredBy) : hint.dismiss()
+            }
     }
 
     private var symbol: String {
@@ -28,6 +33,8 @@ struct RecordingMenuBarPanel: View {
     let microphones: MicrophoneChoice
     let navigation: LibraryNavigation
     let lock: AppLock
+    let shortcut: RecordingShortcut
+    let hint: MediaPlaybackHint
 
     @Environment(\.openWindow) private var openWindow
     @State private var tick = Date.now
@@ -38,6 +45,8 @@ struct RecordingMenuBarPanel: View {
             microphoneStatus
 
             AutomaticCaptureStatus(automatic: automatic)
+
+            MediaPlaybackBanner(hint: hint)
 
             if coordinator.isRecording, let transcript = coordinator.workflow?.transcript, !transcript.isEmpty {
                 Text(transcript.suffix(220))
@@ -113,7 +122,7 @@ struct RecordingMenuBarPanel: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(Self.statusText(for: coordinator))
                     .font(.headline)
-                Text(coordinator.isRecording ? elapsed : "⌥⌘R starts and stops from anywhere")
+                Text(coordinator.isRecording ? elapsed : shortcutHint)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
@@ -137,6 +146,10 @@ struct RecordingMenuBarPanel: View {
 
     private var microphoneName: String {
         microphones.active?.name ?? String(localized: "No Microphone")
+    }
+
+    private var shortcutHint: String {
+        shortcut.combo.map { String(localized: "\($0.displayText) starts and stops from anywhere") } ?? ""
     }
 
     private var elapsed: String {
