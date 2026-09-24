@@ -26,6 +26,7 @@ struct MeetingSite: Identifiable, Codable, Equatable, Sendable {
 protocol MeetingSiteAllowList: Sendable {
     func sites() -> [MeetingSite]
     func setAllowed(_ allowed: Bool, forHost host: String)
+    var suggestsSpeakerNames: Bool { get nonmutating set }
 }
 
 @MainActor
@@ -41,6 +42,7 @@ final class BrowserMeetingBridge {
     init(coordinator: RecordingCoordinator, allowList: MeetingSiteAllowList) {
         self.coordinator = coordinator
         self.allowList = allowList
+        suggestsSpeakerNames = allowList.suggestsSpeakerNames
     }
 
     var sites: [MeetingSite] {
@@ -49,6 +51,10 @@ final class BrowserMeetingBridge {
 
     func setAllowed(_ allowed: Bool, for site: MeetingSite) {
         allowList.setAllowed(allowed, forHost: site.host)
+    }
+
+    var suggestsSpeakerNames: Bool {
+        didSet { allowList.suggestsSpeakerNames = suggestsSpeakerNames }
     }
 
     func handle(_ event: BrowserMeetingEvent) async {
@@ -71,7 +77,8 @@ final class BrowserMeetingBridge {
                 coordinator.otherMediaEnded()
             }
         case .speakerStarted, .speakerEnded:
-            guard let speaker = event.speaker, activeMeetingID == nil || activeMeetingID == event.meetingID else { return }
+            guard suggestsSpeakerNames,
+                  let speaker = event.speaker, activeMeetingID == nil || activeMeetingID == event.meetingID else { return }
             if event.phase == .speakerStarted {
                 coordinator.speakerStarted(speaker)
             } else {
@@ -126,6 +133,7 @@ extension BrowserMeetingBridge {
 
 struct UserDefaultsMeetingSiteAllowList: MeetingSiteAllowList, @unchecked Sendable {
     private let key = "still.meetingSites.allowed"
+    private let speakerNamesKey = "still.meetingSites.speakerNames"
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
@@ -147,5 +155,10 @@ struct UserDefaultsMeetingSiteAllowList: MeetingSiteAllowList, @unchecked Sendab
             current.remove(host)
         }
         defaults.set(Array(current), forKey: key)
+    }
+
+    var suggestsSpeakerNames: Bool {
+        get { defaults.bool(forKey: speakerNamesKey) }
+        nonmutating set { defaults.set(newValue, forKey: speakerNamesKey) }
     }
 }

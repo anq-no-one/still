@@ -1601,6 +1601,9 @@
         }
       }
     },
+    "Approve": {},
+    "Approve on your %@": {},
+    "Approve only if the new device shows the same code. It then receives the projects it chooses to keep.": {},
     "Archive": {
       "localizations": {
         "de": {
@@ -2561,6 +2564,7 @@
         }
       }
     },
+    "Code": {},
     "Codex (~/.codex/config.toml)": {
       "localizations": {
         "de": {
@@ -3841,6 +3845,7 @@
         }
       }
     },
+    "Devices": {},
     "Diagnostics": {
       "localizations": {
         "de": {
@@ -5697,6 +5702,10 @@
         }
       }
     },
+    "Join Library": {},
+    "Join Your Library": {},
+    "Join only if your other device shows the same code. Recordings on this device stay and move into the joined library.": {},
+    "Join your other device's Still Library": {},
     "Journal on This Device": {
       "localizations": {
         "de": {
@@ -6593,6 +6602,7 @@
         }
       }
     },
+    "Mac": {},
     "Mac system audio as a separate track": {
       "localizations": {
         "de": {
@@ -7297,6 +7307,7 @@
         }
       }
     },
+    "New %@ wants to join": {},
     "New Project": {
       "localizations": {
         "de": {
@@ -7937,6 +7948,8 @@
         }
       }
     },
+    "Not stored on this Mac": {},
+    "Not stored on this device": {},
     "Not testing": {
       "localizations": {
         "de": {
@@ -8769,6 +8782,7 @@
         }
       }
     },
+    "Open Still on that device and approve this one when it shows the same code.": {},
     "Open System Settings": {
       "localizations": {
         "de": {
@@ -11841,6 +11855,8 @@
         }
       }
     },
+    "Removing from this Mac once another device keeps a copy": {},
+    "Removing from this device once another device keeps a copy": {},
     "Require Unlock": {
       "localizations": {
         "de": {
@@ -16001,6 +16017,8 @@
         }
       }
     },
+    "Stored on this Mac": {},
+    "Stored on this device": {},
     "Suggested name from the call: %@": {
       "localizations": {
         "de": {
@@ -16321,70 +16339,7 @@
         }
       }
     },
-    "Sync sends your recordings to your own iCloud account, encrypted on this device first. Apple stores only ciphertext: no transcript, note, audio, or key ever leaves in readable form. Text and notes arrive on your other devices before the audio finishes.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die Synchronisierung sendet deine Aufnahmen an dein eigenes iCloud-Konto, zuvor auf diesem Gerät verschlüsselt. Apple speichert nur Chiffretext: Kein Transkript, keine Notiz, kein Audio und kein Schlüssel verlässt jemals lesbar das Gerät. Text und Notizen kommen auf deinen anderen Geräten an, bevor das Audio fertig ist."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La sincronización envía tus grabaciones a tu propia cuenta de iCloud, cifradas antes en este dispositivo. Apple solo almacena texto cifrado: ninguna transcripción, nota, audio o clave sale nunca en forma legible. El texto y las notas llegan a tus otros dispositivos antes de que termine el audio."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La synchronisation envoie vos enregistrements vers votre propre compte iCloud, chiffrés sur cet appareil au préalable. Apple ne stocke que du texte chiffré : aucune transcription, note, audio ou clé ne quitte jamais l'appareil sous une forme lisible. Le texte et les notes arrivent sur vos autres appareils avant que l'audio ne soit terminé."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La sincronizzazione invia le tue registrazioni al tuo account iCloud, crittografate prima su questo dispositivo. Apple memorizza solo testo cifrato: nessuna trascrizione, nota, audio o chiave esce mai in forma leggibile. Il testo e le note arrivano sui tuoi altri dispositivi prima che l'audio sia completato."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synchronisatie stuurt je opnamen naar je eigen iCloud-account, eerst versleuteld op dit toestel. Apple bewaart alleen cijfertekst: geen transcript, notitie, audio of sleutel verlaat ooit in leesbare vorm dit toestel. Tekst en notities komen op je andere toestellen aan voordat de audio klaar is."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synchronizacja wysyła twoje nagrania do twojego własnego konta iCloud, zaszyfrowane najpierw na tym urządzeniu. Apple przechowuje tylko zaszyfrowane dane — żadna transkrypcja, notatka, dźwięk ani klucz nigdy nie opuszczają urządzenia w czytelnej formie. Tekst i notatki docierają na inne urządzenia, zanim skończy się dźwięk."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A sincronização envia as suas gravações para a sua própria conta iCloud, encriptadas primeiro neste dispositivo. A Apple guarda apenas texto cifrado: nenhuma transcrição, nota, áudio ou chave sai alguma vez em formato legível. O texto e as notas chegam aos seus outros dispositivos antes de o áudio terminar."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Синхронизация отправляет ваши записи в ваш собственный аккаунт iCloud, предварительно зашифровав их на этом устройстве. Apple хранит только зашифрованные данные — ни транскрипт, ни заметка, ни звук, ни ключ никогда не покидают устройство в читаемом виде. Текст и заметки приходят на другие устройства раньше, чем догружается звук."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synkronisering skickar dina inspelningar till ditt eget iCloud-konto, krypterade på den här enheten först. Apple lagrar endast chiffertext. Ingen transkription, anteckning, ljud eller nyckel lämnar någonsin enheten i läsbar form. Text och anteckningar kommer till dina andra enheter innan ljudet är klart."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Синхронізація надсилає ваші записи у ваш власний обліковий запис iCloud, попередньо зашифрувавши їх на цьому пристрої. Apple зберігає лише зашифровані дані — жоден транскрипт, нотатка, звук чи ключ ніколи не покидають пристрій у читабельному вигляді. Текст і нотатки з’являються на інших пристроях раніше, ніж довантажиться звук."
-          }
-        }
-      }
-    },
+    "Sync sends your recordings to your own iCloud account, encrypted on this device first. Apple stores only ciphertext: no transcript, note, audio, or key ever leaves in readable form. Each project has its own key, so a device only receives the projects it keeps. Text and notes arrive on your other devices before the audio finishes.": {},
     "System Audio": {
       "localizations": {
         "de": {
@@ -16961,70 +16916,8 @@
         }
       }
     },
-    "This choice stays on this device. Recordings outside it do not appear in the library, search, Siri, or the menu bar, and their audio is not downloaded here. With exactly one project chosen, new recordings go into it.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Diese Auswahl bleibt auf diesem Gerät. Aufnahmen außerhalb davon erscheinen nicht in der Bibliothek, der Suche, bei Siri oder in der Menüleiste, und ihr Audio wird hier nicht heruntergeladen. Ist genau ein Projekt gewählt, landen neue Aufnahmen darin."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esta elección permanece en este dispositivo. Las grabaciones que quedan fuera no aparecen en la biblioteca, la búsqueda, Siri ni la barra de menús, y su audio no se descarga aquí. Con exactamente un proyecto elegido, las nuevas grabaciones se guardan en él."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ce choix reste sur cet appareil. Les enregistrements en dehors de celui-ci n'apparaissent pas dans la bibliothèque, la recherche, Siri ou la barre de menus, et leur audio n'est pas téléchargé ici. Avec exactement un projet choisi, les nouveaux enregistrements y sont classés."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Questa scelta resta su questo dispositivo. Le registrazioni escluse non compaiono nella libreria, nella ricerca, in Siri o nella barra dei menu, e il loro audio non viene scaricato qui. Con esattamente un progetto scelto, le nuove registrazioni vi confluiscono."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deze keuze blijft op dit toestel. Opnamen die hierbuiten vallen, verschijnen niet in de bibliotheek, zoekfunctie, Siri of de menubalk, en de audio ervan wordt hier niet gedownload. Als er precies één project is gekozen, gaan nieuwe opnamen daarin."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ten wybór pozostaje na tym urządzeniu. Nagrania spoza niego nie pojawiają się w bibliotece, wyszukiwaniu, Siri ani na pasku menu, a ich dźwięk nie jest tu pobierany. Gdy wybrano dokładnie jeden projekt, nowe nagrania trafiają do niego."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esta escolha mantém-se neste dispositivo. As gravações fora dela não aparecem na biblioteca, na pesquisa, na Siri ou na barra de menus, e o seu áudio não é transferido para aqui. Com exatamente um projeto escolhido, as novas gravações vão para ele."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Этот выбор остаётся на этом устройстве. Записи вне него не появляются в библиотеке, поиске, Siri или строке меню, а их звук сюда не загружается. Если выбран ровно один проект, новые записи попадают в него."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Det här valet stannar på den här enheten. Inspelningar utanför det visas inte i biblioteket, sökningen, Siri eller menyraden, och deras ljud laddas inte ner här. Med exakt ett projekt valt hamnar nya inspelningar i det."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Цей вибір залишається на цьому пристрої. Записи поза ним не з’являються в бібліотеці, пошуку, Siri чи рядку меню, а їхній звук сюди не завантажується. Якщо вибрано рівно один проєкт, нові записи потрапляють у нього."
-          }
-        }
-      }
-    },
+    "This choice stays on this Mac. A project you turn off leaves it: its recordings, audio, search entries, and key are removed here once another device keeps a copy, and nothing is deleted anywhere else. With exactly one project chosen, new recordings go into it.": {},
+    "This choice stays on this device. A project you turn off leaves it: its recordings, audio, search entries, and key are removed here once another device keeps a copy, and nothing is deleted anywhere else. With exactly one project chosen, new recordings go into it.": {},
     "This device could not turn the recording into text. The audio is saved, so you can still play it.": {
       "localizations": {
         "de": {
@@ -18689,6 +18582,7 @@
         }
       }
     },
+    "Waiting for another device to share this project": {},
     "Waiting for approval. Still unlocks Pro as soon as it is approved.": {
       "localizations": {
         "de": {
@@ -19393,6 +19287,7 @@
         }
       }
     },
+    "Your %@ approved this device.": {},
     "Your Library is locked, so AI tools get an error until you unlock it.": {
       "localizations": {
         "de": {
@@ -19969,6 +19864,8 @@
         }
       }
     },
+    "iPad": {},
+    "iPhone": {},
     "macOS already uses this shortcut. Choose another one or turn it off in System Settings → Keyboard → Keyboard Shortcuts.": {
       "localizations": {
         "de": {
@@ -20032,7 +19929,8 @@
           }
         }
       }
-    }
+    },
+    "other device": {}
   },
   "version": "1.0"
 }

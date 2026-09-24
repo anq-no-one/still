@@ -140,6 +140,20 @@ struct BrowserMeetingBridgeTests {
     }
 
     @Test
+    func speakerNamesAreIgnoredUntilTheUserTurnsThemOn() async throws {
+        let (bridge, coordinator) = try await make(allowed: [meet])
+        bridge.suggestsSpeakerNames = false
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .started))
+
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .speakerStarted, speaker: "Dana Kim"))
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .speakerEnded, speaker: "Dana Kim"))
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .ended))
+
+        let recording = try #require(coordinator.library.recordings.first)
+        #expect(recording.speakers.allSatisfy { $0.suggestedName == nil })
+    }
+
+    @Test
     func soundFromAnotherTabIsMarkedOnTheSavedRecording() async throws {
         let (bridge, coordinator) = try await make(allowed: [meet])
         await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .started))
@@ -200,6 +214,7 @@ struct BrowserMeetingBridgeTests {
 
 final class MemorySiteAllowList: MeetingSiteAllowList, @unchecked Sendable {
     private var allowed: Set<String>
+    var suggestsSpeakerNames = true
 
     init(allowed: Set<String>) {
         self.allowed = allowed

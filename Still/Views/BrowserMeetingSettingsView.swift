@@ -10,10 +10,11 @@ struct BrowserMeetingSettingsView: View {
             ForEach(bridge.sites) { site in
                 Toggle(site.name, isOn: allowed(site))
             }
+            Toggle("Suggest Speaker Names from Google Meet", isOn: speakerNames)
         } header: {
             Text("Browser Meetings")
         } footer: {
-            Text("The Still extension tells the app when a meeting on one of these sites starts and ends, and on Google Meet who is speaking. Still then records only the browser that holds the meeting, so music and videos in other apps stay out, and suggests speaker names you can confirm or reject. The extension reads nothing else from the page, and nothing from your Library ever reaches the browser. Turning the extension off leaves manual recording and allowed call apps working as before.")
+            Text("The Still extension tells the app when a meeting on one of these sites starts and ends, and, if you turn on speaker names, who is speaking on Google Meet. Still then records only the browser that holds the meeting, so music and videos in other apps stay out, and suggests speaker names you can confirm or reject. The extension reads nothing else from the page, and nothing from your Library ever reaches the browser. Turning the extension off leaves manual recording and allowed call apps working as before.")
         }
 
         Section {
@@ -29,6 +30,10 @@ struct BrowserMeetingSettingsView: View {
         } footer: {
             Text("Turn on each browser where you installed the Still extension, so the extension can reach the app. Safari needs no setup here.")
         }
+    }
+
+    private var speakerNames: Binding<Bool> {
+        Binding(get: { bridge.suggestsSpeakerNames }, set: { bridge.suggestsSpeakerNames = $0 })
     }
 
     private func allowed(_ site: MeetingSite) -> Binding<Bool> {
