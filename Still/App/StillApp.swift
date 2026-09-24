@@ -18,6 +18,7 @@ struct StillApp: App {
     private let browser: BrowserMeetingBridge
     private let aiTools: MCPAccess
     private let chromium: ChromiumConnections
+    private let microphones: MicrophoneChoice
     #endif
 
     private let navigation: LibraryNavigation
@@ -199,6 +200,18 @@ struct StillApp: App {
                 isReady: { setupFlow.isComplete && recordingLibrary.state == .unlocked }
             )
         }
+        #if os(macOS)
+        microphones = MainActor.assumeIsolated {
+            let choice = MicrophoneChoice(
+                source: CoreAudioInputDevices(),
+                store: UserDefaultsMicrophoneChoiceStore(),
+                meter: InputLevelMeter(input: microphone),
+                isRecording: { recordingCoordinator.isCapturing }
+            )
+            microphone.preferredDevice = { choice.captureDeviceUID }
+            return choice
+        }
+        #endif
         navigation = MainActor.assumeIsolated { LibraryNavigation() }
         Task { @MainActor in
             await recordingLibrary.unlock()
@@ -282,13 +295,21 @@ struct StillApp: App {
                     automatic: automatic,
                     browser: browser,
                     aiTools: aiTools,
-                    chromium: chromium
+                    chromium: chromium,
+                    microphones: microphones
                 )
             }
         }
 
         MenuBarExtra {
-            RecordingMenuBarPanel(coordinator: coordinator, library: library, automatic: automatic, navigation: navigation, lock: lock)
+            RecordingMenuBarPanel(
+                coordinator: coordinator,
+                library: library,
+                automatic: automatic,
+                microphones: microphones,
+                navigation: navigation,
+                lock: lock
+            )
         } label: {
             RecordingMenuBarLabel(coordinator: coordinator)
                 .modifier(LibraryWindowOpenerInstaller(reopener: reopener))

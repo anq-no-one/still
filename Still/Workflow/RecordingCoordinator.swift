@@ -65,6 +65,10 @@ final class RecordingCoordinator {
         phase == .recording
     }
 
+    var isCapturing: Bool {
+        phase == .preparing || phase == .recording
+    }
+
     var canStop: Bool {
         workflow?.canSave == true
     }
