@@ -24,7 +24,7 @@ happens, and only for that purpose:
 | You do this | What travels |
 |---|---|
 | Approve the model download | A request to the model host for the transcription, speaker and language model files. No content of yours is sent. |
-| Turn on iCloud sync | Encrypted recordings to your own iCloud account. Apple stores ciphertext; it cannot read your transcripts, notes, audio, or key. |
+| Turn on iCloud sync | Encrypted recordings to your own iCloud account. Apple stores ciphertext; it cannot read your transcripts, notes, audio, or key. Each project has its own key, so a Mac receives only the projects you keep on it. |
 | Turn on nearby sync and pair a device | The same encrypted data, directly to the device you paired, over your local network. |
 | Buy or restore Still Pro | A purchase request to Apple. Apple tells us whether you own the product, nothing else. |
 | Share or export | Only what you chose, only to where you chose, through the system share sheet. |
@@ -85,7 +85,8 @@ before deleting the app, or remove Still's data from your iCloud account afterwa
 ## What Still cannot protect against
 
 - **Metadata is not encrypted.** When a recording was made and how long it lasted are stored and
-  synced in the clear. Someone with access to your iCloud records learns when you recorded, never
+  synced in the clear, and so are the kind of each of your devices and the random ids of the
+  projects it keeps. Someone with access to your iCloud records learns when you recorded, never
   what was said.
 - **Your recovery code is the whole key.** Anyone holding it can open your Library, and losing it
   with no unlocked device means the Library cannot be opened. There is no back door.
