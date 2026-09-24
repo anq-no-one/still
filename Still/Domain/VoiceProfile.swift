@@ -50,14 +50,6 @@ enum VoiceProfiles {
             .sorted { $0.name < $1.name }
     }
 
-    static func ownerName(in recordings: [Recording]) -> String? {
-        newestFirst(recordings)
-            .lazy
-            .flatMap(\.speakers)
-            .first { $0.isYou && $0.isNamedByUser }?
-            .name
-    }
-
     static func key(for name: String) -> String {
         name.trimmingCharacters(in: .whitespacesAndNewlines)
             .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)

@@ -2,6 +2,10 @@ import SwiftUI
 
 struct TranscriptionSettingsView: View {
     let models: ModelInstallers
+    let library: Library
+
+    @State private var ownerName = ""
+    @State private var ownerNameFailure: String?
 
     var body: some View {
         Form {
@@ -14,6 +18,12 @@ struct TranscriptionSettingsView: View {
             }
 
             Section {
+                TextField("Your Name", text: $ownerName, prompt: Text("First and last name"))
+                    .onSubmit(saveOwnerName)
+                if let ownerNameFailure {
+                    Label(ownerNameFailure, systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.red)
+                }
                 LabeledContent("Download Size", value: models.speakers.pack.downloadSizeText)
                 ModelPackStatus(installer: models.speakers, ready: "Ready to Tell Speakers Apart")
             } header: {
@@ -24,6 +34,18 @@ struct TranscriptionSettingsView: View {
         }
         .formStyle(.grouped)
         .settingsPaneTitle("Transcription")
+        .onAppear { ownerName = library.ownerName ?? "" }
+        .onDisappear(perform: saveOwnerName)
+    }
+
+    private func saveOwnerName() {
+        guard ownerName != (library.ownerName ?? "") else { return }
+        do {
+            try library.setOwnerName(ownerName)
+            ownerNameFailure = nil
+        } catch {
+            ownerNameFailure = error.localizedDescription
+        }
     }
 }
 
