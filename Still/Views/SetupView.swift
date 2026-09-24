@@ -2,7 +2,11 @@ import SwiftUI
 
 struct SetupView: View {
     let flow: SetupFlow
-    let installer: ModelPackInstaller
+    let models: ModelInstallers
+
+    private var installer: ModelPackInstaller {
+        models.transcription
+    }
 
     var body: some View {
         Group {
@@ -13,6 +17,8 @@ struct SetupView: View {
                 microphoneStep
             case .systemAudio:
                 systemAudioStep
+            case .calendar:
+                calendarStep
             case .transcription:
                 transcriptionStep
             case nil:
@@ -70,6 +76,19 @@ struct SetupView: View {
         }
     }
 
+    private var calendarStep: some View {
+        step(
+            icon: "calendar",
+            title: "Know Who Is in the Meeting",
+            body: "Still can read the event you are in to put names on the people speaking in your recordings. The calendar stays on this device, and you can skip this."
+        ) {
+            primary("Allow Calendar") {
+                Task { await flow.requestCalendar() }
+            }
+            secondary("Not Now", action: flow.skipCalendar)
+        }
+    }
+
     private var transcriptionStep: some View {
         step(
             icon: "waveform",
@@ -83,11 +102,11 @@ struct SetupView: View {
                 }
             case .failed:
                 primary("Try Again") {
-                    Task { await installer.approveAndInstall() }
+                    Task { await models.approveAndInstall() }
                 }
             default:
-                primary("Download \(installer.pack.downloadSizeText)") {
-                    Task { await installer.approveAndInstall() }
+                primary("Download \(models.downloadSizeText)") {
+                    Task { await models.approveAndInstall() }
                 }
             }
         }

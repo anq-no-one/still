@@ -25,6 +25,9 @@ struct SetupFlowTests {
         #expect(flow.step == .systemAudio)
 
         flow.requestSystemAudio()
+        #expect(flow.step == .calendar)
+
+        await flow.requestCalendar()
         #expect(flow.step == .transcription)
 
         modelReady = true
@@ -51,6 +54,7 @@ struct SetupFlowTests {
         flow.acknowledgePrivacy()
         await flow.requestMicrophone()
         flow.requestSystemAudio()
+        flow.skipCalendar()
         #expect(flow.isComplete)
 
         permissions.systemAudio = .denied
@@ -65,8 +69,36 @@ struct SetupFlowTests {
 
         flow.acknowledgePrivacy()
         await flow.requestMicrophone()
+        #expect(flow.step == .calendar)
+        flow.skipCalendar()
 
         #expect(flow.isComplete)
+    }
+
+    @Test
+    func aDeclinedCalendarDoesNotHoldSetupBack() async {
+        let permissions = FakeSetupPermissions(calendarAnswer: .denied)
+        let flow = makeFlow(permissions: permissions, includesSystemAudio: false, isTranscriptionReady: { true })
+        flow.acknowledgePrivacy()
+        await flow.requestMicrophone()
+
+        await flow.requestCalendar()
+
+        #expect(flow.calendar == .denied)
+        #expect(flow.isComplete)
+    }
+
+    @Test
+    func skippingTheCalendarIsRememberedAcrossLaunches() {
+        let store = MemorySetupStore()
+        let permissions = FakeSetupPermissions()
+        permissions.microphone = .granted
+        permissions.systemAudio = .granted
+        let flow = makeFlow(store: store, permissions: permissions)
+        flow.acknowledgePrivacy()
+        flow.skipCalendar()
+
+        #expect(makeFlow(store: store, permissions: permissions).step == .transcription)
     }
 
     @Test
@@ -104,10 +136,17 @@ final class MemorySetupStore: SetupProgressStore, @unchecked Sendable {
 final class FakeSetupPermissions: SetupPermissions {
     var microphone: PermissionState = .notAsked
     var systemAudio: PermissionState = .notAsked
+    var calendar: PermissionState = .notAsked
     private let microphoneAnswer: PermissionState
+    private let calendarAnswer: PermissionState
 
-    init(microphoneAnswer: PermissionState = .granted) {
+    init(microphoneAnswer: PermissionState = .granted, calendarAnswer: PermissionState = .granted) {
         self.microphoneAnswer = microphoneAnswer
+        self.calendarAnswer = calendarAnswer
+    }
+
+    func requestCalendar() async {
+        calendar = calendarAnswer
     }
 
     func requestMicrophone() async {

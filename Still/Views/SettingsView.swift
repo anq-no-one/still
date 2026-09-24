@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     let library: Library
-    let modelInstaller: ModelPackInstaller
+    let models: ModelInstallers
     let entitlements: Entitlements
     let sync: SyncEngine
     let diagnostics: Diagnostics
@@ -15,7 +15,7 @@ struct SettingsView: View {
         #if os(macOS)
         TabView {
             Tab("General", systemImage: "gearshape") {
-                TranscriptionSettingsView(installer: modelInstaller)
+                TranscriptionSettingsView(models: models)
             }
             Tab("Recording", systemImage: "record.circle") {
                 Form {
@@ -46,7 +46,7 @@ struct SettingsView: View {
         #else
         SettingsList(
             library: library,
-            modelInstaller: modelInstaller,
+            models: models,
             entitlements: entitlements,
             sync: sync,
             diagnostics: diagnostics
@@ -58,7 +58,7 @@ struct SettingsView: View {
 #if os(iOS)
 private struct SettingsList: View {
     let library: Library
-    let modelInstaller: ModelPackInstaller
+    let models: ModelInstallers
     let entitlements: Entitlements
     let sync: SyncEngine
     let diagnostics: Diagnostics
@@ -78,7 +78,7 @@ private struct SettingsList: View {
 
                 Section {
                     link("Transcription", systemImage: "waveform", color: .blue) {
-                        TranscriptionSettingsView(installer: modelInstaller)
+                        TranscriptionSettingsView(models: models)
                     }
                     link("Sync", systemImage: "arrow.triangle.2.circlepath", color: .cyan) {
                         SyncSettingsView(engine: sync)

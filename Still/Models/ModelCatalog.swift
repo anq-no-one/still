@@ -34,4 +34,36 @@ enum ModelCatalog {
             ModelFile(path: "parakeet_vocab.json", bytes: 151122, sha256: "7ec60e05f1b24480736ec0eed40900f4626bce1fa9a60fd700ec7e2a59198735"),
         ]
     )
+
+    static let speakerSeparation = ModelPack(
+        id: "speaker-separation",
+        purpose: String(localized: "Tells apart the people speaking in a recording, on this device, and recognizes voices you have named before."),
+        version: "sortformer-ae9a27ab-lseend-28ce1b1f-wespeaker-df2625ac",
+        baseURL: URL(string: "https://huggingface.co/FluidInference/diar-streaming-sortformer-coreml/resolve/ae9a27ab45dc0aa3abede7d2d6bad2b7a69aa6d1/v3/palettized/")!,
+        minimumMemoryBytes: 4 * 1_024 * 1_024 * 1_024,
+        files: [
+            ModelFile(path: "\(SpeakerModels.smallMeeting)/analytics/coremldata.bin", bytes: 243, sha256: "d089abd182fa99fa06fc6b1ac4a19f4facf26efe463a525d955de7738b992911"),
+            ModelFile(path: "\(SpeakerModels.smallMeeting)/coremldata.bin", bytes: 842, sha256: "d1d42633c334b71b94c04714e09edf3d68a38a6496f1ae851fd08dfef7571736"),
+            ModelFile(path: "\(SpeakerModels.smallMeeting)/model.mil", bytes: 1808228, sha256: "6cf150303a99908f667564a9a63e5e13a9bcc43f6cdf78575865647a22631e68"),
+            ModelFile(path: "\(SpeakerModels.smallMeeting)/weights/weight.bin", bytes: 90425472, sha256: "846e44443e302dc44c914ee807f29537e01ec67d1d463a61ef277e1198527138"),
+            ModelFile(path: "\(SpeakerModels.largeMeeting)/analytics/coremldata.bin", bytes: 243, sha256: "eae41bbb03511ff0e04bb217b278b49e67a9744724c28ac2c3b1ecbb6a719544", source: SpeakerModels.largeMeetingSource),
+            ModelFile(path: "\(SpeakerModels.largeMeeting)/coremldata.bin", bytes: 1413, sha256: "ca07a132288cc2acbaee7e034d18c3a9d66bd5be22617b52e9e812d160268ccf", source: SpeakerModels.largeMeetingSource),
+            ModelFile(path: "\(SpeakerModels.largeMeeting)/metadata.json", bytes: 7024, sha256: "f0f4925a193fd765f54f2c9854b16ce4aaae344669d10c1bd412f498d009af6a", source: SpeakerModels.largeMeetingSource),
+            ModelFile(path: "\(SpeakerModels.largeMeeting)/model.mil", bytes: 207939, sha256: "036a1b0a14ffc42e0ff66a16c955b1a79cbd95409d44c4cc571b29bbec79b86d", source: SpeakerModels.largeMeetingSource),
+            ModelFile(path: "\(SpeakerModels.largeMeeting)/weights/weight.bin", bytes: 44407680, sha256: "0bf5dc575c0dcb1856eb21e25f401e9e45c183c663f6b6324404b650fdcdbec2", source: SpeakerModels.largeMeetingSource),
+            ModelFile(path: "\(SpeakerModels.voiceprint)/analytics/coremldata.bin", bytes: 243, sha256: "d2b1fcde6121aea3ff0e14c1dc50d09dacb0314a2e89156353c31804230a422f", source: SpeakerModels.voiceprintSource),
+            ModelFile(path: "\(SpeakerModels.voiceprint)/coremldata.bin", bytes: 359, sha256: "6feb2472a71fa9d8a84020c85206138a4f6261c565c9884bf518d59dd5838da7", source: SpeakerModels.voiceprintSource),
+            ModelFile(path: "\(SpeakerModels.voiceprint)/metadata.json", bytes: 2738, sha256: "ddc4858b4051254098015cd0b97080149839d697faf7b036f933190e70b26758", source: SpeakerModels.voiceprintSource),
+            ModelFile(path: "\(SpeakerModels.voiceprint)/model.mil", bytes: 706900, sha256: "2850f775d6ba659f01f616fed77ce6a45a25de3eb7e4bf3a4b07b658be4e13dd", source: SpeakerModels.voiceprintSource),
+            ModelFile(path: "\(SpeakerModels.voiceprint)/weights/weight.bin", bytes: 7243904, sha256: "34004f6798d35cad7071e2fdc67e63faaa782f53697e1cb49bcb452cf81ae151", source: SpeakerModels.voiceprintSource),
+        ]
+    )
+}
+
+enum SpeakerModels {
+    static let smallMeeting = "SortformerOffline_v2.1.mlmodelc"
+    static let largeMeeting = "ls_eend_dih3_100ms.mlmodelc"
+    static let voiceprint = "wespeaker_v2.mlmodelc"
+    static let voiceprintSource = URL(string: "https://huggingface.co/FluidInference/speaker-diarization-coreml/resolve/df2625ac79a7ac6b65ad868fee6d80f320da4232/")!
+    static let largeMeetingSource = URL(string: "https://huggingface.co/FluidInference/ls-eend-coreml/resolve/28ce1b1f8ef186729df63b3886fbaae7bc10c4a1/optimized/dih3/100ms/")!
 }

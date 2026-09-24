@@ -35,6 +35,7 @@ struct EncryptedRecordingRepository: RecordingRepository {
                 transcript: content.transcript,
                 segments: content.segments,
                 speakers: content.speakers,
+                expectedParticipants: content.expectedParticipants,
                 note: content.note,
                 createdAt: record.createdAt,
                 duration: record.duration
@@ -50,6 +51,7 @@ struct EncryptedRecordingRepository: RecordingRepository {
                     transcript: recording.transcript,
                     segments: recording.segments,
                     speakers: recording.speakers,
+                    expectedParticipants: recording.expectedParticipants,
                     note: recording.note
                 )
             )

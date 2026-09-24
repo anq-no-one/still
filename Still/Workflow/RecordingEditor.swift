@@ -67,12 +67,8 @@ final class RecordingEditor {
         scheduleSave()
     }
 
-    /// Renaming touches the speaker group only. Segments point at it by id, so
-    /// no transcript text changes.
     func renameSpeaker(_ speaker: Speaker, to name: String) {
-        guard let index = recording.speakers.firstIndex(where: { $0.id == speaker.id }) else { return }
-
-        recording.speakers[index].name = name
+        recording = recording.renamingSpeaker(speaker, to: name)
         scheduleSave()
     }
 

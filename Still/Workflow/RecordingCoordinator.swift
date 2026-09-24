@@ -20,6 +20,8 @@ final class RecordingCoordinator {
     private let entitlements: Entitlements
     private let makeSession: () -> TranscriptionSession
     private let makeFinalTranscription: () -> FinalTranscription
+    private let makeSpeakerSeparation: () -> SpeakerSeparation
+    private let expectedParticipants: @MainActor (Date) async -> [String]
     private let isReady: @MainActor () -> Bool
 
     private(set) var workflow: RecordingWorkflow?
@@ -30,6 +32,8 @@ final class RecordingCoordinator {
         entitlements: Entitlements,
         makeSession: @escaping () -> TranscriptionSession,
         makeFinalTranscription: @escaping () -> FinalTranscription,
+        makeSpeakerSeparation: @escaping () -> SpeakerSeparation = { .trackBased },
+        expectedParticipants: @escaping @MainActor (Date) async -> [String] = { _ in [] },
         isReady: @escaping @MainActor () -> Bool = { true }
     ) {
         self.isReady = isReady
@@ -37,6 +41,8 @@ final class RecordingCoordinator {
         self.entitlements = entitlements
         self.makeSession = makeSession
         self.makeFinalTranscription = makeFinalTranscription
+        self.makeSpeakerSeparation = makeSpeakerSeparation
+        self.expectedParticipants = expectedParticipants
     }
 
     var phase: Phase {
@@ -76,6 +82,8 @@ final class RecordingCoordinator {
             let workflow = RecordingWorkflow(
                 session: makeSession(),
                 finalTranscription: makeFinalTranscription(),
+                speakerSeparation: entitlements.allows(.speakerSeparation) ? makeSpeakerSeparation() : .trackBased,
+                expectedParticipants: expectedParticipants,
                 recorder: try library.makeRecorder(),
                 library: library,
                 showsLiveDraft: entitlements.allows(.liveTranscript)

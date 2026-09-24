@@ -1,4 +1,5 @@
 import AVFoundation
+import EventKit
 import Foundation
 #if os(macOS)
 import AppKit
@@ -26,6 +27,18 @@ final class SystemSetupPermissions: SetupPermissions {
         #else
         .granted
         #endif
+    }
+
+    var calendar: PermissionState {
+        switch EKEventStore.authorizationStatus(for: .event) {
+        case .fullAccess: .granted
+        case .notDetermined: .notAsked
+        default: .denied
+        }
+    }
+
+    func requestCalendar() async {
+        _ = try? await EKEventStore().requestFullAccessToEvents()
     }
 
     func requestMicrophone() async {

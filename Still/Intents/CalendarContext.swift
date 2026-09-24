@@ -54,7 +54,7 @@ struct EventKitCalendarSource: CalendarSource {
         return store.events(matching: predicate).map { event in
             MeetingContext(
                 title: event.title ?? "",
-                participants: (event.attendees ?? []).compactMap(\.name)
+                participants: (event.attendees ?? []).filter { !$0.isCurrentUser }.compactMap(\.name)
             )
         }
     }

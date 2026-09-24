@@ -15,6 +15,8 @@ final class RecordingWorkflow {
 
     private let session: TranscriptionSession
     private let finalTranscription: FinalTranscription
+    private let speakerSeparation: SpeakerSeparation
+    private let expectedParticipants: @MainActor (Date) async -> [String]
     private let noteBuilder: GroundedNoteBuilder
     private let recorder: AudioRecorder
     private let library: RecordingLibrary
@@ -31,6 +33,8 @@ final class RecordingWorkflow {
     init(
         session: TranscriptionSession,
         finalTranscription: FinalTranscription,
+        speakerSeparation: SpeakerSeparation = .trackBased,
+        expectedParticipants: @escaping @MainActor (Date) async -> [String] = { _ in [] },
         noteBuilder: GroundedNoteBuilder = GroundedNoteBuilder(),
         recorder: AudioRecorder,
         library: RecordingLibrary,
@@ -39,6 +43,8 @@ final class RecordingWorkflow {
     ) {
         self.session = session
         self.finalTranscription = finalTranscription
+        self.speakerSeparation = speakerSeparation
+        self.expectedParticipants = expectedParticipants
         self.noteBuilder = noteBuilder
         self.recorder = recorder
         self.library = library
@@ -118,7 +124,8 @@ final class RecordingWorkflow {
 
         do {
             try await recorder.finish()
-            let transcription = try await transcribeCapturedTracksIfPossible()
+            let participants = await expectedParticipants(startedAt ?? now())
+            let transcription = try await transcribeAndSeparateSpeakers(expecting: participants)
             let segments = transcription?.segments ?? []
             let transcript = segments.plainText
             guard !transcript.isEmpty || transcription == nil else {
@@ -141,6 +148,7 @@ final class RecordingWorkflow {
                     transcript: transcript,
                     segments: segments,
                     speakers: transcription?.speakers ?? [],
+                    expectedParticipants: participants.isEmpty ? nil : participants,
                     note: note,
                     createdAt: startedAt,
                     duration: elapsed
@@ -160,15 +168,20 @@ final class RecordingWorkflow {
         state = .idle
     }
 
-    private func transcribeCapturedTracksIfPossible() async throws -> TranscriptionResult? {
+    private func transcribeAndSeparateSpeakers(expecting participants: [String]) async throws -> TranscriptionResult? {
+        let tracks = try library.capturedTracks(forRecording: recordingID)
+        let transcription: TranscriptionResult
         do {
-            return try await finalTranscription.run(
-                tracks: try library.capturedTracks(forRecording: recordingID),
+            transcription = try await finalTranscription.run(
+                tracks: tracks,
                 checkpoints: try library.checkpointStore(forRecording: recordingID)
             )
         } catch is TranscriptionError {
             return nil
         }
+        var naming = library.speakerNaming
+        naming.participants = participants
+        return await speakerSeparation.separate(transcription, tracks: tracks, naming: naming)
     }
 
     private var isFailed: Bool {

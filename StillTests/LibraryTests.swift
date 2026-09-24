@@ -37,6 +37,34 @@ struct EncryptedRecordingRepositoryTests {
     }
 
     @Test
+    func keepsVoicesAndExpectedPeopleSealed() throws {
+        let context = try makeContext()
+        let repository = EncryptedRecordingRepository(context: context, key: SymmetricKey(size: .bits256))
+        let guest = Speaker(
+            name: "Anna Kowalska",
+            origin: .system,
+            isYou: false,
+            nameSource: .user,
+            voiceprint: Voiceprint([0.6, 0.8])
+        )
+        let recording = Recording(
+            title: "Call",
+            transcript: "",
+            speakers: [guest],
+            expectedParticipants: ["Anna Kowalska", "Ben Olsen"],
+            duration: 60
+        )
+
+        try repository.save(recording)
+
+        let loaded = try #require(try repository.load().first)
+        #expect(loaded.speakers == [guest])
+        #expect(loaded.expectedParticipants == ["Anna Kowalska", "Ben Olsen"])
+        let stored = try #require(try context.fetch(FetchDescriptor<EncryptedRecording>()).first)
+        #expect(!String(decoding: stored.sealedContent, as: UTF8.self).contains("Ben Olsen"))
+    }
+
+    @Test
     func refusesToReadWithAnotherKey() throws {
         let context = try makeContext()
         try EncryptedRecordingRepository(context: context, key: SymmetricKey(size: .bits256))
