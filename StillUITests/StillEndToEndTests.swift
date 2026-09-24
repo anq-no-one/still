@@ -76,24 +76,27 @@ final class StillEndToEndTests: XCTestCase {
 
     private func completeOnboarding() {
         tap("Continue")
-        let allowMicrophone = app.buttons["Allow Microphone"]
-        if allowMicrophone.waitForExistence(timeout: 5) {
-            allowMicrophone.tap()
-        }
-        let skipCalendar = app.buttons["Not Now"]
-        if skipCalendar.waitForExistence(timeout: 5) {
-            skipCalendar.tap()
-        }
-        installTranscription()
+        tapIfShown("Allow Microphone")
+        tapIfShown("Not Now")
+        tapIfShown(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Download'")).firstMatch)
+        let setupStep = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Step '")).firstMatch
+        waitForAbsence(setupStep, timeout: 1_800, "setup to finish, including the Model Pack download")
     }
 
-    private func installTranscription() {
-        let download = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Download'")).firstMatch
-        waitFor(app.staticTexts["No Recordings Yet"].exists ? app.staticTexts["No Recordings Yet"] : app.staticTexts["Transcribe on This Device"], "the transcription step")
-        if download.exists {
-            download.tap()
+    private func tapIfShown(_ label: String) {
+        tapIfShown(app.buttons[label])
+    }
+
+    private func tapIfShown(_ button: XCUIElement, timeout: TimeInterval = 10) {
+        let deadline = Date.now.addingTimeInterval(timeout)
+        while Date.now < deadline {
+            allowSystemPrompts()
+            if button.exists {
+                button.tap()
+                return
+            }
+            Thread.sleep(forTimeInterval: 1)
         }
-        waitForAbsence(app.staticTexts["Transcribe on This Device"], timeout: 1_800, "the Model Pack to download and verify")
     }
 
     private func tap(_ label: String) {
