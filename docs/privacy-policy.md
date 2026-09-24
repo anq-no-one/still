@@ -1,6 +1,6 @@
 # Still privacy policy
 
-Last updated: 23 September 2026
+Last updated: 24 September 2026
 
 ## The short version
 
@@ -11,8 +11,9 @@ and even then it travels and rests as ciphertext your own devices can open.
 ## What Still stores, and where
 
 Recordings, transcripts, notes, facts and tasks, speaker names and voice profiles live in an encrypted Library on your device.
-Audio is written in encrypted pieces as you record. The encryption key is held in the device
-keychain and released by Face ID, Touch ID or your device passcode.
+Audio is written in encrypted pieces as you record. The encryption key is held in this device's
+keychain. If you turn on App Lock, Still also asks for Face ID, Touch ID or your device passcode
+before it shows your Library.
 
 Still never uploads this content anywhere on its own.
 
@@ -32,11 +33,17 @@ happens, and only for that purpose:
 
 Diagnostics is off unless you turn it on, and you can turn it off again at any time.
 
+Separately, Still keeps a 90-day journal on this device of what it did and what failed: event
+names, app version, error numbers and random identifiers, sealed with a key that never leaves the
+device. It never holds audio, transcripts, names, project titles, file paths or keys, and it leaves
+the device only when you export it yourself.
+
 ## Voice profiles
 
-When you name a speaker, Still keeps a voice profile so it can recognize that person in later
-recordings. The profile is a numeric voice signature, not audio. It is stored and synced encrypted
-like the rest of your Library, and you can delete it at any time.
+Still remembers a person's voice only when you turn that on for a named speaker. It then suggests
+that name when the voice returns in a later recording, and you confirm each suggestion. The profile
+is a numeric voice signature, not audio. It is stored and synced encrypted like the rest of your
+Library, and Settings lets you forget it at any time.
 
 ## Local AI
 
@@ -91,7 +98,7 @@ before deleting the app, or remove Still's data from your iCloud account afterwa
   what was said.
 - **Your recovery code is the whole key.** Anyone holding it can open your Library, and losing it
   with no unlocked device means the Library cannot be opened. There is no back door.
-- **A compromised device.** Still relies on the keychain and biometric enforcement; no app can
+- **A compromised device.** Still relies on the keychain and, with App Lock on, biometric enforcement; no app can
   restore that boundary once the operating system itself is compromised.
 
 ## Recording other people
