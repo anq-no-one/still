@@ -107,18 +107,53 @@ struct ModelPackInstallerTests {
         #expect(relaunched.requests.isEmpty)
     }
 
+    @Test
+    func resumingWithoutApprovalMakesNoRequest() async throws {
+        let scratch = try Scratch()
+        let downloader = FakeDownloader(pack: .sample)
+        let installer = makeInstaller(root: scratch.directory, downloader: downloader)
+
+        await installer.resumeIfApproved()
+
+        #expect(installer.state == .needsApproval)
+        #expect(downloader.requests.isEmpty)
+    }
+
+    @Test
+    func aDownloadInterruptedByQuittingFinishesAfterRelaunchWithoutAskingAgain() async throws {
+        let scratch = try Scratch()
+        let approval = MemoryModelApprovalStore()
+        let downloader = FakeDownloader(pack: .sample)
+        downloader.failAfterBytes = 4
+        let first = makeInstaller(root: scratch.directory, downloader: downloader, approval: approval)
+        await first.approveAndInstall()
+        #expect(first.state != .installed)
+
+        downloader.failAfterBytes = nil
+        let relaunched = makeInstaller(root: scratch.directory, downloader: downloader, approval: approval)
+        #expect(relaunched.state == .needsApproval)
+        #expect(relaunched.isApproved)
+
+        await relaunched.resumeIfApproved()
+
+        #expect(relaunched.state == .installed)
+        #expect(downloader.resumedOffsets.contains(4))
+    }
+
     private func makeInstaller(
         root: URL,
         downloader: ModelFileDownloader,
         memory: Int = ModelPack.sample.minimumMemoryBytes,
-        freeBytes: Int = 1 << 30
+        freeBytes: Int = 1 << 30,
+        approval: ModelApprovalStore = MemoryModelApprovalStore()
     ) -> ModelPackInstaller {
         ModelPackInstaller(
             pack: .sample,
             root: root,
             downloader: downloader,
             availableMemory: { memory },
-            availableStorage: { _ in freeBytes }
+            availableStorage: { _ in freeBytes },
+            approval: approval
         )
     }
 }

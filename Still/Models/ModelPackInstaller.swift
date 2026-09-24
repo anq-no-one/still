@@ -18,6 +18,7 @@ final class ModelPackInstaller {
     private let downloader: ModelFileDownloader
     private let availableMemory: () -> Int
     private let availableStorage: (URL) -> Int?
+    private let approval: ModelApprovalStore
 
     private(set) var state: State
 
@@ -26,13 +27,15 @@ final class ModelPackInstaller {
         root: URL,
         downloader: ModelFileDownloader,
         availableMemory: @escaping () -> Int = { Int(ProcessInfo.processInfo.physicalMemory) },
-        availableStorage: @escaping (URL) -> Int? = ModelPackInstaller.freeBytes
+        availableStorage: @escaping (URL) -> Int? = ModelPackInstaller.freeBytes,
+        approval: ModelApprovalStore = MemoryModelApprovalStore()
     ) {
         self.pack = pack
         self.root = root
         self.downloader = downloader
         self.availableMemory = availableMemory
         self.availableStorage = availableStorage
+        self.approval = approval
         state = Self.isInstalled(pack: pack, root: root) ? .installed : .needsApproval
     }
 
@@ -51,6 +54,7 @@ final class ModelPackInstaller {
     /// approves the download makes a request.
     func approveAndInstall() async {
         guard state != .installed else { return }
+        approval.markApproved(pack)
 
         do {
             try checkDevice()
@@ -92,6 +96,18 @@ final class ModelPackInstaller {
         } catch {
             state = .failed(error.localizedDescription)
         }
+    }
+
+    var isApproved: Bool {
+        approval.isApproved(pack)
+    }
+
+    /// Picks up a download the user approved before the app quit or the network dropped.
+    func resumeIfApproved() async {
+        guard isApproved, state != .installed else { return }
+        if case .installing = state { return }
+        if state == .verifying { return }
+        await approveAndInstall()
     }
 
     private func checkDevice() throws {

@@ -6,6 +6,8 @@ struct SettingsView: View {
     let entitlements: Entitlements
     let sync: SyncEngine
     let diagnostics: Diagnostics
+    let setup: SetupFlow
+    let lock: AppLock
     #if os(macOS)
     let automatic: AutomaticRecording
     let browser: BrowserMeetingBridge
@@ -18,6 +20,9 @@ struct SettingsView: View {
         TabView {
             Tab("General", systemImage: "gearshape") {
                 TranscriptionSettingsView(models: models, library: library)
+            }
+            Tab("Access", systemImage: "hand.raised") {
+                AccessSettingsView(setup: setup)
             }
             Tab("Recording", systemImage: "record.circle") {
                 Form {
@@ -33,7 +38,7 @@ struct SettingsView: View {
                 SyncSettingsView(engine: sync)
             }
             Tab("Security", systemImage: "key") {
-                SecuritySettingsView(library: library)
+                SecuritySettingsView(library: library, lock: lock)
             }
             Tab("Storage", systemImage: "internaldrive") {
                 RetentionSettingsView(library: library)
@@ -57,7 +62,9 @@ struct SettingsView: View {
             models: models,
             entitlements: entitlements,
             sync: sync,
-            diagnostics: diagnostics
+            diagnostics: diagnostics,
+            setup: setup,
+            lock: lock
         )
         #endif
     }
@@ -70,6 +77,8 @@ private struct SettingsList: View {
     let entitlements: Entitlements
     let sync: SyncEngine
     let diagnostics: Diagnostics
+    let setup: SetupFlow
+    let lock: AppLock
 
     @Environment(\.dismiss) private var dismiss
 
@@ -85,6 +94,9 @@ private struct SettingsList: View {
                 }
 
                 Section {
+                    link("Access", systemImage: "hand.raised.fill", color: .indigo) {
+                        AccessSettingsView(setup: setup)
+                    }
                     link("Projects", systemImage: "folder.fill", color: .orange) {
                         ProjectsSettingsView(library: library)
                     }
@@ -98,7 +110,7 @@ private struct SettingsList: View {
 
                 Section {
                     link("Keys and Devices", systemImage: "key.fill", color: .gray) {
-                        SecuritySettingsView(library: library)
+                        SecuritySettingsView(library: library, lock: lock)
                     }
                     link("Audio and Deletion", systemImage: "trash.fill", color: .red) {
                         RetentionSettingsView(library: library)

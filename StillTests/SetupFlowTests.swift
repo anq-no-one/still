@@ -36,6 +36,35 @@ struct SetupFlowTests {
     }
 
     @Test
+    func aRefusedCalendarStillLetsTheUserRecord() async {
+        let permissions = FakeSetupPermissions(calendarAnswer: .denied)
+        let flow = makeFlow(permissions: permissions, isTranscriptionReady: { true })
+        flow.acknowledgePrivacy()
+        await flow.requestMicrophone()
+        flow.requestSystemAudio()
+
+        await flow.requestCalendar()
+
+        #expect(flow.calendar == .denied)
+        #expect(flow.isComplete)
+    }
+
+    @Test
+    func countsTheStepsThisDeviceNeeds() async {
+        let permissions = FakeSetupPermissions()
+        let mac = makeFlow(permissions: permissions, includesSystemAudio: true)
+        let phone = makeFlow(permissions: FakeSetupPermissions(), includesSystemAudio: false)
+
+        #expect(mac.stepNumber == 1)
+        #expect(mac.stepCount == 5)
+        #expect(phone.stepCount == 4)
+        #expect(!phone.asksForSystemAudio)
+
+        mac.acknowledgePrivacy()
+        #expect(mac.stepNumber == 2)
+    }
+
+    @Test
     func aDeclinedMicrophoneKeepsSetupOpen() async {
         let permissions = FakeSetupPermissions(microphoneAnswer: .denied)
         let flow = makeFlow(permissions: permissions)

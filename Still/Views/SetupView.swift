@@ -4,11 +4,34 @@ struct SetupView: View {
     let flow: SetupFlow
     let models: ModelInstallers
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private var installer: ModelPackInstaller {
         models.transcription
     }
 
     var body: some View {
+        ViewThatFits(in: .vertical) {
+            currentStep
+                .frame(maxHeight: .infinity)
+            ScrollView {
+                currentStep
+            }
+        }
+        .stillSheetWidth(mac: 440, minHeight: 520)
+        .animation(reduceMotion ? nil : .default, value: flow.step)
+        .task {
+            await models.resumeIfApproved()
+        }
+        .task {
+            while !Task.isCancelled {
+                flow.refresh()
+                try? await Task.sleep(for: .seconds(1))
+            }
+        }
+    }
+
+    private var currentStep: some View {
         Group {
             switch flow.step {
             case .privacy:
@@ -27,21 +50,13 @@ struct SetupView: View {
         }
         .padding(.horizontal, 32)
         .padding(.vertical, 40)
-        .stillSheetWidth(mac: 440, minHeight: 520)
-        .animation(.default, value: flow.step)
-        .task {
-            while !Task.isCancelled {
-                flow.refresh()
-                try? await Task.sleep(for: .seconds(1))
-            }
-        }
     }
 
     private var privacyStep: some View {
         step(
             icon: "lock.shield.fill",
             title: "Your Recordings Stay Here",
-            body: "Still records, transcribes, and stores everything on this device. There is no account, and nothing is sent anywhere until you ask for it."
+            body: "Still records, transcribes, and stores everything on this device. There is no account, and nothing is sent anywhere until you ask for it. The next steps explain each permission before your device asks for it."
         ) {
             primary("Continue", action: flow.acknowledgePrivacy)
         }
@@ -52,10 +67,10 @@ struct SetupView: View {
             icon: "mic.fill",
             title: "Let Still Hear You",
             body: flow.microphone == .denied
-                ? "Still cannot record without the microphone. Turn on Still in Privacy & Security → Microphone, then come back."
-                : "Still needs the microphone to record you. Everything it hears stays on this device."
+                ? String(localized: "Still cannot record without the microphone. Turn on Still in Privacy & Security → Microphone, then come back.")
+                : String(localized: "Still needs the microphone to record you. Everything it hears stays on this device.")
         ) {
-            primary(flow.microphone == .denied ? "Open System Settings" : "Allow Microphone") {
+            primary(flow.microphone == .denied ? "Open Settings" : "Allow Microphone") {
                 Task { await flow.requestMicrophone() }
             }
         }
@@ -66,8 +81,8 @@ struct SetupView: View {
             icon: "person.2.wave.2.fill",
             title: "Hear Everyone on the Call",
             body: flow.systemAudio == .denied
-                ? "Turn on Still in Privacy & Security → Screen & System Audio Recording. Still records only sound, never your screen."
-                : "To record the other people on a call, macOS asks you to allow Screen & System Audio Recording. Still records only sound, never your screen."
+                ? String(localized: "Turn on Still in Privacy & Security → Screen & System Audio Recording. Still records only sound, never your screen.")
+                : String(localized: "To record the other people on a call, macOS asks you to allow Screen & System Audio Recording. Still records only sound, never your screen.")
         ) {
             primary(flow.systemAudio == .denied ? "Open System Settings" : "Allow", action: flow.requestSystemAudio)
             if flow.systemAudio == .denied {
@@ -80,12 +95,13 @@ struct SetupView: View {
         step(
             icon: "calendar",
             title: "Know Who Is in the Meeting",
-            body: "Still can read the event you are in to put names on the people speaking in your recordings. The calendar stays on this device, and you can skip this."
+            body: String(localized: "Still can read the event you are in to put names on the people speaking in your recordings. The calendar stays on this device. This is optional: without it, you name speakers yourself, and you can turn it on later in Settings.")
         ) {
             primary("Allow Calendar") {
                 Task { await flow.requestCalendar() }
             }
             secondary("Not Now", action: flow.skipCalendar)
+                .keyboardShortcut(.cancelAction)
         }
     }
 
@@ -99,7 +115,10 @@ struct SetupView: View {
             case .installing, .verifying:
                 ProgressView(value: installer.progress) {
                     Text("Downloading…")
+                } currentValueLabel: {
+                    Text(installer.progress, format: .percent.precision(.fractionLength(0)))
                 }
+                .accessibilityValue(Text(installer.progress, format: .percent.precision(.fractionLength(0))))
             case .failed:
                 primary("Try Again") {
                     Task { await models.approveAndInstall() }
@@ -119,7 +138,11 @@ struct SetupView: View {
         @ViewBuilder actions: () -> Actions
     ) -> some View {
         VStack(spacing: 20) {
-            Spacer(minLength: 0)
+            if let number = flow.stepNumber {
+                Text("Step \(number) of \(flow.stepCount)")
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(.secondary)
+            }
 
             Image(systemName: icon)
                 .font(.system(size: 56, weight: .regular))
@@ -131,6 +154,7 @@ struct SetupView: View {
             Text(title)
                 .font(.largeTitle.bold())
                 .multilineTextAlignment(.center)
+                .accessibilityAddTraits(.isHeader)
 
             Text(text)
                 .font(.body)
@@ -144,12 +168,11 @@ struct SetupView: View {
                     .multilineTextAlignment(.center)
             }
 
-            Spacer(minLength: 24)
-
             VStack(spacing: 12) {
                 actions()
             }
             .frame(maxWidth: 360)
+            .padding(.top, 12)
         }
         .frame(maxWidth: .infinity)
     }

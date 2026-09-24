@@ -8,6 +8,7 @@ struct StillApp: App {
     private let entitlements: Entitlements
     private let coordinator: RecordingCoordinator
     private let setup: SetupFlow
+    private let lock: AppLock
     private let sync: SyncEngine
     private let diagnostics: Diagnostics
     #if os(macOS)
@@ -73,18 +74,29 @@ struct StillApp: App {
                 transcription: ModelPackInstaller(
                     pack: ModelCatalog.parakeetV3,
                     root: modelRoot,
-                    downloader: URLSessionModelFileDownloader()
+                    downloader: URLSessionModelFileDownloader(),
+                    approval: UserDefaultsModelApprovalStore()
                 ),
                 speakers: ModelPackInstaller(
                     pack: ModelCatalog.speakerSeparation,
                     root: modelRoot,
-                    downloader: URLSessionModelFileDownloader()
+                    downloader: URLSessionModelFileDownloader(),
+                    approval: UserDefaultsModelApprovalStore()
                 )
             )
         }
         models = installers
         let speech = ParakeetEngine(pack: ModelCatalog.parakeetV3, root: modelRoot)
         let installer = installers.transcription
+
+        let journal = MainActor.assumeIsolated {
+            let journal = DiagnosticJournal(
+                fileURL: supportRoot.appending(path: "Diagnostics/journal.jsonl")
+            )
+            journal.note(.appLaunched)
+            try? journal.removeExpired()
+            return journal
+        }
 
         let recordingLibrary = MainActor.assumeIsolated {
             Library(
@@ -123,7 +135,8 @@ struct StillApp: App {
                         }
                     }
                 ),
-                selectionStore: UserDefaultsProjectSelectionStore()
+                selectionStore: UserDefaultsProjectSelectionStore(),
+                journal: journal
             )
         }
         let setupFlow = MainActor.assumeIsolated {
@@ -135,9 +148,12 @@ struct StillApp: App {
             )
         }
         setup = setupFlow
+        lock = MainActor.assumeIsolated {
+            AppLock(settings: UserDefaultsAppLockSettings(), authenticator: SystemOwnerAuthenticator())
+        }
         library = recordingLibrary
         diagnostics = MainActor.assumeIsolated {
-            Diagnostics(settings: UserDefaultsDiagnosticsSettings(), sink: NoDiagnosticsSink())
+            Diagnostics(settings: UserDefaultsDiagnosticsSettings(), sink: NoDiagnosticsSink(), journal: journal)
         }
 
         let syncEngine = MainActor.assumeIsolated {
@@ -231,21 +247,25 @@ struct StillApp: App {
         .defaultLaunchBehavior(.presented)
 
         Settings {
-            SettingsView(
-                library: library,
-                models: models,
-                entitlements: entitlements,
-                sync: sync,
-                diagnostics: diagnostics,
-                automatic: automatic,
-                browser: browser,
-                aiTools: aiTools,
-                chromium: chromium
-            )
+            LockGate(lock: lock, coordinator: coordinator) {
+                SettingsView(
+                    library: library,
+                    models: models,
+                    entitlements: entitlements,
+                    sync: sync,
+                    diagnostics: diagnostics,
+                    setup: setup,
+                    lock: lock,
+                    automatic: automatic,
+                    browser: browser,
+                    aiTools: aiTools,
+                    chromium: chromium
+                )
+            }
         }
 
         MenuBarExtra {
-            RecordingMenuBarPanel(coordinator: coordinator, library: library, automatic: automatic, navigation: navigation)
+            RecordingMenuBarPanel(coordinator: coordinator, library: library, automatic: automatic, navigation: navigation, lock: lock)
         } label: {
             RecordingMenuBarLabel(coordinator: coordinator)
                 .modifier(LibraryWindowOpenerInstaller(reopener: reopener))
@@ -259,15 +279,18 @@ struct StillApp: App {
     }
 
     private var libraryView: some View {
-        LibraryView(
-            library: library,
-            models: models,
-            entitlements: entitlements,
-            coordinator: coordinator,
-            setup: setup,
-            sync: sync,
-            diagnostics: diagnostics,
-            navigation: navigation
-        )
+        LockGate(lock: lock, coordinator: coordinator) {
+            LibraryView(
+                library: library,
+                models: models,
+                entitlements: entitlements,
+                coordinator: coordinator,
+                setup: setup,
+                sync: sync,
+                diagnostics: diagnostics,
+                lock: lock,
+                navigation: navigation
+            )
+        }
     }
 }

@@ -72,6 +72,18 @@ final class SetupFlow {
         step == nil
     }
 
+    var stepNumber: Int? {
+        step.flatMap(steps.firstIndex(of:)).map { $0 + 1 }
+    }
+
+    var stepCount: Int {
+        steps.count
+    }
+
+    var asksForSystemAudio: Bool {
+        steps.contains(.systemAudio)
+    }
+
     var microphone: PermissionState {
         _ = revision
         return permissions.microphone

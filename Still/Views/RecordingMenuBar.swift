@@ -26,6 +26,7 @@ struct RecordingMenuBarPanel: View {
     let library: Library
     let automatic: AutomaticRecording
     let navigation: LibraryNavigation
+    let lock: AppLock
 
     @Environment(\.openWindow) private var openWindow
     @State private var tick = Date.now
@@ -122,7 +123,8 @@ struct RecordingMenuBarPanel: View {
     }
 
     private var recent: [Recording] {
-        Array(library.recordings.prefix(5))
+        guard !lock.isLocked else { return [] }
+        return Array(library.recordings.prefix(5))
     }
 
     private var watching: Binding<Bool> {

@@ -8,6 +8,7 @@ struct LibraryView: View {
     let setup: SetupFlow
     let sync: SyncEngine
     let diagnostics: Diagnostics
+    let lock: AppLock
     @Bindable var navigation: LibraryNavigation
 
     @State private var isCapturing = false
@@ -97,7 +98,9 @@ struct LibraryView: View {
                 models: models,
                 entitlements: entitlements,
                 sync: sync,
-                diagnostics: diagnostics
+                diagnostics: diagnostics,
+                setup: setup,
+                lock: lock
             )
         }
         #endif

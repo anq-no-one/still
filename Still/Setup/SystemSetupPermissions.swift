@@ -10,7 +10,17 @@ import UIKit
 
 @MainActor
 final class SystemSetupPermissions: SetupPermissions {
-    private var askedForSystemAudio = false
+    private static let askedForSystemAudioKey = "still.setup.askedForSystemAudio"
+    private let defaults: UserDefaults
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+    }
+
+    private var askedForSystemAudio: Bool {
+        get { defaults.bool(forKey: Self.askedForSystemAudioKey) }
+        set { defaults.set(newValue, forKey: Self.askedForSystemAudioKey) }
+    }
 
     var microphone: PermissionState {
         switch AVCaptureDevice.authorizationStatus(for: .audio) {
@@ -38,7 +48,11 @@ final class SystemSetupPermissions: SetupPermissions {
     }
 
     func requestCalendar() async {
-        _ = try? await EKEventStore().requestFullAccessToEvents()
+        if calendar == .notAsked {
+            _ = try? await EKEventStore().requestFullAccessToEvents()
+        } else {
+            Self.openSettings(anchor: "Privacy_Calendars")
+        }
     }
 
     func requestMicrophone() async {
@@ -65,6 +79,16 @@ final class SystemSetupPermissions: SetupPermissions {
         NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: configuration) { _, _ in
             Task { @MainActor in NSApp.terminate(nil) }
         }
+        #endif
+    }
+
+    static func openPasscodeSettings() {
+        #if os(macOS)
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preferences.password") {
+            NSWorkspace.shared.open(url)
+        }
+        #else
+        openSettings(anchor: "")
         #endif
     }
 

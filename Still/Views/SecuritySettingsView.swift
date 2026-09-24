@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SecuritySettingsView: View {
     let library: Library
+    let lock: AppLock
 
     @State private var code: RecoveryCode?
     @State private var failure: String?
@@ -10,6 +11,8 @@ struct SecuritySettingsView: View {
 
     var body: some View {
         Form {
+            AppLockSettingsSection(lock: lock)
+
             Section {
                 if let code {
                     Text(code.formatted)

@@ -61,15 +61,18 @@ final class Library: RecordingLibrary {
     private(set) var projectSelection: ProjectSelection
     private(set) var settings = LibrarySettings()
     var retentionPolicy: RetentionPolicy = .forever
+    private let journal: DiagnosticJournal?
 
     init(
         keyRing: LibraryKeyRing,
         services: LibraryServices,
-        selectionStore: ProjectSelectionStore = MemoryProjectSelectionStore()
+        selectionStore: ProjectSelectionStore = MemoryProjectSelectionStore(),
+        journal: DiagnosticJournal? = nil
     ) {
         self.keyRing = keyRing
         self.services = services
         self.selectionStore = selectionStore
+        self.journal = journal
         projectSelection = selectionStore.load()
     }
 
@@ -144,6 +147,7 @@ final class Library: RecordingLibrary {
         guard state != .unlocked, state != .unlocking else { return }
 
         state = .unlocking
+        journal?.note(.libraryUnlockStarted)
         do {
             let key = try await keyRing.unlock(reason: reason)
             let repository = services.makeRepository(key)
@@ -155,6 +159,7 @@ final class Library: RecordingLibrary {
             try recoverInterruptedAudio(cipher: LibraryCipher(key: key))
             try applyRetention()
             state = .unlocked
+            journal?.note(.libraryUnlocked)
             semanticIndex = SemanticIndex(engine: await services.makeEmbeddingEngine())
             semanticIndex.rebuild(storedRecordings)
         } catch {
@@ -165,6 +170,7 @@ final class Library: RecordingLibrary {
             storedProjects = []
             settings = LibrarySettings()
             state = .failed(error.localizedDescription)
+            journal?.fail(.libraryUnlockFailed, error: error)
         }
     }
 

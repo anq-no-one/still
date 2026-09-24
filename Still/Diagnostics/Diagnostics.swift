@@ -44,15 +44,20 @@ final class Diagnostics {
     private let now: () -> Date
 
     private(set) var isEnabled: Bool
+    let journal: DiagnosticJournal
 
     init(
         settings: DiagnosticsSettingsStore,
         sink: DiagnosticsSink,
+        journal: DiagnosticJournal = DiagnosticJournal(
+            fileURL: URL.temporaryDirectory.appending(path: "still-journal-\(UUID().uuidString).jsonl")
+        ),
         environment: @escaping () -> (appVersion: String, systemVersion: String, deviceClass: String) = Diagnostics.systemEnvironment,
         now: @escaping () -> Date = Date.init
     ) {
         self.settings = settings
         self.sink = sink
+        self.journal = journal
         self.environment = environment
         self.now = now
         isEnabled = settings.isEnabled()
