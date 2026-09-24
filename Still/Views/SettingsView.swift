@@ -24,6 +24,9 @@ struct SettingsView: View {
                 }
                 .formStyle(.grouped)
             }
+            Tab("Projects", systemImage: "folder") {
+                ProjectsSettingsView(library: library)
+            }
             Tab("Sync", systemImage: "arrow.triangle.2.circlepath") {
                 SyncSettingsView(engine: sync)
             }
@@ -77,6 +80,9 @@ private struct SettingsList: View {
                 }
 
                 Section {
+                    link("Projects", systemImage: "folder.fill", color: .orange) {
+                        ProjectsSettingsView(library: library)
+                    }
                     link("Transcription", systemImage: "waveform", color: .blue) {
                         TranscriptionSettingsView(installer: modelInstaller)
                     }
