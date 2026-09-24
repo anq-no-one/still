@@ -12,7 +12,7 @@ against.
 | Someone picking up an unlocked device | The master key is wrapped by a Keychain device key released through Face ID or Touch ID | `LibraryKeyRingTests` |
 | Wrong key or tampered ciphertext | AES-GCM authentication fails closed; stored records are untouched | `LibraryCipherTests`, `SecurityAndSyncGateTests` |
 | Apple, or anyone with the CloudKit records | Only sealed payloads and ordering metadata are pushed | `noTransportEverCarriesPlaintext` |
-| A lost device that still holds old key material | Revocation rotates the account key and re-seals the local Library. Project keys are not rotated yet, see below | `aRevokedDeviceCannotReadAnythingWrittenAfterwards` |
+| A lost device that still holds old key material | Revocation rotates the account key and every project key and re-seals the local Library, so later records open only with the new keys | `aRevokedDeviceCannotReadAnythingWrittenAfterwards`, `aRevokedMacCannotReadWhatIsRecordedAfterTheRevocation` |
 | A replayed or duplicated sync change | Merge is order-independent and idempotent over field values | `duplicateAndReorderedDeliveryReachTheSameResult` |
 | Concurrent edits on two devices | Generated content follows the newer pass; user-authored text is unioned, never dropped | `threeDevicesConvergeOnTheSameRecording` |
 | A deletion arriving before an older copy | Tombstones match on every stored Recording, so an older copy merges into the deletion | `aDeletionIsNotResurrectedByAnOlderCopy` |
@@ -42,10 +42,11 @@ against.
   whatever it already had. Rotation protects everything written afterwards, not the past.
 - **Device and project ids are not encrypted.** A device record lists its kind (Mac, iPhone, iPad),
   its public key, and the random ids of the projects it requests and holds. Names stay sealed.
-- **The join code has no commitment round.** Someone who controls the iCloud records and can grind
-  device keys could try to match a nine-digit code. The cost is high, not impossible.
-- **Revocation rotates the account key, not project keys.** A revoked device loses project names and
-  any project it never held, but keeps reading new recordings in projects whose key it already had.
+- **The join code has no commitment round.** Someone who controls the iCloud records could try to
+  grind device keys until a nine-digit code matches. The code passes through 400,000 rounds of
+  PBKDF2, so each guess costs a key pair plus that work, which puts a match out of practical reach
+  without making it impossible.
+- **Revocation does not reach the past.** A revoked device keeps whatever it already downloaded.
 - **A recovery code is the whole key.** Anyone holding it can open the Library, and Still cannot
   tell whether it was written down safely.
 - **The device key rests on Keychain and biometric enforcement.** A jailbroken or compromised OS

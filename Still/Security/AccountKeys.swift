@@ -43,6 +43,14 @@ struct AccountKeys: Codable, Equatable, Sendable {
         scopeKeys[scope] = key.rawBytes
     }
 
+    func renewingScopeKeys() -> AccountKeys {
+        var renewed = self
+        for scope in heldScopeIDs {
+            renewed.hold(SymmetricKey(size: .bits256), for: scope)
+        }
+        return renewed
+    }
+
     mutating func release(_ scope: UUID) {
         scopeKeys.removeValue(forKey: scope)
     }

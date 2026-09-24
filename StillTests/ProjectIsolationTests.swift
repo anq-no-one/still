@@ -35,6 +35,28 @@ struct ProjectIsolationTests {
     }
 
     @Test
+    func aRevokedMacCannotReadWhatIsRecordedAfterTheRevocation() async throws {
+        let trio = try await Trio.make()
+        let before = try trio.phone.record("Roadmap review", in: trio.acme)
+        try await trio.settle()
+        #expect(trio.workMac.library.recordings.map(\.id) == [before.id])
+
+        let oldKey = try #require(trio.phone.library.scopeKey(for: trio.acme))
+        try await trio.phone.library.revokeOtherDevices()
+        #expect(trio.phone.library.scopeKey(for: trio.acme) != oldKey)
+
+        let after = try trio.phone.record("Budget freeze", in: trio.acme)
+        for _ in 0..<3 {
+            await trio.phone.engine.sync()
+            await trio.workMac.engine.sync()
+        }
+
+        #expect(trio.phone.engine.lastFailure == nil)
+        #expect(!trio.workMac.library.storedRecordings.contains { $0.id == after.id })
+        #expect(trio.workMac.library.scopeKey(for: trio.acme) == oldKey)
+    }
+
+    @Test
     func bothScreensShowTheSameCodeBeforeJoining() async throws {
         let phone = try await Device.make(kind: .iphone)
         let cloud = phone.cloud

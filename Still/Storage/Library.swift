@@ -365,7 +365,7 @@ final class Library: RecordingLibrary {
         guard key != nil else { throw LibraryError.locked }
 
         let newKey = try await keyRing.beginRotation(reason: reason)
-        try rotate(to: newKey, keys: accountKeys)
+        try rotate(to: newKey, keys: accountKeys?.renewingScopeKeys())
     }
 
     func join(

@@ -1,3 +1,4 @@
+import CommonCrypto
 import CryptoKit
 import Foundation
 #if canImport(UIKit)
@@ -60,12 +61,37 @@ struct DeviceRecord: Codable, Equatable, Sendable {
 }
 
 enum VerificationCode {
+    static let rounds: UInt32 = 400_000
+
     static func between(_ first: Data, _ second: Data) -> String {
         let ordered = [first, second].sorted { $0.lexicographicallyPrecedes($1) }
-        let digest = SHA256.hash(data: ordered[0] + ordered[1])
+        let digest = stretch(ordered[0] + ordered[1])
         let number = digest.prefix(8).reduce(UInt64(0)) { $0 << 8 | UInt64($1) } % 1_000_000_000
         let digits = Array(String(format: "%09llu", number))
         return stride(from: 0, to: digits.count, by: 3).map { String(digits[$0..<$0 + 3]) }.joined(separator: " ")
+    }
+
+    private static func stretch(_ keys: Data) -> Data {
+        let salt = Data("still.join-code".utf8)
+        var output = Data(count: 32)
+        let status = output.withUnsafeMutableBytes { outputBytes in
+            keys.withUnsafeBytes { keyBytes in
+                salt.withUnsafeBytes { saltBytes in
+                    CCKeyDerivationPBKDF(
+                        CCPBKDFAlgorithm(kCCPBKDF2),
+                        keyBytes.baseAddress?.assumingMemoryBound(to: Int8.self),
+                        keys.count,
+                        saltBytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                        salt.count,
+                        CCPseudoRandomAlgorithm(kCCPRFHmacAlgSHA256),
+                        rounds,
+                        outputBytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                        32
+                    )
+                }
+            }
+        }
+        return status == kCCSuccess ? output : Data(SHA256.hash(data: keys))
     }
 }
 

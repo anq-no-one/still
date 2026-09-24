@@ -38,6 +38,7 @@ Run a single unit test (Swift Testing, macOS host):
 ```sh
 xcodebuild test -project Still.xcodeproj -scheme Still-macOS \
   -destination 'platform=macOS,arch=arm64' -parallel-testing-enabled NO \
+  -skipPackagePluginValidation -skipMacroValidation \
   -derivedDataPath ~/Library/Developer/Xcode/DerivedData/Still-shared \
   -only-testing StillTests/LibraryTests
 ```
