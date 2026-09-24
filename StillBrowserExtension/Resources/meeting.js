@@ -1,6 +1,4 @@
-// Reports only that a meeting on this page started or ended. It reads no page
-// content and receives nothing back from Still.
-
+const extensionRuntime = (globalThis.browser ?? globalThis.chrome).runtime;
 const MEETING_ID = `${location.host}${location.pathname}`;
 
 let reportedStart = false;
@@ -15,7 +13,7 @@ function inMeeting() {
 }
 
 function report(phase) {
-  browser.runtime.sendMessage({ host: location.host, meetingID: MEETING_ID, phase });
+  extensionRuntime.sendMessage({ host: location.host, meetingID: MEETING_ID, phase });
 }
 
 function check() {

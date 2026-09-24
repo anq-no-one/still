@@ -14,6 +14,7 @@ struct StillApp: App {
     private let automatic: AutomaticRecording
     private let browser: BrowserMeetingBridge
     private let aiTools: MCPAccess
+    private let chromium: ChromiumConnections
     #endif
 
     private let navigation: LibraryNavigation
@@ -210,6 +211,14 @@ struct StillApp: App {
             access.startIfEnabled()
             return access
         }
+        chromium = MainActor.assumeIsolated {
+            let connections = ChromiumConnections(
+                registry: NativeMessagingHostInstaller(),
+                store: UserDefaultsChromiumBrowserStore()
+            )
+            connections.refresh()
+            return connections
+        }
         #endif
     }
 
@@ -230,7 +239,8 @@ struct StillApp: App {
                 diagnostics: diagnostics,
                 automatic: automatic,
                 browser: browser,
-                aiTools: aiTools
+                aiTools: aiTools,
+                chromium: chromium
             )
         }
 

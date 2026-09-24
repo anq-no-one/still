@@ -22,5 +22,12 @@
 	<true/>
 	<key>com.apple.security.personal-information.calendars</key>
 	<true/>
+	<key>com.apple.security.temporary-exception.files.home-relative-path.read-write</key>
+	<array>
+		<string>/Library/Application Support/Google/Chrome/NativeMessagingHosts/</string>
+		<string>/Library/Application Support/Microsoft Edge/NativeMessagingHosts/</string>
+		<string>/Library/Application Support/BraveSoftware/Brave-Browser/NativeMessagingHosts/</string>
+		<string>/Library/Application Support/Arc/User Data/NativeMessagingHosts/</string>
+	</array>
 </dict>
 </plist>
