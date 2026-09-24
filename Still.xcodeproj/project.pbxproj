@@ -94,6 +94,7 @@
 		4215D7EC94809D2CE20C7AC4 /* RecordingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A341116EE865894AA2B5CE96 /* RecordingCoordinator.swift */; };
 		42F69EDA92CA930AA4262DE6 /* CallDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F05F12C5EFC0088923C4EE /* CallDetector.swift */; };
 		4353C304E8A8D24A1A04AC48 /* SystemAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD84D8B2CDE6A9B204A7603 /* SystemAudioRecorder.swift */; };
+		444BE9666698115019581B3B /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 7C6A41A446CC94C6F1F59E0D /* InfoPlist.xcstrings */; };
 		44E2EBD491E670FCF9F0C3E4 /* Retention.swift in Sources */ = {isa = PBXBuildFile; fileRef = 282CA3F4838D898028F02F60 /* Retention.swift */; };
 		4546C631F37FB5196E865983 /* TimeInterval+RecordingDuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761AC9223726492858D3A9A7 /* TimeInterval+RecordingDuration.swift */; };
 		45F23F61D7BB7A14EEBD70D9 /* TranscriptSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = F31C82E0D6631C810A9E0BCF /* TranscriptSegment.swift */; };
@@ -284,6 +285,7 @@
 		BD8223575031BB55AD19A5CC /* AudioImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54E809E3CBFB27005DF2531 /* AudioImportView.swift */; };
 		BD94F51B0EEDABE45E8FBD14 /* FluidSpeakerDiarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FAADF706933D3D24A3DFC34 /* FluidSpeakerDiarizer.swift */; };
 		BF921FB23C14E73485A94C47 /* NetworkBoundaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EABF0DBC14FCCC53FBD89E25 /* NetworkBoundaryTests.swift */; };
+		C1A9F418D5DB4E7489DA382C /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 7C6A41A446CC94C6F1F59E0D /* InfoPlist.xcstrings */; };
 		C22FE5A2DAC26C442DE967D0 /* TranscriptionSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BC420DCDF72289386E9958 /* TranscriptionSession.swift */; };
 		C24A08C0F85D8D91B73FC694 /* RecoveryCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C0C747D43BC104C5592372D /* RecoveryCode.swift */; };
 		C37E925F16C0B8A02C9B5C86 /* ProjectsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8227A92F5BB1E709F9EF869 /* ProjectsSettingsView.swift */; };
@@ -529,6 +531,7 @@
 		71F05F12C5EFC0088923C4EE /* CallDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallDetector.swift; sourceTree = "<group>"; };
 		73580B4107E3B11C0E4F7E03 /* EmbeddingEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddingEngine.swift; sourceTree = "<group>"; };
 		761AC9223726492858D3A9A7 /* TimeInterval+RecordingDuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TimeInterval+RecordingDuration.swift"; sourceTree = "<group>"; };
+		7C6A41A446CC94C6F1F59E0D /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		7D2905A5C99099899B729E25 /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = background.js; sourceTree = "<group>"; };
 		7E54CBBC9E940E367EAB49EC /* SystemAudioScopeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemAudioScopeTests.swift; sourceTree = "<group>"; };
 		7FBB0F3AFE8E7F3BE14D659C /* JSONRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONRPC.swift; sourceTree = "<group>"; };
@@ -701,6 +704,7 @@
 			isa = PBXGroup;
 			children = (
 				C2CFFD99ADA20FCD1727AC55 /* Assets.xcassets */,
+				7C6A41A446CC94C6F1F59E0D /* InfoPlist.xcstrings */,
 				92E2291AAE80307F3DE70502 /* iOS-Info.plist */,
 				568D6EA737E4E25FF1895983 /* Localizable.xcstrings */,
 				B217EAE5DC79CD244E8C8C0B /* PrivacyInfo.xcprivacy */,
@@ -1362,7 +1366,17 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
+				de,
 				en,
+				es,
+				fr,
+				it,
+				nl,
+				pl,
+				"pt-PT",
+				ru,
+				sv,
+				uk,
 			);
 			mainGroup = 01FD8AD78A9B70EB2FD086BF;
 			minimizedProjectReferenceProxies = 1;
@@ -1391,6 +1405,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AB30BAC59CDF5401258CE501 /* Assets.xcassets in Resources */,
+				444BE9666698115019581B3B /* InfoPlist.xcstrings in Resources */,
 				EF4BE9324F5B4F9354614728 /* Localizable.xcstrings in Resources */,
 				63AB8BECD610C0795C429B50 /* PrivacyInfo.xcprivacy in Resources */,
 				B8DD4A1D37C715AE7A92541C /* Still.storekit in Resources */,
@@ -1416,6 +1431,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2F7595B64036DB76D5334D6A /* Assets.xcassets in Resources */,
+				C1A9F418D5DB4E7489DA382C /* InfoPlist.xcstrings in Resources */,
 				6DC85F6719E38C197BAEAF97 /* Localizable.xcstrings in Resources */,
 				E050806D6B562591FB3E4ED0 /* PrivacyInfo.xcprivacy in Resources */,
 				084DFFF38CB9BCA30570C23A /* Still.storekit in Resources */,
