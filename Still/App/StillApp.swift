@@ -13,6 +13,7 @@ struct StillApp: App {
     #if os(macOS)
     private let automatic: AutomaticRecording
     private let browser: BrowserMeetingBridge
+    private let aiTools: MCPAccess
     #endif
 
     private let navigation: LibraryNavigation
@@ -166,6 +167,17 @@ struct StillApp: App {
                 allowList: UserDefaultsMeetingSiteAllowList()
             )
         }
+        aiTools = MainActor.assumeIsolated {
+            let access = MCPAccess(
+                settings: UserDefaultsMCPAccessSettings(),
+                source: LibraryMeetingSource(library: recordingLibrary)
+            )
+            #if DEBUG
+            if UITestLaunch.allowsAITools { access.enable() }
+            #endif
+            access.startIfEnabled()
+            return access
+        }
         #endif
     }
 
@@ -185,7 +197,8 @@ struct StillApp: App {
                 sync: sync,
                 diagnostics: diagnostics,
                 automatic: automatic,
-                browser: browser
+                browser: browser,
+                aiTools: aiTools
             )
         }
 
