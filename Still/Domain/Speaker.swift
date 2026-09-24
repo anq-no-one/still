@@ -8,6 +8,7 @@ struct Speaker: Identifiable, Codable, Equatable, Sendable {
         case voiceProfile
         case owner
         case user
+        case callCue
     }
 
     let id: UUID
@@ -16,6 +17,7 @@ struct Speaker: Identifiable, Codable, Equatable, Sendable {
     let isYou: Bool
     var nameSource: NameSource?
     var voiceprint: Voiceprint?
+    var suggestedName: String?
 
     init(
         id: UUID = UUID(),
@@ -23,7 +25,8 @@ struct Speaker: Identifiable, Codable, Equatable, Sendable {
         origin: AudioTrack?,
         isYou: Bool,
         nameSource: NameSource? = nil,
-        voiceprint: Voiceprint? = nil
+        voiceprint: Voiceprint? = nil,
+        suggestedName: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -31,6 +34,22 @@ struct Speaker: Identifiable, Codable, Equatable, Sendable {
         self.isYou = isYou
         self.nameSource = nameSource
         self.voiceprint = voiceprint
+        self.suggestedName = suggestedName
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, name, origin, isYou, nameSource, voiceprint, suggestedName
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        origin = try container.decodeIfPresent(AudioTrack.self, forKey: .origin)
+        isYou = try container.decode(Bool.self, forKey: .isYou)
+        nameSource = try? container.decodeIfPresent(NameSource.self, forKey: .nameSource)
+        voiceprint = try container.decodeIfPresent(Voiceprint.self, forKey: .voiceprint)
+        suggestedName = try container.decodeIfPresent(String.self, forKey: .suggestedName)
     }
 
     var isNamedByUser: Bool {
@@ -41,7 +60,7 @@ struct Speaker: Identifiable, Codable, Equatable, Sendable {
         guard !isYou else { return false }
         switch nameSource {
         case .none, .track, .diarization: return true
-        case .calendar, .voiceProfile, .owner, .user: return false
+        case .calendar, .voiceProfile, .owner, .user, .callCue: return false
         }
     }
 
@@ -49,6 +68,24 @@ struct Speaker: Identifiable, Codable, Equatable, Sendable {
         var copy = self
         copy.name = name
         copy.nameSource = source
+        copy.suggestedName = nil
+        return copy
+    }
+
+    func suggesting(_ name: String) -> Speaker {
+        var copy = self
+        copy.suggestedName = name
+        return copy
+    }
+
+    func confirmingSuggestedName() -> Speaker {
+        guard let suggestedName else { return self }
+        return named(suggestedName, by: .callCue)
+    }
+
+    func rejectingSuggestedName() -> Speaker {
+        var copy = self
+        copy.suggestedName = nil
         return copy
     }
 

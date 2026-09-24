@@ -25,6 +25,7 @@ final class RecordingWorkflow {
     private var startedAt: Date?
     private var finishedAt: Date?
     private var draftStartFailure: String?
+    private var speakerCues = SpeakerCueLog()
 
     private(set) var state: State = .idle
 
@@ -94,6 +95,7 @@ final class RecordingWorkflow {
         startedAt = now()
         finishedAt = nil
         draftStartFailure = nil
+        speakerCues = SpeakerCueLog()
 
         do {
             try await recorder.start(recordingID: recordingID)
@@ -118,11 +120,23 @@ final class RecordingWorkflow {
         state = .recording
     }
 
+    func speakerStarted(_ name: String) {
+        guard let offset = recordingOffset else { return }
+        speakerCues.began(name, at: offset)
+    }
+
+    func speakerEnded(_ name: String) {
+        guard let offset = recordingOffset else { return }
+        speakerCues.ended(name, at: offset)
+    }
+
     func save() async {
         guard state == .recording else { return }
 
         state = .finalizing
         stopCapture()
+        let cues = speakerCues.cues(closingAt: elapsed)
+        speakerCues = SpeakerCueLog()
 
         do {
             try await recorder.finish()
@@ -133,6 +147,7 @@ final class RecordingWorkflow {
                     createdAt: startedAt,
                     duration: elapsed,
                     participants: await expectedParticipants(startedAt),
+                    cues: cues,
                     suggestedProjectID: suggestedProjectID
                 )
             )
@@ -149,8 +164,14 @@ final class RecordingWorkflow {
         guard state != .saved else { return }
 
         stopCapture()
+        speakerCues = SpeakerCueLog()
         await recorder.discard()
         state = .idle
+    }
+
+    private var recordingOffset: TimeInterval? {
+        guard state == .recording, let startedAt else { return nil }
+        return now().timeIntervalSince(startedAt)
     }
 
     private var isFailed: Bool {

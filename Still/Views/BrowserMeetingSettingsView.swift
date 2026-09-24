@@ -13,7 +13,7 @@ struct BrowserMeetingSettingsView: View {
         } header: {
             Text("Browser Meetings")
         } footer: {
-            Text("The Still extension tells the app when a meeting on one of these sites starts and ends. Still then records only the browser that holds the meeting, so music and videos in other apps stay out. The extension reads no page content, and nothing from your Library ever reaches the browser. Turning the extension off leaves manual recording and allowed call apps working as before.")
+            Text("The Still extension tells the app when a meeting on one of these sites starts and ends, and on Google Meet who is speaking. Still then records only the browser that holds the meeting, so music and videos in other apps stay out, and suggests speaker names you can confirm or reject. The extension reads nothing else from the page, and nothing from your Library ever reaches the browser. Turning the extension off leaves manual recording and allowed call apps working as before.")
         }
 
         Section {

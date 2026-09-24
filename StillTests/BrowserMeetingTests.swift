@@ -117,6 +117,28 @@ struct BrowserMeetingBridgeTests {
         #expect(bridge.activeMeetingID == nil)
     }
 
+    @Test
+    func whoIsSpeakingNeverStartsARecording() async throws {
+        let (bridge, coordinator) = try await make(allowed: [meet])
+
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .speakerStarted, speaker: "Dana Kim"))
+
+        #expect(!coordinator.isRecording)
+        #expect(bridge.activeMeetingID == nil)
+    }
+
+    @Test
+    func whoIsSpeakingKeepsTheMeetingGoing() async throws {
+        let (bridge, coordinator) = try await make(allowed: [meet])
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .started))
+
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .speakerStarted, speaker: "Dana Kim"))
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .speakerEnded, speaker: "Dana Kim"))
+
+        #expect(coordinator.isRecording)
+        #expect(bridge.activeMeetingID == "a")
+    }
+
     private func make(allowed: [String]) async throws -> (BrowserMeetingBridge, RecordingCoordinator) {
         let container = try ModelContainer(
             for: EncryptedRecording.self,

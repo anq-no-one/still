@@ -4,6 +4,12 @@ struct BrowserMeetingEvent: Codable, Equatable, Sendable {
     enum Phase: String, Codable, Sendable {
         case started
         case ended
+        case speakerStarted
+        case speakerEnded
+
+        var isAboutSpeaker: Bool {
+            self == .speakerStarted || self == .speakerEnded
+        }
     }
 
     let host: String
@@ -11,12 +17,14 @@ struct BrowserMeetingEvent: Codable, Equatable, Sendable {
     let phase: Phase
     var browserBundleID: String?
     var tabID: Int?
+    var speaker: String?
 }
 
 enum BrowserMeetingSignal {
     static let name = Notification.Name("com.andrii.still.browser.meeting")
     static let maximumHostLength = 253
     static let maximumMeetingIDLength = 512
+    static let maximumSpeakerLength = 128
 
     private static let hostCharacters = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyz0123456789.-")
 
@@ -27,16 +35,15 @@ enum BrowserMeetingSignal {
 
     static func event(fromPayload payload: Any?) -> BrowserMeetingEvent? {
         guard let text = payload as? String, let data = text.data(using: .utf8),
-              let event = try? JSONDecoder().decode(BrowserMeetingEvent.self, from: data),
-              isValid(event)
+              let event = try? JSONDecoder().decode(BrowserMeetingEvent.self, from: data)
         else { return nil }
-        return event
+        return validated(event)
     }
 
     static func event(fromExtensionMessage data: Data, browserBundleID: String?) -> BrowserMeetingEvent? {
         guard var event = try? JSONDecoder().decode(BrowserMeetingEvent.self, from: data) else { return nil }
         event.browserBundleID = browserBundleID
-        return isValid(event) ? event : nil
+        return validated(event)
     }
 
     #if os(macOS)
@@ -50,6 +57,28 @@ enum BrowserMeetingSignal {
         )
     }
     #endif
+
+    static func speakerName(from text: String) -> String? {
+        let visible = text.unicodeScalars.filter { !CharacterSet.controlCharacters.contains($0) }
+        let name = String(String.UnicodeScalarView(visible))
+            .split(whereSeparator: \.isWhitespace)
+            .joined(separator: " ")
+        guard !name.isEmpty, name.count <= maximumSpeakerLength else { return nil }
+        return name
+    }
+
+    private static func validated(_ event: BrowserMeetingEvent) -> BrowserMeetingEvent? {
+        guard isValid(event) else { return nil }
+
+        var validated = event
+        guard event.phase.isAboutSpeaker else {
+            validated.speaker = nil
+            return validated
+        }
+        guard let speaker = event.speaker.flatMap(speakerName(from:)) else { return nil }
+        validated.speaker = speaker
+        return validated
+    }
 
     private static func isValid(_ event: BrowserMeetingEvent) -> Bool {
         !event.host.isEmpty

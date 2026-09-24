@@ -62,4 +62,20 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         renamed.speakers[index] = speakers[index].named(trimmed, by: .user)
         return renamed
     }
+
+    func confirmingSuggestedName(of speaker: Speaker) -> Recording {
+        updatingSpeaker(speaker) { $0.confirmingSuggestedName() }
+    }
+
+    func rejectingSuggestedName(of speaker: Speaker) -> Recording {
+        updatingSpeaker(speaker) { $0.rejectingSuggestedName() }
+    }
+
+    private func updatingSpeaker(_ speaker: Speaker, _ change: (Speaker) -> Speaker) -> Recording {
+        guard let index = speakers.firstIndex(where: { $0.id == speaker.id }) else { return self }
+
+        var updated = self
+        updated.speakers[index] = change(speakers[index])
+        return updated
+    }
 }

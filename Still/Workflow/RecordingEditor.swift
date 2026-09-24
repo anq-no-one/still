@@ -77,6 +77,16 @@ final class RecordingEditor {
         scheduleSave()
     }
 
+    func confirmSuggestedName(of speaker: Speaker) {
+        recording = recording.confirmingSuggestedName(of: speaker)
+        scheduleSave()
+    }
+
+    func rejectSuggestedName(of speaker: Speaker) {
+        recording = recording.rejectingSuggestedName(of: speaker)
+        scheduleSave()
+    }
+
     func confirmProject() {
         recording.assign(toProject: recording.projectID)
         scheduleSave()

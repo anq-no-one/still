@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Still",
   "version": "1.0",
-  "description": "Tells Still when an approved meeting starts and ends. It sends nothing else.",
+  "description": "Tells Still when an approved meeting starts and ends, and who is speaking during it. It sends nothing else.",
   "permissions": ["nativeMessaging"],
   "host_permissions": [
     "https://meet.google.com/*",

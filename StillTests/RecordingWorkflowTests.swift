@@ -328,13 +328,14 @@ final class SpyAudioRecorder: AudioRecorder {
 final class SpyRecordingLibrary: RecordingLibrary {
     private(set) var recordings: [Recording] = []
     var capturedPCM = Data(repeating: 3, count: 32_000)
+    var capturedTrack = AudioTrack.microphone
 
     func add(_ recording: Recording) throws {
         recordings.append(recording)
     }
 
     func capturedTracks(forRecording id: UUID) throws -> [CapturedTrack] {
-        [CapturedTrack(track: .microphone, format: .transcription, startOffset: 0, pcm: capturedPCM)]
+        [CapturedTrack(track: capturedTrack, format: .transcription, startOffset: 0, pcm: capturedPCM)]
     }
 
     func checkpointStore(forRecording id: UUID) throws -> TranscriptionCheckpointStore {
@@ -342,7 +343,7 @@ final class SpyRecordingLibrary: RecordingLibrary {
     }
 
     func tracks(forRecording id: UUID) -> [AudioTrack] {
-        [.microphone]
+        [capturedTrack]
     }
 
     var speakerNaming = SpeakerNamingContext.none

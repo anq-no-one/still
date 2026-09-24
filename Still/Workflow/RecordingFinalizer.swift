@@ -8,6 +8,7 @@ struct RecordingFinalizer {
         var createdAt: Date
         var duration: TimeInterval
         var participants: [String] = []
+        var cues: [SpeakerCue] = []
         var suggestedProjectID: UUID?
         var requiresTranscript = false
     }
@@ -69,6 +70,7 @@ struct RecordingFinalizer {
         }
         var naming = library.speakerNaming
         naming.participants = draft.participants
-        return await speakerSeparation.separate(transcription, tracks: tracks, naming: naming)
+        let separated = await speakerSeparation.separate(transcription, tracks: tracks, naming: naming)
+        return SpeakerCueMatcher.suggest(draft.cues, for: separated, ownerName: naming.ownerName)
     }
 }
