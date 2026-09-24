@@ -60,7 +60,9 @@ struct CloudKitSyncTransport: SyncTransport {
                 moreComing = batch.moreComing
             }
 
-            let wanted = changes.filter { $0.kind != .recording || $0.scopeID.map(scopes.contains) == true }
+            let wanted = changes.filter {
+                ($0.kind != .recording && $0.kind != .vocabulary) || $0.scopeID.map(scopes.contains) == true
+            }
             var payloads: [CKRecord.ID: Data] = [:]
             for start in stride(from: 0, to: wanted.count, by: Self.fetchBatchSize) {
                 let ids = wanted[start..<min(start + Self.fetchBatchSize, wanted.count)].map(Self.recordID(for:))

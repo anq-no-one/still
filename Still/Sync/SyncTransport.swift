@@ -4,6 +4,7 @@ struct SyncChange: Equatable, Sendable {
     enum Kind: String, Sendable {
         case recording
         case project
+        case vocabulary
         case device
         case trust
         case grant

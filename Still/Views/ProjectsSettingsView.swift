@@ -6,12 +6,13 @@ struct ProjectsSettingsView: View {
 
     @State private var newName = ""
     @State private var failure: String?
+    @State private var vocabularyProject: Project?
 
     var body: some View {
         Form {
             Section {
                 ForEach(library.projects) { project in
-                    ProjectEditorRow(project: project, save: save)
+                    ProjectEditorRow(project: project, save: save, editVocabulary: { vocabularyProject = project })
                 }
 
                 HStack {
@@ -37,6 +38,9 @@ struct ProjectsSettingsView: View {
         }
         .formStyle(.grouped)
         .settingsPaneTitle("Projects")
+        .sheet(item: $vocabularyProject) { project in
+            VocabularyEditorView(library: library, project: project)
+        }
     }
 
     private var trimmedName: String {
@@ -70,12 +74,14 @@ struct ProjectsSettingsView: View {
 private struct ProjectEditorRow: View {
     let project: Project
     let save: (Project) -> Void
+    let editVocabulary: () -> Void
 
     @State private var name: String
 
-    init(project: Project, save: @escaping (Project) -> Void) {
+    init(project: Project, save: @escaping (Project) -> Void, editVocabulary: @escaping () -> Void) {
         self.project = project
         self.save = save
+        self.editVocabulary = editVocabulary
         _name = State(initialValue: project.name)
     }
 
@@ -105,6 +111,9 @@ private struct ProjectEditorRow: View {
                 .labelsHidden()
                 .foregroundStyle(project.isArchived ? .secondary : .primary)
                 .onSubmit(rename)
+
+            Button("Vocabulary", action: editVocabulary)
+                .buttonStyle(.borderless)
 
             Button(project.isArchived ? "Unarchive" : "Archive") {
                 var updated = project
