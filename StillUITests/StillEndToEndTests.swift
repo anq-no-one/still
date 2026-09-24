@@ -4,6 +4,7 @@ import XCTest
 final class StillEndToEndTests: XCTestCase {
     private let app = XCUIApplication()
     private let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+    private var accessibilityIssues: [String] = []
 
     func testRecordTranscribeFindAndReopen() {
         launch(resetting: true)
@@ -69,6 +70,39 @@ final class StillEndToEndTests: XCTestCase {
         navigateBack()
         app.staticTexts["Audio and Deletion"].tap()
         waitFor(app.staticTexts["Keep Audio"], "the retention choices")
+    }
+
+    func testPrimaryScreensPassTheAccessibilityAudit() throws {
+        launch(resetting: true)
+        waitFor(app.buttons["Continue"], "the first setup step")
+        try audit()
+
+        completeOnboarding()
+        waitFor(app.staticTexts["No Recordings Yet"], "an empty, unlocked Library")
+        try audit()
+
+        app.buttons["Settings"].tap()
+        waitFor(app.staticTexts["Keys and Devices"], "the settings list")
+        try audit()
+
+        app.staticTexts["Access"].tap()
+        waitFor(app.staticTexts["Microphone"], "the access page")
+        try audit()
+
+        for issue in accessibilityIssues { print("ACCESSIBILITY-ISSUE", issue) }
+        XCTAssertTrue(accessibilityIssues.isEmpty, accessibilityIssues.joined(separator: "\n"))
+    }
+
+    private func audit() throws {
+        let systemDrawn: Set<String> = ["Done", "Search Recordings"]
+        try app.performAccessibilityAudit { issue in
+            let label = issue.element?.label ?? ""
+            let isWarning = issue.compactDescription.localizedCaseInsensitiveContains("nearly passed")
+            if !isWarning, !systemDrawn.contains(label) {
+                self.accessibilityIssues.append("\(issue.compactDescription): \(label)")
+            }
+            return true
+        }
     }
 
     private func launch(resetting: Bool, handingOver fixture: String? = nil) {

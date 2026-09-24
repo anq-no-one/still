@@ -142,6 +142,7 @@
 		55678A14C2004E43B3345321 /* MicrophoneInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E092DC8CD20241A58DFA8D /* MicrophoneInput.swift */; };
 		55C71808ED4676E659D5374A /* AutomaticRecording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E8C5C860C0BB63FF3D5816 /* AutomaticRecording.swift */; };
 		5616ABE8CA769C68AF8B638A /* StillArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102898B3DAFE3A79F1CEEEB9 /* StillArchive.swift */; };
+		56685CAB72653091C82006C8 /* StillColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3DF0170F2F79C1433537BE5 /* StillColors.swift */; };
 		56FBF1BD0CDE058DF7F95A95 /* CaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C2B1EC013A5F908AF9D62F0 /* CaptureView.swift */; };
 		5811CE1411395A1198C059A3 /* SpeakerCueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECDCE292AFC544E5A24F92B /* SpeakerCueTests.swift */; };
 		587CD9CFAC2237137ECDA604 /* ModelPack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A67D3534FC6DB812E737FC /* ModelPack.swift */; };
@@ -228,6 +229,7 @@
 		8370912F6B396D64C7EE49E9 /* SpeakerSeparation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA3B12925AEF1049DDE062E2 /* SpeakerSeparation.swift */; };
 		83CF191E62D5BFB5F1932D8E /* MacAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B03B5401AB2345F5ACC04A5 /* MacAudioRecorder.swift */; };
 		8403D8D1752C62CA39A60776 /* CallActivityWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = E27C9A0B89DA154FEA190BBF /* CallActivityWatcher.swift */; };
+		85474663D98614A441396B21 /* StillColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3DF0170F2F79C1433537BE5 /* StillColors.swift */; };
 		86704328F9046A4F1621B83C /* LibrarySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6DE9F70991768E706BE0054 /* LibrarySettings.swift */; };
 		86CD319F3705718933DFA2C4 /* RecordingShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E466888E58B8C5154027F4C /* RecordingShortcut.swift */; };
 		8702C06572C635C61DDB4D32 /* SystemAudioScopeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E54CBBC9E940E367EAB49EC /* SystemAudioScopeTests.swift */; };
@@ -653,6 +655,7 @@
 		A0A22692B9E537288917439F /* BrowserMeetingSignal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserMeetingSignal.swift; sourceTree = "<group>"; };
 		A19D7504927CA12A370ACCEA /* NearbySync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbySync.swift; sourceTree = "<group>"; };
 		A341116EE865894AA2B5CE96 /* RecordingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingCoordinator.swift; sourceTree = "<group>"; };
+		A3DF0170F2F79C1433537BE5 /* StillColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StillColors.swift; sourceTree = "<group>"; };
 		A67AEC89038D78957809DF02 /* MicrophoneSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneSettingsView.swift; sourceTree = "<group>"; };
 		A6944E7E4073FF3EDCC4BDBF /* showcase.fixture.caf */ = {isa = PBXFileReference; path = showcase.fixture.caf; sourceTree = "<group>"; };
 		A7205DA1D1DD32873A417638 /* RetentionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetentionSettingsView.swift; sourceTree = "<group>"; };
@@ -1332,6 +1335,7 @@
 				E0741E127CB4B36AAEEC8114 /* SheetSizing.swift */,
 				005E56963E13BDD318F0C2E6 /* SpeakerListView.swift */,
 				C1EA286254BF5C9C9CE97C07 /* SpeakersSettingsView.swift */,
+				A3DF0170F2F79C1433537BE5 /* StillColors.swift */,
 				C35B2C98BB8E77FD942E068A /* SyncSettingsView.swift */,
 				E05A7D0BA8FEA196385BD4AC /* VocabularyEditorView.swift */,
 				B1423C8F6152E04A66AF1C90 /* VocabularyReviewSheet.swift */,
@@ -1805,6 +1809,7 @@
 				21AC7E6395618A53DDD180C9 /* SpeakersSettingsView.swift in Sources */,
 				253CCDC3EA80732A299BB242 /* StillApp.swift in Sources */,
 				5616ABE8CA769C68AF8B638A /* StillArchive.swift in Sources */,
+				56685CAB72653091C82006C8 /* StillColors.swift in Sources */,
 				D6F79C7A3A42579D33AF32EF /* StillIntentEnvironment.swift in Sources */,
 				1A020FC48DF314F8EEDA5DEC /* StillIntents.swift in Sources */,
 				D79643FDFAA5CDD6EE8337E6 /* StorageCapacity.swift in Sources */,
@@ -2069,6 +2074,7 @@
 				7A1CFB91FC9BC3C0BC103504 /* SpeakersSettingsView.swift in Sources */,
 				6949D34A4C735B67B37288E8 /* StillApp.swift in Sources */,
 				5AD9286C9610EAFD0E1C74CD /* StillArchive.swift in Sources */,
+				85474663D98614A441396B21 /* StillColors.swift in Sources */,
 				94A5114EFA193589A06AD11F /* StillIntentEnvironment.swift in Sources */,
 				B8A0CA470420B76F5DDB8C45 /* StillIntents.swift in Sources */,
 				241EC6CCBED62540D59197B4 /* StorageCapacity.swift in Sources */,
@@ -2232,6 +2238,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -2486,6 +2493,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";

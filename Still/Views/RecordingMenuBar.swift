@@ -113,7 +113,7 @@ struct RecordingMenuBarPanel: View {
                     .font(.title2)
                     .foregroundStyle(.white)
                     .frame(width: 44, height: 44)
-                    .background(.red, in: .circle)
+                    .background(.record, in: .circle)
             }
             .buttonStyle(.plain)
             .disabled(!coordinator.isRecording && !coordinator.canStart)

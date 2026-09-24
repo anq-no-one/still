@@ -65,7 +65,7 @@ struct CaptureView: View {
                         .font(.title2)
                         .foregroundStyle(.white)
                         .frame(width: 64, height: 64)
-                        .background(.red, in: .circle)
+                        .background(.record, in: .circle)
                         .symbolEffect(.pulse, isActive: coordinator.isRecording && !reduceMotion)
                 }
                 .buttonStyle(.plain)

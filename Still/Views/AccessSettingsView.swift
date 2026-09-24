@@ -75,9 +75,13 @@ struct AccessSettingsView: View {
             Spacer(minLength: 8)
             switch state {
             case .granted:
-                Label("Allowed", systemImage: "checkmark.circle.fill")
-                    .labelStyle(.titleAndIcon)
-                    .foregroundStyle(.green)
+                Label {
+                    Text("Allowed")
+                } icon: {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                }
+                .labelStyle(.titleAndIcon)
             case .notAsked:
                 Button("Allow", action: request)
             case .denied:

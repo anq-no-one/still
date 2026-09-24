@@ -48,7 +48,15 @@ struct LibraryView: View {
             .searchable(text: $query, prompt: "Search Recordings")
             .navigationTitle("Recordings")
             .overlay {
-                emptyState
+                if showsEmptyState {
+                    GeometryReader { proxy in
+                        ScrollView {
+                            emptyState
+                                .frame(maxWidth: .infinity, minHeight: proxy.size.height)
+                        }
+                        .scrollBounceBehavior(.basedOnSize)
+                    }
+                }
             }
             #if os(macOS)
             .navigationSplitViewColumnWidth(min: 220, ideal: 260)
@@ -187,11 +195,18 @@ struct LibraryView: View {
             } actions: {
                 Button("Record", systemImage: "record.circle.fill", action: startRecording)
                     .buttonStyle(.borderedProminent)
-                    .tint(.red)
+                    .tint(.record)
                     .disabled(!coordinator.canStart)
             }
         case .unlocked:
             EmptyView()
+        }
+    }
+
+    private var showsEmptyState: Bool {
+        switch library.state {
+        case .unlocked: library.recordings.isEmpty
+        default: true
         }
     }
 
@@ -318,7 +333,7 @@ struct LibraryView: View {
         .labelStyle(.titleAndIcon)
         #endif
         .disabled(!coordinator.isRecording && !coordinator.canStart)
-        .tint(.red)
+        .tint(.record)
         .symbolEffect(.pulse, isActive: coordinator.isRecording && !reduceMotion)
         #if os(iOS)
         .keyboardShortcut("r", modifiers: [.command, .shift])

@@ -5,18 +5,19 @@ struct SetupView: View {
     let models: ModelInstallers
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @ScaledMetric(relativeTo: .largeTitle) private var iconSize = 56
 
     private var installer: ModelPackInstaller {
         models.transcription
     }
 
     var body: some View {
-        ViewThatFits(in: .vertical) {
-            currentStep
-                .frame(maxHeight: .infinity)
+        GeometryReader { proxy in
             ScrollView {
                 currentStep
+                    .frame(maxWidth: .infinity, minHeight: proxy.size.height)
             }
+            .scrollBounceBehavior(.basedOnSize)
         }
         .stillSheetWidth(mac: 440, minHeight: 520)
         .animation(reduceMotion ? nil : .default, value: flow.step)
@@ -149,24 +150,25 @@ struct SetupView: View {
             if let number = flow.stepNumber {
                 Text("Step \(number) of \(flow.stepCount)")
                     .font(.footnote.weight(.medium))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.primary.opacity(0.75))
             }
 
             Image(systemName: icon)
-                .font(.system(size: 56, weight: .regular))
+                .font(.system(size: iconSize, weight: .regular))
                 .symbolRenderingMode(.hierarchical)
                 .foregroundStyle(.tint)
-                .frame(height: 72)
+                .frame(minHeight: iconSize + 16)
                 .accessibilityHidden(true)
 
             Text(title)
                 .font(.largeTitle.bold())
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
 
             Text(text)
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.primary.opacity(0.8))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
