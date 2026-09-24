@@ -8,7 +8,7 @@ import Testing
 struct AutomaticRecordingTests {
     private let zoom = "us.zoom.xos"
     private let teams = "com.microsoft.teams2"
-    private let chrome = "com.google.Chrome"
+    private let slack = "com.tinyspeck.slackmacgap"
 
     @Test
     func savesTheRecordingWhenTheCallEnds() async throws {
@@ -29,15 +29,33 @@ struct AutomaticRecordingTests {
     }
 
     @Test
-    func aBrowserHelperProcessCountsAsTheBrowser() async throws {
-        let (automatic, watcher, coordinator) = try await make(allowed: [chrome])
+    func aHelperProcessCountsAsItsApp() async throws {
+        let (automatic, watcher, coordinator) = try await make(allowed: [slack])
         automatic.startWatching()
 
-        watcher.activate("com.google.Chrome.helper")
+        watcher.activate("com.tinyspeck.slackmacgap.helper")
         await settle()
 
         #expect(coordinator.isRecording)
-        #expect(automatic.triggeredBy == chrome)
+        #expect(automatic.triggeredBy == slack)
+    }
+
+    @Test
+    func anAutomaticCallCapturesOnlyThatAppsSound() async throws {
+        let (automatic, watcher, coordinator) = try await make(allowed: [zoom])
+        automatic.startWatching()
+
+        watcher.activate(zoom)
+        await settle()
+
+        #expect(coordinator.audioTarget.scope == .apps([zoom]))
+    }
+
+    @Test
+    func browsersAreLeftToTheExtension() {
+        let browsers = ["com.google.Chrome", "com.apple.Safari", "com.microsoft.edgemac", "com.brave.Browser"]
+
+        #expect(browsers.allSatisfy { CallApp.owner(of: $0) == nil })
     }
 
     @Test
@@ -113,14 +131,14 @@ struct AutomaticRecordingTests {
     @Test
     func switchingAnAppRedrawsTheList() async throws {
         let (automatic, _, _) = try await make(allowed: [])
-        let app = try #require(automatic.apps.first { $0.bundleID == chrome })
+        let app = try #require(automatic.apps.first { $0.bundleID == slack })
         let redrawn = Flag()
         withObservationTracking { _ = automatic.apps } onChange: { redrawn.raise() }
 
         automatic.setAllowed(true, for: app)
 
         #expect(redrawn.isRaised)
-        #expect(automatic.apps.first { $0.bundleID == chrome }?.isAllowed == true)
+        #expect(automatic.apps.first { $0.bundleID == slack }?.isAllowed == true)
     }
 
     @Test

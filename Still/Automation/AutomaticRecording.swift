@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-struct CallApp: Identifiable, Codable, Equatable, Sendable {
+struct CallApp: Identifiable, Equatable, Sendable {
     var id: String { bundleID }
 
     let bundleID: String
@@ -9,14 +9,10 @@ struct CallApp: Identifiable, Codable, Equatable, Sendable {
     var isAllowed: Bool
 
     static let known: [CallApp] = [
-        CallApp(bundleID: "com.google.Chrome", name: "Google Chrome", isAllowed: false),
-        CallApp(bundleID: "company.thebrowser.Browser", name: "Arc", isAllowed: false),
-        CallApp(bundleID: "com.microsoft.edgemac", name: "Microsoft Edge", isAllowed: false),
-        CallApp(bundleID: "com.brave.Browser", name: "Brave", isAllowed: false),
-        CallApp(bundleID: "org.mozilla.firefox", name: "Firefox", isAllowed: false),
         CallApp(bundleID: "us.zoom.xos", name: "Zoom", isAllowed: false),
         CallApp(bundleID: "com.microsoft.teams2", name: "Microsoft Teams", isAllowed: false),
-        CallApp(bundleID: "com.cisco.webexmeetingsapp", name: "Webex", isAllowed: false),
+        CallApp(bundleID: "Cisco-Systems.Spark", name: "Webex", isAllowed: false),
+        CallApp(bundleID: "com.cisco.webexmeetingsapp", name: "Webex Meetings", isAllowed: false),
         CallApp(bundleID: "com.tinyspeck.slackmacgap", name: "Slack", isAllowed: false),
         CallApp(bundleID: "com.apple.FaceTime", name: "FaceTime", isAllowed: false),
         CallApp(bundleID: "ru.keepcoder.Telegram", name: "Telegram", isAllowed: false),
@@ -24,8 +20,20 @@ struct CallApp: Identifiable, Codable, Equatable, Sendable {
         CallApp(bundleID: "com.hnc.Discord", name: "Discord", isAllowed: false),
     ]
 
+    private static let audioProcesses: [String: [String]] = [
+        "com.apple.FaceTime": ["com.apple.avconferenced"],
+    ]
+
+    static func owner(of processBundleID: String) -> CallApp? {
+        known.first { $0.owns(processBundleID) }
+    }
+
+    var processBundleIDs: [String] {
+        [bundleID] + (Self.audioProcesses[bundleID] ?? [])
+    }
+
     func owns(_ processBundleID: String) -> Bool {
-        processBundleID == bundleID || processBundleID.hasPrefix(bundleID + ".")
+        processBundleIDs.contains { processBundleID == $0 || processBundleID.hasPrefix($0 + ".") }
     }
 }
 
@@ -102,15 +110,16 @@ final class AutomaticRecording {
         guard isWatching,
               triggeredBy == nil,
               !coordinator.isRecording,
-              let app = apps.first(where: { $0.isAllowed && $0.owns(processBundleID) })
+              let owner = CallApp.owner(of: processBundleID),
+              let app = apps.first(where: { $0.isAllowed && $0.bundleID == owner.bundleID })
         else { return }
 
         triggeredBy = app.bundleID
-        await coordinator.start()
+        await coordinator.start(capturing: .app(app))
     }
 
     private func appWentAway(_ processBundleID: String) async {
-        guard let triggeredBy, CallApp(bundleID: triggeredBy, name: "", isAllowed: true).owns(processBundleID) else { return }
+        guard let triggeredBy, CallApp.owner(of: processBundleID)?.bundleID == triggeredBy else { return }
 
         self.triggeredBy = nil
         if coordinator.isRecording {

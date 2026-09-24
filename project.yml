@@ -112,6 +112,7 @@ targets:
     platform: macOS
     sources:
       - path: StillBrowserExtension
+      - path: Still/Automation/BrowserMeetingSignal.swift
     info:
       path: StillBrowserExtension/Info.plist
     settings:

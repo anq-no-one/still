@@ -9,6 +9,7 @@ final class MacAudioRecorder: AudioRecorder {
     private let microphone: MicrophoneRecorder
     private let systemAudio: SystemAudioRecorder
     private let capturesSystemAudio: () -> Bool
+    private let scope: @MainActor () -> SystemAudioScope
     private let now: () -> Date
 
     private var isCapturingSystemAudio = false
@@ -28,11 +29,13 @@ final class MacAudioRecorder: AudioRecorder {
         systemAudioInput: SystemAudioInput,
         format: AudioFormat = .transcription,
         capturesSystemAudio: @escaping () -> Bool,
+        scope: @escaping @MainActor () -> SystemAudioScope,
         now: @escaping () -> Date = Date.init
     ) {
         microphone = MicrophoneRecorder(root: root, cipher: cipher, input: microphoneInput, format: format)
         systemAudio = SystemAudioRecorder(root: root, cipher: cipher, input: systemAudioInput, format: format)
         self.capturesSystemAudio = capturesSystemAudio
+        self.scope = scope
         self.now = now
     }
 
@@ -46,7 +49,8 @@ final class MacAudioRecorder: AudioRecorder {
         do {
             try await systemAudio.start(
                 recordingID: recordingID,
-                startOffset: now().timeIntervalSince(startedAt)
+                startOffset: now().timeIntervalSince(startedAt),
+                scope: scope()
             )
             isCapturingSystemAudio = true
         } catch {

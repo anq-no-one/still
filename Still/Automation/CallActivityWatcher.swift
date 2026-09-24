@@ -2,14 +2,28 @@
 import CoreAudio
 import Foundation
 
-@MainActor
-final class MicrophoneUseWatcher: CallAppWatcher {
-    static let pollInterval: Duration = .milliseconds(1_500)
-    static let releaseGrace: TimeInterval = 5
+protocol AudioActivitySource: Sendable {
+    func currentActivity() -> [AudioProcessActivity]
+}
 
-    private let ownBundleID = Bundle.main.bundleIdentifier ?? ""
+@MainActor
+final class CallActivityWatcher: CallAppWatcher {
+    static let pollInterval: Duration = .milliseconds(1_500)
+
+    private let source: AudioActivitySource
+    private let now: () -> Date
+    private var detector: CallDetector
     private var loop: Task<Void, Never>?
-    private var listening: [String: Date] = [:]
+
+    init(
+        source: AudioActivitySource = CoreAudioActivitySource(),
+        detector: CallDetector = CallDetector(),
+        now: @escaping () -> Date = Date.init
+    ) {
+        self.source = source
+        self.detector = detector
+        self.now = now
+    }
 
     func start(
         onActivate: @escaping @MainActor (String) -> Void,
@@ -27,32 +41,24 @@ final class MicrophoneUseWatcher: CallAppWatcher {
     func stop() {
         loop?.cancel()
         loop = nil
-        listening.removeAll()
+        detector.reset()
     }
 
     private func poll(
         onActivate: @MainActor (String) -> Void,
         onDeactivate: @MainActor (String) -> Void
     ) {
-        let now = Date.now
-        let current = Self.bundleIDsUsingMicrophone().filter { $0 != ownBundleID && !$0.hasPrefix(ownBundleID + ".") }
-
-        for bundleID in current {
-            if listening[bundleID] == nil {
-                onActivate(bundleID)
-            }
-            listening[bundleID] = now
-        }
-
-        for (bundleID, lastHeard) in listening where !current.contains(bundleID) {
-            if now.timeIntervalSince(lastHeard) >= Self.releaseGrace {
-                listening[bundleID] = nil
-                onDeactivate(bundleID)
+        for event in detector.observe(source.currentActivity(), at: now()) {
+            switch event {
+            case .started(let bundleID): onActivate(bundleID)
+            case .ended(let bundleID): onDeactivate(bundleID)
             }
         }
     }
+}
 
-    private nonisolated static func bundleIDsUsingMicrophone() -> Set<String> {
+struct CoreAudioActivitySource: AudioActivitySource {
+    func currentActivity() -> [AudioProcessActivity] {
         var address = AudioObjectPropertyAddress(
             mSelector: kAudioHardwarePropertyProcessObjectList,
             mScope: kAudioObjectPropertyScopeGlobal,
@@ -67,14 +73,19 @@ final class MicrophoneUseWatcher: CallAppWatcher {
         guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &processes) == noErr
         else { return [] }
 
-        return Set(processes.compactMap { process in
-            isRunningInput(process) ? bundleID(of: process) : nil
-        })
+        return processes.compactMap { process in
+            guard let bundleID = Self.bundleID(of: process) else { return nil }
+            return AudioProcessActivity(
+                bundleID: bundleID,
+                usesMicrophone: Self.flag(kAudioProcessPropertyIsRunningInput, of: process),
+                playsAudio: Self.flag(kAudioProcessPropertyIsRunningOutput, of: process)
+            )
+        }
     }
 
-    private nonisolated static func isRunningInput(_ process: AudioObjectID) -> Bool {
+    private static func flag(_ selector: AudioObjectPropertySelector, of process: AudioObjectID) -> Bool {
         var address = AudioObjectPropertyAddress(
-            mSelector: kAudioProcessPropertyIsRunningInput,
+            mSelector: selector,
             mScope: kAudioObjectPropertyScopeGlobal,
             mElement: kAudioObjectPropertyElementMain
         )
@@ -83,7 +94,7 @@ final class MicrophoneUseWatcher: CallAppWatcher {
         return AudioObjectGetPropertyData(process, &address, 0, nil, &size, &running) == noErr && running != 0
     }
 
-    private nonisolated static func bundleID(of process: AudioObjectID) -> String? {
+    private static func bundleID(of process: AudioObjectID) -> String? {
         var address = AudioObjectPropertyAddress(
             mSelector: kAudioProcessPropertyBundleID,
             mScope: kAudioObjectPropertyScopeGlobal,

@@ -57,6 +57,7 @@ struct StillApp: App {
         #endif
         let microphone = MainActor.assumeIsolated { MicrophoneInput(fixture: audioFixture) }
         let systemAudio = SystemAudioInput()
+        let audioTarget = MainActor.assumeIsolated { SystemAudioTarget() }
 
         let supportRoot = URL.applicationSupportDirectory.appending(path: "Still", directoryHint: .isDirectory)
 
@@ -101,7 +102,8 @@ struct StillApp: App {
                                 cipher: LibraryCipher(key: key),
                                 microphoneInput: microphone,
                                 systemAudioInput: systemAudio,
-                                capturesSystemAudio: { proEntitlements.allows(.macSystemAudio) }
+                                capturesSystemAudio: { proEntitlements.allows(.macSystemAudio) },
+                                scope: { audioTarget.scope }
                             )
                             #else
                             MicrophoneRecorder(root: audioRoot, cipher: LibraryCipher(key: key), input: microphone)
@@ -158,7 +160,8 @@ struct StillApp: App {
                 expectedParticipants: { date in
                     await CalendarContext(source: EventKitCalendarSource()).suggestion(at: date)?.participants ?? []
                 },
-                isReady: { setupFlow.isComplete && recordingLibrary.state == .unlocked }
+                isReady: { setupFlow.isComplete && recordingLibrary.state == .unlocked },
+                audioTarget: audioTarget
             )
         }
         coordinator = recordingCoordinator
@@ -182,15 +185,17 @@ struct StillApp: App {
         automatic = MainActor.assumeIsolated {
             AutomaticRecording(
                 coordinator: recordingCoordinator,
-                watcher: MicrophoneUseWatcher(),
+                watcher: CallActivityWatcher(),
                 allowList: UserDefaultsCallAppAllowList()
             )
         }
         browser = MainActor.assumeIsolated {
-            BrowserMeetingBridge(
+            let bridge = BrowserMeetingBridge(
                 coordinator: recordingCoordinator,
                 allowList: UserDefaultsMeetingSiteAllowList()
             )
+            bridge.listenForExtensions()
+            return bridge
         }
         #endif
     }

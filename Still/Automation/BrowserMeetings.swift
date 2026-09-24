@@ -1,5 +1,8 @@
 import Foundation
 import Observation
+#if os(macOS)
+import AppKit
+#endif
 
 struct MeetingSite: Identifiable, Codable, Equatable, Sendable {
     var id: String { host }
@@ -8,25 +11,16 @@ struct MeetingSite: Identifiable, Codable, Equatable, Sendable {
     let name: String
     var isAllowed: Bool
 
-    /// The only hosts the extension may ever see. Anything else is refused
-    /// before it reaches Still.
     static let supported: [MeetingSite] = [
         MeetingSite(host: "meet.google.com", name: "Google Meet", isAllowed: false),
         MeetingSite(host: "teams.microsoft.com", name: "Microsoft Teams", isAllowed: false),
         MeetingSite(host: "zoom.us", name: "Zoom", isAllowed: false),
         MeetingSite(host: "whereby.com", name: "Whereby", isAllowed: false),
     ]
-}
 
-struct BrowserMeetingEvent: Equatable, Sendable {
-    enum Phase: String, Codable, Sendable {
-        case started
-        case ended
+    func matches(_ pageHost: String) -> Bool {
+        pageHost == host || pageHost.hasSuffix("." + host)
     }
-
-    let host: String
-    let meetingID: String
-    let phase: Phase
 }
 
 protocol MeetingSiteAllowList: Sendable {
@@ -34,16 +28,15 @@ protocol MeetingSiteAllowList: Sendable {
     func setAllowed(_ allowed: Bool, forHost host: String)
 }
 
-/// Receives nothing but a host, a meeting id, and whether it started or ended.
-/// The browser never sees a transcript, a note, audio, or a key, because none
-/// of that travels in this direction.
 @MainActor
 @Observable
 final class BrowserMeetingBridge {
     private let coordinator: RecordingCoordinator
     private let allowList: MeetingSiteAllowList
+    @ObservationIgnored private var observers: [(NotificationCenter, NSObjectProtocol)] = []
 
     private(set) var activeMeetingID: String?
+    private(set) var activeBrowser: String?
 
     init(coordinator: RecordingCoordinator, allowList: MeetingSiteAllowList) {
         self.coordinator = coordinator
@@ -65,18 +58,57 @@ final class BrowserMeetingBridge {
         case .started:
             guard activeMeetingID == nil, !coordinator.isRecording else { return }
             activeMeetingID = event.meetingID
-            await coordinator.start()
+            activeBrowser = event.browserBundleID
+            await coordinator.start(capturing: .browser(event.browserBundleID))
         case .ended:
             guard activeMeetingID == event.meetingID else { return }
-            activeMeetingID = nil
-            await coordinator.stopAndSave()
+            await endActiveMeeting()
         }
     }
 
+    func browserQuit(_ bundleID: String) async {
+        guard activeMeetingID != nil, activeBrowser == nil || activeBrowser == bundleID else { return }
+        await endActiveMeeting()
+    }
+
+    private func endActiveMeeting() async {
+        activeMeetingID = nil
+        activeBrowser = nil
+        await coordinator.stopAndSave()
+    }
+
     private func isAllowed(_ host: String) -> Bool {
-        allowList.sites().contains { $0.host == host && $0.isAllowed }
+        allowList.sites().contains { $0.isAllowed && $0.matches(host) }
     }
 }
+
+#if os(macOS)
+extension BrowserMeetingBridge {
+    func listenForExtensions() {
+        guard observers.isEmpty else { return }
+
+        let distributed = DistributedNotificationCenter.default()
+        let signal = distributed.addObserver(forName: BrowserMeetingSignal.name, object: nil, queue: .main) { [weak self] notification in
+            let event = BrowserMeetingSignal.event(fromPayload: notification.object)
+            MainActor.assumeIsolated {
+                guard let self, let event else { return }
+                Task { await self.handle(event) }
+            }
+        }
+
+        let workspace = NSWorkspace.shared.notificationCenter
+        let quit = workspace.addObserver(forName: NSWorkspace.didTerminateApplicationNotification, object: nil, queue: .main) { [weak self] notification in
+            let bundleID = (notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication)?.bundleIdentifier
+            MainActor.assumeIsolated {
+                guard let self, let bundleID, WebBrowser.all.contains(where: { $0.bundleID == bundleID }) else { return }
+                Task { await self.browserQuit(bundleID) }
+            }
+        }
+
+        observers = [(distributed, signal), (workspace, quit)]
+    }
+}
+#endif
 
 struct UserDefaultsMeetingSiteAllowList: MeetingSiteAllowList, @unchecked Sendable {
     private let key = "still.meetingSites.allowed"
