@@ -33,6 +33,16 @@ struct TranscriptionSettingsView: View {
             }
 
             Section {
+                LabeledContent("Download Size", value: models.meetingMemory.pack.downloadSizeText)
+                LabeledContent("Runs On", value: "This Device Only")
+                ModelPackStatus(installer: models.meetingMemory, ready: "Ready to Find Decisions and Tasks")
+            } header: {
+                Text("Decisions and Tasks")
+            } footer: {
+                Text(models.meetingMemory.pack.purpose)
+            }
+
+            Section {
                 if library.rememberedVoiceProfiles.isEmpty {
                     Text("No voices remembered")
                         .foregroundStyle(.secondary)

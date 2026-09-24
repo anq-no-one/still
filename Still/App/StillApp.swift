@@ -13,6 +13,7 @@ struct StillApp: App {
     private let lock: AppLock
     private let sync: SyncEngine
     private let diagnostics: Diagnostics
+    private let extraction: MemoryExtraction
     #if os(macOS)
     private let automatic: AutomaticRecording
     private let browser: BrowserMeetingBridge
@@ -84,6 +85,12 @@ struct StillApp: App {
                 ),
                 speakers: ModelPackInstaller(
                     pack: ModelCatalog.speakerSeparation,
+                    root: modelRoot,
+                    downloader: URLSessionModelFileDownloader(),
+                    approval: UserDefaultsModelApprovalStore()
+                ),
+                meetingMemory: ModelPackInstaller(
+                    pack: ModelCatalog.meetingMemory(forMemory: Int(ProcessInfo.processInfo.physicalMemory)),
                     root: modelRoot,
                     downloader: URLSessionModelFileDownloader(),
                     approval: UserDefaultsModelApprovalStore()
@@ -220,8 +227,17 @@ struct StillApp: App {
         }
         #endif
         navigation = MainActor.assumeIsolated { LibraryNavigation() }
+        let memoryInstaller = installers.meetingMemory
+        let memoryExtractor = LocalModelExtractor(pack: memoryInstaller.pack, root: modelRoot)
+        let memoryExtraction = MainActor.assumeIsolated {
+            MemoryExtraction(library: recordingLibrary) {
+                LocalModelExtractor.canRun && memoryInstaller.state == .installed ? memoryExtractor : nil
+            }
+        }
+        extraction = memoryExtraction
         Task { @MainActor in
             await recordingLibrary.unlock()
+            memoryExtraction.start()
             await proEntitlements.refresh()
             await syncEngine.syncIfEnabled()
             await recordingCoordinator.finishInterruptedProcessing()
@@ -355,6 +371,7 @@ struct StillApp: App {
                 sync: sync,
                 diagnostics: diagnostics,
                 lock: lock,
+                extraction: extraction,
                 navigation: navigation
             )
         }

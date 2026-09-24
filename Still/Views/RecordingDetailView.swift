@@ -3,6 +3,7 @@ import Translation
 
 struct RecordingDetailView: View {
     let library: Library
+    let extraction: MemoryExtraction
     let startAt: TimeInterval?
 
     @State private var editor: RecordingEditor
@@ -12,8 +13,9 @@ struct RecordingDetailView: View {
     @State private var showsTranslation = false
     @State private var translationFailure: String?
 
-    init(recording: Recording, library: Library, startAt: TimeInterval? = nil) {
+    init(recording: Recording, library: Library, extraction: MemoryExtraction, startAt: TimeInterval? = nil) {
         self.library = library
+        self.extraction = extraction
         self.startAt = startAt
         _editor = State(initialValue: RecordingEditor(recording: recording, library: library))
         _title = State(initialValue: recording.title)
@@ -52,6 +54,13 @@ struct RecordingDetailView: View {
                     Label(message, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(.red)
                 }
+
+                MemorySectionsView(
+                    recordingID: recording.id,
+                    library: library,
+                    extraction: extraction,
+                    play: { player.play(from: $0) }
+                )
 
                 noteView
 
