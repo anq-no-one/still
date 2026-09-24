@@ -15,6 +15,7 @@ protocol RecordingLibrary: AnyObject {
 struct LibraryServices {
     let audioRoot: URL
     let settingsFile: URL
+    let keysFile: URL
     let makeRepository: (SymmetricKey) -> RecordingRepository
     let makeRecorder: (SymmetricKey) -> AudioRecorder
     let makeEmbeddingEngine: () async -> EmbeddingEngine?
@@ -23,6 +24,7 @@ struct LibraryServices {
     init(
         audioRoot: URL,
         settingsFile: URL? = nil,
+        keysFile: URL? = nil,
         makeRepository: @escaping (SymmetricKey) -> RecordingRepository,
         makeRecorder: @escaping (SymmetricKey) -> AudioRecorder,
         makeEmbeddingEngine: @escaping () async -> EmbeddingEngine? = { nil },
@@ -30,6 +32,7 @@ struct LibraryServices {
     ) {
         self.audioRoot = audioRoot
         self.settingsFile = settingsFile ?? audioRoot.appending(path: "Library.settings")
+        self.keysFile = keysFile ?? audioRoot.appending(path: "Library.keys")
         self.makeRepository = makeRepository
         self.makeRecorder = makeRecorder
         self.makeEmbeddingEngine = makeEmbeddingEngine
@@ -53,6 +56,7 @@ final class Library: RecordingLibrary {
     private var repository: RecordingRepository?
     private var projectRepository: ProjectRepository?
     private var key: SymmetricKey?
+    private var accountKeys: AccountKeys?
 
     private(set) var state: State = .locked
     private(set) var storedRecordings: [Recording] = []
@@ -121,13 +125,24 @@ final class Library: RecordingLibrary {
     /// Audio for a recording this device hides is left in iCloud, so a
     /// restricted Mac never holds another project's voices.
     func keepsAudio(forRecording id: UUID) -> Bool {
-        storedRecordings.contains { $0.id == id && projectSelection.isVisible($0) }
+        storedRecordings.contains { $0.id == id && projectSelection.isVisible($0) && holds($0.projectScope) }
+    }
+
+    func audioSealing(forRecording id: UUID) -> ScopeChunkSealing? {
+        guard let key,
+              let recording = storedRecordings.first(where: { $0.id == id }),
+              let scope = scopeID(for: recording.projectScope),
+              let scopeKey = accountKeys?.key(for: scope)
+        else { return nil }
+
+        return ScopeChunkSealing(local: LibraryCipher(key: key), scopeKey: scopeKey)
     }
 
     @discardableResult
     func createProject(named name: String, color: ProjectColor, at date: Date = .now) throws -> Project {
         let project = Project(name: name, color: color, createdAt: date)
         try writeProject(project)
+        try hold(SymmetricKey(size: .bits256), forScope: project.id)
         return project
     }
 
@@ -163,6 +178,7 @@ final class Library: RecordingLibrary {
             storedRecordings = try repository.load()
             try loadProjects(with: key)
             settings = LibrarySettings.load(from: services.settingsFile, cipher: LibraryCipher(key: key))
+            accountKeys = try loadAccountKeys(with: key)
             self.repository = repository
             self.key = key
             try recoverInterruptedAudio(cipher: LibraryCipher(key: key))
@@ -176,6 +192,7 @@ final class Library: RecordingLibrary {
             repository = nil
             projectRepository = nil
             key = nil
+            accountKeys = nil
             storedRecordings = []
             storedProjects = []
             settings = LibrarySettings()
@@ -310,6 +327,7 @@ final class Library: RecordingLibrary {
             storedRecordings = try repository.load()
             try loadProjects(with: key)
             settings = LibrarySettings.load(from: services.settingsFile, cipher: LibraryCipher(key: key))
+            accountKeys = try loadAccountKeys(with: key)
             self.repository = repository
             self.key = key
             state = .unlocked
@@ -322,12 +340,27 @@ final class Library: RecordingLibrary {
         }
     }
 
-    /// Rotating re-seals everything under a key a revoked device never held, so
-    /// nothing written afterwards opens with the material it kept.
     func revokeOtherDevices(reason: String = String(localized: "Rotate your Still Library key")) async throws {
-        guard let oldKey = key, let repository else { throw LibraryError.locked }
+        guard key != nil else { throw LibraryError.locked }
 
         let newKey = try await keyRing.beginRotation(reason: reason)
+        try rotate(to: newKey, keys: accountKeys)
+    }
+
+    func join(
+        _ invitation: AccountInvitation,
+        reason: String = String(localized: "Join your other device's Still Library")
+    ) async throws {
+        guard key != nil, let accountKeys else { throw LibraryError.locked }
+
+        let newKey = SymmetricKey(data: invitation.accountKey)
+        try await keyRing.beginRotation(to: newKey, reason: reason)
+        try rotate(to: newKey, keys: accountKeys.joining(invitation))
+    }
+
+    private func rotate(to newKey: SymmetricKey, keys: AccountKeys?) throws {
+        guard let oldKey = key else { throw LibraryError.locked }
+
         let oldCipher = LibraryCipher(key: oldKey)
         let newCipher = LibraryCipher(key: newKey)
         let newRepository = services.makeRepository(newKey)
@@ -348,18 +381,17 @@ final class Library: RecordingLibrary {
                 try newProjectRepository.save(project)
             }
             try settings.save(to: services.settingsFile, cipher: newCipher)
+            try keys?.save(to: services.keysFile, cipher: newCipher)
         } catch {
-            // Nothing has replaced the Library key yet, so the old one still
-            // opens whatever was not re-sealed.
             try? keyRing.abandonRotation()
             throw error
         }
 
         try keyRing.completeRotation()
-        _ = repository
-        self.repository = newRepository
+        repository = newRepository
         projectRepository = newProjectRepository
         key = newKey
+        accountKeys = keys
     }
 
     private func reseal(
@@ -385,16 +417,130 @@ final class Library: RecordingLibrary {
         }
     }
 
-    func sealForSync(_ recording: Recording) throws -> Data {
-        guard let key else { throw LibraryError.locked }
-
-        return try LibraryCipher(key: key).seal(try JSONEncoder().encode(recording))
+    var accountID: UUID? {
+        accountKeys?.accountID
     }
 
-    func openSyncPayload(_ sealed: Data) throws -> Recording {
+    var accountCreatedAt: Date? {
+        accountKeys?.createdAt
+    }
+
+    var knownScopes: [ProjectScope] {
+        [.noProject] + storedProjects.map { .project($0.id) }
+    }
+
+    func scopeID(for scope: ProjectScope) -> UUID? {
+        switch scope {
+        case .project(let id): id
+        case .noProject: accountKeys?.noProjectScopeID
+        }
+    }
+
+    var heldScopeIDs: Set<UUID> {
+        accountKeys?.heldScopeIDs ?? []
+    }
+
+    var requestedScopeIDs: Set<UUID> {
+        Set(knownScopes.filter(projectSelection.includes).compactMap(scopeID(for:)))
+    }
+
+    func holds(_ scope: ProjectScope) -> Bool {
+        scopeID(for: scope).map(heldScopeIDs.contains) ?? false
+    }
+
+    func storage(of scope: ProjectScope) -> ScopeStorage {
+        if projectSelection.includes(scope) {
+            return holds(scope) ? .stored : .waitingForKey
+        }
+
+        let keepsCopies = storedRecordings.contains { $0.projectScope == scope && $0.isProjectConfirmed }
+        return holds(scope) || keepsCopies ? .leaving : .notStored
+    }
+
+    func scopeKey(for scope: UUID) -> SymmetricKey? {
+        accountKeys?.key(for: scope)
+    }
+
+    func hold(_ scopeKey: SymmetricKey, forScope scope: UUID) throws {
+        guard let key, var keys = accountKeys else { throw LibraryError.locked }
+
+        keys.hold(scopeKey, for: scope)
+        try keys.save(to: services.keysFile, cipher: LibraryCipher(key: key))
+        accountKeys = keys
+    }
+
+    func confirmedRecordings(inScope scope: UUID) -> [Recording] {
+        storedRecordings.filter { $0.isProjectConfirmed && scopeID(for: $0.projectScope) == scope }
+    }
+
+    func releaseScope(_ scope: UUID) throws {
+        guard let key, var keys = accountKeys else { throw LibraryError.locked }
+
+        for recording in confirmedRecordings(inScope: scope) {
+            try purgeLocalCopy(ofRecording: recording.id)
+        }
+        keys.release(scope)
+        try keys.save(to: services.keysFile, cipher: LibraryCipher(key: key))
+        accountKeys = keys
+    }
+
+    func purgeLocalCopy(ofRecording id: UUID) throws {
+        guard let repository else { throw LibraryError.locked }
+
+        try repository.delete(id)
+        try? AudioChunkStore.discard(AudioChunkStore.directory(forRecording: id, in: services.audioRoot))
+        storedRecordings.removeAll { $0.id == id }
+        semanticIndex.remove(id)
+    }
+
+    func accountInvitation() throws -> AccountInvitation {
+        guard let key, let accountKeys else { throw LibraryError.locked }
+
+        return AccountInvitation(
+            accountKey: key.rawBytes,
+            accountID: accountKeys.accountID,
+            createdAt: accountKeys.createdAt,
+            noProjectScopeID: accountKeys.noProjectScopeID
+        )
+    }
+
+    func sealForAccount(_ data: Data) throws -> Data {
         guard let key else { throw LibraryError.locked }
 
-        return try JSONDecoder().decode(Recording.self, from: try LibraryCipher(key: key).open(sealed))
+        return try LibraryCipher(key: key).seal(data)
+    }
+
+    func openFromAccount(_ sealed: Data) throws -> Data {
+        guard let key else { throw LibraryError.locked }
+
+        return try LibraryCipher(key: key).open(sealed)
+    }
+
+    func syncChange(for recording: Recording, deviceID: UUID) throws -> SyncChange? {
+        guard let scope = scopeID(for: recording.projectScope), let scopeKey = accountKeys?.key(for: scope) else {
+            return nil
+        }
+
+        return SyncChange(
+            id: recording.id,
+            kind: .recording,
+            updatedAt: recording.updatedAt,
+            deviceID: deviceID,
+            scopeID: scope,
+            payload: try LibraryCipher(key: scopeKey).seal(try JSONEncoder().encode(recording))
+        )
+    }
+
+    func openRecording(from change: SyncChange) throws -> Recording {
+        guard let scope = change.scopeID, let scopeKey = accountKeys?.key(for: scope), let payload = change.payload else {
+            throw LibraryCipherError.unreadable
+        }
+
+        let recording = try JSONDecoder().decode(Recording.self, from: try LibraryCipher(key: scopeKey).open(payload))
+        guard recording.id == change.id, scopeID(for: recording.projectScope) == scope else {
+            throw LibraryCipherError.unreadable
+        }
+        return recording
     }
 
     func sealForSync(_ project: Project) throws -> Data {
@@ -411,7 +557,9 @@ final class Library: RecordingLibrary {
 
     func applyRemote(_ remote: Project) throws {
         let local = project(withID: remote.id)
-        try writeProject(local.map { Project.merge($0, remote) } ?? remote)
+        let merged = local.map { Project.merge($0, remote) } ?? remote
+        guard merged != local else { return }
+        try writeProject(merged)
     }
 
     /// Matched against every stored Recording, tombstones included, so a copy
@@ -422,7 +570,9 @@ final class Library: RecordingLibrary {
             return
         }
 
-        try write(RecordingMerge.merge(local, remote))
+        let merged = RecordingMerge.merge(local, remote)
+        guard merged != local else { return }
+        try write(merged)
     }
 
     func archive(_ recording: Recording, tracks: [AudioTrack]) throws -> Data {
@@ -627,6 +777,17 @@ final class Library: RecordingLibrary {
                 )
             )
         }
+    }
+
+    private func loadAccountKeys(with key: SymmetricKey) throws -> AccountKeys {
+        let cipher = LibraryCipher(key: key)
+        if let stored = try AccountKeys.load(from: services.keysFile, cipher: cipher) {
+            return stored
+        }
+
+        let founded = AccountKeys.founding(projects: storedProjects.map(\.id), at: .now)
+        try founded.save(to: services.keysFile, cipher: cipher)
+        return founded
     }
 
     private func loadProjects(with key: SymmetricKey) throws {

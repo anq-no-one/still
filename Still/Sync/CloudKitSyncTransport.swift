@@ -2,11 +2,6 @@ import CloudKit
 import Foundation
 import OSLog
 
-/// Carries sealed payloads through the user's own private CloudKit database.
-/// The record fields hold ciphertext and ordering metadata only.
-///
-/// Asking for a container without the iCloud entitlement traps, so a build
-/// without a provisioning profile never asks and reports sync as unreachable.
 struct CloudKitSyncTransport: SyncTransport {
     static let recordType = "StillSyncChange"
     static let zoneID = CKRecordZone.ID(zoneName: "Recordings")
@@ -27,21 +22,18 @@ struct CloudKitSyncTransport: SyncTransport {
         return FileManager.default.fileExists(atPath: profile.path)
     }
 
-    /// CloudKit rejects a freshly built record that already exists on the
-    /// server, because it carries no change tag. Existing records are fetched
-    /// and edited in place so the second sync of a Recording behaves like the
-    /// first.
     func push(_ changes: [SyncChange]) async throws {
         try await reachingCloudKit { database in
-            let ids = changes.map { CKRecord.ID(recordName: Self.recordName(for: $0), zoneID: Self.zoneID) }
-            let existing = try await database.records(for: ids)
-            let records = changes.map { change -> CKRecord in
-                let id = CKRecord.ID(recordName: Self.recordName(for: change), zoneID: Self.zoneID)
+            let ids = changes.map(Self.recordID(for:))
+            let existing = try await database.records(for: ids, desiredKeys: [])
+            let records = zip(changes, ids).map { change, id -> CKRecord in
                 let record = (try? existing[id]?.get()) ?? CKRecord(recordType: Self.recordType, recordID: id)
                 record["kind"] = change.kind.rawValue as NSString
                 record["updatedAt"] = change.updatedAt as NSDate
                 record["deviceID"] = change.deviceID.uuidString as NSString
-                record["payload"] = change.sealedRecording as NSData
+                record["scopeID"] = change.scopeID?.uuidString as NSString?
+                record["recipientID"] = change.recipientID?.uuidString as NSString?
+                record["payload"] = (change.payload ?? Data()) as NSData
                 return record
             }
 
@@ -49,16 +41,18 @@ struct CloudKitSyncTransport: SyncTransport {
         }
     }
 
-    /// Zone changes need no server indexes, unlike a query, so a fresh iCloud
-    /// container works without any schema set up by hand.
-    func pull(since: Date?) async throws -> [SyncChange] {
+    func pull(payloadsFor scopes: Set<UUID>) async throws -> [SyncChange] {
         try await reachingCloudKit { database in
             var changes: [SyncChange] = []
             var token: CKServerChangeToken?
             var moreComing = true
 
             while moreComing {
-                let batch = try await database.recordZoneChanges(inZoneWith: Self.zoneID, since: token)
+                let batch = try await database.recordZoneChanges(
+                    inZoneWith: Self.zoneID,
+                    since: token,
+                    desiredKeys: Self.headerKeys
+                )
                 changes += batch.modificationResultsByID.values.compactMap { result in
                     (try? result.get()).flatMap { Self.change(from: $0.record) }
                 }
@@ -66,8 +60,21 @@ struct CloudKitSyncTransport: SyncTransport {
                 moreComing = batch.moreComing
             }
 
+            let wanted = changes.filter { $0.kind != .recording || $0.scopeID.map(scopes.contains) == true }
+            var payloads: [CKRecord.ID: Data] = [:]
+            for start in stride(from: 0, to: wanted.count, by: Self.fetchBatchSize) {
+                let ids = wanted[start..<min(start + Self.fetchBatchSize, wanted.count)].map(Self.recordID(for:))
+                for (id, result) in try await database.records(for: ids, desiredKeys: ["payload"]) {
+                    payloads[id] = (try? result.get())?["payload"] as? Data
+                }
+            }
+
             return changes
-                .filter { change in since.map { change.updatedAt > $0 } ?? true }
+                .map { change in
+                    var change = change
+                    change.payload = payloads[Self.recordID(for: change)]
+                    return change
+                }
                 .sorted { $0.updatedAt < $1.updatedAt }
         }
     }
@@ -85,34 +92,38 @@ struct CloudKitSyncTransport: SyncTransport {
         }
     }
 
-    static let projectPrefix = "project-"
+    private static let headerKeys: [CKRecord.FieldKey] = ["kind", "updatedAt", "deviceID", "scopeID", "recipientID"]
+    private static let fetchBatchSize = 200
 
-    /// Projects carry a prefix so an older build, which reads every record
-    /// name as a Recording id, skips them instead of misreading them.
     static func recordName(for change: SyncChange) -> String {
         switch change.kind {
-        case .recording: change.recordingID.uuidString
-        case .project: projectPrefix + change.recordingID.uuidString
+        case .recording: change.id.uuidString
+        default: change.kind.rawValue + "-" + change.id.uuidString
         }
+    }
+
+    private static func recordID(for change: SyncChange) -> CKRecord.ID {
+        CKRecord.ID(recordName: recordName(for: change), zoneID: zoneID)
     }
 
     private static func change(from record: CKRecord) -> SyncChange? {
         let kind = (record["kind"] as? String).flatMap(SyncChange.Kind.init(rawValue:)) ?? .recording
         let name = record.recordID.recordName
-        let idText = kind == .project && name.hasPrefix(projectPrefix) ? String(name.dropFirst(projectPrefix.count)) : name
+        let prefix = kind.rawValue + "-"
+        let idText = kind != .recording && name.hasPrefix(prefix) ? String(name.dropFirst(prefix.count)) : name
 
-        guard let recordingID = UUID(uuidString: idText),
+        guard let id = UUID(uuidString: idText),
               let updatedAt = record["updatedAt"] as? Date,
-              let deviceID = (record["deviceID"] as? String).flatMap(UUID.init(uuidString:)),
-              let payload = record["payload"] as? Data
+              let deviceID = (record["deviceID"] as? String).flatMap(UUID.init(uuidString:))
         else { return nil }
 
         return SyncChange(
-            recordingID: recordingID,
+            id: id,
+            kind: kind,
             updatedAt: updatedAt,
             deviceID: deviceID,
-            sealedRecording: payload,
-            kind: kind
+            scopeID: (record["scopeID"] as? String).flatMap(UUID.init(uuidString:)),
+            recipientID: (record["recipientID"] as? String).flatMap(UUID.init(uuidString:))
         )
     }
 }

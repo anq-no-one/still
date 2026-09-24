@@ -74,10 +74,14 @@ struct LibraryKeyRing {
     /// Starts a rotation without disturbing the key that currently opens the
     /// Library, so a failure part way through loses nothing.
     func beginRotation(reason: String) async throws -> SymmetricKey {
-        let deviceKey = try await source.deviceKey(reason: reason)
         let master = SymmetricKey(size: .bits256)
-        try source.store(pendingMasterKey: try LibraryCipher(key: deviceKey).seal(master.rawBytes))
+        try await beginRotation(to: master, reason: reason)
         return master
+    }
+
+    func beginRotation(to master: SymmetricKey, reason: String) async throws {
+        let deviceKey = try await source.deviceKey(reason: reason)
+        try source.store(pendingMasterKey: try LibraryCipher(key: deviceKey).seal(master.rawBytes))
     }
 
     func completeRotation() throws {

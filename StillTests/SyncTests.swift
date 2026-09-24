@@ -127,10 +127,13 @@ struct SyncEngineTests {
         engine.enable()
         await engine.sync()
 
-        let change = try #require(transport.pushed.first?.first)
-        let bytes = String(decoding: change.sealedRecording, as: UTF8.self)
-        #expect(!bytes.contains("Budget review"))
-        #expect(!bytes.contains("delay hiring"))
+        let changes = try #require(transport.pushed.first)
+        #expect(changes.contains { $0.kind == .recording })
+        for change in changes {
+            let bytes = String(decoding: change.payload ?? Data(), as: UTF8.self)
+            #expect(!bytes.contains("Budget review"))
+            #expect(!bytes.contains("delay hiring"))
+        }
     }
 
     @Test
@@ -144,14 +147,7 @@ struct SyncEngineTests {
         var remote = recording
         remote.title = "Remote title"
         remote.updatedAt = Date(timeIntervalSince1970: 200)
-        transport.incoming = [
-            SyncChange(
-                recordingID: remote.id,
-                updatedAt: remote.updatedAt,
-                deviceID: UUID(),
-                sealedRecording: try library.sealForSync(remote)
-            )
-        ]
+        transport.incoming = [try #require(try library.syncChange(for: remote, deviceID: UUID()))]
 
         engine.enable()
         await engine.sync()
@@ -170,14 +166,7 @@ struct SyncEngineTests {
         var recording = Recording(title: "Mine", transcript: "text", duration: 60)
         try library.add(recording)
         recording.title = "Stale copy"
-        transport.incoming = [
-            SyncChange(
-                recordingID: recording.id,
-                updatedAt: recording.updatedAt,
-                deviceID: deviceID,
-                sealedRecording: try library.sealForSync(recording)
-            )
-        ]
+        transport.incoming = [try #require(try library.syncChange(for: recording, deviceID: deviceID))]
 
         engine.enable()
         await engine.sync()
@@ -211,7 +200,7 @@ struct SyncEngineTests {
         engine.enable()
         await engine.sync()
 
-        #expect(transport.pushed.flatMap { $0 }.allSatisfy { $0.kind == .project })
+        #expect(!transport.pushed.flatMap { $0 }.contains { $0.kind == .recording })
     }
 
     @Test
@@ -229,7 +218,7 @@ struct SyncEngineTests {
         transport.failure = nil
         await engine.sync()
 
-        let sent = transport.pushed.flatMap { $0 }.filter { $0.recordingID == recording.id }
+        let sent = transport.pushed.flatMap { $0 }.filter { $0.id == recording.id }
         #expect(sent.count == 1)
         #expect(library.recordings.first?.isProjectConfirmed == true)
     }
@@ -246,13 +235,13 @@ struct SyncEngineTests {
         engine.enable()
 
         await engine.sync()
-        #expect(!transport.pushed.flatMap { $0 }.contains { $0.recordingID == recording.id })
+        #expect(!transport.pushed.flatMap { $0 }.contains { $0.id == recording.id })
 
         try library.assign([recording.id], toProject: right.id)
         await engine.sync()
 
-        let sent = try #require(transport.pushed.flatMap { $0 }.first { $0.recordingID == recording.id })
-        #expect(try library.openSyncPayload(sent.sealedRecording).projectID == right.id)
+        let sent = try #require(transport.pushed.flatMap { $0 }.first { $0.id == recording.id })
+        #expect(try library.openRecording(from: sent).projectID == right.id)
     }
 
     private func makeEngine(
@@ -264,7 +253,7 @@ struct SyncEngineTests {
             library: library!,
             transport: transport,
             settings: MemorySyncSettings(),
-            deviceID: deviceID
+            identity: DeviceIdentity(id: deviceID)
         )
     }
 
@@ -303,7 +292,7 @@ final class SpySyncTransport: SyncTransport, @unchecked Sendable {
         pushed.append(changes)
     }
 
-    func pull(since: Date?) async throws -> [SyncChange] {
+    func pull(payloadsFor scopes: Set<UUID>) async throws -> [SyncChange] {
         if let failure { throw failure }
         return incoming
     }

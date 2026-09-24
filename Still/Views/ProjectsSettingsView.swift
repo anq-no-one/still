@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ProjectsSettingsView: View {
     let library: Library
+    let sync: SyncEngine
 
     @State private var newName = ""
     @State private var failure: String?
@@ -25,7 +26,7 @@ struct ProjectsSettingsView: View {
                 Text("Projects sync to your other devices, encrypted like your recordings.")
             }
 
-            DeviceProjectSelectionSection(library: library)
+            DeviceProjectSelectionSection(library: library, sync: sync)
 
             if let failure {
                 Section {
@@ -141,6 +142,7 @@ private struct ProjectEditorRow: View {
 
 private struct DeviceProjectSelectionSection: View {
     let library: Library
+    let sync: SyncEngine
 
     var body: some View {
         Section {
@@ -150,21 +152,33 @@ private struct DeviceProjectSelectionSection: View {
                 Text("All Except These").tag(ProjectSelection.Mode.except)
             }
 
-            if library.projectSelection.mode != .all {
-                Toggle(isOn: scopeBinding(.noProject)) {
-                    Label("No Project", systemImage: "circle.dashed")
-                }
+            scopeRow(.noProject) {
+                Label("No Project", systemImage: "circle.dashed")
+            }
 
-                ForEach(library.projects) { project in
-                    Toggle(isOn: scopeBinding(.project(project.id))) {
-                        ProjectBadge(project: project)
-                    }
+            ForEach(library.projects) { project in
+                scopeRow(.project(project.id)) {
+                    ProjectBadge(project: project)
                 }
             }
         } header: {
             Text(deviceTitle)
         } footer: {
-            Text("This choice stays on this device. Recordings outside it do not appear in the library, search, Siri, or the menu bar, and their audio is not downloaded here. With exactly one project chosen, new recordings go into it.")
+            Text(footer)
+        }
+    }
+
+    @ViewBuilder
+    private func scopeRow(_ scope: ProjectScope, @ViewBuilder label: () -> some View) -> some View {
+        let content = VStack(alignment: .leading, spacing: 2) {
+            label()
+            ScopeStorageText(storage: library.storage(of: scope))
+        }
+
+        if library.projectSelection.mode == .all {
+            content
+        } else {
+            Toggle(isOn: scopeBinding(scope)) { content }
         }
     }
 
@@ -176,13 +190,21 @@ private struct DeviceProjectSelectionSection: View {
         #endif
     }
 
+    private var footer: LocalizedStringKey {
+        #if os(macOS)
+        "This choice stays on this Mac. A project you turn off leaves it: its recordings, audio, search entries, and key are removed here once another device keeps a copy, and nothing is deleted anywhere else. With exactly one project chosen, new recordings go into it."
+        #else
+        "This choice stays on this device. A project you turn off leaves it: its recordings, audio, search entries, and key are removed here once another device keeps a copy, and nothing is deleted anywhere else. With exactly one project chosen, new recordings go into it."
+        #endif
+    }
+
     private var modeBinding: Binding<ProjectSelection.Mode> {
         Binding(
             get: { library.projectSelection.mode },
             set: { mode in
                 var selection = library.projectSelection
                 selection.mode = mode
-                library.setProjectSelection(selection)
+                select(selection)
             }
         )
     }
@@ -197,8 +219,41 @@ private struct DeviceProjectSelectionSection: View {
                 } else {
                     selection.scopes.remove(scope)
                 }
-                library.setProjectSelection(selection)
+                select(selection)
             }
         )
+    }
+
+    private func select(_ selection: ProjectSelection) {
+        library.setProjectSelection(selection)
+        Task { await sync.syncIfEnabled() }
+    }
+}
+
+private struct ScopeStorageText: View {
+    let storage: ScopeStorage
+
+    var body: some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+    }
+
+    private var text: LocalizedStringKey {
+        #if os(macOS)
+        switch storage {
+        case .stored: "Stored on this Mac"
+        case .waitingForKey: "Waiting for another device to share this project"
+        case .leaving: "Removing from this Mac once another device keeps a copy"
+        case .notStored: "Not stored on this Mac"
+        }
+        #else
+        switch storage {
+        case .stored: "Stored on this device"
+        case .waitingForKey: "Waiting for another device to share this project"
+        case .leaving: "Removing from this device once another device keeps a copy"
+        case .notStored: "Not stored on this device"
+        }
+        #endif
     }
 }

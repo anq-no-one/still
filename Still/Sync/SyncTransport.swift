@@ -1,23 +1,30 @@
 import Foundation
 
-/// What a device sends. The payload is already sealed, so a transport only ever
-/// handles ciphertext plus the metadata it needs to order changes.
 struct SyncChange: Equatable, Sendable {
     enum Kind: String, Sendable {
         case recording
         case project
+        case device
+        case trust
+        case grant
     }
 
-    let recordingID: UUID
+    let id: UUID
+    var kind: Kind = .recording
     let updatedAt: Date
     let deviceID: UUID
-    let sealedRecording: Data
-    var kind: Kind = .recording
+    var scopeID: UUID?
+    var recipientID: UUID?
+    var payload: Data?
+
+    var isWithdrawnGrant: Bool {
+        kind == .grant && payload?.isEmpty == true
+    }
 }
 
 protocol SyncTransport: Sendable {
     func push(_ changes: [SyncChange]) async throws
-    func pull(since: Date?) async throws -> [SyncChange]
+    func pull(payloadsFor scopes: Set<UUID>) async throws -> [SyncChange]
 }
 
 enum SyncError: LocalizedError, Equatable {

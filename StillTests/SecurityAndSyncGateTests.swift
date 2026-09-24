@@ -23,6 +23,7 @@ struct SecurityAndSyncGateTests {
         try writer.append(Data("raw microphone samples".utf8))
         try writer.finish()
         try library.add(recording)
+        try library.confirmProjects(of: [recording.id])
 
         let textTransport = SpySyncTransport()
         let engine = SyncEngine(
@@ -34,10 +35,19 @@ struct SecurityAndSyncGateTests {
         await engine.sync()
 
         let chunkTransport = FakeChunkTransport()
-        await AudioChunkSync(audioRoot: scratch.directory, transport: chunkTransport, freeBytes: { _ in 1 << 30 })
-            .sync(recordingID: recording.id)
+        await AudioChunkSync(
+            audioRoot: scratch.directory,
+            transport: chunkTransport,
+            freeBytes: { _ in 1 << 30 },
+            sealing: library.audioSealing(forRecording:)
+        )
+        .sync(recordingID: recording.id)
 
-        let onTheWire = (textTransport.pushed.flatMap { $0 }.map(\.sealedRecording)
+        let noProjectScope = try #require(library.scopeID(for: .noProject))
+        let scopeKey = try #require(library.scopeKey(for: noProjectScope))
+        #expect(textTransport.pushed.flatMap { $0 }.contains { $0.kind == .recording })
+        #expect(!chunkTransport.stored.isEmpty)
+        let onTheWire = (textTransport.pushed.flatMap { $0 }.compactMap(\.payload)
             + chunkTransport.stored.values.map(\.sealed))
             .map { String(decoding: $0, as: UTF8.self) }
             .joined()
@@ -46,6 +56,7 @@ struct SecurityAndSyncGateTests {
         #expect(!onTheWire.contains("delay hiring"))
         #expect(!onTheWire.contains("raw microphone samples"))
         #expect(!onTheWire.contains(key.rawBytes.base64EncodedString()))
+        #expect(!onTheWire.contains(scopeKey.rawBytes.base64EncodedString()))
     }
 
     @Test
@@ -137,7 +148,7 @@ struct SecurityAndSyncGateTests {
         try library.add(Recording(title: "After", transcript: "new secret", duration: 30))
 
         for recording in library.recordings {
-            let sealed = try library.sealForSync(recording)
+            let sealed = try #require(try library.syncChange(for: recording, deviceID: UUID())?.payload)
             #expect(throws: LibraryCipherError.unreadable) {
                 try LibraryCipher(key: revokedKey).open(sealed)
             }

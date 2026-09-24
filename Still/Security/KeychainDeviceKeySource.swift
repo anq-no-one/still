@@ -16,6 +16,7 @@ struct KeychainDeviceKeySource: DeviceKeySource {
     private let recoveryAccount = "library-recovery"
     private let pendingMasterKeyAccount = "library-master-key-pending"
     private let journalKeyAccount = "diagnostic-journal-key"
+    private let agreementKeyAccount = "device-agreement-key"
 
     static let defaultService = "com.andrii.still.library"
 
@@ -54,6 +55,15 @@ struct KeychainDeviceKeySource: DeviceKeySource {
         }
         let key = SymmetricKey(size: .bits256)
         try write(key.rawBytes, account: journalKeyAccount)
+        return key
+    }
+
+    func agreementKey() throws -> Curve25519.KeyAgreement.PrivateKey {
+        if let existing = try read(account: agreementKeyAccount, context: nil) {
+            return try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: existing)
+        }
+        let key = Curve25519.KeyAgreement.PrivateKey()
+        try write(key.rawRepresentation, account: agreementKeyAccount)
         return key
     }
 

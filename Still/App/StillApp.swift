@@ -110,6 +110,7 @@ struct StillApp: App {
                 services: LibraryServices(
                     audioRoot: audioRoot,
                     settingsFile: supportRoot.appending(path: "Library.settings"),
+                    keysFile: supportRoot.appending(path: "Library.keys"),
                     makeRepository: { key in
                         MainActor.assumeIsolated {
                             EncryptedRecordingRepository(context: context, key: key)
@@ -166,7 +167,11 @@ struct StillApp: App {
             SyncEngine(
                 library: recordingLibrary,
                 transport: CloudKitSyncTransport(),
-                settings: UserDefaultsSyncSettings()
+                settings: UserDefaultsSyncSettings(),
+                identity: DeviceIdentity(
+                    agreementKey: (try? KeychainDeviceKeySource().agreementKey()) ?? .init(),
+                    kind: .current
+                )
             )
         }
         sync = syncEngine

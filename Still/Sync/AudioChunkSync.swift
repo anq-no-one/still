@@ -16,9 +16,26 @@ struct AudioChunkID: Hashable, Codable, Sendable {
 struct AudioChunkPayload: Equatable, Sendable {
     let id: AudioChunkID
     let sealed: Data
+}
 
-    var digest: String {
-        SHA256.hash(data: sealed).map { String(format: "%02x", $0) }.joined()
+struct ScopeChunkSealing: Sendable {
+    let local: LibraryCipher
+    let scopeKey: SymmetricKey
+
+    func outgoing(_ localSealed: Data) throws -> (payload: Data, digest: String) {
+        let plaintext = try local.open(localSealed)
+        return (try LibraryCipher(key: scopeKey).seal(plaintext), digest(of: plaintext))
+    }
+
+    func incoming(_ payload: Data, digest expected: String?) -> Data? {
+        guard let plaintext = try? LibraryCipher(key: scopeKey).open(payload), digest(of: plaintext) == expected else {
+            return nil
+        }
+        return try? local.seal(plaintext)
+    }
+
+    private func digest(of plaintext: Data) -> String {
+        HMAC<SHA256>.authenticationCode(for: plaintext, using: scopeKey).map { String(format: "%02x", $0) }.joined()
     }
 }
 
@@ -48,6 +65,7 @@ final class AudioChunkSync {
     private let transport: AudioChunkTransport
     private let freeBytes: (URL) -> Int?
     private let keepsAudio: (UUID) -> Bool
+    private let sealing: (UUID) -> ScopeChunkSealing?
 
     private(set) var state: State = .idle
 
@@ -55,20 +73,30 @@ final class AudioChunkSync {
         audioRoot: URL,
         transport: AudioChunkTransport,
         freeBytes: @escaping (URL) -> Int? = ModelPackInstaller.freeBytes,
-        keepsAudio: @escaping (UUID) -> Bool = { _ in true }
+        keepsAudio: @escaping (UUID) -> Bool = { _ in true },
+        sealing: @escaping (UUID) -> ScopeChunkSealing?
     ) {
         self.audioRoot = audioRoot
         self.transport = transport
         self.freeBytes = freeBytes
         self.keepsAudio = keepsAudio
+        self.sealing = sealing
     }
 
     func sync(recordingID: UUID) async {
+        guard let sealing = sealing(recordingID) else {
+            state = .complete
+            return
+        }
+
         do {
             let remote = try await transport.inventory(forRecording: recordingID)
+            let toUpload = try localPayloads(for: recordingID).compactMap { local -> (AudioChunkPayload, String)? in
+                let outgoing = try sealing.outgoing(local.sealed)
+                guard remote[local.id] != outgoing.digest else { return nil }
+                return (AudioChunkPayload(id: local.id, sealed: outgoing.payload), outgoing.digest)
+            }
             let local = localPayloads(for: recordingID)
-
-            let toUpload = local.filter { remote[$0.id] != $0.digest }
             let toDownload = keepsAudio(recordingID)
                 ? remote.keys.filter { id in !local.contains { $0.id == id } }
                 : []
@@ -82,8 +110,8 @@ final class AudioChunkSync {
             state = .queued(total)
             var done = 0
 
-            for payload in toUpload {
-                try await transport.upload(payload, digest: payload.digest)
+            for (payload, digest) in toUpload {
+                try await transport.upload(payload, digest: digest)
                 done += 1
                 state = .transferring(completed: done, total: total)
             }
@@ -95,10 +123,10 @@ final class AudioChunkSync {
                 }
 
                 let payload = try await transport.download(id)
-                guard payload.digest == remote[id] else { continue }
+                guard let localSealed = sealing.incoming(payload.sealed, digest: remote[id]) else { continue }
 
                 try AudioChunkStore.writeSealed(
-                    payload.sealed,
+                    localSealed,
                     forRecording: id.recordingID,
                     track: id.track,
                     part: id.part,
