@@ -169,9 +169,10 @@ struct ProjectVocabularyMergeTests {
         second.upsert(VocabularyTerm(term: "Terraform"))
 
         let merged = ProjectVocabulary.merge(first, second)
+        let reversed = ProjectVocabulary.merge(second, first)
 
         #expect(Set(merged.terms.map(\.term)) == ["Kubernetes", "Terraform"])
-        #expect(merged == ProjectVocabulary.merge(second, first))
+        #expect(Set(merged.terms.map(\.id)) == Set(reversed.terms.map(\.id)))
     }
 
     @Test

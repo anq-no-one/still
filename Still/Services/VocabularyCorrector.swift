@@ -23,6 +23,7 @@ enum VocabularyCorrector {
     private struct Entry {
         let words: [String]
         let replacement: String
+        let diacriticInsensitive: Bool
     }
 
     private struct Token {
@@ -30,15 +31,23 @@ enum VocabularyCorrector {
         let range: Range<String.Index>
     }
 
+    /// The term's own spelling only normalizes case, so a transcript that
+    /// already spells it with different diacritics is left alone unless the
+    /// user lists that spelling as a variant. Variants fold case and
+    /// diacritics, since they stand for whatever the recognizer misheard.
     /// Longest word count first, so a two-word variant like "cooper netties"
     /// wins over a one-word variant that happens to match part of it.
     private static func matchEntries(for terms: [VocabularyTerm]) -> [Entry] {
         var entries: [Entry] = []
         for term in terms {
-            for pattern in Set([term.term] + term.variants) {
-                let words = foldedWords(of: pattern)
+            let ownWords = foldedWords(of: term.term, diacriticInsensitive: false)
+            if !ownWords.isEmpty {
+                entries.append(Entry(words: ownWords, replacement: term.term, diacriticInsensitive: false))
+            }
+            for variant in Set(term.variants) {
+                let words = foldedWords(of: variant, diacriticInsensitive: true)
                 guard !words.isEmpty else { continue }
-                entries.append(Entry(words: words, replacement: term.term))
+                entries.append(Entry(words: words, replacement: term.term, diacriticInsensitive: true))
             }
         }
         return entries.sorted { lhs, rhs in
@@ -81,7 +90,7 @@ enum VocabularyCorrector {
         for entry in entries {
             let span = entry.words.count
             guard index + span <= tokens.count else { continue }
-            let candidate = tokens[index..<(index + span)].map { fold($0.word) }
+            let candidate = tokens[index..<(index + span)].map { fold($0.word, diacriticInsensitive: entry.diacriticInsensitive) }
             if candidate == entry.words {
                 return (entry, index + span)
             }
@@ -91,18 +100,21 @@ enum VocabularyCorrector {
 
     private static func wordTokens(in text: String) -> [Token] {
         var tokens: [Token] = []
-        text.enumerateSubstrings(in: text.startIndex..<text.endIndex, options: [.byWords, .substringNotRequired]) { substring, range, _, _ in
+        text.enumerateSubstrings(in: text.startIndex..<text.endIndex, options: .byWords) { substring, range, _, _ in
             guard let substring else { return }
             tokens.append(Token(word: substring, range: range))
         }
         return tokens
     }
 
-    private static func foldedWords(of text: String) -> [String] {
-        wordTokens(in: text).map { fold($0.word) }
+    private static func foldedWords(of text: String, diacriticInsensitive: Bool) -> [String] {
+        wordTokens(in: text).map { fold($0.word, diacriticInsensitive: diacriticInsensitive) }
     }
 
-    private static func fold(_ text: String) -> String {
-        text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
+    private static func fold(_ text: String, diacriticInsensitive: Bool) -> String {
+        text.folding(
+            options: diacriticInsensitive ? [.caseInsensitive, .diacriticInsensitive] : [.caseInsensitive],
+            locale: nil
+        )
     }
 }

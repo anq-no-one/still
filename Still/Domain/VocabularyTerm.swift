@@ -54,19 +54,20 @@ struct VocabularyTerm: Identifiable, Codable, Equatable, Sendable {
         return merged
     }
 
-    /// Trims whitespace, drops the term's own spelling, and de-duplicates
-    /// case- and diacritic-insensitively while keeping each variant's first
-    /// spelling, so "Kubernetes" stays out of its own variant list and
-    /// "Kuber Nettis" doesn't sit beside "kuber nettis".
+    /// Trims whitespace, drops the term's own spelling (case-insensitively,
+    /// matching the corrector's case-only self normalization), and
+    /// de-duplicates case- and diacritic-insensitively while keeping each
+    /// variant's first spelling, so "Kubernetes" stays out of its own
+    /// variant list and "Kuber Nettis" doesn't sit beside "kuber nettis".
     static func normalized(_ variants: [String], excluding term: String) -> [String] {
-        let termKey = dedupeKey(term)
+        let termKey = term.folding(options: .caseInsensitive, locale: nil)
         var seen = Set<String>()
         var result: [String] = []
         for variant in variants {
             let trimmed = variant.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty else { continue }
-            let key = dedupeKey(trimmed)
-            guard key != termKey, seen.insert(key).inserted else { continue }
+            guard trimmed.folding(options: .caseInsensitive, locale: nil) != termKey else { continue }
+            guard seen.insert(dedupeKey(trimmed)).inserted else { continue }
             result.append(trimmed)
         }
         return result
