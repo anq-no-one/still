@@ -31,9 +31,8 @@ Three things are needed:
    long silence. None of it exists in this repository.
 2. **The devices.** An iPhone 13 and a base M1 Mac, since the gates are defined on the minimum
    supported hardware and no other machine can stand in.
-3. **The Parakeet runtime.** `docs/models/parakeet-tdt-0.6b-v3.md` pins the artifact and verifies
-   its digests, but FluidAudio is not yet linked and transcription still runs through Apple's
-   on-device recognizer. Measuring today would measure the wrong engine.
+3. **Runs on those devices.** Transcription runs through Parakeet V3 via FluidAudio
+   (`Still/Services/ParakeetEngine.swift`), so a measurement now measures the shipping engine.
 
 Peak memory, thermal state, and energy come from an Instruments run on those devices, which also
 cannot be produced here.

@@ -61,7 +61,7 @@ those tools do with the data afterwards is governed by their own privacy terms.
 ## The browser extensions
 
 The optional Still extensions for Safari and Chromium browsers report that a meeting started or ended on a site you allowed.
-On Google Meet they also report the display name of whoever the call marks as speaking. Still uses those names only to
+If you turn on speaker names, they also report on Google Meet the display name of whoever the call marks as speaking. Still uses those names only to
 suggest who a speaker is in that recording, which you can confirm or reject. The suggestion stays inside the encrypted
 recording, and the timing behind it is discarded once the recording is saved. During a meeting they also report when
 another tab starts or stops playing sound, without saying which tab or what it plays, so Still can mark that part of the
