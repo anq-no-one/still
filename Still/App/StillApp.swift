@@ -23,6 +23,7 @@ struct StillApp: App {
     #endif
 
     private let navigation: LibraryNavigation
+    private let preferences: SettingsPreferences
     #if os(macOS)
     private let shortcut: RecordingShortcut
     private let login: LaunchAtLogin
@@ -167,6 +168,7 @@ struct StillApp: App {
             )
         }
         setup = setupFlow
+        preferences = MainActor.assumeIsolated { SettingsPreferences() }
         lock = MainActor.assumeIsolated {
             AppLock(settings: UserDefaultsAppLockSettings(), authenticator: SystemOwnerAuthenticator())
         }
@@ -329,6 +331,7 @@ struct StillApp: App {
                     diagnostics: diagnostics,
                     setup: setup,
                     lock: lock,
+                    preferences: preferences,
                     automatic: automatic,
                     browser: browser,
                     aiTools: aiTools,
@@ -340,6 +343,7 @@ struct StillApp: App {
                 )
             }
         }
+        .windowResizability(.contentMinSize)
 
         MenuBarExtra {
             RecordingMenuBarPanel(
@@ -352,6 +356,7 @@ struct StillApp: App {
                 shortcut: shortcut,
                 hint: mediaHint
             )
+            .stillAppearance(preferences)
         } label: {
             RecordingMenuBarLabel(coordinator: coordinator, hint: mediaHint, automatic: automatic)
                 .modifier(LibraryWindowOpenerInstaller(reopener: reopener))
@@ -377,8 +382,10 @@ struct StillApp: App {
                 diagnostics: diagnostics,
                 lock: lock,
                 extraction: extraction,
+                preferences: preferences,
                 navigation: navigation
             )
         }
+        .stillAppearance(preferences)
     }
 }

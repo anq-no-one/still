@@ -1,7 +1,6 @@
 import SwiftUI
 
-struct TranscriptionSettingsView: View {
-    let models: ModelInstallers
+struct SpeakersSettingsView: View {
     let library: Library
 
     @State private var ownerName = ""
@@ -10,36 +9,16 @@ struct TranscriptionSettingsView: View {
     var body: some View {
         Form {
             Section {
-                LabeledContent("Download Size", value: models.transcription.pack.downloadSizeText)
-                LabeledContent("Runs On", value: "This Device Only")
-                ModelPackStatus(installer: models.transcription, ready: "Ready to Transcribe Offline")
-            } footer: {
-                Text(models.transcription.pack.purpose)
-            }
-
-            Section {
                 TextField("Your Name", text: $ownerName, prompt: Text("First and last name"))
                     .onSubmit(saveOwnerName)
                 if let ownerNameFailure {
                     Label(ownerNameFailure, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(.red)
                 }
-                LabeledContent("Download Size", value: models.speakers.pack.downloadSizeText)
-                ModelPackStatus(installer: models.speakers, ready: "Ready to Tell Speakers Apart")
             } header: {
-                Text("Speakers")
+                Text("You")
             } footer: {
-                Text(models.speakers.pack.purpose)
-            }
-
-            Section {
-                LabeledContent("Download Size", value: models.meetingMemory.pack.downloadSizeText)
-                LabeledContent("Runs On", value: "This Device Only")
-                ModelPackStatus(installer: models.meetingMemory, ready: "Ready to Find Decisions and Tasks")
-            } header: {
-                Text("Decisions and Tasks")
-            } footer: {
-                Text(models.meetingMemory.pack.purpose)
+                Text("Still suggests this name for your own voice in recordings.")
             }
 
             Section {
@@ -61,7 +40,7 @@ struct TranscriptionSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .settingsPaneTitle("Transcription")
+        .settingsPaneTitle("Speakers")
         .onAppear { ownerName = library.ownerName ?? "" }
         .onDisappear(perform: saveOwnerName)
     }
@@ -74,32 +53,5 @@ struct TranscriptionSettingsView: View {
         } catch {
             ownerNameFailure = error.localizedDescription
         }
-    }
-}
-
-private struct ModelPackStatus: View {
-    let installer: ModelPackInstaller
-    let ready: LocalizedStringKey
-
-    var body: some View {
-        switch installer.state {
-        case .needsApproval:
-            Button("Download") { install() }
-        case .installing, .verifying:
-            ProgressView("Downloading…", value: installer.progress)
-        case .installed:
-            Label(ready, systemImage: "checkmark.circle.fill")
-                .foregroundStyle(.green)
-        case .failed(let message):
-            VStack(alignment: .leading, spacing: 6) {
-                Label(message, systemImage: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.red)
-                Button("Try Again") { install() }
-            }
-        }
-    }
-
-    private func install() {
-        Task { await installer.approveAndInstall() }
     }
 }
