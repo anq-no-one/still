@@ -26,6 +26,7 @@ final class RecordingWorkflow {
     private var finishedAt: Date?
     private var draftStartFailure: String?
     private var speakerCues = SpeakerCueLog()
+    private var mixedMedia = MixedMediaLog()
 
     private(set) var state: State = .idle
 
@@ -96,6 +97,7 @@ final class RecordingWorkflow {
         finishedAt = nil
         draftStartFailure = nil
         speakerCues = SpeakerCueLog()
+        mixedMedia = MixedMediaLog()
 
         do {
             try await recorder.start(recordingID: recordingID)
@@ -130,6 +132,16 @@ final class RecordingWorkflow {
         speakerCues.ended(name, at: offset)
     }
 
+    func otherMediaStarted() {
+        guard let offset = recordingOffset else { return }
+        mixedMedia.began(at: offset)
+    }
+
+    func otherMediaEnded() {
+        guard let offset = recordingOffset else { return }
+        mixedMedia.ended(at: offset)
+    }
+
     func save() async {
         guard state == .recording else { return }
 
@@ -137,6 +149,8 @@ final class RecordingWorkflow {
         stopCapture()
         let cues = speakerCues.cues(closingAt: elapsed)
         speakerCues = SpeakerCueLog()
+        let mixed = mixedMedia.spans(closingAt: elapsed)
+        mixedMedia = MixedMediaLog()
 
         do {
             try await recorder.finish()
@@ -148,6 +162,7 @@ final class RecordingWorkflow {
                     duration: elapsed,
                     participants: await expectedParticipants(startedAt),
                     cues: cues,
+                    mixedMedia: mixed,
                     suggestedProjectID: suggestedProjectID
                 )
             )
@@ -165,6 +180,7 @@ final class RecordingWorkflow {
 
         stopCapture()
         speakerCues = SpeakerCueLog()
+        mixedMedia = MixedMediaLog()
         await recorder.discard()
         state = .idle
     }

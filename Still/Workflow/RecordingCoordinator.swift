@@ -123,6 +123,14 @@ final class RecordingCoordinator {
         workflow?.speakerStarted(name)
     }
 
+    func otherMediaStarted() {
+        workflow?.otherMediaStarted()
+    }
+
+    func otherMediaEnded() {
+        workflow?.otherMediaEnded()
+    }
+
     func speakerEnded(_ name: String) {
         workflow?.speakerEnded(name)
     }

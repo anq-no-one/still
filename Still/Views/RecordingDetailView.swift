@@ -69,6 +69,15 @@ struct RecordingDetailView: View {
                     )
                 }
 
+                if let spans = recording.mixedMediaSpans, !spans.isEmpty {
+                    Label(
+                        "Another browser tab played sound during \(spans.map(\.clockText).formatted(.list(type: .and))). It may be mixed into the transcript there.",
+                        systemImage: "speaker.wave.2"
+                    )
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                }
+
                 Divider()
 
                 if recording.transcript.isEmpty {
@@ -88,6 +97,7 @@ struct RecordingDetailView: View {
                             showsTranslation: showsTranslation,
                             segment: segment,
                             speaker: editor.speaker(of: segment),
+                            isMixed: recording.mixedMediaSpans?.contains { $0.overlaps(segment) } ?? false,
                             play: { player.play(from: segment.start) },
                             correct: { editor.correct(segment, to: $0) }
                         )
@@ -215,6 +225,7 @@ private struct SegmentRow: View {
     let showsTranslation: Bool
     let segment: TranscriptSegment
     let speaker: Speaker?
+    let isMixed: Bool
     let play: () -> Void
     let correct: (String) -> Void
 
@@ -225,12 +236,14 @@ private struct SegmentRow: View {
         showsTranslation: Bool,
         segment: TranscriptSegment,
         speaker: Speaker?,
+        isMixed: Bool,
         play: @escaping () -> Void,
         correct: @escaping (String) -> Void
     ) {
         self.showsTranslation = showsTranslation
         self.segment = segment
         self.speaker = speaker
+        self.isMixed = isMixed
         self.play = play
         self.correct = correct
         _text = State(initialValue: segment.displayText)
@@ -250,6 +263,12 @@ private struct SegmentRow: View {
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                         .lineLimit(1)
+                }
+                if isMixed {
+                    Image(systemName: "speaker.wave.2")
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                        .accessibilityLabel("Other browser sound may be mixed in here")
                 }
             }
             .frame(width: 92, alignment: .leading)

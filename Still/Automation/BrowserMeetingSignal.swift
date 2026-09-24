@@ -6,6 +6,8 @@ struct BrowserMeetingEvent: Codable, Equatable, Sendable {
         case ended
         case speakerStarted
         case speakerEnded
+        case mediaStarted
+        case mediaEnded
 
         var isAboutSpeaker: Bool {
             self == .speakerStarted || self == .speakerEnded

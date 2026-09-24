@@ -63,6 +63,13 @@ final class BrowserMeetingBridge {
         case .ended:
             guard activeMeetingID == event.meetingID else { return }
             await endActiveMeeting()
+        case .mediaStarted, .mediaEnded:
+            guard activeMeetingID == event.meetingID else { return }
+            if event.phase == .mediaStarted {
+                coordinator.otherMediaStarted()
+            } else {
+                coordinator.otherMediaEnded()
+            }
         case .speakerStarted, .speakerEnded:
             guard let speaker = event.speaker, activeMeetingID == nil || activeMeetingID == event.meetingID else { return }
             if event.phase == .speakerStarted {

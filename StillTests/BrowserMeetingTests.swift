@@ -139,6 +139,30 @@ struct BrowserMeetingBridgeTests {
         #expect(bridge.activeMeetingID == "a")
     }
 
+    @Test
+    func soundFromAnotherTabIsMarkedOnTheSavedRecording() async throws {
+        let (bridge, coordinator) = try await make(allowed: [meet])
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .started))
+
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .mediaStarted))
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .mediaEnded))
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .ended))
+
+        let recording = try #require(coordinator.library.recordings.first)
+        #expect(recording.mixedMediaSpans?.count == 1)
+    }
+
+    @Test
+    func soundFromAnotherTabOutsideTheMeetingIsIgnored() async throws {
+        let (bridge, coordinator) = try await make(allowed: [meet])
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .started))
+
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "b", phase: .mediaStarted))
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .ended))
+
+        #expect(coordinator.library.recordings.first?.mixedMediaSpans == nil)
+    }
+
     private func make(allowed: [String]) async throws -> (BrowserMeetingBridge, RecordingCoordinator) {
         let container = try ModelContainer(
             for: EncryptedRecording.self,

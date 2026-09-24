@@ -9,6 +9,7 @@ struct RecordingFinalizer {
         var duration: TimeInterval
         var participants: [String] = []
         var cues: [SpeakerCue] = []
+        var mixedMedia: [TimeSpan] = []
         var suggestedProjectID: UUID?
         var requiresTranscript = false
     }
@@ -47,7 +48,8 @@ struct RecordingFinalizer {
             note: note,
             createdAt: draft.createdAt,
             duration: draft.duration,
-            projectID: draft.suggestedProjectID
+            projectID: draft.suggestedProjectID,
+            mixedMediaSpans: draft.mixedMedia.isEmpty ? nil : draft.mixedMedia
         )
         try library.add(recording)
         return recording

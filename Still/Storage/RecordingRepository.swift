@@ -40,7 +40,8 @@ struct EncryptedRecordingRepository: RecordingRepository {
                 createdAt: record.createdAt,
                 duration: record.duration,
                 projectID: content.projectID,
-                projectAssignedAt: content.projectAssignedAt
+                projectAssignedAt: content.projectAssignedAt,
+                mixedMediaSpans: content.mixedMediaSpans
             )
         }
     }
@@ -56,7 +57,8 @@ struct EncryptedRecordingRepository: RecordingRepository {
                     expectedParticipants: recording.expectedParticipants,
                     note: recording.note,
                     projectID: recording.projectID,
-                    projectAssignedAt: recording.projectAssignedAt
+                    projectAssignedAt: recording.projectAssignedAt,
+                    mixedMediaSpans: recording.mixedMediaSpans
                 )
             )
         )

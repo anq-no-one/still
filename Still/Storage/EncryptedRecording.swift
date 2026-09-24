@@ -25,4 +25,5 @@ struct RecordingContent: Codable {
     var note: Note?
     var projectID: UUID?
     var projectAssignedAt: Date?
+    var mixedMediaSpans: [TimeSpan]?
 }
