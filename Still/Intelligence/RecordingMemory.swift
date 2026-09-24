@@ -113,24 +113,33 @@ extension Recording {
     }
 }
 
-struct ProjectTask: Identifiable, Equatable, Sendable {
+struct SourcedItem: Identifiable, Equatable, Sendable {
     let item: MemoryItem
     let recordingID: UUID
     let recordingTitle: String
     let recordingDate: Date
 
+    init(_ item: MemoryItem, in recording: Recording) {
+        self.item = item
+        recordingID = recording.id
+        recordingTitle = recording.title
+        recordingDate = recording.createdAt
+    }
+
     var id: String {
         "\(recordingID.uuidString)-\(item.id)"
     }
 
-    static func accepted(in recordings: [Recording], project projectID: UUID) -> [ProjectTask] {
+    var time: TimeInterval {
+        item.sourceStart
+    }
+
+    static func acceptedTasks(in recordings: [Recording], project projectID: UUID) -> [SourcedItem] {
         recordings
             .filter { $0.projectID == projectID && $0.isProjectConfirmed && !$0.isDeleted }
             .sorted { $0.createdAt > $1.createdAt }
             .flatMap { recording in
-                (recording.memory?.acceptedTasks ?? []).map {
-                    ProjectTask(item: $0, recordingID: recording.id, recordingTitle: recording.title, recordingDate: recording.createdAt)
-                }
+                (recording.memory?.acceptedTasks ?? []).map { SourcedItem($0, in: recording) }
             }
     }
 }

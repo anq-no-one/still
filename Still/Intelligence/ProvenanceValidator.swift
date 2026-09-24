@@ -55,6 +55,15 @@ struct ProvenanceValidator: Sendable {
         return Outcome(items: kept, withheld: withheld)
     }
 
+    func stillSupports(_ item: MemoryItem, in segments: [TranscriptSegment]) -> Bool {
+        let byID = Dictionary(segments.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        let sources = item.sourceSegmentIDs.compactMap { byID[$0] }
+        guard !sources.isEmpty, sources.count == item.sourceSegmentIDs.count else { return false }
+        guard !item.isEdited else { return true }
+
+        return support(of: item.text, in: sources.map(\.displayText).joined(separator: " ")) >= minimumSupport
+    }
+
     func support(of text: String, in evidence: String) -> Double {
         let terms = Set(Self.keyTerms(in: text))
         guard !terms.isEmpty else { return 0 }
@@ -68,7 +77,7 @@ struct ProvenanceValidator: Sendable {
         MemoryText.words(in: text).filter { $0.count >= 3 && !stopWords.contains($0) }
     }
 
-    private static func matches(_ term: String, _ word: String) -> Bool {
+    static func matches(_ term: String, _ word: String) -> Bool {
         guard term != word else { return true }
         guard term.count >= 4, word.count >= 4 else { return false }
 

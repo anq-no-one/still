@@ -775,8 +775,16 @@ final class Library: RecordingLibrary {
         try updateMemoryItem(itemID, inRecording: recordingID, at: date) { $0.edited(to: text, at: date) }
     }
 
-    func acceptedTasks(inProject projectID: UUID) -> [ProjectTask] {
-        ProjectTask.accepted(in: recordings, project: projectID)
+    func acceptedTasks(inProject projectID: UUID) -> [SourcedItem] {
+        SourcedItem.acceptedTasks(in: recordings, project: projectID)
+    }
+
+    func projectHistory(_ projectID: UUID) -> ProjectHistory {
+        ProjectHistory(recordings: recordings, project: projectID)
+    }
+
+    func dashboard(at date: Date = .now) -> Dashboard {
+        Dashboard(recordings: recordings, now: date)
     }
 
     private func updateMemoryItem(
