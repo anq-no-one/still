@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Still",
   "version": "1.0",
-  "description": "Tells Still when an approved meeting starts and ends. It sends nothing else.",
+  "description": "Tells Still when an approved meeting starts and ends, and who is speaking during it. It sends nothing else.",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4LK9WKGFWzvflBlAZfzchwINkoLDnsLTmQZCzeoqdap8xmhboXkR3G+wjMKqTag9qeQIwOD/kAogppQIHOVVcH8uHIAuomeVfVmmEYhfk37jHNzuqV9JBJlvqQlWJkJtemstpMPzd4Q9cp9nZvY2OtE2NF3L1DLLYEV2qxpg0HJfXMouWtwXUw6YdktkuUTM2REPpyEK/6ueiZnWIH2tLliJCPCSkESrVzl81+HOEbRsd2VPnt5VeuwIVQuGPsmWet15oyNuya2fTamtfsBvQl9qgVBoMXOOo1E+pU7EruzdyXjIR9wXGiyWQSiepvMMmlrZA8uxzo2bIFzGyMmN7QIDAQAB",
   "minimum_chrome_version": "116",
   "permissions": ["nativeMessaging", "storage"],

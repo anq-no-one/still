@@ -1,4 +1,4 @@
-import { meetingSignal } from "./sites.js";
+import { isMeetingBoundary, meetingSignal } from "./sites.js";
 
 const NATIVE_HOST = "com.andrii.still.meetings";
 
@@ -31,7 +31,9 @@ chrome.runtime.onMessage.addListener((message, sender) => {
   }
   const tabID = sender.tab?.id;
   forward({ ...signal, tabID });
-  remember(tabID, signal.phase === "started" ? { host: signal.host, meetingID: signal.meetingID } : null);
+  if (isMeetingBoundary(signal.phase)) {
+    remember(tabID, signal.phase === "started" ? { host: signal.host, meetingID: signal.meetingID } : null);
+  }
 });
 
 chrome.tabs.onRemoved.addListener(async (tabID) => {

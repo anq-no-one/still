@@ -31,7 +31,7 @@ struct NativeMessagingHostManifest: Codable, Equatable {
 
     init(hostExecutable: URL, extensionIDs: [String]) {
         name = Self.hostName
-        description = "Tells Still when an approved meeting starts and ends."
+        description = "Tells Still when an approved meeting starts and ends, and who is speaking during it."
         path = hostExecutable.path(percentEncoded: false)
         type = "stdio"
         allowedOrigins = extensionIDs.map { "chrome-extension://\($0)/" }

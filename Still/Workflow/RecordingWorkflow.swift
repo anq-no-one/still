@@ -28,6 +28,7 @@ final class RecordingWorkflow {
     private var startedAt: Date?
     private var finishedAt: Date?
     private var draftStartFailure: String?
+    private var speakerCues = SpeakerCueLog()
 
     private(set) var state: State = .idle
 
@@ -95,6 +96,7 @@ final class RecordingWorkflow {
         startedAt = now()
         finishedAt = nil
         draftStartFailure = nil
+        speakerCues = SpeakerCueLog()
 
         do {
             try await recorder.start(recordingID: recordingID)
@@ -119,16 +121,28 @@ final class RecordingWorkflow {
         state = .recording
     }
 
+    func speakerStarted(_ name: String) {
+        guard let offset = recordingOffset else { return }
+        speakerCues.began(name, at: offset)
+    }
+
+    func speakerEnded(_ name: String) {
+        guard let offset = recordingOffset else { return }
+        speakerCues.ended(name, at: offset)
+    }
+
     func save() async {
         guard state == .recording else { return }
 
         state = .finalizing
         stopCapture()
+        let cues = speakerCues.cues(closingAt: elapsed)
+        speakerCues = SpeakerCueLog()
 
         do {
             try await recorder.finish()
             let participants = await expectedParticipants(startedAt ?? now())
-            let transcription = try await transcribeAndSeparateSpeakers(expecting: participants)
+            let transcription = try await transcribeAndSeparateSpeakers(expecting: participants, cues: cues)
             let segments = transcription?.segments ?? []
             let transcript = segments.plainText
             guard !transcript.isEmpty || transcription == nil else {
@@ -168,11 +182,15 @@ final class RecordingWorkflow {
         guard state != .saved else { return }
 
         stopCapture()
+        speakerCues = SpeakerCueLog()
         await recorder.discard()
         state = .idle
     }
 
-    private func transcribeAndSeparateSpeakers(expecting participants: [String]) async throws -> TranscriptionResult? {
+    private func transcribeAndSeparateSpeakers(
+        expecting participants: [String],
+        cues: [SpeakerCue]
+    ) async throws -> TranscriptionResult? {
         let tracks = try library.capturedTracks(forRecording: recordingID)
         let transcription: TranscriptionResult
         do {
@@ -185,7 +203,13 @@ final class RecordingWorkflow {
         }
         var naming = library.speakerNaming
         naming.participants = participants
-        return await speakerSeparation.separate(transcription, tracks: tracks, naming: naming)
+        let separated = await speakerSeparation.separate(transcription, tracks: tracks, naming: naming)
+        return SpeakerCueMatcher.suggest(cues, for: separated, ownerName: naming.ownerName)
+    }
+
+    private var recordingOffset: TimeInterval? {
+        guard state == .recording, let startedAt else { return nil }
+        return now().timeIntervalSince(startedAt)
     }
 
     private var isFailed: Bool {

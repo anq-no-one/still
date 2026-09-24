@@ -110,6 +110,14 @@ final class RecordingCoordinator {
         }
     }
 
+    func speakerStarted(_ name: String) {
+        workflow?.speakerStarted(name)
+    }
+
+    func speakerEnded(_ name: String) {
+        workflow?.speakerEnded(name)
+    }
+
     func cancel() async {
         await workflow?.cancel()
         workflow = nil
