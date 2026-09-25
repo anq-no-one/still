@@ -142,7 +142,7 @@ private struct SpeakerRow: View {
             if let caption {
                 Text(caption)
                     .font(.caption)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.secondary)
             }
         }
     }

@@ -271,6 +271,7 @@ private struct SegmentRow: View {
 
     @State private var text: String
     @FocusState private var isEditing: Bool
+    @ScaledMetric(relativeTo: .caption) private var timeColumnWidth = 92
 
     init(
         showsTranslation: Bool,
@@ -305,17 +306,17 @@ private struct SegmentRow: View {
                 if let speaker {
                     Text(speaker.name)
                         .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .lineLimit(1)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 if isMixed {
                     Image(systemName: "speaker.wave.2")
                         .font(.caption2)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(.attention)
                         .accessibilityLabel("Other browser sound may be mixed in here")
                 }
             }
-            .frame(width: 92, alignment: .leading)
+            .frame(width: timeColumnWidth, alignment: .leading)
 
             VStack(alignment: .leading, spacing: 4) {
                 TextField("Transcript", text: $text, axis: .vertical)

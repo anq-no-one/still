@@ -160,6 +160,7 @@ struct LibraryView: View {
                 preferencesExporter: preferencesExporter,
                 preferencesImporter: preferencesImporter
             )
+            .presentationSizing(.page)
         }
         #endif
         .alert("Still could not finish that", isPresented: showsActionError) {
@@ -258,7 +259,11 @@ struct LibraryView: View {
 
     private var recordingRows: some View {
         ForEach(shownRecordings) { recording in
-            RecordingRow(recording: recording, project: library.project(withID: recording.projectID))
+            RecordingRow(
+                recording: recording,
+                project: library.project(withID: recording.projectID),
+                isSelected: navigation.selection == recording.id
+            )
                 .tag(recording.id)
                 .swipeActions {
                     Button("Delete", systemImage: "trash", role: .destructive) {
@@ -454,16 +459,19 @@ private struct SearchResultRow: View {
 private struct RecordingRow: View {
     let recording: Recording
     let project: Project?
+    let isSelected: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(recording.title)
                 .font(.headline)
-                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
 
             if !recording.isProjectConfirmed {
                 UnconfirmedProjectBadge(suggested: project)
                     .font(.caption)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .foregroundStyle(isSelected ? AnyShapeStyle(.primary) : AnyShapeStyle(.attention))
             } else if let project {
                 ProjectBadge(project: project)
                     .font(.caption)
@@ -475,8 +483,9 @@ private struct RecordingRow: View {
                 Text(recording.duration.recordingDurationText)
             }
             .font(.caption)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(isSelected ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
         }
         .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
     }
 }

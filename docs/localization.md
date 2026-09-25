@@ -36,5 +36,12 @@ Done:
   keyboard. On the Mac a global Option-Command-R works without the window.
 - Recording state is communicated by symbol and text, not by color alone.
 
+`testPrimaryScreensPassTheAccessibilityAudit` runs Xcode's accessibility audit on setup, the library,
+Settings, Access, the capture sheet and a saved recording. It passes on iPhone. Run it on iPad with
+`STILL_E2E_DEVICE_TYPE="iPad Pro 11-inch (M5)" bin/e2e.sh --only testPrimaryScreensPassTheAccessibilityAudit`;
+there one issue remains: the speaker name under a transcript time stamp reports partial Dynamic Type
+support in the iPad split view. The audit ignores contrast warnings marked "nearly passed", issues it
+cannot tie to an element, and controls the system draws (Done, the search field, the sidebar title).
+
 Outstanding: a full VoiceOver pass on a device, Increased Contrast verification, and focus-order
 review for each sheet.

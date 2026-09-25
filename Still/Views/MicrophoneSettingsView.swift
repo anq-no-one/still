@@ -18,7 +18,7 @@ struct MicrophoneSettingsView: View {
             LabeledContent("In Use", value: microphones.active?.name ?? String(localized: "No Microphone"))
             if let notice = microphones.fallbackNotice {
                 Label(notice, systemImage: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(.attention)
             }
             levelTestRow
             if let reason = microphones.levelTestUnavailableReason {

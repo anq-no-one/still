@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usage: bin/e2e.sh [--device <udid>] [--only <test name>]
+# Usage: bin/e2e.sh [--device <udid>] [--only <test name>]   (STILL_E2E_DEVICE_TYPE="iPad Pro 11-inch (M5)" picks another simulator)
 
 set -euo pipefail
 
@@ -55,7 +55,7 @@ xcodegen generate --spec "${ROOT}/project.yml" --project "${ROOT}" --quiet
 if [ -n "$DEVICE" ]; then
   DESTINATION="id=${DEVICE}"
 else
-  DEVICE_TYPE="$(xcrun simctl list devicetypes | grep -m1 -E '^iPhone 1[6-9] Pro \(' | sed -E 's/ \(.*//')"
+  DEVICE_TYPE="${STILL_E2E_DEVICE_TYPE:-$(xcrun simctl list devicetypes | grep -m1 -E '^iPhone 1[6-9] Pro \(' | sed -E 's/ \(.*//')}"
   SIMULATOR="$(xcrun simctl create still-e2e "$DEVICE_TYPE")"
   xcrun simctl boot "$SIMULATOR"
   xcrun simctl bootstatus "$SIMULATOR" >/dev/null

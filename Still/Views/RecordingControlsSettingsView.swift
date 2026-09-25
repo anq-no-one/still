@@ -17,13 +17,13 @@ struct RecordingControlsSettingsView: View {
             }
             if let problem = shortcut.problem {
                 Label(problem.localizedDescription, systemImage: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(.attention)
                     .font(.callout)
             }
             Toggle("Open Still at Login", isOn: Binding(get: { login.isEnabled }, set: login.set))
             if let problem = login.problem {
                 Label(problem, systemImage: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(.attention)
                     .font(.callout)
             }
             Toggle("Warn When Music or Video Is Playing", isOn: $warnsAboutMedia)

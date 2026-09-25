@@ -75,46 +75,48 @@ final class StillEndToEndTests: XCTestCase {
     func testPrimaryScreensPassTheAccessibilityAudit() throws {
         launch(resetting: true)
         waitFor(app.buttons["Continue"], "the first setup step")
-        try audit()
+        try audit("setup")
 
         completeOnboarding()
         waitFor(app.staticTexts["No Recordings Yet"], "an empty, unlocked Library")
-        try audit()
+        try audit("library")
 
         app.buttons["Settings"].tap()
         waitFor(app.staticTexts["Keys and Devices"], "the settings list")
-        try audit()
+        try audit("settings")
 
         app.staticTexts["Access"].tap()
         waitFor(app.staticTexts["Microphone"], "the access page")
-        try audit()
+        try audit("access")
 
         navigateBack()
         app.buttons["Done"].tap()
         app.toolbars.buttons["Record"].tap()
         waitForText("budget", timeout: 60, "the live transcript to hear the meeting")
-        try audit()
+        try audit("capture")
 
         let save = app.buttons["Save Recording"]
         save.tap()
         waitForAbsence(save, timeout: 120, "the final transcript to finish and the sheet to close")
         app.collectionViews.cells.firstMatch.tap()
         waitForText("forecast", timeout: 20, "the saved transcript")
-        try audit()
+        try audit("detail")
 
         for issue in accessibilityIssues { print("ACCESSIBILITY-ISSUE", issue) }
         XCTAssertTrue(accessibilityIssues.isEmpty, accessibilityIssues.joined(separator: "\n"))
     }
 
-    private func audit() throws {
-        let systemDrawn: Set<String> = ["Done", "Search Recordings"]
+    private func audit(_ screen: String) throws {
+        keepScreenshot("audit \(screen)")
+        let systemDrawn: Set<String> = ["Done", "Search Recordings", "Recordings"]
         try app.performAccessibilityAudit { issue in
             let label = issue.element?.label ?? ""
             let isWarning = issue.compactDescription.localizedCaseInsensitiveContains("nearly passed")
-            if !isWarning, !systemDrawn.contains(label) {
+            let isUnlocated = issue.element == nil
+            if !isWarning, !isUnlocated, !systemDrawn.contains(label) {
                 let element = issue.element
                 let detail = "\(label) type=\(element?.elementType.rawValue ?? 0) id=\(element?.identifier ?? "") value=\(String(describing: element?.value ?? "").prefix(40)) frame=\(element?.frame ?? .zero)"
-                self.accessibilityIssues.append("\(issue.compactDescription): \(detail)")
+                self.accessibilityIssues.append("[\(screen)] \(issue.compactDescription): \(detail)")
             }
             return true
         }

@@ -136,7 +136,7 @@ struct RecordingMenuBarPanel: View {
                 .accessibilityLabel(String(localized: "Microphone: \(microphoneName)"))
             if let notice = microphones.fallbackNotice {
                 Label(notice, systemImage: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(.attention)
             }
         }
         .font(.caption)
