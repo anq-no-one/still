@@ -27,7 +27,7 @@ struct RecordingDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                TextField("Title", text: $title)
+                TextField("Title", text: $title, axis: .vertical)
                     .font(.largeTitle.bold())
                     .textFieldStyle(.plain)
                     .onChange(of: title) { _, value in editor.rename(to: value) }
@@ -239,6 +239,7 @@ struct RecordingDetailView: View {
                 TextEditor(text: $noteText)
                     .frame(minHeight: 90)
                     .font(.body)
+                    .accessibilityLabel("Your Notes")
                     .onChange(of: noteText) { _, value in editor.updateNoteText(value) }
             }
         }
@@ -291,11 +292,15 @@ private struct SegmentRow: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
-                Button(segment.startText, action: play)
-                    .font(.system(.caption, design: .monospaced))
-                    .foregroundStyle(.secondary)
-                    .buttonStyle(.plain)
-                    .accessibilityHint("Plays the recording from \(segment.startText)")
+                Button(action: play) {
+                    Text(segment.startText)
+                        .frame(minWidth: 44, minHeight: 44, alignment: .topLeading)
+                        .contentShape(.rect)
+                }
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(.secondary)
+                .buttonStyle(.plain)
+                .accessibilityHint("Plays the recording from \(segment.startText)")
 
                 if let speaker {
                     Text(speaker.name)

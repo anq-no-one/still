@@ -89,6 +89,19 @@ final class StillEndToEndTests: XCTestCase {
         waitFor(app.staticTexts["Microphone"], "the access page")
         try audit()
 
+        navigateBack()
+        app.buttons["Done"].tap()
+        app.toolbars.buttons["Record"].tap()
+        waitForText("budget", timeout: 60, "the live transcript to hear the meeting")
+        try audit()
+
+        let save = app.buttons["Save Recording"]
+        save.tap()
+        waitForAbsence(save, timeout: 120, "the final transcript to finish and the sheet to close")
+        app.collectionViews.cells.firstMatch.tap()
+        waitForText("forecast", timeout: 20, "the saved transcript")
+        try audit()
+
         for issue in accessibilityIssues { print("ACCESSIBILITY-ISSUE", issue) }
         XCTAssertTrue(accessibilityIssues.isEmpty, accessibilityIssues.joined(separator: "\n"))
     }
@@ -99,7 +112,9 @@ final class StillEndToEndTests: XCTestCase {
             let label = issue.element?.label ?? ""
             let isWarning = issue.compactDescription.localizedCaseInsensitiveContains("nearly passed")
             if !isWarning, !systemDrawn.contains(label) {
-                self.accessibilityIssues.append("\(issue.compactDescription): \(label)")
+                let element = issue.element
+                let detail = "\(label) type=\(element?.elementType.rawValue ?? 0) id=\(element?.identifier ?? "") value=\(String(describing: element?.value ?? "").prefix(40)) frame=\(element?.frame ?? .zero)"
+                self.accessibilityIssues.append("\(issue.compactDescription): \(detail)")
             }
             return true
         }
