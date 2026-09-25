@@ -68,11 +68,11 @@ struct PreferencesTransferSection: View {
         case (0, 0):
             return String(localized: "Nothing in this file applied to this device.")
         case (0, let projects):
-            return String(localized: "Imported vocabulary for \(projects) project(s).")
+            return String(localized: "Vocabulary imported for projects: \(projects).")
         case (let preferences, 0):
-            return String(localized: "Imported \(preferences) preference(s).")
+            return String(localized: "Preferences imported: \(preferences).")
         case (let preferences, let projects):
-            return String(localized: "Imported \(preferences) preference(s) and vocabulary for \(projects) project(s).")
+            return String(localized: "Preferences imported: \(preferences). Vocabulary imported for projects: \(projects).")
         }
     }
 }
