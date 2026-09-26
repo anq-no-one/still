@@ -39,7 +39,7 @@ struct SettingsView: View {
                     }
                 }
             }
-            .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
+            .navigationSplitViewColumnWidth(min: 280, ideal: 308, max: 392)
             .toolbar(removing: .sidebarToggle)
         } detail: {
             destination(for: preferences.page)
