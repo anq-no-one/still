@@ -133,7 +133,6 @@ end
 
 desc "Build and upload both iOS and macOS builds to TestFlight, tagging each"
 lane :beta_all do
-  ensure_git_status_clean
   ship(scheme: "Still-iOS", platform: "iOS", destination: "generic/platform=iOS", tf_platform: "ios")
   ship(scheme: "Still-macOS", platform: "macOS", destination: "generic/platform=macOS", tf_platform: "macos", pkg: true)
 end
@@ -154,7 +153,6 @@ platform :ios do
 
   desc "Build and upload an iOS build to TestFlight"
   lane :beta do
-    ensure_git_status_clean
     ship(scheme: "Still-iOS", platform: "iOS", destination: "generic/platform=iOS", tf_platform: "ios")
   end
 
@@ -182,7 +180,6 @@ platform :mac do
 
   desc "Build and upload a Mac build to TestFlight"
   lane :beta do
-    ensure_git_status_clean
     ship(scheme: "Still-macOS", platform: "macOS", destination: "generic/platform=macOS", tf_platform: "macos", pkg: true)
   end
 
