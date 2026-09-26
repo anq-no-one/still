@@ -8,7 +8,7 @@ ROOT = File.expand_path("..", __dir__)
 BUILD_DIR = File.join(ROOT, "Release", "build")
 
 def op_field(name)
-  value = sh("op", "read", "#{OP_ITEM}/#{name}", log: false).strip
+  value = (ENV["STILL_OP_#{name}"] || sh("op", "read", "#{OP_ITEM}/#{name}", log: false)).strip
   UI.user_error!("1Password field #{name} is empty") if value.empty?
   value
 end
