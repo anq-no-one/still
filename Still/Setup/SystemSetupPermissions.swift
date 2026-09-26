@@ -74,12 +74,22 @@ final class SystemSetupPermissions: SetupPermissions {
 
     static func relaunch() {
         #if os(macOS)
-        let configuration = NSWorkspace.OpenConfiguration()
-        configuration.createsNewApplicationInstance = true
-        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: configuration) { _, _ in
-            Task { @MainActor in NSApp.terminate(nil) }
-        }
+        let helper = Process()
+        helper.executableURL = URL(fileURLWithPath: "/bin/sh")
+        helper.arguments = ["-c", relaunchCommand(
+            processID: ProcessInfo.processInfo.processIdentifier,
+            bundlePath: Bundle.main.bundleURL.path(percentEncoded: false)
+        )]
+        helper.standardOutput = FileHandle.nullDevice
+        helper.standardError = FileHandle.nullDevice
+        guard (try? helper.run()) != nil else { return }
+        Task { @MainActor in NSApp.terminate(nil) }
         #endif
+    }
+
+    static func relaunchCommand(processID: Int32, bundlePath: String) -> String {
+        let escaped = bundlePath.replacingOccurrences(of: "'", with: "'\\''")
+        return "i=0; while kill -0 \(processID) 2>/dev/null && [ $i -lt 100 ]; do sleep 0.1; i=$((i+1)); done; /usr/bin/open '\(escaped)'"
     }
 
     static func openPasscodeSettings() {

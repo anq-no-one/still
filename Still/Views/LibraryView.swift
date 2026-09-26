@@ -529,7 +529,6 @@ private struct RecordingRow: View {
                 UnconfirmedProjectBadge(suggested: project)
                     .font(.caption)
                     .fixedSize(horizontal: false, vertical: true)
-                    .foregroundStyle(isSelected ? AnyShapeStyle(.primary) : AnyShapeStyle(.attention))
             } else if let project {
                 ProjectBadge(project: project)
                     .font(.caption)

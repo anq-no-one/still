@@ -10,6 +10,9 @@ struct RecordingDetailView: View {
     @State private var player = RecordingPlayer()
     @State private var title: String
     @State private var noteText: String
+    @State private var copiedNote = false
+    @State private var copiedPrompt = false
+    @State private var copyReset: Task<Void, Never>?
     @State private var showsTranslation = false
     @State private var translationFailure: String?
     @State private var vocabularyChanges: [VocabularyChange] = []
@@ -221,12 +224,7 @@ struct RecordingDetailView: View {
     @ViewBuilder
     private var noteView: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Picker("Note Format", selection: templateBinding) {
-                ForEach(NoteTemplate.allCases, id: \.self) { template in
-                    Text(template.title).tag(template)
-                }
-            }
-            .pickerStyle(.segmented)
+            noteActions
 
             NoteSectionView(title: "Summary", items: editor.note.summary, openEvidence: openEvidence)
             NoteSectionView(title: "Decisions", items: editor.note.decisions, openEvidence: openEvidence)
@@ -245,11 +243,42 @@ struct RecordingDetailView: View {
         }
     }
 
-    private var templateBinding: Binding<NoteTemplate> {
-        Binding(
-            get: { editor.note.template },
-            set: { editor.changeTemplate(to: $0) }
-        )
+    private var noteActions: some View {
+        HStack {
+            Spacer()
+            Button(copiedNoteTitle, systemImage: copiedNote ? "checkmark" : "doc.on.doc") {
+                NoteClipboard.copy(RecordingDocument.plainText(for: editor.recording))
+                copiedNote = true
+                confirmCopy()
+            }
+            .accessibilityLabel(Text("Copy the whole note as text"))
+            if !editor.note.isEmpty {
+                Button(copiedPromptTitle, systemImage: copiedPrompt ? "checkmark" : "sparkles") {
+                    NoteClipboard.copy(AIAssistPrompt.prompt(note: editor.note, title: editor.recording.title, recordedAt: editor.recording.createdAt))
+                    copiedPrompt = true
+                    confirmCopy()
+                }
+                .accessibilityLabel(Text("Copy a prompt for an external AI assistant"))
+            }
+        }
+    }
+
+    private var copiedNoteTitle: String {
+        copiedNote ? String(localized: "Copied") : String(localized: "Copy Note")
+    }
+
+    private var copiedPromptTitle: String {
+        copiedPrompt ? String(localized: "Copied") : String(localized: "Ask AI")
+    }
+
+    private func confirmCopy() {
+        copyReset?.cancel()
+        copyReset = Task {
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
+            copiedNote = false
+            copiedPrompt = false
+        }
     }
 
     private func openEvidence(_ item: NoteItem) {

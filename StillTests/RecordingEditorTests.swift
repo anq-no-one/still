@@ -66,7 +66,7 @@ struct RecordingEditorTests {
     }
 
     @Test
-    func changingTheTemplateKeepsTheUsersOwnWords() async throws {
+    func editingYourNotesKeepsTheGeneratedNote() async throws {
         let library = try await makeLibrary()
         let segments = words("We agreed to ship .")
         let recording = Recording(
@@ -80,10 +80,7 @@ struct RecordingEditorTests {
         let editor = RecordingEditor(recording: recording, library: library)
 
         editor.updateNoteText("Ask about the budget next time")
-        editor.changeTemplate(to: .interview)
 
-        #expect(editor.note.template == .interview)
-        #expect(editor.note.isTemplateUserChosen)
         #expect(editor.note.userText == "Ask about the budget next time")
         #expect(editor.note.summary.count == 1)
     }

@@ -27,6 +27,11 @@ struct NoteSectionView: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityHint("Plays the transcript this came from")
+                    .contextMenu {
+                        Button("Copy", systemImage: "doc.on.doc") {
+                            NoteClipboard.copy(item.text)
+                        }
+                    }
                 }
             }
         }

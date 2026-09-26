@@ -29,7 +29,6 @@ struct DashboardSections: View {
                             .lineLimit(2)
                         HStack {
                             UnconfirmedProjectBadge(suggested: library.project(withID: recording.projectID))
-                                .foregroundStyle(.attention)
                             Text(recording.createdAt, format: .dateTime.day().month().hour().minute())
                                 .foregroundStyle(.secondary)
                         }

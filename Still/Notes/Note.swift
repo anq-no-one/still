@@ -32,23 +32,20 @@ struct NoteItem: Identifiable, Codable, Equatable, Sendable {
 
 struct Note: Codable, Equatable, Sendable {
     var template: NoteTemplate
-    var isTemplateUserChosen: Bool
     var summary: [NoteItem]
     var decisions: [NoteItem]
     var actions: [NoteItem]
-    /// Text the user wrote. Regenerating or changing the template never touches it.
+    /// Text the user wrote. Regenerating the note never touches it.
     var userText: String
 
     init(
         template: NoteTemplate,
-        isTemplateUserChosen: Bool = false,
         summary: [NoteItem] = [],
         decisions: [NoteItem] = [],
         actions: [NoteItem] = [],
         userText: String = ""
     ) {
         self.template = template
-        self.isTemplateUserChosen = isTemplateUserChosen
         self.summary = summary
         self.decisions = decisions
         self.actions = actions

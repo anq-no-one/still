@@ -57,15 +57,6 @@ final class RecordingEditor {
         scheduleSave()
     }
 
-    /// A different shape never costs the user their own words.
-    func changeTemplate(to template: NoteTemplate) {
-        var note = note
-        note.template = template
-        note.isTemplateUserChosen = true
-        recording.note = note
-        scheduleSave()
-    }
-
     func addAction(_ text: String, citing segment: TranscriptSegment?) {
         var note = note
         note.actions.append(

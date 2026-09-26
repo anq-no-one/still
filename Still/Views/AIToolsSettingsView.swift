@@ -83,8 +83,7 @@ struct AIToolsSettingsView: View {
                 Text(title)
                 Spacer()
                 Button("Copy") {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(text, forType: .string)
+                    NoteClipboard.copy(text)
                 }
             }
             Text(text)

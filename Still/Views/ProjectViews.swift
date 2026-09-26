@@ -141,13 +141,20 @@ struct UnconfirmedProjectBadge: View {
     let suggested: Project?
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 4) {
-            Image(systemName: "folder.badge.questionmark")
-                .accessibilityHidden(true)
-            Text(suggested.map { "\($0.name)?" } ?? String(localized: "Project?"))
-                .fixedSize(horizontal: false, vertical: true)
+        if let suggested {
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                ProjectDot(color: suggested.color)
+                Text("\(suggested.name)?")
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text("Project not confirmed. Not syncing yet."))
+        } else {
+            Text("No Project")
+                .foregroundStyle(.secondary.opacity(0.6))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text("No project. Not syncing yet."))
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text("Project not confirmed. Not syncing yet."))
     }
 }
