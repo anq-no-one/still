@@ -40,6 +40,16 @@ struct RetentionSettingsView: View {
                 }
             }
 
+            if !library.archivedRecordings.isEmpty {
+                Section("Archived") {
+                    ForEach(library.archivedRecordings) { recording in
+                        LabeledContent(recording.title) {
+                            Button("Unarchive") { unarchive(recording) }
+                        }
+                    }
+                }
+            }
+
             if let failure {
                 Section {
                     Label(failure, systemImage: "exclamationmark.triangle.fill")
@@ -63,6 +73,15 @@ struct RetentionSettingsView: View {
     private func restore(_ recording: Recording) {
         do {
             try library.restore(recording)
+            failure = nil
+        } catch {
+            failure = error.localizedDescription
+        }
+    }
+
+    private func unarchive(_ recording: Recording) {
+        do {
+            try library.unarchive(recording)
             failure = nil
         } catch {
             failure = error.localizedDescription

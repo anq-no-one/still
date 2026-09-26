@@ -253,6 +253,7 @@
 		8F7B3AB87155BABA7193DDDA /* MixedMediaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840972BBCBE5E69B9D293B28 /* MixedMediaTests.swift */; };
 		908D7404CB56B74EF780D776 /* StillEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F263219A829A89216941C1D /* StillEndToEndTests.swift */; };
 		90C367AD57B947C7A8D8B498 /* AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0D1ACDA57AD031036AC27E6 /* AppLock.swift */; };
+		912136B804D58B40BAC7F18E /* RecordingArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B45E25EB56C01FA42C949CE /* RecordingArchiveTests.swift */; };
 		91BC8F232D9DD30A71B96238 /* AccessSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA319FC0C719438360D4CA /* AccessSettingsView.swift */; };
 		91F6B2F634D39F807EA02C2F /* MLXLLM in Frameworks */ = {isa = PBXBuildFile; productRef = CD65949BC7041857E591A79B /* MLXLLM */; };
 		934F3CF3235C97460584BC25 /* ErrorRates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC6AC769409F84372E60BED /* ErrorRates.swift */; };
@@ -499,10 +500,10 @@
 		3C751C86AF58EADE58333C54 /* Embed Dependencies */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = Contents/Helpers;
-			dstSubfolderSpec = 1;
+			dstPath = "";
+			dstSubfolderSpec = 6;
 			files = (
-				A6F9C15C2C82A5A95BC0A5DA /* StillMCPHelper in Embed Dependencies */,
+				386CC47CBED9C773A07C2873 /* StillNativeHost in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -510,10 +511,10 @@
 		637B4BA22A327BC208728672 /* Embed Dependencies */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 6;
+			dstPath = Contents/Helpers;
+			dstSubfolderSpec = 1;
 			files = (
-				386CC47CBED9C773A07C2873 /* StillNativeHost in Embed Dependencies */,
+				A6F9C15C2C82A5A95BC0A5DA /* StillMCPHelper in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -657,6 +658,7 @@
 		8855C30165897D18A50C1C35 /* LibrarySearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySearchTests.swift; sourceTree = "<group>"; };
 		89DD4735697D542F3B59FD11 /* NativeMessagingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeMessagingTests.swift; sourceTree = "<group>"; };
 		8A03CBFBE57E51091612476E /* ProvenanceValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvenanceValidator.swift; sourceTree = "<group>"; };
+		8B45E25EB56C01FA42C949CE /* RecordingArchiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingArchiveTests.swift; sourceTree = "<group>"; };
 		8BAFA3EBB3B909D3D430FBA5 /* FinalTranscriptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinalTranscriptionTests.swift; sourceTree = "<group>"; };
 		8D47EAF15D354A9BBC2B6714 /* CloudKitSyncTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitSyncTransport.swift; sourceTree = "<group>"; };
 		8ECDCE292AFC544E5A24F92B /* SpeakerCueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerCueTests.swift; sourceTree = "<group>"; };
@@ -955,6 +957,7 @@
 				29A2DB61A70D339EB5B7BEAA /* ProjectHistoryTests.swift */,
 				7D1FA0F7A876191846471034 /* ProjectIsolationTests.swift */,
 				84CD5DFD225CF95E36956740 /* ProjectTests.swift */,
+				8B45E25EB56C01FA42C949CE /* RecordingArchiveTests.swift */,
 				060B341C18DD955A4C4285D2 /* RecordingControlsTests.swift */,
 				116E37E40F4E436B28F2E9B0 /* RecordingCoordinatorTests.swift */,
 				34A8F2B1E779EE782BC8F7DA /* RecordingEditorTests.swift */,
@@ -1937,6 +1940,7 @@
 				2657AFC6C397B26D1A697AF0 /* ProjectHistoryTests.swift in Sources */,
 				EC89A2F97962D50EF0606425 /* ProjectIsolationTests.swift in Sources */,
 				05F039BBA218E44F890F702C /* ProjectTests.swift in Sources */,
+				912136B804D58B40BAC7F18E /* RecordingArchiveTests.swift in Sources */,
 				6389C4F8DED3D84C6116E161 /* RecordingControlsTests.swift in Sources */,
 				A5D08DD7472674FDCF1163EB /* RecordingCoordinatorTests.swift in Sources */,
 				7D8C3DAC4916F2B1B50061E3 /* RecordingEditorTests.swift in Sources */,

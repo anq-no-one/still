@@ -50,7 +50,7 @@ struct CaptureView: View {
 
             ZStack {
                 HStack {
-                    Button("Cancel", role: .cancel) {
+                    Button("Close", role: .cancel) {
                         Task {
                             await coordinator.cancel()
                             dismiss()

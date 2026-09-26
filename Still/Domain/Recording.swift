@@ -12,6 +12,7 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
     let duration: TimeInterval
     var updatedAt: Date
     var deletedAt: Date?
+    var archivedAt: Date?
     var projectID: UUID?
     var projectAssignedAt: Date?
     var mixedMediaSpans: [TimeSpan]?
@@ -30,6 +31,7 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         duration: TimeInterval,
         updatedAt: Date = .now,
         deletedAt: Date? = nil,
+        archivedAt: Date? = nil,
         projectID: UUID? = nil,
         projectAssignedAt: Date? = nil,
         mixedMediaSpans: [TimeSpan]? = nil,
@@ -47,6 +49,7 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         self.duration = duration
         self.updatedAt = updatedAt
         self.deletedAt = deletedAt
+        self.archivedAt = archivedAt
         self.projectID = projectID
         self.projectAssignedAt = projectAssignedAt
         self.mixedMediaSpans = mixedMediaSpans
@@ -56,6 +59,10 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
 
     var isDeleted: Bool {
         deletedAt != nil
+    }
+
+    var isArchived: Bool {
+        archivedAt != nil
     }
 
     var unclaimedParticipants: [String] {

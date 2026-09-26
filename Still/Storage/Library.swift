@@ -92,7 +92,11 @@ final class Library: RecordingLibrary {
     /// Only what this device shows. Every surface that reads recordings goes
     /// through this list, so a project hidden here stays hidden everywhere.
     var recordings: [Recording] {
-        storedRecordings.filter { !$0.isDeleted && projectSelection.isVisible($0) }
+        storedRecordings.filter { !$0.isDeleted && !$0.isArchived && projectSelection.isVisible($0) }
+    }
+
+    var archivedRecordings: [Recording] {
+        storedRecordings.filter { $0.isArchived && !$0.isDeleted && projectSelection.isVisible($0) }
     }
 
     var deletedRecordings: [Recording] {
@@ -259,6 +263,24 @@ final class Library: RecordingLibrary {
         restored.deletedAt = nil
         restored.updatedAt = .now
         try write(restored)
+    }
+
+    /// Archiving hides a recording from the list without touching its audio,
+    /// text, or sync. It stays recoverable from Storage settings.
+    func archive(_ recording: Recording, at date: Date = .now) throws {
+        var archived = recording
+        archived.archivedAt = date
+        archived.updatedAt = date
+        try write(archived)
+        journal?.record(.recordingArchived, correlationID: recording.id)
+    }
+
+    func unarchive(_ recording: Recording) throws {
+        var unarchived = recording
+        unarchived.archivedAt = nil
+        unarchived.updatedAt = .now
+        try write(unarchived)
+        journal?.record(.recordingUnarchived, correlationID: recording.id)
     }
 
     func applyRetention(now: Date = .now) throws {

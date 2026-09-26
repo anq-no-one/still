@@ -16,6 +16,8 @@ enum JournalCode: String, Codable, CaseIterable, Sendable {
     case recordingCancelled
     case recordingFailed
     case recordingDeleted
+    case recordingArchived
+    case recordingUnarchived
     case projectConfirmed
     case transcriptionFailed
     case modelDownloadFailed

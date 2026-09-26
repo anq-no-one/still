@@ -22,6 +22,8 @@ struct LibraryView: View {
     @State private var isShowingTasks = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var actionError: String?
+    @State private var renamingID: Recording.ID?
+    @State private var renameDraft = ""
     @State private var query = ""
     @State private var projectFilter: ProjectScope?
     @State private var selectedIDs: Set<Recording.ID> = []
@@ -43,6 +45,20 @@ struct LibraryView: View {
                         ) { projectID in
                             assign(ids, to: projectID)
                         }
+                    }
+                }
+                if ids.count == 1, let recording = library.recordings.first(where: { $0.id == ids.first }) {
+                    Button("Rename", systemImage: "pencil") {
+                        renamingID = recording.id
+                        renameDraft = recording.title
+                    }
+                }
+                if !ids.isEmpty {
+                    Button("Archive", systemImage: "archivebox") {
+                        archive(ids)
+                    }
+                    Button("Delete", systemImage: "trash", role: .destructive) {
+                        delete(ids)
                     }
                 }
             }
@@ -167,6 +183,11 @@ struct LibraryView: View {
             Button("OK", role: .cancel) { actionError = nil }
         } message: {
             Text(actionError ?? "")
+        }
+        .alert("Rename Recording", isPresented: showsRename) {
+            TextField("Title", text: $renameDraft)
+            Button("Rename") { commitRename() }
+            Button("Cancel", role: .cancel) { renamingID = nil }
         }
         .onChange(of: coordinator.isRecording) { _, isRecording in
             if isRecording { isCapturing = true }
@@ -420,6 +441,43 @@ struct LibraryView: View {
         do {
             if navigation.selection == recording.id { navigation.selection = nil }
             try library.delete(recording)
+        } catch {
+            actionError = error.localizedDescription
+        }
+    }
+
+    private func delete(_ ids: Set<Recording.ID>) {
+        for recording in library.recordings where ids.contains(recording.id) {
+            delete(recording)
+        }
+    }
+
+    private func archive(_ ids: Set<Recording.ID>) {
+        do {
+            for recording in library.recordings where ids.contains(recording.id) {
+                if navigation.selection == recording.id { navigation.selection = nil }
+                try library.archive(recording)
+            }
+        } catch {
+            actionError = error.localizedDescription
+        }
+    }
+
+    private var showsRename: Binding<Bool> {
+        Binding(get: { renamingID != nil }, set: { if !$0 { renamingID = nil } })
+    }
+
+    private func commitRename() {
+        guard let id = renamingID,
+              let recording = library.recordings.first(where: { $0.id == id }) else {
+            renamingID = nil
+            return
+        }
+        let title = renameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        renamingID = nil
+        guard !title.isEmpty, title != recording.title else { return }
+        do {
+            try library.rename(recording, to: title)
         } catch {
             actionError = error.localizedDescription
         }

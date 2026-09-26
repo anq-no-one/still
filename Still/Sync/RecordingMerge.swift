@@ -20,6 +20,7 @@ enum RecordingMerge {
         merged.memory = RecordingMemory.merge(newer.memory, older.memory)
         merged.updatedAt = max(local.updatedAt, remote.updatedAt)
         merged.deletedAt = earliest(local.deletedAt, remote.deletedAt)
+        merged.archivedAt = earliest(local.archivedAt, remote.archivedAt)
         return merged.keepingLatestProject(of: older)
     }
 
@@ -57,8 +58,8 @@ enum RecordingMerge {
         return newer + older.filter { $0.isUserAuthored && !known.contains($0.id) }
     }
 
-    /// A deletion on either device wins, and the earlier stamp is kept so both
-    /// devices count the recovery window from the same moment.
+    /// A deletion or archive on either device wins, and the earlier stamp is
+    /// kept so both devices count the recovery window from the same moment.
     private static func earliest(_ first: Date?, _ second: Date?) -> Date? {
         switch (first, second) {
         case (nil, nil): nil
