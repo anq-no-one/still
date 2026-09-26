@@ -1,219 +1,243 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "NSCalendarsFullAccessUsageDescription": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still liest den Termin, in dem du gerade bist, um einen Titel und die erwarteten Personen vorzuschlagen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still reads the event you are in to suggest a title and the people expected."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still lee el evento en el que estás para sugerir un título y las personas previstas."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still lit l’événement en cours pour suggérer un titre et les personnes attendues."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still legge l’evento in corso per suggerire un titolo e le persone previste."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still leest de afspraak waarin je zit om een titel en de verwachte deelnemers voor te stellen."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still odczytuje bieżące wydarzenie, aby zaproponować tytuł i oczekiwanych uczestników."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Still lê o evento em curso para sugerir um título e as pessoas esperadas."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still читает текущее событие, чтобы предложить название и ожидаемых участников."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still läser händelsen du är i för att föreslå en titel och de förväntade deltagarna."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still читає поточну подію, щоб запропонувати назву та очікуваних учасників."
+  "sourceLanguage" : "en",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Still"
           }
         }
       }
     },
-    "NSLocalNetworkUsageDescription": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still synchronisiert direkt mit deinen anderen Geräten in diesem Netzwerk, wenn du die Synchronisierung in der Nähe aktivierst."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still syncs directly with your other devices on this network when you turn on nearby sync."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still se sincroniza directamente con tus otros dispositivos de esta red cuando activas la sincronización cercana."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still se synchronise directement avec vos autres appareils sur ce réseau lorsque vous activez la synchronisation à proximité."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still si sincronizza direttamente con gli altri tuoi dispositivi su questa rete quando attivi la sincronizzazione nelle vicinanze."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still synchroniseert rechtstreeks met je andere apparaten op dit netwerk als je synchronisatie in de buurt aanzet."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still synchronizuje się bezpośrednio z innymi Twoimi urządzeniami w tej sieci, gdy włączysz synchronizację w pobliżu."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Still sincroniza diretamente com os seus outros dispositivos nesta rede quando ativa a sincronização próxima."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still синхронизируется напрямую с другими вашими устройствами в этой сети, когда вы включаете синхронизацию поблизости."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still synkar direkt med dina andra enheter i det här nätverket när du slår på synkning i närheten."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still синхронізується напряму з іншими вашими пристроями в цій мережі, коли ви вмикаєте синхронізацію поруч."
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Still"
           }
         }
       }
     },
-    "NSMicrophoneUsageDescription": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still nutzt das Mikrofon, um ein Meeting auf diesem Gerät zu transkribieren."
+    "NSCalendarsFullAccessUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still liest den Termin, in dem du gerade bist, um einen Titel und die erwarteten Personen vorzuschlagen."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still uses the microphone to transcribe a meeting on this device."
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still reads the event you are in to suggest a title and the people expected."
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still usa el micrófono para transcribir una reunión en este dispositivo."
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still lee el evento en el que estás para sugerir un título y las personas previstas."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still utilise le micro pour transcrire une réunion sur cet appareil."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still lit l’événement en cours pour suggérer un titre et les personnes attendues."
           }
         },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still usa il microfono per trascrivere una riunione su questo dispositivo."
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still legge l’evento in corso per suggerire un titolo e le persone previste."
           }
         },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still gebruikt de microfoon om een vergadering op dit apparaat uit te schrijven."
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still leest de afspraak waarin je zit om een titel en de verwachte deelnemers voor te stellen."
           }
         },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still używa mikrofonu, aby transkrybować spotkanie na tym urządzeniu."
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still odczytuje bieżące wydarzenie, aby zaproponować tytuł i oczekiwanych uczestników."
           }
         },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Still usa o microfone para transcrever uma reunião neste dispositivo."
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Still lê o evento em curso para sugerir um título e as pessoas esperadas."
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still использует микрофон, чтобы расшифровать встречу на этом устройстве."
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still читает текущее событие, чтобы предложить название и ожидаемых участников."
           }
         },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still använder mikrofonen för att transkribera ett möte på den här enheten."
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still läser händelsen du är i för att föreslå en titel och de förväntade deltagarna."
           }
         },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still використовує мікрофон, щоб розшифрувати зустріч на цьому пристрої."
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still читає поточну подію, щоб запропонувати назву та очікуваних учасників."
+          }
+        }
+      }
+    },
+    "NSLocalNetworkUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still synchronisiert direkt mit deinen anderen Geräten in diesem Netzwerk, wenn du die Synchronisierung in der Nähe aktivierst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still syncs directly with your other devices on this network when you turn on nearby sync."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still se sincroniza directamente con tus otros dispositivos de esta red cuando activas la sincronización cercana."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still se synchronise directement avec vos autres appareils sur ce réseau lorsque vous activez la synchronisation à proximité."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still si sincronizza direttamente con gli altri tuoi dispositivi su questa rete quando attivi la sincronizzazione nelle vicinanze."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still synchroniseert rechtstreeks met je andere apparaten op dit netwerk als je synchronisatie in de buurt aanzet."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still synchronizuje się bezpośrednio z innymi Twoimi urządzeniami w tej sieci, gdy włączysz synchronizację w pobliżu."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Still sincroniza diretamente com os seus outros dispositivos nesta rede quando ativa a sincronização próxima."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still синхронизируется напрямую с другими вашими устройствами в этой сети, когда вы включаете синхронизацию поблизости."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still synkar direkt med dina andra enheter i det här nätverket när du slår på synkning i närheten."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still синхронізується напряму з іншими вашими пристроями в цій мережі, коли ви вмикаєте синхронізацію поруч."
+          }
+        }
+      }
+    },
+    "NSMicrophoneUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still nutzt das Mikrofon, um ein Meeting auf diesem Gerät zu transkribieren."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still uses the microphone to transcribe a meeting on this device."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still usa el micrófono para transcribir una reunión en este dispositivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still utilise le micro pour transcrire une réunion sur cet appareil."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still usa il microfono per trascrivere una riunione su questo dispositivo."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still gebruikt de microfoon om een vergadering op dit apparaat uit te schrijven."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still używa mikrofonu, aby transkrybować spotkanie na tym urządzeniu."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Still usa o microfone para transcrever uma reunião neste dispositivo."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still использует микрофон, чтобы расшифровать встречу на этом устройстве."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still använder mikrofonen för att transkribera ett möte på den här enheten."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still використовує мікрофон, щоб розшифрувати зустріч на цьому пристрої."
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

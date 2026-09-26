@@ -131,7 +131,7 @@ Deployment target is now iOS/macOS 26.
 - W10 Google Analytics (Firebase) + Crashlytics, opt-in only, Firebase project under Google account anq.no.one@gmail.com, set up in Chrome
 - Diarization branch worktree-agent-a21221bbef762254b accepted (2 commits), follow-ups running; merge after the TestFlight trial build finishes
 - ASC app record exists: "Still - AI note taker", Apple ID 6815369488
-- TODO: semantic index builds on the main actor at unlock; move off main before release
+- Done: semantic index builds in the background after unlock (2026-09-25)
 
 ## Product specification and issue handoff — 2026-09-24
 
@@ -146,3 +146,24 @@ Deployment target is now iOS/macOS 26.
 - Existing #29, #32, and #33 now use the free-product release criteria. #8 and #9 had stray CLI output at the top of their bodies; it was removed. #9 no longer depends on the closed Pro issue #5. No issue was closed because the remaining open tasks still describe work to do; #1 was left as the historical parent per the ticketing contract.
 - This handoff added documentation and edited GitHub issues only. Do not infer any new app-code implementation from it. At handoff, `main` is at `c8acffd` and no task-owned background job is running. Another worker committed the spec, progress notes, fixture, and wayfinder move while this issue pass was in progress; preserve that commit and all existing `.claude/worktrees/` content.
 - Exact next action for the implementer: open #35, inspect the current onboarding/model-permission flow and any active worktree, then implement only its acceptance criteria and run its listed verification command.
+
+## Ralph loop on #34 — 2026-09-24
+- Merged into main: speaker separation + owner name (a21221), projects + project UI (a0e0), per-app call capture + Chromium native host (a19f), MCP server + still-mcp helper (a5c1). Worktrees and branches removed. 361 unit tests green.
+- still-mcp cannot run from the sandboxed unit-test host (SIGTRAP in sandbox init), so bin/check.sh smoke-tests it instead.
+- Remaining worktree: agent-a7189 (MLX notes WIP: JSONSchema, TranscriptChunker) — use for #43.
+- Next: #35 onboarding, then #36, #37, #38, #39, #40, #41, #44 (unblocked).
+- Done on main (local, not pushed yet): #35 setup resume/access pane/a11y, #36 app lock, #37 journal (sealed with device Keychain key), #41 project confirmation gates sync, #40 automatic capture keeps only meeting-like calls, #53 journal covers record/sync/export/delete/confirm.
+- E2E testRecordTranscribeFindAndReopen fails since the worktree merges (6feccd6 passes, 8aaf3ce fails: toolbar Record hit point -1,-1, live transcript never shows "budget"). Bisecting in .claude/worktrees/baseline-e2e with DerivedData Still-baseline. Do not push main until E2E is green.
+- Agents running in worktrees: #38 Mac audio import, #44 Mac microphone choice, #39 speaker cues from Meet. Merge each, run gate.
+- Found: no UI to join a second device (each device has its own master key; restore(using:) has no caller), so cross-device sync cannot open payloads today. #47 must add device joining + per-project keys (HPKE grants to device public keys).
+- Found: voice profiles match voices across meetings without consent (merged diarization work). Gate behind opt-in in #54.
+- 2026-09-24 morning: on main and pushed — #38 import, #44 mic choice, #39 Meet speaker cues, #54 voice consent, #50 shortcut/login/media hint, #40 browser mixed-media spans, #47 per-project keys + device joining (HPKE grants, 9-digit code), interrupted-processing recovery fix, 10-language UI translation (bin/localize.py), E2E onboarding fix (2/2 green). Privacy page on anq-no-one/still-app regenerated (scratchpad policy_html.py converter).
+- Running agents: #51 video/share import, #43 extraction (MLX + fallback), #45 settings sidebar, #42 vocabulary, translator for 26 #47 strings.
+- Next: #46 (after #43), #48 (after #43), #49 (after #45), #52 (after #42). Then Firebase opt-in analytics/Crashlytics (spec, no slice issue yet), release #30/#32/#33.
+- Open security gaps from #47: join code lacks commit step (MITM by iCloud controller could brute-force 1e9 codes); revoke rotates only account key, not project keys.
+- 2026-09-24 evening: merged #42 vocabulary, #43 extraction (Qwen3 MLX packs, extractive fallback), #45 settings sidebar, #46 MCP per-client approval + list_facts/list_tasks, #51 video/share import, #52 apply vocabulary with review, speaker-name opt-in, revoke renews project keys, join code PBKDF2. still-eval WER/hour measurements in docs/release-gates.md. 404 strings in 10 languages. main green: 546 unit, E2E 3/3.
+- Running: #48 dashboard (opus), #49 preference export (sonnet).
+- After them: all #35–#54 slices done → release work #29 (a11y pass), #30 (devices), #32 TestFlight, #33 launch; Firebase opt-in needs user OK.
+- 2026-09-25: all slices #35–#54 implemented on main (pushed b72655a): +#48 dashboard/decision history, #49 preference transfer, accessibility audit E2E (setup, library, settings, access pass), accent/record colors meet contrast. main: 572 unit, E2E 4/4, 429 strings × 10 languages.
+- Blocked on user: 1Password CLI not configured ("No accounts configured") → no ASC key → no TestFlight (#32). Firebase project creation needs explicit OK. GitHub issues not closed (needs OK).
+- Not verifiable here: iPhone 13 / base M1 measurements (#30), native-speaker review (#29), real Zoom/Teams/Meet calls (#39/#40).

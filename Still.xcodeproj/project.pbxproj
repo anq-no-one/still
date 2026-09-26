@@ -553,7 +553,7 @@
 		0FEB924620C1CBE19E5E7DD8 /* SystemOwnerAuthenticator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemOwnerAuthenticator.swift; sourceTree = "<group>"; };
 		102898B3DAFE3A79F1CEEEB9 /* StillArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StillArchive.swift; sourceTree = "<group>"; };
 		104FA6868E717D1D91A00F9C /* EntitlementsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementsTests.swift; sourceTree = "<group>"; };
-		10D335CE32A7A5BE104CDE97 /* StillMCPHelper */ = {isa = PBXFileReference; includeInIndex = 0; path = StillMCPHelper; sourceTree = BUILT_PRODUCTS_DIR; };
+		10D335CE32A7A5BE104CDE97 /* StillMCPHelper */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; name = StillMCPHelper; path = "still-mcp"; sourceTree = BUILT_PRODUCTS_DIR; };
 		115F6B2B47515F36D9AAF797 /* RecordingMerge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingMerge.swift; sourceTree = "<group>"; };
 		116E37E40F4E436B28F2E9B0 /* RecordingCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingCoordinatorTests.swift; sourceTree = "<group>"; };
 		12036573C00B181325383C2C /* RecordingWorkflowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingWorkflowTests.swift; sourceTree = "<group>"; };
@@ -584,7 +584,7 @@
 		2E21B74C251917584FE3B83E /* RecordingTitleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingTitleTests.swift; sourceTree = "<group>"; };
 		2E466888E58B8C5154027F4C /* RecordingShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingShortcut.swift; sourceTree = "<group>"; };
 		3178169308F66E895CE0AD50 /* RecordingMenuBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingMenuBar.swift; sourceTree = "<group>"; };
-		31B5EA790A05B4AEBFF2859D /* StillNativeHost */ = {isa = PBXFileReference; includeInIndex = 0; path = StillNativeHost; sourceTree = BUILT_PRODUCTS_DIR; };
+		31B5EA790A05B4AEBFF2859D /* StillNativeHost */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = StillNativeHost; sourceTree = BUILT_PRODUCTS_DIR; };
 		322330B1AB49CB8B62355C8C /* KeychainDeviceKeySource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainDeviceKeySource.swift; sourceTree = "<group>"; };
 		32A2BA9C4C1E847D08BDBFF6 /* KeyGrant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyGrant.swift; sourceTree = "<group>"; };
 		32AA319FC0C719438360D4CA /* AccessSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessSettingsView.swift; sourceTree = "<group>"; };
@@ -646,7 +646,7 @@
 		7FC7A9934495825086A68228 /* AudioInputDevices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioInputDevices.swift; sourceTree = "<group>"; };
 		7FD1BE1B4193A86811F3EB0F /* LibrarySearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySearch.swift; sourceTree = "<group>"; };
 		821DF3FA93123348B34A56A9 /* DiagnosticJournalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticJournalTests.swift; sourceTree = "<group>"; };
-		82EF5C65B62A8FF39477370C /* Still-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Still-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		82EF5C65B62A8FF39477370C /* Still-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = "Still-macOS.app"; path = Still.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		840972BBCBE5E69B9D293B28 /* MixedMediaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixedMediaTests.swift; sourceTree = "<group>"; };
 		84CD5DFD225CF95E36956740 /* ProjectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectTests.swift; sourceTree = "<group>"; };
 		84E847FE21648601BF4288E9 /* TranscriptPhrasesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptPhrasesTests.swift; sourceTree = "<group>"; };
@@ -685,7 +685,7 @@
 		A341116EE865894AA2B5CE96 /* RecordingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingCoordinator.swift; sourceTree = "<group>"; };
 		A3DF0170F2F79C1433537BE5 /* StillColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StillColors.swift; sourceTree = "<group>"; };
 		A67AEC89038D78957809DF02 /* MicrophoneSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneSettingsView.swift; sourceTree = "<group>"; };
-		A6944E7E4073FF3EDCC4BDBF /* showcase.fixture.caf */ = {isa = PBXFileReference; path = showcase.fixture.caf; sourceTree = "<group>"; };
+		A6944E7E4073FF3EDCC4BDBF /* showcase.fixture.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = showcase.fixture.caf; sourceTree = "<group>"; };
 		A7205DA1D1DD32873A417638 /* RetentionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetentionSettingsView.swift; sourceTree = "<group>"; };
 		A840C543C1400810EAE971DC /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		A9E6642D6522D98160584097 /* BrowserMeetingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserMeetingSettingsView.swift; sourceTree = "<group>"; };
@@ -707,7 +707,7 @@
 		B122FF6D23D8F48A1023628C /* OwnerNameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwnerNameTests.swift; sourceTree = "<group>"; };
 		B1414B043E233512D517A3FB /* NoteTemplateSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteTemplateSelector.swift; sourceTree = "<group>"; };
 		B1423C8F6152E04A66AF1C90 /* VocabularyReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyReviewSheet.swift; sourceTree = "<group>"; };
-		B217EAE5DC79CD244E8C8C0B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		B217EAE5DC79CD244E8C8C0B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B24C02251AC7C38054D66075 /* MeetingSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingSource.swift; sourceTree = "<group>"; };
 		B3799B3CBBD627C0D3D86119 /* RecordingVisibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingVisibility.swift; sourceTree = "<group>"; };
 		B63CCCDF23E1DB2E202625AF /* SettingsPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPreferences.swift; sourceTree = "<group>"; };
@@ -733,12 +733,12 @@
 		C74A9E391AB33C57E9B9DA49 /* ExtractiveNoteGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtractiveNoteGenerator.swift; sourceTree = "<group>"; };
 		C9771B8550525726EAABA42A /* LocalModelExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalModelExtractor.swift; sourceTree = "<group>"; };
 		C9CFFCA22411AE5CDA9A1D24 /* NoteSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSectionView.swift; sourceTree = "<group>"; };
-		CA2CD3744224EBBDC7E0E67A /* Still-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Still-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA2CD3744224EBBDC7E0E67A /* Still.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Still.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA88AF98C9CC64CB3C9B6789 /* ModelFileDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelFileDownloader.swift; sourceTree = "<group>"; };
 		CB4641254D413AA52607AD93 /* RecordingMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingMemory.swift; sourceTree = "<group>"; };
 		CDCE46E281DC1CE5B5D27C85 /* ErrorRateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorRateTests.swift; sourceTree = "<group>"; };
 		CF4D50DF6DBD308D38145243 /* ModelsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsSettingsView.swift; sourceTree = "<group>"; };
-		CF9AD9B7835F4CC287A297E5 /* StillEval */ = {isa = PBXFileReference; includeInIndex = 0; path = StillEval; sourceTree = BUILT_PRODUCTS_DIR; };
+		CF9AD9B7835F4CC287A297E5 /* StillEval */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; name = StillEval; path = "still-eval"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1079EDF53833E8749300E9A /* StillNativeHost.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StillNativeHost.entitlements; sourceTree = "<group>"; };
 		D1E092DC8CD20241A58DFA8D /* MicrophoneInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneInput.swift; sourceTree = "<group>"; };
 		D23376E6C722188BB5CB9EFE /* SyncTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTransport.swift; sourceTree = "<group>"; };
@@ -749,7 +749,7 @@
 		D5E43131E8655E18F83C219D /* ModelApprovalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelApprovalStore.swift; sourceTree = "<group>"; };
 		D6DE9F70991768E706BE0054 /* LibrarySettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySettings.swift; sourceTree = "<group>"; };
 		D7BC420DCDF72289386E9958 /* TranscriptionSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionSession.swift; sourceTree = "<group>"; };
-		D82252AF57447EA6F7D07F2A /* Still.storekit */ = {isa = PBXFileReference; path = Still.storekit; sourceTree = "<group>"; };
+		D82252AF57447EA6F7D07F2A /* Still.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Still.storekit; sourceTree = "<group>"; };
 		D945291D8F52446D8FF6840D /* RecordingDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingDocument.swift; sourceTree = "<group>"; };
 		D9B49261F766B8E72C5C35D8 /* MemorySectionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorySectionsView.swift; sourceTree = "<group>"; };
 		DA0A26758F37035FFA34A6C1 /* MediaImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaImportView.swift; sourceTree = "<group>"; };
@@ -766,7 +766,7 @@
 		E2AD6FCB299BB01B963B40A1 /* PreferencesFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesFile.swift; sourceTree = "<group>"; };
 		E47FE1C3F7106AAD17217994 /* SyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTests.swift; sourceTree = "<group>"; };
 		E48B7AD0B3245A9B0D6FFAE6 /* LibraryWindowReopener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryWindowReopener.swift; sourceTree = "<group>"; };
-		E5EB732D4738DCB46FE94650 /* meeting.fixture.caf */ = {isa = PBXFileReference; path = meeting.fixture.caf; sourceTree = "<group>"; };
+		E5EB732D4738DCB46FE94650 /* meeting.fixture.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = meeting.fixture.caf; sourceTree = "<group>"; };
 		E6E8C5D3A953E416B39ABB6E /* MediaImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaImportTests.swift; sourceTree = "<group>"; };
 		E7066B9C1C68C40F8BA07DDC /* MCPSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPSession.swift; sourceTree = "<group>"; };
 		E764FBA40A9AC8A5D354BFA7 /* LaunchAtLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLogin.swift; sourceTree = "<group>"; };
@@ -1176,7 +1176,7 @@
 		840A35E61B17558FC8F6BA24 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				CA2CD3744224EBBDC7E0E67A /* Still-iOS.app */,
+				CA2CD3744224EBBDC7E0E67A /* Still.app */,
 				82EF5C65B62A8FF39477370C /* Still-macOS.app */,
 				ACD829BFD23A4F81E4EA629C /* StillBrowserExtension.appex */,
 				CF9AD9B7835F4CC287A297E5 /* StillEval */,
@@ -1555,7 +1555,7 @@
 				6200F7C024C1E489C7711965 /* Tokenizers */,
 			);
 			productName = "Still-iOS";
-			productReference = CA2CD3744224EBBDC7E0E67A /* Still-iOS.app */;
+			productReference = CA2CD3744224EBBDC7E0E67A /* Still.app */;
 			productType = "com.apple.product-type.application";
 		};
 		FBE1B0B8AEDFDB39A0C23F0E /* StillMCPHelper */ = {
@@ -2251,8 +2251,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
-				EXCLUDED_SOURCE_FILE_NAMES = "*.fixture.caf *.fixture.mov";
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					"*.fixture.caf",
+					"*.fixture.mov",
+				);
 				INFOPLIST_FILE = "Still/Supporting/iOS-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2407,7 +2411,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
-				EXCLUDED_SOURCE_FILE_NAMES = "*.fixture.caf *.fixture.mov";
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					"*.fixture.caf",
+					"*.fixture.mov",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Still;
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Still reads the event you are in to suggest a title and the people expected.";
@@ -2527,6 +2534,7 @@
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "Still/Supporting/iOS-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
