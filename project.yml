@@ -172,6 +172,7 @@ targets:
     info:
       path: StillBrowserExtension/Info.plist
       properties:
+        CFBundleDisplayName: StillBrowserExtension
         NSExtension:
           NSExtensionPointIdentifier: com.apple.Safari.web-extension
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SafariWebExtensionHandler
