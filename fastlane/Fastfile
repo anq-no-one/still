@@ -67,9 +67,17 @@ def beta_tag(platform:, version:, build_number:)
 end
 
 def xcodegen_regen!
-  sh("xcodegen", "generate", "--spec", File.join(ROOT, "project.yml"), "--project", ROOT)
-  unless `git status --porcelain`.strip.empty?
-    sh("git", "commit", "-am", "chore: regenerate Xcode project")
+  tries = 0
+  loop do
+    sh("xcodegen", "generate", "--spec", File.join(ROOT, "project.yml"), "--project", ROOT)
+    break if `git status --porcelain`.strip.empty?
+    tries += 1
+    if tries >= 5
+      UI.user_error!("The regenerated project differs from the commit after 5 tries. " \
+        "Either commit a fresh xcodegen result first, or the generator flipped its " \
+        "helper layout nondeterministically — refusing to ship the wrong one.")
+    end
+    UI.message("Regenerated project differs from the commit, retrying (#{tries}/5)")
   end
 end
 
