@@ -49,6 +49,8 @@ targets:
       path: Still/Supporting/iOS-Info.plist
       properties:
         CFBundleDisplayName: Still
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         ITSAppUsesNonExemptEncryption: false
         NSMicrophoneUsageDescription: Still uses the microphone to transcribe a meeting on this device.
         NSLocalNetworkUsageDescription: Still syncs directly with your other devices on this network when you turn on nearby sync.
