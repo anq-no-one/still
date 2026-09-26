@@ -502,10 +502,10 @@
 		3C751C86AF58EADE58333C54 /* Embed Dependencies */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = Contents/Helpers;
-			dstSubfolderSpec = 1;
+			dstPath = "";
+			dstSubfolderSpec = 6;
 			files = (
-				A6F9C15C2C82A5A95BC0A5DA /* StillMCPHelper in Embed Dependencies */,
+				386CC47CBED9C773A07C2873 /* StillNativeHost in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -513,10 +513,10 @@
 		637B4BA22A327BC208728672 /* Embed Dependencies */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 6;
+			dstPath = Contents/Helpers;
+			dstSubfolderSpec = 1;
 			files = (
-				386CC47CBED9C773A07C2873 /* StillNativeHost in Embed Dependencies */,
+				A6F9C15C2C82A5A95BC0A5DA /* StillMCPHelper in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2395,6 +2395,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Still;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Still reads the event you are in to suggest a title and the people expected.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Still syncs directly with your other devices on this network when you turn on nearby sync.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Still uses the microphone to transcribe a meeting on this device.";
@@ -2420,6 +2421,7 @@
 				EXCLUDED_SOURCE_FILE_NAMES = "*.fixture.caf *.fixture.mov";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Still;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Still reads the event you are in to suggest a title and the people expected.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Still syncs directly with your other devices on this network when you turn on nearby sync.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Still uses the microphone to transcribe a meeting on this device.";
