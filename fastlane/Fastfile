@@ -66,19 +66,24 @@ def beta_tag(platform:, version:, build_number:)
   "testflight-#{platform}-#{version}-#{build_number}"
 end
 
+def canonical_project_text(path)
+  File.read(File.join(ROOT, path)).gsub(/[0-9A-F]{16,}/, "ID").lines.sort.join
+end
+
+def committed_canonical_project_text(path)
+  `git -C #{ROOT.shellescape} show HEAD:#{path.shellescape} 2>/dev/null`.gsub(/[0-9A-F]{16,}/, "ID").lines.sort.join
+end
+
 def xcodegen_regen!
-  tries = 0
-  loop do
-    sh("xcodegen", "generate", "--spec", File.join(ROOT, "project.yml"), "--project", ROOT)
-    break if `git status --porcelain`.strip.empty?
-    tries += 1
-    if tries >= 5
-      UI.user_error!("The regenerated project differs from the commit after 5 tries. " \
-        "Either commit a fresh xcodegen result first, or the generator flipped its " \
-        "helper layout nondeterministically — refusing to ship the wrong one.")
-    end
-    UI.message("Regenerated project differs from the commit, retrying (#{tries}/5)")
+  sh("xcodegen", "generate", "--spec", File.join(ROOT, "project.yml"), "--project", ROOT)
+  dirty = `git -C #{ROOT.shellescape} status --porcelain -- Still.xcodeproj`.lines.map { |l| l[3..].strip }
+  return if dirty.empty?
+  unless dirty.all? { |p| !canonical_project_text(p).empty? && canonical_project_text(p) == committed_canonical_project_text(p) }
+    UI.user_error!("The regenerated project differs from the commit beyond xcodegen's " \
+      "nondeterministic ID assignment. Commit the regenerated project first.")
   end
+  sh("git", "-C", ROOT, "checkout", "--", "Still.xcodeproj")
+  UI.message("Ignoring nondeterministic xcodegen ID assignment; building the committed project")
 end
 
 def build(scheme:, platform:, destination:, version:, build_number:)
