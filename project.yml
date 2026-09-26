@@ -49,6 +49,7 @@ targets:
       path: Still/Supporting/iOS-Info.plist
       properties:
         CFBundleDisplayName: Still
+        ITSAppUsesNonExemptEncryption: false
         NSMicrophoneUsageDescription: Still uses the microphone to transcribe a meeting on this device.
         NSLocalNetworkUsageDescription: Still syncs directly with your other devices on this network when you turn on nearby sync.
         NSCalendarsFullAccessUsageDescription: Still reads the event you are in to suggest a title and the people expected.
@@ -132,6 +133,7 @@ targets:
         CODE_SIGN_STYLE: Automatic
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Still
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
         INFOPLIST_KEY_NSMicrophoneUsageDescription: Still uses the microphone to transcribe a meeting on this device.
         INFOPLIST_KEY_NSLocalNetworkUsageDescription: Still syncs directly with your other devices on this network when you turn on nearby sync.
