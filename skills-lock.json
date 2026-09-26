@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "ios-hig-design": {
+      "source": "wondelai/skills",
+      "sourceType": "github",
+      "skillPath": "ios-hig-design/SKILL.md",
+      "computedHash": "57f41a91308e10b3315ee2ddabea4e9254bf119dc0265d03b37c6afc88e1c009"
+    },
     "swift-concurrency": {
       "source": "avdlee/swift-concurrency-agent-skill",
       "sourceType": "github",
