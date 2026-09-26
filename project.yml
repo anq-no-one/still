@@ -171,6 +171,10 @@ targets:
       - path: Still/Automation/BrowserMeetingSignal.swift
     info:
       path: StillBrowserExtension/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.Safari.web-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SafariWebExtensionHandler
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.andrii.still.browser
