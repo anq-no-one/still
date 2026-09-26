@@ -15,11 +15,28 @@ struct CloudKitSyncTransport: SyncTransport {
 
     static var isProvisioned: Bool {
         #if os(macOS)
-        let profile = Bundle.main.bundleURL.appending(path: "Contents/embedded.provisionprofile")
+        let contents = Bundle.main.bundleURL.appending(path: "Contents")
+        return hasCloudKitIdentity(
+            profile: contents.appending(path: "embedded.provisionprofile"),
+            storeReceipt: contents.appending(path: "_MASReceipt/receipt")
+        )
         #else
-        let profile = Bundle.main.bundleURL.appending(path: "embedded.mobileprovision")
+        return hasCloudKitIdentity(
+            profile: Bundle.main.bundleURL.appending(path: "embedded.mobileprovision"),
+            storeReceipt: nil
+        )
         #endif
-        return FileManager.default.fileExists(atPath: profile.path)
+    }
+
+    static func hasCloudKitIdentity(profile: URL, storeReceipt: URL?) -> Bool {
+        let files = FileManager.default
+        if files.fileExists(atPath: profile.path) {
+            return true
+        }
+        if let storeReceipt, files.fileExists(atPath: storeReceipt.path) {
+            return true
+        }
+        return false
     }
 
     func push(_ changes: [SyncChange]) async throws {

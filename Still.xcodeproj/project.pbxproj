@@ -38,6 +38,7 @@
 		141EDBEF638A5E9A123F3CCF /* ParakeetEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9606E84C14B167BF5DBF52BF /* ParakeetEngine.swift */; };
 		1522093B7A05E2DF61D4F5ED /* AppLockSettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0192E394250083860497333 /* AppLockSettingsSection.swift */; };
 		15473B8E30C3D6B04AC94CEE /* OwnerNameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B122FF6D23D8F48A1023628C /* OwnerNameTests.swift */; };
+		1617D328EC7640C0ADB9FBAD /* CloudKitSyncTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6B476449F16529A7AFEBE1 /* CloudKitSyncTransportTests.swift */; };
 		16BD8496DADAD2C0F972BEC0 /* VoiceProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 919A7CF683831357B18795E5 /* VoiceProfile.swift */; };
 		170FC85355A9BC905110A309 /* ModelPackInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0837C7A3BCBCA1D03A047E7F /* ModelPackInstaller.swift */; };
 		17C6036D1F69FD8C9FBCDF59 /* JSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D053AD001674118D31BF0F2 /* JSONValue.swift */; };
@@ -513,10 +514,10 @@
 		3C751C86AF58EADE58333C54 /* Embed Dependencies */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = Contents/Helpers;
-			dstSubfolderSpec = 1;
+			dstPath = "";
+			dstSubfolderSpec = 6;
 			files = (
-				A6F9C15C2C82A5A95BC0A5DA /* StillMCPHelper in Embed Dependencies */,
+				386CC47CBED9C773A07C2873 /* StillNativeHost in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -524,10 +525,10 @@
 		637B4BA22A327BC208728672 /* Embed Dependencies */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 6;
+			dstPath = Contents/Helpers;
+			dstSubfolderSpec = 1;
 			files = (
-				386CC47CBED9C773A07C2873 /* StillNativeHost in Embed Dependencies */,
+				A6F9C15C2C82A5A95BC0A5DA /* StillMCPHelper in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -634,6 +635,7 @@
 		57DD9F47A3AF1F873326E02E /* BrowserMeetingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserMeetingTests.swift; sourceTree = "<group>"; };
 		5843C0EA5B0697DF375321E8 /* NoDiagnosticsSink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoDiagnosticsSink.swift; sourceTree = "<group>"; };
 		5AA0EB82596901E5A5EBAB6E /* Dashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dashboard.swift; sourceTree = "<group>"; };
+		5B6B476449F16529A7AFEBE1 /* CloudKitSyncTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitSyncTransportTests.swift; sourceTree = "<group>"; };
 		5D089166E1658E9D3D527B1D /* OfflineTranscriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineTranscriber.swift; sourceTree = "<group>"; };
 		5E22EE90A7A7F79B0993F147 /* AudioPlaybackThread.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlaybackThread.swift; sourceTree = "<group>"; };
 		5E32AF4D96687C311A67B299 /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
@@ -952,6 +954,7 @@
 				65AC327944E96E9221579AFD /* BrowserMeetingSignalTests.swift */,
 				57DD9F47A3AF1F873326E02E /* BrowserMeetingTests.swift */,
 				C1F0164B1B019A431B7CDAE6 /* CallDetectorTests.swift */,
+				5B6B476449F16529A7AFEBE1 /* CloudKitSyncTransportTests.swift */,
 				821DF3FA93123348B34A56A9 /* DiagnosticJournalTests.swift */,
 				AA29A511C56EFBCEFD3BCDF2 /* EchoFilterTests.swift */,
 				104FA6868E717D1D91A00F9C /* EntitlementsTests.swift */,
@@ -1952,6 +1955,7 @@
 				318C408E6E0EE516352EADF9 /* BrowserMeetingSignalTests.swift in Sources */,
 				3554AEEE012FEB26238420D0 /* BrowserMeetingTests.swift in Sources */,
 				EE9D8D7138F4D9E7041D5BB4 /* CallDetectorTests.swift in Sources */,
+				1617D328EC7640C0ADB9FBAD /* CloudKitSyncTransportTests.swift in Sources */,
 				C3FC5F40CE66B432F8EDFD9A /* DiagnosticJournalTests.swift in Sources */,
 				48EAB7BB96A648A1C1EA157C /* EchoFilterTests.swift in Sources */,
 				BC10DC2E9F19FD49185B2FE5 /* EntitlementsTests.swift in Sources */,
