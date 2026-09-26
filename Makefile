@@ -8,6 +8,7 @@ BUNDLE_ID := com.andrii.still
 .PHONY: run-mac run-ios
 
 run-mac:
+	pkill -x Still || true
 	xcodegen generate --spec "$(ROOT)/project.yml" --project "$(ROOT)" --quiet
 	xcodebuild build -project "$(ROOT)/Still.xcodeproj" -scheme Still-macOS -destination 'platform=macOS,arch=arm64' -derivedDataPath "$(DERIVED_DATA)" -skipPackagePluginValidation -skipMacroValidation -allowProvisioningUpdates
 	open "$(MAC_APP)"

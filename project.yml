@@ -147,6 +147,8 @@ targets:
         com.apple.security.app-sandbox: true
         com.apple.security.application-groups:
           - R3XFQ7K885.com.andrii.still
+        keychain-access-groups:
+          - R3XFQ7K885.com.andrii.still
         com.apple.security.device.audio-input: true
         com.apple.security.network.client: true
         com.apple.security.personal-information.calendars: true

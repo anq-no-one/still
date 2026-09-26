@@ -31,5 +31,9 @@
 		<string>/Library/Application Support/BraveSoftware/Brave-Browser/NativeMessagingHosts/</string>
 		<string>/Library/Application Support/Arc/User Data/NativeMessagingHosts/</string>
 	</array>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>R3XFQ7K885.com.andrii.still</string>
+	</array>
 </dict>
 </plist>

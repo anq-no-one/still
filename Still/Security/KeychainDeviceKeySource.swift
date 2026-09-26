@@ -144,7 +144,7 @@ struct KeychainDeviceKeySource: DeviceKeySource {
         case errSecItemNotFound:
             return nil
         default:
-            throw LibraryKeyError.keychainFailure(status)
+            throw Self.authenticationError(for: status) ?? LibraryKeyError.keychainFailure(status)
         }
     }
 
