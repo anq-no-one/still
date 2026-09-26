@@ -5,10 +5,10 @@ import Testing
 @MainActor
 struct RecordingPlayerTests {
     @Test
-    func aRecordingWhoseAudioWasDeletedIsNotAnError() {
+    func aRecordingWhoseAudioWasDeletedIsNotAnError() async {
         let player = RecordingPlayer()
 
-        player.load(Data())
+        await player.load(Data())
 
         #expect(player.state == .noAudio)
         #expect(!player.canPlay)
@@ -16,10 +16,10 @@ struct RecordingPlayerTests {
     }
 
     @Test
-    func damagedAudioReadsAsUnreadableRatherThanMissing() {
+    func damagedAudioReadsAsUnreadableRatherThanMissing() async {
         let player = RecordingPlayer()
 
-        player.load(Data(repeating: 0xAB, count: 512))
+        await player.load(Data(repeating: 0xAB, count: 512))
 
         #expect(player.canPlay == false)
         if case .unreadable = player.state {
@@ -30,12 +30,12 @@ struct RecordingPlayerTests {
     }
 
     @Test
-    func realAudioLoadsAndIsPlayable() {
+    func realAudioLoadsAndIsPlayable() async {
         let format = AudioFormat(sampleRate: 8_000, channels: 1, bitsPerSample: 16)
         let silence = Data(count: format.bytesPerSecond)
         let player = RecordingPlayer()
 
-        player.load(WAVFile.data(pcm: silence, format: format))
+        await player.load(WAVFile.data(pcm: silence, format: format))
 
         #expect(player.state == .ready)
         #expect(player.canPlay)
@@ -43,17 +43,28 @@ struct RecordingPlayerTests {
     }
 
     @Test
-    func playingThenPausingLeavesNothingRunning() {
+    func playingThenPausingLeavesNothingRunning() async {
         let format = AudioFormat(sampleRate: 8_000, channels: 1, bitsPerSample: 16)
         let player = RecordingPlayer()
-        player.load(WAVFile.data(pcm: Data(count: format.bytesPerSecond * 2), format: format))
+        await player.load(WAVFile.data(pcm: Data(count: format.bytesPerSecond * 2), format: format))
 
         player.play(from: 0)
-
-        #expect(player.isPlaying)
+        #expect(await polled({ player.isPlaying }))
 
         player.pause()
 
         #expect(!player.isPlaying)
+    }
+
+    private func polled(
+        _ condition: @escaping @MainActor () -> Bool,
+        timeout: TimeInterval = 5
+    ) async -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while !condition() {
+            guard Date() < deadline else { return false }
+            try? await Task.sleep(for: .milliseconds(50))
+        }
+        return true
     }
 }

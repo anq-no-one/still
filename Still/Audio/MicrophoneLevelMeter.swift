@@ -4,7 +4,7 @@ import Foundation
 
 @MainActor
 protocol MicrophoneLevelMeter: AnyObject {
-    func start(onLevel: @escaping @MainActor @Sendable (Double) -> Void) throws
+    func start(onLevel: @escaping @MainActor @Sendable (Double) -> Void) async throws
     func stop()
 }
 
@@ -17,10 +17,10 @@ final class InputLevelMeter: MicrophoneLevelMeter {
         self.input = input
     }
 
-    func start(onLevel: @escaping @MainActor @Sendable (Double) -> Void) throws {
+    func start(onLevel: @escaping @MainActor @Sendable (Double) -> Void) async throws {
         guard consumer == nil else { return }
 
-        consumer = try input.attach { _ in
+        consumer = try await input.attach { _ in
             { buffer in
                 guard let level = InputLevel.of(buffer) else { return }
                 Task { @MainActor in onLevel(level) }

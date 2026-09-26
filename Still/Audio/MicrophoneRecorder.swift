@@ -35,7 +35,7 @@ final class MicrophoneRecorder: AudioRecorder {
         let format = format
 
         do {
-            consumer = try input.attach { inputFormat in
+            consumer = try await input.attach { inputFormat in
                 try PCMSink(writer: writer, from: inputFormat, to: format).consumer
             }
         } catch {

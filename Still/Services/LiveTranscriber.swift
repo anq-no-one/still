@@ -34,7 +34,7 @@ final class LiveTranscriber: TranscriptionSession {
         failure = nil
 
         let samples = LiveSamples()
-        consumer = try input.attach { format in
+        consumer = try await input.attach { format in
             try samples.consumer(from: format, source: .microphone)
         }
         systemAudioConsumer = try? systemAudio?.attach { format in

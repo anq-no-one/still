@@ -133,11 +133,12 @@ struct MicrophoneChoiceTests {
     }
 
     @Test
-    func theLevelTestShowsWhatTheMeterHears() {
+    func theLevelTestShowsWhatTheMeterHears() async {
         let meter = FakeLevelMeter()
         let choice = make(meter: meter)
 
         choice.startLevelTest()
+        await waitForMeter(meter)
         meter.hear(0.6)
 
         #expect(choice.levelTest == .listening(level: 0.6))
@@ -168,11 +169,12 @@ struct MicrophoneChoiceTests {
     }
 
     @Test
-    func theLevelTestStopsWhenARecordingStarts() {
+    func theLevelTestStopsWhenARecordingStarts() async {
         let meter = FakeLevelMeter()
         let recording = Flag()
         let choice = make(meter: meter, isRecording: { recording.isRaised })
         choice.startLevelTest()
+        await waitForMeter(meter)
 
         recording.raise()
         meter.hear(0.4)
@@ -182,12 +184,14 @@ struct MicrophoneChoiceTests {
     }
 
     @Test
-    func choosingAnotherDeviceRestartsARunningLevelTest() {
+    func choosingAnotherDeviceRestartsARunningLevelTest() async {
         let meter = FakeLevelMeter()
         let choice = make(meter: meter)
         choice.startLevelTest()
+        await waitForMeter(meter)
 
         choice.choose(headset)
+        await waitForMeter(meter, starts: 2)
 
         #expect(meter.starts == 2)
         #expect(meter.isRunning)
@@ -195,15 +199,17 @@ struct MicrophoneChoiceTests {
     }
 
     @Test
-    func unpluggingTheTestedDeviceRestartsTheLevelTestOnTheFallback() {
+    func unpluggingTheTestedDeviceRestartsTheLevelTestOnTheFallback() async {
         let source = FakeAudioInputDevices(devices: [builtIn, headset], systemDefault: builtIn)
         let meter = FakeLevelMeter()
         let choice = make(source: source, meter: meter)
         choice.choose(headset)
         choice.startLevelTest()
+        await waitForMeter(meter)
 
         source.devices = [builtIn]
         source.changed()
+        await waitForMeter(meter, starts: 2)
 
         #expect(meter.starts == 2)
         #expect(choice.isTestingLevel)
@@ -211,12 +217,16 @@ struct MicrophoneChoiceTests {
     }
 
     @Test
-    func aMeterThatCannotStartReportsWhy() {
+    func aMeterThatCannotStartReportsWhy() async {
         let meter = FakeLevelMeter()
         meter.failure = CaptureError.inputUnavailable
         let choice = make(meter: meter)
 
         choice.startLevelTest()
+        for _ in 0..<200 {
+            if case .failed = choice.levelTest { break }
+            try? await Task.sleep(for: .milliseconds(10))
+        }
 
         #expect(choice.levelTest == .failed(CaptureError.inputUnavailable.localizedDescription))
     }
@@ -271,6 +281,12 @@ struct MicrophoneChoiceTests {
 
     private func heardLevel(_ choice: MicrophoneChoice) -> Double {
         if case .listening(let level) = choice.levelTest { level } else { 0 }
+    }
+
+    private func waitForMeter(_ meter: FakeLevelMeter, starts: Int = 1) async {
+        for _ in 0..<200 where meter.starts < starts {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
     }
 
     private func make(
@@ -357,7 +373,7 @@ final class FakeLevelMeter: MicrophoneLevelMeter {
         onLevel != nil
     }
 
-    func start(onLevel: @escaping @MainActor @Sendable (Double) -> Void) throws {
+    func start(onLevel: @escaping @MainActor @Sendable (Double) -> Void) async throws {
         if let failure { throw failure }
         starts += 1
         self.onLevel = onLevel

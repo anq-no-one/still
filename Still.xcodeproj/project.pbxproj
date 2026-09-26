@@ -169,6 +169,7 @@
 		5F416E5931C24D01ACF0F32A /* Recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB38F864906FB7D64D992B1 /* Recording.swift */; };
 		5FAAD363177C691D3E50E6DB /* MicrophonePermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DD8EEBE7A0EABDC7BADE84 /* MicrophonePermission.swift */; };
 		5FDA661E67A0EC5280A36406 /* GlobalRecordingShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433EEBD3226EAB0023DBDC1A /* GlobalRecordingShortcut.swift */; };
+		5FF5A2DD7E82A8771B348394 /* AudioPlaybackThread.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E22EE90A7A7F79B0993F147 /* AudioPlaybackThread.swift */; };
 		6142CB956375768E3CBFF359 /* ProjectTasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A089264B9CF415D01009C495 /* ProjectTasksView.swift */; };
 		619124FE2CD948DFBFEAA370 /* AppleTranslationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB47B445B5E3BB1AF522ECE2 /* AppleTranslationEngine.swift */; };
 		61E15543F0886C080C88B9D5 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C5A429E01C7F4E99F794B2 /* main.swift */; };
@@ -436,6 +437,7 @@
 		F2B009007E7AF29359B384D8 /* NoteTemplateSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1414B043E233512D517A3FB /* NoteTemplateSelector.swift */; };
 		F3FB75C86A3F77B5463D90EB /* SyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47FE1C3F7106AAD17217994 /* SyncTests.swift */; };
 		F44FE8EC11445980A9A410A9 /* SecuritySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFDD31C806EAB9700A7BD3BC /* SecuritySettingsView.swift */; };
+		F5381A48BCD9A32321E1E233 /* AudioPlaybackThread.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E22EE90A7A7F79B0993F147 /* AudioPlaybackThread.swift */; };
 		F545E25716096EAF6B02F015 /* SystemOwnerAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FEB924620C1CBE19E5E7DD8 /* SystemOwnerAuthenticator.swift */; };
 		F55B4782C139840280024CCA /* LockGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5229AD28F2104B0B3D3E8D88 /* LockGate.swift */; };
 		F61584069F2D9DC3FFDCFFA7 /* NativeMessaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A4869EDB1F56AE5751286E /* NativeMessaging.swift */; };
@@ -500,10 +502,10 @@
 		3C751C86AF58EADE58333C54 /* Embed Dependencies */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 6;
+			dstPath = Contents/Helpers;
+			dstSubfolderSpec = 1;
 			files = (
-				386CC47CBED9C773A07C2873 /* StillNativeHost in Embed Dependencies */,
+				A6F9C15C2C82A5A95BC0A5DA /* StillMCPHelper in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -511,10 +513,10 @@
 		637B4BA22A327BC208728672 /* Embed Dependencies */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = Contents/Helpers;
-			dstSubfolderSpec = 1;
+			dstPath = "";
+			dstSubfolderSpec = 6;
 			files = (
-				A6F9C15C2C82A5A95BC0A5DA /* StillMCPHelper in Embed Dependencies */,
+				386CC47CBED9C773A07C2873 /* StillNativeHost in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -618,6 +620,7 @@
 		5843C0EA5B0697DF375321E8 /* NoDiagnosticsSink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoDiagnosticsSink.swift; sourceTree = "<group>"; };
 		5AA0EB82596901E5A5EBAB6E /* Dashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dashboard.swift; sourceTree = "<group>"; };
 		5D089166E1658E9D3D527B1D /* OfflineTranscriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineTranscriber.swift; sourceTree = "<group>"; };
+		5E22EE90A7A7F79B0993F147 /* AudioPlaybackThread.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlaybackThread.swift; sourceTree = "<group>"; };
 		5E32AF4D96687C311A67B299 /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
 		5F06869F59FDBD7032480186 /* NoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteTests.swift; sourceTree = "<group>"; };
 		5FAADF706933D3D24A3DFC34 /* FluidSpeakerDiarizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FluidSpeakerDiarizer.swift; sourceTree = "<group>"; };
@@ -1295,6 +1298,7 @@
 				DAB3742729A60565FDCB96CE /* AudioChunkStore.swift */,
 				D381245294D23291EBE28BE4 /* AudioFormat.swift */,
 				7FC7A9934495825086A68228 /* AudioInputDevices.swift */,
+				5E22EE90A7A7F79B0993F147 /* AudioPlaybackThread.swift */,
 				D5813DD23A9C422F9A353FFB /* AudioRecorder.swift */,
 				6B03B5401AB2345F5ACC04A5 /* MacAudioRecorder.swift */,
 				B0560C49AD541AE690EB40BB /* MicrophoneChoice.swift */,
@@ -1731,6 +1735,7 @@
 				3ADF78D59D4861CBC645D2BB /* AudioChunkSync.swift in Sources */,
 				C5377079768A509772415742 /* AudioFormat.swift in Sources */,
 				E1003132B5FDC2BED92F1183 /* AudioInputDevices.swift in Sources */,
+				F5381A48BCD9A32321E1E233 /* AudioPlaybackThread.swift in Sources */,
 				6D02CDC94FBB21CA4840CEC0 /* AudioRecorder.swift in Sources */,
 				55C71808ED4676E659D5374A /* AutomaticRecording.swift in Sources */,
 				E4F8ABF399691D8B1B463013 /* AutomaticRecordingSettingsView.swift in Sources */,
@@ -2017,6 +2022,7 @@
 				7AFE886426DD0D2FBE025B6D /* AudioChunkSync.swift in Sources */,
 				AF8D60DE5F28FA56BD778B35 /* AudioFormat.swift in Sources */,
 				6DDE208AE6BE0BC4A00E5875 /* AudioInputDevices.swift in Sources */,
+				5FF5A2DD7E82A8771B348394 /* AudioPlaybackThread.swift in Sources */,
 				526326CF650BDFECD2832639 /* AudioRecorder.swift in Sources */,
 				6ABBE4CA5956C0347F871C93 /* AutomaticRecording.swift in Sources */,
 				4B3F6E057875076D1EDCA0C9 /* AutomaticRecordingSettingsView.swift in Sources */,

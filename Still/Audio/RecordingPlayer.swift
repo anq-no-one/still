@@ -13,64 +13,96 @@ final class RecordingPlayer {
         case unreadable(String)
     }
 
-    private var player: AVAudioPlayer?
-    private var finishWatcher: PlaybackFinishWatcher?
+    private var box = PlayerBox()
+    private var loadGeneration = 0
 
     private(set) var state: State = .noAudio
     private(set) var isPlaying = false
 
     var currentTime: TimeInterval {
-        player?.currentTime ?? 0
+        box.player?.currentTime ?? 0
     }
 
     var canPlay: Bool {
         state == .ready
     }
 
-    func load(_ wav: Data) {
+    /// Decoding into buffers happens on the playback thread, so opening a
+    /// long recording never stalls the interface. The state flips when the
+    /// buffers are ready; a newer load discards an older one still in flight.
+    func load(_ wav: Data) async {
+        loadGeneration += 1
+        let generation = loadGeneration
+        retireBox()
         guard !wav.isEmpty else {
-            player = nil
             isPlaying = false
             state = .noAudio
             return
         }
 
-        do {
-            let player = try AVAudioPlayer(data: wav)
-            let watcher = PlaybackFinishWatcher { [weak self] in
-                self?.isPlaying = false
+        let watcher = PlaybackFinishWatcher { [weak self] in self?.isPlaying = false }
+        let box = box
+        let prepared = await AudioPlaybackThread.shared.run { () -> Result<Void, Error> in
+            do {
+                let player = try AVAudioPlayer(data: wav)
+                player.delegate = watcher
+                player.prepareToPlay()
+                box.player = player
+                box.watcher = watcher
+                return .success(())
+            } catch {
+                return .failure(error)
             }
-            player.delegate = watcher
-            player.prepareToPlay()
-
-            self.player = player
-            finishWatcher = watcher
+        }
+        guard generation == loadGeneration else { return }
+        switch prepared {
+        case .success:
             state = .ready
-        } catch {
-            player = nil
-            finishWatcher = nil
+        case .failure(let error):
+            retireBox()
             isPlaying = false
             state = .unreadable(error.localizedDescription)
         }
     }
 
+    /// Session activation on the first play can block, so it runs on the
+    /// playback thread. The finishing flag still arrives through the delegate,
+    /// which only fires on a thread with a running loop.
     func play(from time: TimeInterval) {
-        guard let player else { return }
-
-        player.currentTime = min(max(0, time), player.duration)
-        player.play()
-        isPlaying = true
+        guard state == .ready else { return }
+        let box = box
+        Task { @MainActor [weak self] in
+            let started = await AudioPlaybackThread.shared.run {
+                box.player?.currentTime = min(max(0, time), box.player?.duration ?? time)
+                return box.player?.play() ?? false
+            }
+            self?.isPlaying = started
+        }
     }
 
     func pause() {
-        player?.pause()
         isPlaying = false
+        let box = box
+        AudioPlaybackThread.shared.perform { box.player?.pause() }
     }
+
+    private func retireBox() {
+        let old = box
+        box = PlayerBox()
+        AudioPlaybackThread.shared.perform { old.player?.stop() }
+    }
+}
+
+/// The player and its delegate outlive any single call, but every touch
+/// happens on the playback thread, so sharing the box is safe.
+private final class PlayerBox: @unchecked Sendable {
+    var player: AVAudioPlayer?
+    var watcher: PlaybackFinishWatcher?
 }
 
 /// AVAudioPlayer reports the end of playback through a delegate, which has to
 /// be an NSObject, so the button does not stay offering Pause forever.
-private final class PlaybackFinishWatcher: NSObject, AVAudioPlayerDelegate {
+private final class PlaybackFinishWatcher: NSObject, AVAudioPlayerDelegate, @unchecked Sendable {
     private let onFinish: @Sendable @MainActor () -> Void
 
     init(onFinish: @escaping @Sendable @MainActor () -> Void) {

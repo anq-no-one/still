@@ -173,7 +173,7 @@ struct RecordingDetailView: View {
             }
         }
         .task {
-            player.load((try? library.audio(for: recording)) ?? Data())
+            await player.load((try? library.audio(for: recording)) ?? Data())
             if let startAt { player.play(from: startAt) }
         }
         .onDisappear {

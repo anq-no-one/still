@@ -94,11 +94,13 @@ final class MicrophoneChoice {
     func startLevelTest() {
         guard !isTestingLevel, canTestLevel else { return }
 
-        do {
-            try meter.start { [weak self] level in self?.heard(level) }
-            levelTest = .listening(level: 0)
-        } catch {
-            levelTest = .failed(error.localizedDescription)
+        levelTest = .listening(level: 0)
+        Task { @MainActor [weak self] in
+            do {
+                try await self?.meter.start { [weak self] level in self?.heard(level) }
+            } catch {
+                self?.levelTest = .failed(error.localizedDescription)
+            }
         }
     }
 
