@@ -20,6 +20,20 @@ struct SpeakerMergeTests {
     }
 
     @Test
+    func mergingHandsAPendingSuggestionToASuggestionlessSurvivor() {
+        var recording = mergedFixture()
+        let duplicate = recording.speakers[1]
+        let survivor = recording.speakers[2]
+        recording.speakers[1] = duplicate.suggesting("Dana Kim")
+
+        let merged = recording.mergingSpeaker(duplicate, into: survivor)
+
+        #expect(merged.speakers.count == 2)
+        #expect(merged.speakers[1].suggestedName == "Dana Kim")
+        #expect(merged.speakers[1].name == "Speaker 2")
+    }
+
+    @Test
     func mergingAnUnknownOrIdenticalSpeakerChangesNothing() {
         let recording = mergedFixture()
         let stranger = Speaker(name: "Stranger", origin: .system, isYou: false)

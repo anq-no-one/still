@@ -25,6 +25,7 @@ final class MeetingTileRecorder {
     private var recordingID: UUID?
     private var startedAt: Date?
     private var timer: Task<Void, Never>?
+    private var generation = 0
 
     init(
         root: URL,
@@ -92,6 +93,7 @@ final class MeetingTileRecorder {
         timer = nil
         recordingID = nil
         startedAt = nil
+        generation += 1
     }
 
     private func loop() async {
@@ -104,6 +106,7 @@ final class MeetingTileRecorder {
 
     private func captureOnce() async {
         guard let recordingID, let startedAt, configuration.isVoiceActive() else { return }
+        let generation = generation
         do {
             let windows = try await TeamsMeetingWindow.fetchWindows()
             guard let resolution = TeamsMeetingWindow.resolve(from: windows) else { return }
@@ -111,6 +114,7 @@ final class MeetingTileRecorder {
             guard let filter = TeamsMeetingWindow.filter(for: resolution, in: content),
                   let png = try await Self.captureFrame(filter: filter, width: configuration.width, height: configuration.height)
             else { return }
+            guard generation == self.generation, self.recordingID == recordingID else { return }
             try MeetingTileStore.save(
                 png,
                 offset: configuration.now().timeIntervalSince(startedAt),
