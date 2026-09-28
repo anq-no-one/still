@@ -44,7 +44,8 @@ final class MediaImporter {
     private let library: MediaImportLibrary
     private let makeFinalTranscription: () -> FinalTranscription
     private let makeSpeakerSeparation: () -> SpeakerSeparation
-    private let noteBuilder: GroundedNoteBuilder
+    private let makeNoteBuilder: @MainActor () -> GroundedNoteBuilder
+    private let makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)?
     private let isReady: @MainActor () -> Bool
     private let now: () -> Date
     private let handOverFolders: [URL]
@@ -58,7 +59,8 @@ final class MediaImporter {
         library: MediaImportLibrary,
         makeFinalTranscription: @escaping () -> FinalTranscription,
         makeSpeakerSeparation: @escaping () -> SpeakerSeparation = { .trackBased },
-        noteBuilder: GroundedNoteBuilder = GroundedNoteBuilder(),
+        makeNoteBuilder: @escaping @MainActor () -> GroundedNoteBuilder = { GroundedNoteBuilder() },
+        makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)? = nil,
         isReady: @escaping @MainActor () -> Bool = { true },
         now: @escaping () -> Date = Date.init,
         handOverFolders: [URL] = MediaImporter.handOverFolders
@@ -66,7 +68,8 @@ final class MediaImporter {
         self.library = library
         self.makeFinalTranscription = makeFinalTranscription
         self.makeSpeakerSeparation = makeSpeakerSeparation
-        self.noteBuilder = noteBuilder
+        self.makeNoteBuilder = makeNoteBuilder
+        self.makeTitle = makeTitle
         self.isReady = isReady
         self.now = now
         self.handOverFolders = handOverFolders
@@ -209,8 +212,9 @@ final class MediaImporter {
         RecordingFinalizer(
             finalTranscription: makeFinalTranscription(),
             speakerSeparation: makeSpeakerSeparation(),
-            noteBuilder: noteBuilder,
-            library: library
+            noteBuilder: makeNoteBuilder(),
+            library: library,
+            makeTitle: makeTitle
         )
     }
 

@@ -134,7 +134,7 @@ struct RecordingDetailView: View {
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
-                    ForEach(recording.segments) { segment in
+                    ForEach(visibleSegments) { segment in
                         SegmentRow(
                             showsTranslation: showsTranslation,
                             segment: segment,
@@ -215,6 +215,12 @@ struct RecordingDetailView: View {
 
     private var recording: Recording {
         editor.recording
+    }
+
+    private var visibleSegments: [TranscriptSegment] {
+        recording.segments.filter {
+            !DisfluencyFilter.isFillerOnly($0.displayText, language: $0.language)
+        }
     }
 
     private var playbackMessage: String? {

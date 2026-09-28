@@ -189,6 +189,9 @@ struct LibraryView: View {
             Button("Rename") { commitRename() }
             Button("Cancel", role: .cancel) { renamingID = nil }
         }
+        .onChange(of: models.meetingMemory.state) { _, state in
+            if state == .installed { extraction.schedule() }
+        }
         .onChange(of: coordinator.isRecording) { _, isRecording in
             if isRecording { isCapturing = true }
         }

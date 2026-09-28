@@ -198,6 +198,17 @@ struct StillApp: App {
                 voiceprints: FluidVoiceprintExtractor(pack: ModelCatalog.speakerSeparation, root: modelRoot)
             )
         }
+        let memoryInstaller = installers.meetingMemory
+        let memoryExtractor = LocalModelExtractor(pack: memoryInstaller.pack, root: modelRoot)
+        let detailsModel = LocalLanguageModel(directory: memoryInstaller.pack.installedDirectory(in: modelRoot))
+        let makePreferredNoteBuilder: @MainActor @Sendable () -> GroundedNoteBuilder = {
+            guard LocalModelExtractor.canRun, memoryInstaller.state == .installed else { return GroundedNoteBuilder() }
+            return GroundedNoteBuilder(preferred: LocalModelNoteGenerator(model: detailsModel))
+        }
+        let makeDetailsTitle: @MainActor @Sendable ([TranscriptSegment]) async -> String? = { segments in
+            guard LocalModelExtractor.canRun, memoryInstaller.state == .installed else { return nil }
+            return await LocalModelTitle(model: detailsModel).title(for: segments)
+        }
         let recordingCoordinator = MainActor.assumeIsolated {
             RecordingCoordinator(
                 library: recordingLibrary,
@@ -205,6 +216,8 @@ struct StillApp: App {
                 makeSession: { LiveTranscriber(input: microphone, systemAudio: systemAudio, engine: speech) },
                 makeFinalTranscription: makeFinalTranscription,
                 makeSpeakerSeparation: makeSpeakerSeparation,
+                makeNoteBuilder: makePreferredNoteBuilder,
+                makeTitle: makeDetailsTitle,
                 expectedParticipants: { date in
                     await CalendarContext(source: EventKitCalendarSource()).suggestion(at: date)?.participants ?? []
                 },
@@ -221,6 +234,8 @@ struct StillApp: App {
                 makeSpeakerSeparation: {
                     proEntitlements.allows(.speakerSeparation) ? makeSpeakerSeparation() : .trackBased
                 },
+                makeNoteBuilder: makePreferredNoteBuilder,
+                makeTitle: makeDetailsTitle,
                 isReady: { setupFlow.isComplete && recordingLibrary.state == .unlocked }
             )
         }
@@ -243,8 +258,6 @@ struct StillApp: App {
             #endif
             return navigation
         }
-        let memoryInstaller = installers.meetingMemory
-        let memoryExtractor = LocalModelExtractor(pack: memoryInstaller.pack, root: modelRoot)
         let memoryExtraction = MainActor.assumeIsolated {
             MemoryExtraction(library: recordingLibrary) {
                 LocalModelExtractor.canRun && memoryInstaller.state == .installed ? memoryExtractor : nil

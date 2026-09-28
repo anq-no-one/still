@@ -19,6 +19,21 @@ struct RecordingFinalizer {
     let speakerSeparation: SpeakerSeparation
     let noteBuilder: GroundedNoteBuilder
     let library: RecordingLibrary
+    let makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)?
+
+    init(
+        finalTranscription: FinalTranscription,
+        speakerSeparation: SpeakerSeparation,
+        noteBuilder: GroundedNoteBuilder,
+        library: RecordingLibrary,
+        makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)? = nil
+    ) {
+        self.finalTranscription = finalTranscription
+        self.speakerSeparation = speakerSeparation
+        self.noteBuilder = noteBuilder
+        self.library = library
+        self.makeTitle = makeTitle
+    }
 
     @discardableResult
     func finalize(
@@ -51,9 +66,16 @@ struct RecordingFinalizer {
         )
         try Task.checkCancellation()
 
+        let finishedTitle: String
+        if let draftTitle = draft.title {
+            finishedTitle = draftTitle
+        } else {
+            finishedTitle = await Self.title(for: segments, transcript: transcript, date: draft.createdAt, makeTitle: makeTitle)
+        }
+
         return Recording(
             id: draft.id,
-            title: draft.title ?? RecordingTitle.from(transcript: transcript, date: draft.createdAt),
+            title: finishedTitle,
             transcript: transcript,
             segments: segments,
             speakers: transcription?.speakers ?? [],
@@ -65,6 +87,19 @@ struct RecordingFinalizer {
             mixedMediaSpans: draft.mixedMedia.isEmpty ? nil : draft.mixedMedia,
             importedFrom: draft.importedFrom
         )
+    }
+
+    private static func title(
+        for segments: [TranscriptSegment],
+        transcript: String,
+        date: Date,
+        makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)?
+    ) async -> String {
+        if let makeTitle, let generated = await makeTitle(segments), !generated.isEmpty {
+            return generated
+        }
+        let language = segments.lazy.compactMap(\.language).first
+        return RecordingTitle.from(transcript: transcript, date: date, language: language)
     }
 
     private func transcribeAndSeparateSpeakers(

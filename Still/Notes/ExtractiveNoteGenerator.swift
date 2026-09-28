@@ -49,7 +49,9 @@ struct ExtractiveNoteGenerator: NoteGenerator, Sendable {
     }
 
     /// Word-level recognizer output becomes sentences, so a quoted claim reads
-    /// like language while still naming every segment it came from.
+    /// like language while still naming every segment it came from. Fillers
+    /// never start a claim, and a segment holding only fillers stays out while
+    /// keeping its own audio time for playback.
     static func sentences(in segments: [TranscriptSegment]) -> [(text: String, start: TimeInterval, sourceIDs: [UUID])] {
         var sentences: [(String, TimeInterval, [UUID])] = []
         var words: [String] = []
@@ -57,11 +59,13 @@ struct ExtractiveNoteGenerator: NoteGenerator, Sendable {
         var start: TimeInterval = 0
 
         for segment in segments {
+            let cleaned = DisfluencyFilter.cleanedDisplayText(of: segment)
+            guard !cleaned.isEmpty else { continue }
             if words.isEmpty { start = segment.start }
-            words.append(segment.displayText)
+            words.append(cleaned)
             ids.append(segment.id)
 
-            guard segment.displayText.last.map({ ".?!".contains($0) }) == true else { continue }
+            guard cleaned.last.map({ ".?!".contains($0) }) == true else { continue }
 
             sentences.append((words.joined(separator: " "), start, ids))
             words.removeAll()

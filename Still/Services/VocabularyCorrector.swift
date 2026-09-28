@@ -25,7 +25,7 @@ enum VocabularyCorrector {
         let entries = matchEntries(for: vocabulary.activeTerms)
         guard !entries.isEmpty else { return segments }
 
-        return segments.map { segment in
+        let corrected = segments.map { segment -> TranscriptSegment in
             guard let corrected = correct(segment.text, using: entries), corrected != segment.text else {
                 return segment
             }
@@ -33,6 +33,48 @@ enum VocabularyCorrector {
             copy.correction = corrected
             return copy
         }
+        return joinAcrossBoundaries(corrected, using: entries)
+    }
+
+    private static func joinAcrossBoundaries(_ segments: [TranscriptSegment], using entries: [Entry]) -> [TranscriptSegment] {
+        guard segments.count >= 2 else { return segments }
+        var result = segments
+        for index in result.indices.dropLast() {
+            guard result[index].correction == nil, result[index + 1].correction == nil else { continue }
+            guard let match = boundaryMatch(ending: result[index], starting: result[index + 1], entries: entries) else {
+                continue
+            }
+            var first = result[index]
+            var second = result[index + 1]
+            first.correction = String(first.displayText[..<match.firstCut]) + match.entry.replacement
+            second.correction = String(second.displayText[match.secondCut...].trimmingCharacters(in: .whitespaces))
+            result[index] = first
+            result[index + 1] = second
+        }
+        return result
+    }
+
+    private static func boundaryMatch(
+        ending first: TranscriptSegment,
+        starting second: TranscriptSegment,
+        entries: [Entry]
+    ) -> (entry: Entry, firstCut: String.Index, secondCut: String.Index)? {
+        let firstTokens = wordTokens(in: first.displayText)
+        let secondTokens = wordTokens(in: second.displayText)
+        guard !firstTokens.isEmpty, !secondTokens.isEmpty else { return nil }
+        for entry in entries where entry.words.count >= 2 {
+            for taken in 1..<entry.words.count {
+                guard taken <= firstTokens.count, entry.words.count - taken <= secondTokens.count else { continue }
+                let tail = firstTokens.suffix(taken).map { fold($0.word, diacriticInsensitive: entry.diacriticInsensitive) }
+                let head = secondTokens.prefix(entry.words.count - taken).map {
+                    fold($0.word, diacriticInsensitive: entry.diacriticInsensitive)
+                }
+                if Array(tail) + Array(head) == entry.words {
+                    return (entry, firstTokens[firstTokens.count - taken].range.lowerBound, secondTokens[entry.words.count - taken - 1].range.upperBound)
+                }
+            }
+        }
+        return nil
     }
 
     private struct Entry {

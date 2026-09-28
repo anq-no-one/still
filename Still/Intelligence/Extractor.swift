@@ -6,6 +6,16 @@ struct ExtractionSegment: Identifiable, Equatable, Sendable {
     let end: TimeInterval
     let text: String
     let speaker: String?
+    let language: String?
+
+    init(id: UUID, start: TimeInterval, end: TimeInterval, text: String, speaker: String?, language: String? = nil) {
+        self.id = id
+        self.start = start
+        self.end = end
+        self.text = text
+        self.speaker = speaker
+        self.language = language
+    }
 
     static func segments(of recording: Recording) -> [ExtractionSegment] {
         let speakers = Dictionary(recording.speakers.map { ($0.id, $0.name) }, uniquingKeysWith: { first, _ in first })
@@ -15,7 +25,8 @@ struct ExtractionSegment: Identifiable, Equatable, Sendable {
                 start: segment.start,
                 end: segment.end,
                 text: segment.displayText,
-                speaker: segment.speakerID.flatMap { speakers[$0] }
+                speaker: segment.speakerID.flatMap { speakers[$0] },
+                language: segment.language
             )
         }
     }
@@ -45,23 +56,28 @@ struct TranscriptSentence: Equatable, Sendable {
     static func sentences(in segments: [ExtractionSegment]) -> [TranscriptSentence] {
         var sentences: [TranscriptSentence] = []
         var pending: [ExtractionSegment] = []
+        var pendingText: [String] = []
 
         func close() {
-            let text = pending.map(\.text).joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+            let text = pendingText.joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
             if let first = pending.first, !text.isEmpty {
                 sentences.append(
                     TranscriptSentence(text: text, start: first.start, segmentIDs: pending.map(\.id), speaker: first.speaker)
                 )
             }
             pending.removeAll()
+            pendingText.removeAll()
         }
 
         for segment in segments {
             if let last = pending.last, last.speaker != segment.speaker {
                 close()
             }
+            let text = DisfluencyFilter.cleaned(segment.text, language: segment.language)
+            guard !text.isEmpty else { continue }
             pending.append(segment)
-            if segment.text.last.map({ ".?!".contains($0) }) == true || pending.count >= maximumSegments {
+            pendingText.append(text)
+            if text.last.map({ ".?!".contains($0) }) == true || pending.count >= maximumSegments {
                 close()
             }
         }

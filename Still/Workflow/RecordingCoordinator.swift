@@ -21,6 +21,8 @@ final class RecordingCoordinator {
     private let makeSession: () -> TranscriptionSession
     private let makeFinalTranscription: () -> FinalTranscription
     private let makeSpeakerSeparation: () -> SpeakerSeparation
+    private let makeNoteBuilder: @MainActor () -> GroundedNoteBuilder
+    private let makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)?
     private let expectedParticipants: @MainActor (Date) async -> [String]
     private let isReady: @MainActor () -> Bool
     private let notifier: RecordingNotifier?
@@ -37,6 +39,8 @@ final class RecordingCoordinator {
         makeSession: @escaping () -> TranscriptionSession,
         makeFinalTranscription: @escaping () -> FinalTranscription,
         makeSpeakerSeparation: @escaping () -> SpeakerSeparation = { .trackBased },
+        makeNoteBuilder: @escaping @MainActor () -> GroundedNoteBuilder = { GroundedNoteBuilder() },
+        makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)? = nil,
         expectedParticipants: @escaping @MainActor (Date) async -> [String] = { _ in [] },
         isReady: @escaping @MainActor () -> Bool = { true },
         audioTarget: SystemAudioTarget = SystemAudioTarget(),
@@ -49,6 +53,8 @@ final class RecordingCoordinator {
         self.makeSession = makeSession
         self.makeFinalTranscription = makeFinalTranscription
         self.makeSpeakerSeparation = makeSpeakerSeparation
+        self.makeNoteBuilder = makeNoteBuilder
+        self.makeTitle = makeTitle
         self.expectedParticipants = expectedParticipants
         self.notifier = notifier
     }
@@ -230,8 +236,9 @@ final class RecordingCoordinator {
             let finalizer = RecordingFinalizer(
                 finalTranscription: makeFinalTranscription(),
                 speakerSeparation: entitlements.allows(.speakerSeparation) ? makeSpeakerSeparation() : .trackBased,
-                noteBuilder: GroundedNoteBuilder(),
-                library: library
+                noteBuilder: makeNoteBuilder(),
+                library: library,
+                makeTitle: makeTitle
             )
             var draft = draft
             if draft.participants.isEmpty {

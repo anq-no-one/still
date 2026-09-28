@@ -1,8 +1,8 @@
 import Foundation
 
 enum RecordingTitle {
-    static func from(transcript: String, date: Date = .now, calendar: Calendar = .current) -> String {
-        let words = transcript
+    static func from(transcript: String, date: Date = .now, calendar: Calendar = .current, language: String? = nil) -> String {
+        let words = DisfluencyFilter.cleaned(transcript, language: language)
             .split(whereSeparator: \Character.isWhitespace)
             .prefix(7)
 
