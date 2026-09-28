@@ -99,11 +99,24 @@ def build(scheme:, platform:, destination:, version:, build_number:)
   )
 end
 
+RUNTIME_SYMBOLS_NEWER_THAN_DEPLOYMENT_TARGET = %w[_swift_initBorrow].freeze
+
+def verify_runs_on_deployment_target!(scheme)
+  app = Dir[File.join(BUILD_DIR, "#{scheme}.xcarchive", "Products", "Applications", "*.app")].first
+  info = Dir[File.join(app, "{Contents/,}Info.plist")].first
+  executable = Plist.parse_xml(info)["CFBundleExecutable"]
+  binary = Dir[File.join(app, "{Contents/MacOS/,}#{executable}")].first
+  imported = `nm -u #{binary.shellescape}`.split
+  offending = RUNTIME_SYMBOLS_NEWER_THAN_DEPLOYMENT_TARGET & imported
+  UI.user_error!("#{scheme} imports #{offending.join(', ')}, which the deployment target's Swift runtime lacks") unless offending.empty?
+end
+
 def ship(scheme:, platform:, destination:, tf_platform:, pkg: false)
   xcodegen_regen!
   version = marketing_version
   build_number = next_build_number(platform)
   build(scheme: scheme, platform: platform, destination: destination, version: version, build_number: build_number)
+  verify_runs_on_deployment_target!(scheme)
   if pkg
     upload_to_testflight(api_key: asc_api_key, app_platform: "osx", pkg: lane_context[SharedValues::PKG_OUTPUT_PATH], skip_waiting_for_build_processing: true)
   else

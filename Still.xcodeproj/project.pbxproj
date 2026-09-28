@@ -514,10 +514,10 @@
 		3C751C86AF58EADE58333C54 /* Embed Dependencies */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 6;
+			dstPath = Contents/Helpers;
+			dstSubfolderSpec = 1;
 			files = (
-				386CC47CBED9C773A07C2873 /* StillNativeHost in Embed Dependencies */,
+				A6F9C15C2C82A5A95BC0A5DA /* StillMCPHelper in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -525,10 +525,10 @@
 		637B4BA22A327BC208728672 /* Embed Dependencies */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = Contents/Helpers;
-			dstSubfolderSpec = 1;
+			dstPath = "";
+			dstSubfolderSpec = 6;
 			files = (
-				A6F9C15C2C82A5A95BC0A5DA /* StillMCPHelper in Embed Dependencies */,
+				386CC47CBED9C773A07C2873 /* StillNativeHost in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1678,6 +1678,7 @@
 			packageReferences = (
 				62DB3A083FB98FE2985C78DF /* XCRemoteSwiftPackageReference "FluidAudio" */,
 				42BAB2A9C396D8DF149DD51C /* XCRemoteSwiftPackageReference "mlx-swift-lm" */,
+				659372178DBCD19FD4C02E2F /* XCRemoteSwiftPackageReference "swift-collections" */,
 				436FF86A6524C2BF98845BCE /* XCRemoteSwiftPackageReference "swift-transformers" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -2824,6 +2825,14 @@
 			requirement = {
 				kind = revision;
 				revision = 87a39dfe4068fef0f1c69bfe704b2b3ef4fbc5bc;
+			};
+		};
+		659372178DBCD19FD4C02E2F /* XCRemoteSwiftPackageReference "swift-collections" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-collections";
+			requirement = {
+				kind = exactVersion;
+				version = 1.6.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

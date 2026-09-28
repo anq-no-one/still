@@ -15,6 +15,9 @@ packages:
   SwiftTransformers:
     url: https://github.com/huggingface/swift-transformers
     revision: c21fdcde390313a6d98d8e33a346f2c3486c3ab0
+  SwiftCollections:
+    url: https://github.com/apple/swift-collections
+    exactVersion: 1.6.0
 settings:
   base:
     ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
