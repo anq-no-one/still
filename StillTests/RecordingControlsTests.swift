@@ -1,5 +1,6 @@
 import Carbon.HIToolbox
 import Foundation
+import SwiftData
 import Testing
 @testable import Still
 
@@ -95,6 +96,78 @@ struct RecordingShortcutTests {
         store: MemoryShortcutStore = MemoryShortcutStore()
     ) -> RecordingShortcut {
         RecordingShortcut(registrar: registrar, system: system, store: store) {}
+    }
+}
+
+@MainActor
+struct PreparingCaptureTests {
+    @Test
+    func stoppingWhilePreparingConvergesToIdleInsteadOfStranding() async throws {
+        let gated = GatedAudioRecorder()
+        let coordinator = try await makeCoordinator(recorder: gated)
+
+        let started = Task { await coordinator.start() }
+        await settle(until: { coordinator.phase == .preparing })
+        await coordinator.stopAndSave()
+        gated.release()
+        await started.value
+
+        #expect(coordinator.phase == .idle)
+        #expect(coordinator.workflow == nil)
+        #expect(gated.discardedCount >= 1)
+
+        gated.gatesStart = false
+        await coordinator.start()
+
+        #expect(coordinator.isRecording)
+        await coordinator.cancel()
+    }
+
+    @Test
+    func cancellingWhilePreparingConvergesToIdleInsteadOfStranding() async throws {
+        let gated = GatedAudioRecorder()
+        let coordinator = try await makeCoordinator(recorder: gated)
+
+        let started = Task { await coordinator.start() }
+        await settle(until: { coordinator.phase == .preparing })
+        await coordinator.cancel()
+        gated.release()
+        await started.value
+
+        #expect(coordinator.phase == .idle)
+        #expect(coordinator.workflow == nil)
+    }
+
+    private func settle(until done: () -> Bool) async {
+        for _ in 0..<200 where !done() {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+    }
+
+    private func makeCoordinator(recorder: GatedAudioRecorder) async throws -> RecordingCoordinator {
+        let container = try ModelContainer(
+            for: EncryptedRecording.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        )
+        let context = ModelContext(container)
+        let audioRoot = try Scratch().directory
+        let library = Library(
+            keyRing: LibraryKeyRing(source: FakeDeviceKeySource()),
+            services: LibraryServices(
+                audioRoot: audioRoot,
+                makeRepository: { key in
+                    MainActor.assumeIsolated { EncryptedRecordingRepository(context: context, key: key) }
+                },
+                makeRecorder: { _ in recorder }
+            )
+        )
+        await library.unlock()
+        return RecordingCoordinator(
+            library: library,
+            entitlements: Entitlements(source: FakeEntitlementSource(), cache: MemoryEntitlementCache()),
+            makeSession: { FakeTranscriptionSession() },
+            makeFinalTranscription: { FinalTranscription(transcriber: StubOfflineTranscriber(), windowSeconds: 3_600) }
+        )
     }
 }
 

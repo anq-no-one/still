@@ -43,6 +43,7 @@ struct JournalEntry: Codable, Equatable, Sendable {
     let code: JournalCode
     let errorCode: String?
     let correlationID: UUID?
+    let detail: String?
     let breadcrumbs: [JournalBreadcrumb]
 }
 
@@ -88,7 +89,9 @@ final class DiagnosticJournal {
         }
     }
 
-    func record(_ code: JournalCode, correlationID: UUID? = nil) {
+    static let detailLimit = 4096
+
+    func record(_ code: JournalCode, correlationID: UUID? = nil, detail: String? = nil) {
         note(code)
         append(
             JournalEntry(
@@ -97,6 +100,7 @@ final class DiagnosticJournal {
                 code: code,
                 errorCode: nil,
                 correlationID: correlationID,
+                detail: Self.clipped(detail),
                 breadcrumbs: []
             )
         )
@@ -114,6 +118,7 @@ final class DiagnosticJournal {
             code: code,
             errorCode: error.map(JournalErrorCode.of),
             correlationID: correlationID,
+            detail: nil,
             breadcrumbs: breadcrumbs
         )
         note(code)
@@ -151,6 +156,14 @@ final class DiagnosticJournal {
             try? FileManager.default.removeItem(at: kept)
             throw error
         }
+    }
+
+    private static func clipped(_ detail: String?) -> String? {
+        guard var detail else { return nil }
+        while detail.utf8.count > detailLimit {
+            detail.removeLast()
+        }
+        return detail
     }
 
     private func append(_ entry: JournalEntry) {
@@ -242,6 +255,9 @@ enum JournalExport {
         }
         if let correlationID = entry.correlationID {
             lines[0] += " id=\(correlationID.uuidString)"
+        }
+        if let detail = entry.detail {
+            lines[0] += " detail=\(detail)"
         }
         lines += entry.breadcrumbs.map { "  \($0.at.formatted(.iso8601)) \($0.code.rawValue)" }
         return lines.joined(separator: "\n") + "\n"

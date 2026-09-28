@@ -101,7 +101,7 @@ final class RecordingCoordinator {
             )
             self.workflow = workflow
             await workflow.start()
-            journal?.record(.recordingStarted, correlationID: workflow.recordingID)
+            journal?.record(.recordingStarted, correlationID: workflow.recordingID, detail: scope.triggerBundleID)
         } catch {
             workflow = nil
             startFailure = error.localizedDescription
@@ -112,15 +112,23 @@ final class RecordingCoordinator {
     func stopAndSave() async {
         guard let workflow else { return }
 
+        let wasCapturing = isCapturing
         await workflow.save()
-        guard workflow.state == .saved, let draft = workflow.pendingFinalization else {
-            if case .failed = workflow.state {
-                journal?.fail(.recordingFailed, correlationID: workflow.recordingID)
+        switch workflow.state {
+        case .saved:
+            guard let draft = workflow.pendingFinalization else { return }
+            self.workflow = nil
+            process(draft, notify: true)
+        case .idle:
+            self.workflow = nil
+            if wasCapturing {
+                journal?.record(.recordingCancelled, correlationID: workflow.recordingID)
             }
+        case .failed:
+            journal?.fail(.recordingFailed, correlationID: workflow.recordingID)
+        case .preparing, .recording, .finalizing:
             return
         }
-        self.workflow = nil
-        process(draft, notify: true)
     }
 
     /// Stops tracking a recording the user removed while it was rendering, so

@@ -10,7 +10,7 @@ struct CaptureView: View {
     var body: some View {
         VStack(spacing: 20) {
             VStack(spacing: 6) {
-                Label(coordinator.isRecording ? "Recording on This Device" : "Not Recording", systemImage: "lock.fill")
+                Label(statusTitle, systemImage: "lock.fill")
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(.secondary)
 
@@ -103,6 +103,19 @@ struct CaptureView: View {
         return coordinator.elapsed
     }
 
+    private var statusTitle: String {
+        switch coordinator.phase {
+        case .preparing:
+            "Starting…"
+        case .recording:
+            "Recording on This Device"
+        case .finalizing:
+            "Writing the Transcript…"
+        case .idle, .ready, .failed:
+            "Not Recording"
+        }
+    }
+
     private var draftText: String {
         if let message = coordinator.workflow?.draftFailure {
             return message
@@ -110,6 +123,9 @@ struct CaptureView: View {
         if let workflow = coordinator.workflow, !workflow.showsDraft {
             return "Still is recording. The transcript appears when you save. Live transcript is part of Still Pro."
         }
-        return transcript.isEmpty ? "Listening…" : transcript
+        if transcript.isEmpty {
+            return coordinator.phase == .finalizing ? "Writing the Transcript…" : "Listening…"
+        }
+        return transcript
     }
 }

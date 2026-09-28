@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import Observation
 import SwiftData
@@ -213,18 +214,66 @@ struct AutomaticRecordingTests {
         }
     }
 
+    @Test
+    func endingACallWhilePreparingLeavesNoStrandedSheet() async throws {
+        let gated = GatedAudioRecorder()
+        let (automatic, watcher, coordinator) = try await make(allowed: [zoom], gated: gated)
+        automatic.startWatching()
+
+        watcher.activate(zoom)
+        await settle(until: { coordinator.phase == .preparing })
+        watcher.terminate(zoom)
+        await settle(until: { automatic.triggeredBy == nil })
+        gated.release()
+        await settle(until: { coordinator.workflow == nil })
+
+        #expect(coordinator.phase == .idle)
+        #expect(coordinator.workflow == nil)
+        #expect(automatic.triggeredBy == nil)
+        #expect(coordinator.library.recordings.isEmpty)
+        #expect(automatic.discardedCheck == "Zoom")
+    }
+
+    @Test
+    func automaticStartLogsTheCallAppInTheJournal() async throws {
+        let scratch = try Scratch()
+        let journal = DiagnosticJournal(
+            fileURL: scratch.directory.appending(path: "journal.jsonl"),
+            key: SymmetricKey(size: .bits256)
+        )
+        let (automatic, watcher, coordinator) = try await make(allowed: [zoom], journal: journal)
+        automatic.startWatching()
+
+        watcher.activate(zoom)
+        await settle(until: { coordinator.isRecording })
+
+        let started = try #require(try journal.entries().first { $0.code == .recordingStarted })
+        #expect(started.detail == zoom)
+    }
+
     private func make(
         allowed: [String],
         clock: TestClock = TestClock(),
-        evidence: Bool = false
+        evidence: Bool = false,
+        gated: GatedAudioRecorder? = nil,
+        journal: DiagnosticJournal? = nil
     ) async throws -> (AutomaticRecording, FakeCallAppWatcher, RecordingCoordinator) {
-        try await make(allowList: MemoryAllowList(allowed: Set(allowed)), clock: clock, evidence: evidence)
+        try await make(allowList: MemoryAllowList(allowed: Set(allowed)), clock: clock, evidence: evidence, gated: gated, journal: journal)
+    }
+
+    private func makeRecorderFactory(gated: GatedAudioRecorder?, audioRoot: URL) -> (SymmetricKey) -> AudioRecorder {
+        if let gated {
+            return { _ in gated }
+        }
+        return { key in WritingRecorder(root: audioRoot, cipher: LibraryCipher(key: key)) }
     }
 
     private func make(
         allowList: MemoryAllowList,
         clock: TestClock = TestClock(),
-        evidence: Bool = false
+        evidence: Bool = false,
+        gated: GatedAudioRecorder? = nil,
+        journal: DiagnosticJournal? = nil
     ) async throws -> (AutomaticRecording, FakeCallAppWatcher, RecordingCoordinator) {
         let container = try ModelContainer(
             for: EncryptedRecording.self,
@@ -239,10 +288,9 @@ struct AutomaticRecordingTests {
                 makeRepository: { key in
                     MainActor.assumeIsolated { EncryptedRecordingRepository(context: context, key: key) }
                 },
-                makeRecorder: { key in
-                    MainActor.assumeIsolated { WritingRecorder(root: audioRoot, cipher: LibraryCipher(key: key)) }
-                }
-            )
+                makeRecorder: makeRecorderFactory(gated: gated, audioRoot: audioRoot)
+            ),
+            journal: journal
         )
         await library.unlock()
 

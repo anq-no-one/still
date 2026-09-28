@@ -29,6 +29,7 @@ final class RecordingWorkflow {
 
     private(set) var state: State = .idle
     private(set) var pendingFinalization: RecordingFinalizer.Draft?
+    private var stopRequested = false
 
     init(
         session: TranscriptionSession,
@@ -89,11 +90,18 @@ final class RecordingWorkflow {
         speakerCues = SpeakerCueLog()
         mixedMedia = MixedMediaLog()
         pendingFinalization = nil
+        stopRequested = false
 
         do {
             try await recorder.start(recordingID: recordingID)
         } catch {
             fail(with: error)
+            return
+        }
+
+        if stopRequested {
+            await recorder.discard()
+            state = .idle
             return
         }
 
@@ -108,6 +116,12 @@ final class RecordingWorkflow {
             // The audio is the part worth keeping. A recognizer that will not
             // start costs the live preview, not the recording.
             draftStartFailure = error.localizedDescription
+        }
+
+        if stopRequested {
+            await recorder.discard()
+            state = .idle
+            return
         }
 
         state = .recording
@@ -138,7 +152,18 @@ final class RecordingWorkflow {
     /// The coordinator picks up `pendingFinalization` and finishes it in the
     /// background.
     func save() async {
-        guard state == .recording else { return }
+        switch state {
+        case .idle, .saved, .failed, .finalizing:
+            return
+        case .preparing:
+            stopRequested = true
+            stopCapture()
+            await recorder.discard()
+            state = .idle
+            return
+        case .recording:
+            break
+        }
 
         state = .finalizing
         stopCapture()
@@ -180,6 +205,7 @@ final class RecordingWorkflow {
     func cancel() async {
         guard state != .saved else { return }
 
+        stopRequested = true
         stopCapture()
         speakerCues = SpeakerCueLog()
         mixedMedia = MixedMediaLog()

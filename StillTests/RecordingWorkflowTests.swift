@@ -283,6 +283,32 @@ final class SpyAudioRecorder: AudioRecorder {
 }
 
 @MainActor
+final class GatedAudioRecorder: AudioRecorder {
+    var gatesStart = true
+    private var continuation: CheckedContinuation<Void, Never>?
+    private(set) var startedIDs: [UUID] = []
+    private(set) var discardedCount = 0
+
+    func start(recordingID: UUID) async throws {
+        startedIDs.append(recordingID)
+        if gatesStart {
+            await withCheckedContinuation { continuation = $0 }
+        }
+    }
+
+    func release() {
+        continuation?.resume()
+        continuation = nil
+    }
+
+    func finish() async throws {}
+
+    func discard() async {
+        discardedCount += 1
+    }
+}
+
+@MainActor
 final class SpyRecordingLibrary: RecordingLibrary {
     private(set) var recordings: [Recording] = []
     var capturedPCM = Data(repeating: 3, count: 32_000)

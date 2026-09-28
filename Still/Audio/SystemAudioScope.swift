@@ -20,6 +20,11 @@ enum SystemAudioScope: Equatable, Sendable {
         }
     }
 
+    var triggerBundleID: String? {
+        guard case .apps(let bundleIDs) = self else { return nil }
+        return bundleIDs.compactMap { CallApp.owner(of: $0)?.bundleID }.sorted().first
+    }
+
     func includes(_ processBundleID: String) -> Bool {
         bundleIDs.contains { processBundleID == $0 || processBundleID.hasPrefix($0 + ".") }
     }

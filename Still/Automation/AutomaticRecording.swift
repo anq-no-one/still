@@ -160,7 +160,7 @@ final class AutomaticRecording {
         let app = triggeringApp
         let wasMeeting = await isMeeting()
         finish()
-        guard coordinator.isRecording else { return }
+        guard coordinator.isCapturing else { return }
 
         if wasMeeting {
             await coordinator.stopAndSave()
