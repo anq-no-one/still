@@ -277,4 +277,10 @@ enum AudioChunkStore {
             .filter { $0.pathExtension == chunkExtension }
             .sorted { $0.lastPathComponent < $1.lastPathComponent }
     }
+
+    static func chunkCount(forRecording id: UUID, in root: URL) -> Int {
+        tracks(forRecording: id, in: root).reduce(0) { total, track in
+            total + ((try? chunkURLs(in: trackDirectory(forRecording: id, track: track, in: root)))?.count ?? 0)
+        }
+    }
 }

@@ -21,6 +21,7 @@ struct RecordingDetailView: View {
     @State private var vocabularyChanges: [VocabularyChange] = []
     @State private var findsNoVocabularyChanges = false
     @State private var playingEvidenceID: NoteItem.ID?
+    @State private var detailReady = false
 
     init(recording: Recording, library: Library, extraction: MemoryExtraction, startAt: TimeInterval? = nil) {
         self.library = library
@@ -33,8 +34,10 @@ struct RecordingDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+        Group {
+            if detailReady {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 24) {
                 TextField("Title", text: $title, axis: .vertical)
                     .font(.largeTitle.bold())
                     .textFieldStyle(.plain)
@@ -147,9 +150,13 @@ struct RecordingDetailView: View {
                     }
                 }
             }
-            .padding(28)
-            .frame(maxWidth: 760, alignment: .leading)
-            .frame(maxWidth: .infinity)
+                    .padding(28)
+                    .frame(maxWidth: 760, alignment: .leading)
+                    .frame(maxWidth: .infinity)
+                }
+            } else {
+                RecordingDetailSkeleton(title: latest.title)
+            }
         }
         #if os(macOS)
         .navigationTitle(title)
@@ -199,9 +206,11 @@ struct RecordingDetailView: View {
                 showsTranslation = false
             }
         }
-        .task {
-            await player.load((try? library.audio(for: recording)) ?? Data())
+        .task(id: latest.id) {
+            detailReady = false
+            await player.load(await library.decodedAudio(for: recording))
             if let startAt { player.play(from: startAt) }
+            detailReady = true
         }
         .onChange(of: latest) { _, updated in
             guard editor.recording.isProcessing, !updated.isProcessing, !editor.hasPendingSave else { return }
@@ -333,6 +342,32 @@ struct RecordingDetailView: View {
 
         playingEvidenceID = item.id
         player.play(from: segment.start)
+    }
+}
+
+private struct RecordingDetailSkeleton: View {
+    let title: String
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                Text(title)
+                    .font(.largeTitle.bold())
+                ProgressView("Loading Audio")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                ForEach(0..<4, id: \.self) { _ in
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(.secondary.opacity(0.15))
+                        .frame(height: 48)
+                        .redacted(reason: .placeholder)
+                }
+            }
+            .padding(28)
+            .frame(maxWidth: 760, alignment: .leading)
+            .frame(maxWidth: .infinity)
+        }
+        .accessibilityLabel("Loading recording")
     }
 }
 

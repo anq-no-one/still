@@ -47,6 +47,12 @@ struct LibraryServices {
     }
 }
 
+struct AudioDecodeInputs: Sendable {
+    let id: UUID
+    let audioRoot: URL
+    let keyBytes: Data
+}
+
 @MainActor
 @Observable
 final class Library: RecordingLibrary {
@@ -65,6 +71,7 @@ final class Library: RecordingLibrary {
     private var vocabularyRepository: ProjectVocabularyRepository?
     private var key: SymmetricKey?
     private var accountKeys: AccountKeys?
+    private var audioCache: (id: UUID, chunkCount: Int, wav: Data)?
 
     private(set) var state: State = .locked
     private(set) var storedRecordings: [Recording] = []
@@ -319,6 +326,31 @@ final class Library: RecordingLibrary {
             let captured = try capturedAudio(forRecording: recording.id)
             return WAVFile.data(pcm: captured.pcm, format: captured.format)
         }
+    }
+
+    func decodedAudio(for recording: Recording) async -> Data {
+        let chunkCount = AudioChunkStore.chunkCount(forRecording: recording.id, in: services.audioRoot)
+        if let audioCache, audioCache.id == recording.id, audioCache.chunkCount == chunkCount {
+            return audioCache.wav
+        }
+        guard let inputs = audioInputs(for: recording.id) else { return Data() }
+        let decoded = await AudioPlaybackThread.shared.run { Library.decodeAudio(inputs) }
+        audioCache = (recording.id, decoded.chunkCount, decoded.wav)
+        return decoded.wav
+    }
+
+    nonisolated static func decodeAudio(_ inputs: AudioDecodeInputs) -> (wav: Data, chunkCount: Int) {
+        let cipher = LibraryCipher(key: SymmetricKey(data: inputs.keyBytes))
+        let chunkCount = AudioChunkStore.chunkCount(forRecording: inputs.id, in: inputs.audioRoot)
+        guard let mixed = try? AudioChunkStore.mixed(forRecording: inputs.id, in: inputs.audioRoot, cipher: cipher) else {
+            return (Data(), chunkCount)
+        }
+        return (WAVFile.data(pcm: mixed.pcm, format: mixed.format), chunkCount)
+    }
+
+    private func audioInputs(for id: UUID) -> AudioDecodeInputs? {
+        guard let key else { return nil }
+        return AudioDecodeInputs(id: id, audioRoot: services.audioRoot, keyBytes: key.rawBytes)
     }
 
     func audio(for recording: Recording, track: AudioTrack) throws -> Data {
