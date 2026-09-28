@@ -20,6 +20,7 @@ struct RecordingDetailView: View {
     @State private var translationFailure: String?
     @State private var vocabularyChanges: [VocabularyChange] = []
     @State private var findsNoVocabularyChanges = false
+    @State private var playingEvidenceID: NoteItem.ID?
 
     init(recording: Recording, library: Library, extraction: MemoryExtraction, startAt: TimeInterval? = nil) {
         self.library = library
@@ -82,14 +83,14 @@ struct RecordingDetailView: View {
                         .foregroundStyle(.red)
                 }
 
+                noteView
+
                 MemorySectionsView(
                     recordingID: recording.id,
                     library: library,
                     extraction: extraction,
                     play: { player.play(from: $0) }
                 )
-
-                noteView
 
                 if !recording.speakers.isEmpty {
                     SpeakerListView(
@@ -261,9 +262,9 @@ struct RecordingDetailView: View {
         VStack(alignment: .leading, spacing: 18) {
             noteActions
 
-            NoteSectionView(title: "Summary", items: editor.note.summary, openEvidence: openEvidence)
-            NoteSectionView(title: "Decisions", items: editor.note.decisions, openEvidence: openEvidence)
-            NoteSectionView(title: "Action Items", items: editor.note.actions, openEvidence: openEvidence)
+            NoteSectionView(title: "Summary", items: editor.note.summary, player: player, playingID: playingEvidenceID, toggleEvidence: toggleEvidence)
+            NoteSectionView(title: "Decisions", items: editor.note.decisions, player: player, playingID: playingEvidenceID, toggleEvidence: toggleEvidence)
+            NoteSectionView(title: "Action Items", items: editor.note.actions, player: player, playingID: playingEvidenceID, toggleEvidence: toggleEvidence)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("Your Notes")
@@ -316,11 +317,21 @@ struct RecordingDetailView: View {
         }
     }
 
+    private func toggleEvidence(_ item: NoteItem) {
+        if EvidencePlayback.shouldPause(tapped: item.id, playingID: playingEvidenceID, playerIsPlaying: player.isPlaying) {
+            player.pause()
+            playingEvidenceID = nil
+        } else {
+            openEvidence(item)
+        }
+    }
+
     private func openEvidence(_ item: NoteItem) {
         guard let first = item.sourceSegmentIDs.first,
               let segment = editor.segment(withID: first)
         else { return }
 
+        playingEvidenceID = item.id
         player.play(from: segment.start)
     }
 }

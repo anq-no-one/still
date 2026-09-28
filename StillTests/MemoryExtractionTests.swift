@@ -541,3 +541,38 @@ struct FakeExtractor: Extractor {
         }
     }
 }
+
+struct MemoryRowMenuTests {
+    @Test
+    func aProposedTaskOffersAcceptEditShowSourceAndDismiss() {
+        let item = MemoryItem(kind: .task, text: "Send the notes", sourceSegmentIDs: [UUID()], sourceStart: 3)
+
+        #expect(item.status == .proposed)
+        #expect(MemoryRowMenu.actions(for: item, canEdit: true) == [.approve, .edit, .showSource, .decline])
+    }
+
+    @Test
+    func withoutAnEditorThereIsNoEditAction() {
+        let item = MemoryItem(kind: .fact, text: "Ships Friday", sourceSegmentIDs: [UUID()], sourceStart: 3)
+
+        #expect(MemoryRowMenu.actions(for: item, canEdit: false) == [.approve, .showSource, .decline])
+    }
+
+    @Test
+    func aConfirmedFactKeepsOnlyEditShowSourceAndReject() {
+        let item = MemoryItem(kind: .fact, text: "Ships Friday", sourceSegmentIDs: [UUID()], sourceStart: 3)
+            .reviewed(.approved)
+
+        #expect(item.status == .confirmed)
+        #expect(MemoryRowMenu.actions(for: item, canEdit: true) == [.edit, .showSource, .decline])
+    }
+
+    @Test
+    func anAcceptedTaskHasNoSecondApprove() {
+        let item = MemoryItem(kind: .task, text: "Send the notes", sourceSegmentIDs: [UUID()], sourceStart: 3)
+            .reviewed(.approved)
+
+        #expect(item.status == .accepted)
+        #expect(!MemoryRowMenu.actions(for: item, canEdit: true).contains(.approve))
+    }
+}

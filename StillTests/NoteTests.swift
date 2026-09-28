@@ -170,3 +170,27 @@ func words(_ text: String) -> [TranscriptSegment] {
         )
     }
 }
+
+struct EvidencePlaybackTests {
+    private let tapped = UUID()
+    private let other = UUID()
+
+    @Test
+    func tappingThePlayingRowPauses() {
+        #expect(EvidencePlayback.shouldPause(tapped: tapped, playingID: tapped, playerIsPlaying: true))
+        #expect(EvidencePlayback.isShowingPlaying(tapped, playingID: tapped, playerIsPlaying: true))
+    }
+
+    @Test
+    func tappingAnotherRowStartsItInstead() {
+        #expect(!EvidencePlayback.shouldPause(tapped: other, playingID: tapped, playerIsPlaying: true))
+        #expect(!EvidencePlayback.isShowingPlaying(other, playingID: tapped, playerIsPlaying: true))
+    }
+
+    @Test
+    func aPausedPlayerNeverShowsPlaying() {
+        #expect(!EvidencePlayback.shouldPause(tapped: tapped, playingID: tapped, playerIsPlaying: false))
+        #expect(!EvidencePlayback.isShowingPlaying(tapped, playingID: tapped, playerIsPlaying: false))
+        #expect(!EvidencePlayback.isShowingPlaying(tapped, playingID: nil, playerIsPlaying: false))
+    }
+}

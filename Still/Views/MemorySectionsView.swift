@@ -94,6 +94,28 @@ private struct MemorySection: View {
     }
 }
 
+enum MemoryRowMenu {
+    enum Action: Hashable, Sendable {
+        case approve
+        case edit
+        case showSource
+        case decline
+    }
+
+    static func actions(for item: MemoryItem, canEdit: Bool) -> [Action] {
+        var actions: [Action] = []
+        if item.status == .extracted || item.status == .proposed {
+            actions.append(.approve)
+        }
+        if canEdit {
+            actions.append(.edit)
+        }
+        actions.append(.showSource)
+        actions.append(.decline)
+        return actions
+    }
+}
+
 private struct MemoryRow: View {
     let item: MemoryItem
     let play: (TimeInterval) -> Void
@@ -120,31 +142,44 @@ private struct MemoryRow: View {
                     Text(item.text)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
+
+                statusMark
             }
 
-            HStack(spacing: 12) {
-                statusLabel
-                Spacer()
-                actions
+            if isEditing {
+                HStack {
+                    Spacer()
+                    Button("Cancel") { isEditing = false }
+                    Button("Save", action: save)
+                }
+                .font(.caption)
+                .buttonStyle(.borderless)
+            } else if hasMetadata {
+                HStack(spacing: 12) {
+                    metadata
+                }
+                .font(.caption)
             }
-            .font(.caption)
-            .buttonStyle(.borderless)
         }
         .padding(.vertical, 2)
+        .contextMenu {
+            ForEach(menuActions, id: \.self) { action in
+                menuButton(for: action)
+            }
+        }
     }
 
     @ViewBuilder
-    private var statusLabel: some View {
-        switch item.status {
-        case .extracted, .proposed:
-            Label("Automatically extracted", systemImage: "sparkles")
-                .foregroundStyle(.secondary)
-        case .confirmed, .accepted:
+    private var statusMark: some View {
+        if item.status == .confirmed || item.status == .accepted {
             Label(item.kind == .task ? "Accepted" : "Confirmed", systemImage: "checkmark.circle.fill")
+                .font(.caption)
                 .foregroundStyle(.green)
-        case .rejected, .dismissed:
-            EmptyView()
         }
+    }
+
+    @ViewBuilder
+    private var metadata: some View {
         if let owner = item.owner {
             Label(owner, systemImage: "person")
                 .foregroundStyle(.secondary)
@@ -160,27 +195,34 @@ private struct MemoryRow: View {
         }
     }
 
+    private var hasMetadata: Bool {
+        item.owner != nil || item.due != nil || item.isEdited
+    }
+
+    private var menuActions: [MemoryRowMenu.Action] {
+        MemoryRowMenu.actions(for: item, canEdit: edit != nil)
+    }
+
     @ViewBuilder
-    private var actions: some View {
-        if isEditing {
-            Button("Cancel") { isEditing = false }
-            Button("Save", action: save)
-        } else if item.kind == .task {
-            if item.status == .proposed {
-                Button("Accept") { review(item, .approved) }
+    private func menuButton(for action: MemoryRowMenu.Action) -> some View {
+        switch action {
+        case .approve:
+            Button(item.kind == .task ? "Accept" : "Confirm", systemImage: "checkmark") {
+                review(item, .approved)
             }
-            if edit != nil {
-                Button("Edit") {
-                    draft = item.text
-                    isEditing = true
-                }
+        case .edit:
+            Button("Edit", systemImage: "pencil") {
+                draft = item.text
+                isEditing = true
             }
-            Button("Dismiss", role: .destructive) { review(item, .declined) }
-        } else {
-            if item.status == .extracted {
-                Button("Confirm") { review(item, .approved) }
+        case .showSource:
+            Button("Show source", systemImage: "play") {
+                play(item.sourceStart)
             }
-            Button("Reject", role: .destructive) { review(item, .declined) }
+        case .decline:
+            Button(item.kind == .task ? "Dismiss" : "Reject", systemImage: "xmark", role: .destructive) {
+                review(item, .declined)
+            }
         }
     }
 
