@@ -112,7 +112,8 @@ RUNTIME_SYMBOLS_NEWER_THAN_DEPLOYMENT_TARGET = %w[_swift_initBorrow].freeze
 def verify_runs_on_deployment_target!(scheme)
   app = Dir[File.join(BUILD_DIR, "#{scheme}.xcarchive", "Products", "Applications", "*.app")].first
   info = Dir[File.join(app, "{Contents/,}Info.plist")].first
-  executable = Plist.parse_xml(info)["CFBundleExecutable"]
+  info_xml = sh("/usr/bin/plutil", "-convert", "xml1", "-o", "-", info, log: false)
+  executable = Plist.parse_xml(info_xml)["CFBundleExecutable"]
   binary = Dir[File.join(app, "{Contents/MacOS/,}#{executable}")].first
   imported = `nm -u #{binary.shellescape}`.split
   offending = RUNTIME_SYMBOLS_NEWER_THAN_DEPLOYMENT_TARGET & imported
