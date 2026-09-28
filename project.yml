@@ -109,17 +109,17 @@ targets:
     dependencies:
       - target: StillBrowserExtension
         embed: true
+      - target: StillNativeHost
+        embed: true
+        codeSign: true
+        copy:
+          destination: executables
       - target: StillMCPHelper
         embed: true
         codeSign: false
         copy:
           destination: wrapper
           subpath: Contents/Helpers
-      - target: StillNativeHost
-        embed: true
-        codeSign: true
-        copy:
-          destination: executables
       - package: FluidAudio
       - package: MLXSwiftLM
         product: MLXLLM

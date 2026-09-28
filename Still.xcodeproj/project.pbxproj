@@ -1532,8 +1532,8 @@
 			);
 			dependencies = (
 				A57E855D545B06F0F17EE9F2 /* PBXTargetDependency */,
-				EBE6F4F686F6B89E801A9A15 /* PBXTargetDependency */,
 				C5E6F2DCEDD2DA019B96717D /* PBXTargetDependency */,
+				EBE6F4F686F6B89E801A9A15 /* PBXTargetDependency */,
 			);
 			name = "Still-macOS";
 			packageProductDependencies = (
