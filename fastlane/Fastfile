@@ -75,10 +75,11 @@ def committed_canonical_project_text(path)
 end
 
 def xcodegen_regen!
+  project = File.join("Still.xcodeproj", "project.pbxproj")
   attempts = (ENV["STILL_XCODEGEN_ATTEMPTS"] || "10").to_i
   attempts.times do |i|
     sh("xcodegen", "generate", "--spec", File.join(ROOT, "project.yml"), "--project", ROOT)
-    dirty = `git -C #{ROOT.shellescape} status --porcelain -- Still.xcodeproj`.lines.map { |l| l[3..].strip }
+    dirty = `git -C #{ROOT.shellescape} status --porcelain -- #{project.shellescape}`.lines.map { |l| l[3..].strip }
     return if dirty.empty?
     if dirty.all? { |p| !canonical_project_text(p).empty? && canonical_project_text(p) == committed_canonical_project_text(p) }
       sh("git", "-C", ROOT, "checkout", "--", "Still.xcodeproj")
