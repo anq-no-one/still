@@ -271,6 +271,7 @@
 		95D70D875826BE8602E084CA /* SystemAudioInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BE13C7939DE341C26D69F9 /* SystemAudioInput.swift */; };
 		95EA2569BE78359352528E50 /* RecordingControlsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BFF50E7B3AAB9E43D93F3EB /* RecordingControlsSettingsView.swift */; };
 		95FB9DB2ABEDDB2CDDD64E38 /* MCPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7066B9C1C68C40F8BA07DDC /* MCPSession.swift */; };
+		96BD2D18A9FC88B81AEA3C33 /* ProjectCreationField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00ED543C0776911D5B7054B4 /* ProjectCreationField.swift */; };
 		96D62C3C3D7533DADE243D54 /* EncryptedProjectVocabulary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175ACB1D8E7D4425F09D7C02 /* EncryptedProjectVocabulary.swift */; };
 		96FA9AEB50938BA6A1A378FC /* FinalTranscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4886FA9723AC2955FEED6220 /* FinalTranscription.swift */; };
 		973C9ECDA4F4828C2C80DC27 /* WebBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC4165C416F24D67D329F15B /* WebBrowser.swift */; };
@@ -392,6 +393,7 @@
 		CD0AB94B938E3056BF124D76 /* KeyGrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32A2BA9C4C1E847D08BDBFF6 /* KeyGrant.swift */; };
 		CD3DD45C97E1181201FF3664 /* LibrarySearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FD1BE1B4193A86811F3EB0F /* LibrarySearch.swift */; };
 		CD9A5EC41BFB97316BE0B419 /* PrivacyWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5471ADD2B500872193F4F89F /* PrivacyWelcomeView.swift */; };
+		CDDD33253B1414DA8104F1DE /* ProjectCreationField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00ED543C0776911D5B7054B4 /* ProjectCreationField.swift */; };
 		CE6953CE41A164A4D45C850B /* TranslationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB80E25CA826DA748DD34B16 /* TranslationEngine.swift */; };
 		CE8D9BF70CF86F655A5B0B6F /* MeetingTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2903041D788E7B2EEF7336 /* MeetingTools.swift */; };
 		D09A621019657E27B5BBFB09 /* ModelInstallers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95E10F9EEA9314D9C70D6695 /* ModelInstallers.swift */; };
@@ -550,6 +552,7 @@
 
 /* Begin PBXFileReference section */
 		005E56963E13BDD318F0C2E6 /* SpeakerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerListView.swift; sourceTree = "<group>"; };
+		00ED543C0776911D5B7054B4 /* ProjectCreationField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectCreationField.swift; sourceTree = "<group>"; };
 		01B53AAA8D92651B80DC7743 /* Entitlements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entitlements.swift; sourceTree = "<group>"; };
 		0245E2D3C25AD69B45C4D7BB /* AppearanceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingsView.swift; sourceTree = "<group>"; };
 		034A8B7A7FD9276B6838C20B /* SpeakerCue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerCue.swift; sourceTree = "<group>"; };
@@ -1402,6 +1405,7 @@
 				0E879004B54804518CDA5FD8 /* PreferencesTransferSection.swift */,
 				1C4E987930F0B11484A1EB23 /* PreferencesTransferSettingsView.swift */,
 				5471ADD2B500872193F4F89F /* PrivacyWelcomeView.swift */,
+				00ED543C0776911D5B7054B4 /* ProjectCreationField.swift */,
 				B8227A92F5BB1E709F9EF869 /* ProjectsSettingsView.swift */,
 				A089264B9CF415D01009C495 /* ProjectTasksView.swift */,
 				96647A55B2D2413A7434F395 /* ProjectViews.swift */,
@@ -1877,6 +1881,7 @@
 				CB756DC55E5280258BB9A65D /* PrivacyWelcomeView.swift in Sources */,
 				9D2225612156CF361099C7E0 /* ProUnlockView.swift in Sources */,
 				29A774EE225DEF080C0B924E /* Project.swift in Sources */,
+				96BD2D18A9FC88B81AEA3C33 /* ProjectCreationField.swift in Sources */,
 				B3F931392D096A97BCAB0121 /* ProjectHistory.swift in Sources */,
 				D8165F91E1605D299F83D11C /* ProjectSelectionStore.swift in Sources */,
 				D213ACB47D3F26BEDBA743BB /* ProjectTasksView.swift in Sources */,
@@ -2162,6 +2167,7 @@
 				CD9A5EC41BFB97316BE0B419 /* PrivacyWelcomeView.swift in Sources */,
 				73CC8DA96BEA3CCE5644BD04 /* ProUnlockView.swift in Sources */,
 				B1D0D2717BB1409D5AF3B115 /* Project.swift in Sources */,
+				CDDD33253B1414DA8104F1DE /* ProjectCreationField.swift in Sources */,
 				4250B83013FB03B16310B6FD /* ProjectHistory.swift in Sources */,
 				6D5D529661EEC2E0B5ECF3AB /* ProjectSelectionStore.swift in Sources */,
 				6142CB956375768E3CBFF359 /* ProjectTasksView.swift in Sources */,

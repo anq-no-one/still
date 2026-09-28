@@ -4,7 +4,6 @@ struct ProjectsSettingsView: View {
     let library: Library
     let sync: SyncEngine
 
-    @State private var newName = ""
     @State private var failure: String?
     @State private var vocabularyProject: Project?
 
@@ -15,12 +14,9 @@ struct ProjectsSettingsView: View {
                     ProjectEditorRow(project: project, save: save, editVocabulary: { vocabularyProject = project })
                 }
 
-                HStack {
-                    TextField("New Project", text: $newName)
-                        .onSubmit(create)
-                    Button("Add", systemImage: "plus", action: create)
-                        .disabled(trimmedName.isEmpty)
-                }
+                ProjectCreationField(create: { name in
+                    _ = try library.createProject(named: name)
+                })
             } header: {
                 Text("Projects")
             } footer: {
@@ -40,24 +36,6 @@ struct ProjectsSettingsView: View {
         .settingsPaneTitle("Projects")
         .sheet(item: $vocabularyProject) { project in
             VocabularyEditorView(library: library, project: project)
-        }
-    }
-
-    private var trimmedName: String {
-        newName.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    private func create() {
-        guard !trimmedName.isEmpty else { return }
-
-        let used = Set(library.projects.map(\.color))
-        let color = ProjectColor.allCases.first { !used.contains($0) } ?? .blue
-        do {
-            try library.createProject(named: trimmedName, color: color)
-            newName = ""
-            failure = nil
-        } catch {
-            failure = error.localizedDescription
         }
     }
 

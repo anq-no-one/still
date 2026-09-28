@@ -9,8 +9,9 @@ struct VocabularySettingsView: View {
         Form {
             Section {
                 if library.activeProjects.isEmpty {
-                    Text("No projects yet")
-                        .foregroundStyle(.secondary)
+                    ProjectCreationField(create: { name in
+                        _ = try library.createProject(named: name)
+                    })
                 }
                 ForEach(library.activeProjects) { project in
                     LabeledContent {

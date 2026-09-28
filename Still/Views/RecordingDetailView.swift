@@ -69,7 +69,11 @@ struct RecordingDetailView: View {
                         suggested: library.project(withID: recording.projectID),
                         projects: library.activeProjects,
                         confirm: editor.confirmProject,
-                        assign: editor.assign(toProject:)
+                        assign: editor.assign(toProject:),
+                        create: { name in
+                            let project = try library.createProject(named: name)
+                            editor.assign(toProject: project.id)
+                        }
                     )
                 }
 

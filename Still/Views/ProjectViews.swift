@@ -103,6 +103,7 @@ struct ProjectConfirmationBar: View {
     let projects: [Project]
     let confirm: () -> Void
     let assign: (UUID?) -> Void
+    let create: (String) throws -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -131,6 +132,8 @@ struct ProjectConfirmationBar: View {
                 Button("Confirm", action: confirm)
                     .buttonStyle(.borderedProminent)
             }
+
+            ProjectCreationField(create: create)
         }
         .padding()
         .background(.orange.opacity(0.12), in: .rect(cornerRadius: 12))

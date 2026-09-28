@@ -135,6 +135,31 @@ struct LibraryProjectTests {
     }
 
     @Test
+    func creatingWithoutAColorTakesTheFirstUnusedOne() async throws {
+        let library = try await makeUnlockedLibrary(context: try makeContext())
+
+        let first = try library.createProject(named: "Acme")
+        let second = try library.createProject(named: "Beta")
+
+        #expect(first.color == .red)
+        #expect(second.color == .orange)
+        #expect(library.nextUnusedProjectColor == .yellow)
+        #expect(library.projects.map(\.name) == ["Acme", "Beta"])
+    }
+
+    @Test
+    func creatingPastEveryColorFallsBackToBlue() async throws {
+        let library = try await makeUnlockedLibrary(context: try makeContext())
+
+        for color in ProjectColor.allCases {
+            try library.createProject(named: color.rawValue, color: color)
+        }
+
+        #expect(library.nextUnusedProjectColor == .blue)
+        #expect(try library.createProject(named: "Overflow").color == .blue)
+    }
+
+    @Test
     func assignsSeveralRecordingsAtOnceAndKeepsItAcrossRelaunch() async throws {
         let context = try makeContext()
         let library = try await makeUnlockedLibrary(context: context)

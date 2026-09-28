@@ -107,6 +107,24 @@ struct RecordingEditorTests {
     }
 
     @Test
+    func creatingAProjectFromTheBannerAssignsAndConfirmsTheRecording() async throws {
+        let library = try await makeLibrary()
+        let recording = Recording(title: "Call", transcript: "hello", duration: 60)
+        try library.add(recording)
+        let editor = RecordingEditor(recording: recording, library: library)
+
+        let project = try library.createProject(named: "Acme")
+        editor.assign(toProject: project.id)
+        editor.saveNow()
+
+        #expect(editor.recording.projectID == project.id)
+        #expect(editor.recording.isProjectConfirmed)
+        let saved = try #require(library.recordings.first)
+        #expect(saved.projectID == project.id)
+        #expect(saved.isProjectConfirmed)
+    }
+
+    @Test
     func editsReachTheLibraryOnSave() async throws {
         let library = try await makeLibrary()
         let segments = words("Draft .")
