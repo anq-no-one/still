@@ -91,6 +91,7 @@ final class LiveTranscriber: TranscriptionSession {
 
 private final class LiveSamples: @unchecked Sendable {
     private let lock = NSLock()
+    private let converterLock = NSLock()
     private var mix = LiveMix(settle: ParakeetEngine.sampleRate, realignAfter: 2 * ParakeetEngine.sampleRate)
 
     func consumer(from format: AVAudioFormat, source: LiveMix.Source) throws -> MicrophoneInput.Consumer {
@@ -103,9 +104,8 @@ private final class LiveSamples: @unchecked Sendable {
             throw CaptureError.inputUnavailable
         }
 
-        nonisolated(unsafe) let unsafeConverter = converter
         return { [self] buffer in
-            guard let floats = Self.convert(buffer, with: unsafeConverter, to: target) else { return }
+            guard let floats = converterLock.withLock({ Self.convert(buffer, with: converter, to: target) }) else { return }
             lock.withLock { mix.add(floats, from: source) }
         }
     }

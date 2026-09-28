@@ -42,11 +42,10 @@ final class SemanticIndex {
         guard let engine else { return Task {} }
 
         isRebuilding = true
-        let unchecked = UncheckedEngine(engine: engine)
         let live = recordings.filter { !$0.isDeleted }
         return Task { @MainActor in
             let built = await Task.detached(priority: .utility) {
-                Dictionary(uniqueKeysWithValues: live.map { ($0.id, Self.entries(for: $0, engine: unchecked.engine)) })
+                Dictionary(uniqueKeysWithValues: live.map { ($0.id, Self.entries(for: $0, engine: engine)) })
             }.value
 
             entriesByRecording = built
@@ -93,10 +92,6 @@ final class SemanticIndex {
             }
         }
     }
-}
-
-private struct UncheckedEngine: @unchecked Sendable {
-    let engine: EmbeddingEngine
 }
 
 private func cosineSimilarity(_ a: [Float], _ b: [Float]) -> Float {

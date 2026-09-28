@@ -126,7 +126,7 @@ final class MediaImporter {
         var recordingID: UUID?
         do {
             let source = try MediaFile.inspect(url)
-            let id = try library.importID(forContentDigest: try await source.contentDigest())
+            let id = try library.importID(forContentDigest: try await background { try await source.contentDigest() })
             guard !library.hasRecording(withID: id) else {
                 releaseHandedOver(url)
                 phase = .imported(id)
@@ -178,7 +178,15 @@ final class MediaImporter {
     private func decode(_ sound: SoundTrack, as id: UUID) async throws -> TimeInterval {
         phase = .decoding(0)
         let writer = try library.stageImport(forRecording: id, track: Self.track)
-        return try await sound.decode(into: writer, progress: report { .decoding($0) })
+        let progress = report { .decoding($0) }
+        return try await background {
+            try await sound.decode(into: writer, progress: progress)
+        }
+    }
+
+    private func background<T: Sendable>(_ work: @escaping @Sendable () async throws -> T) async throws -> T {
+        let task = Task.detached(priority: .utility, operation: work)
+        return try await withTaskCancellationHandler(operation: { try await task.value }, onCancel: { task.cancel() })
     }
 
     private func releaseHandedOver(_ url: URL) {

@@ -15,8 +15,8 @@ struct SetupFlowTests {
     @Test
     func walksEveryStepAndFinishesOnlyWhenEverythingIsReady() async {
         let permissions = FakeSetupPermissions()
-        var modelReady = false
-        let flow = makeFlow(permissions: permissions, isTranscriptionReady: { modelReady })
+        let modelReady = ReadinessFlag()
+        let flow = makeFlow(permissions: permissions, isTranscriptionReady: { modelReady.current })
 
         flow.acknowledgePrivacy()
         #expect(flow.step == .microphone)
@@ -30,7 +30,7 @@ struct SetupFlowTests {
         await flow.requestCalendar()
         #expect(flow.step == .transcription)
 
-        modelReady = true
+        modelReady.set(true)
         flow.refresh()
         #expect(flow.isComplete)
     }
@@ -151,6 +151,14 @@ struct SetupFlowTests {
             isTranscriptionReady: isTranscriptionReady
         )
     }
+}
+
+final class ReadinessFlag: @unchecked Sendable {
+    private let lock = NSLock()
+    private var value = false
+
+    var current: Bool { lock.withLock { value } }
+    func set(_ newValue: Bool) { lock.withLock { value = newValue } }
 }
 
 final class MemorySetupStore: SetupProgressStore, @unchecked Sendable {

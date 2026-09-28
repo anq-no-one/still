@@ -146,10 +146,11 @@ final class MCPConnection: @unchecked Sendable {
 }
 
 private final class LineBufferBox: @unchecked Sendable {
+    private let lock = NSLock()
     private var buffer = JSONLineBuffer()
 
     func append(_ data: Data) -> [Data] {
-        buffer.append(data)
+        lock.withLock { buffer.append(data) }
     }
 }
 #endif

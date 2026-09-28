@@ -1,7 +1,7 @@
 import Foundation
 import NaturalLanguage
 
-protocol EmbeddingEngine {
+protocol EmbeddingEngine: Sendable {
     func embed(_ text: String) -> [Float]?
 }
 

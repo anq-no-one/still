@@ -80,11 +80,11 @@ final class MicrophoneRecorder: AudioRecorder {
         let center = NotificationCenter.default
         let session = AVAudioSession.sharedInstance()
         interruptionObservers = [
-            center.addObserver(forName: AVAudioSession.interruptionNotification, object: session, queue: .main) { _ in
-                Task { try? await self.finish() }
+            center.addObserver(forName: AVAudioSession.interruptionNotification, object: session, queue: .main) { [weak self] _ in
+                Task { @MainActor in try? await self?.finish() }
             },
-            center.addObserver(forName: AVAudioSession.mediaServicesWereResetNotification, object: session, queue: .main) { _ in
-                Task { try? await self.finish() }
+            center.addObserver(forName: AVAudioSession.mediaServicesWereResetNotification, object: session, queue: .main) { [weak self] _ in
+                Task { @MainActor in try? await self?.finish() }
             },
         ]
         #endif
@@ -98,6 +98,7 @@ final class MicrophoneRecorder: AudioRecorder {
 private final class PCMSink: @unchecked Sendable {
     private let writer: AudioChunkWriter
     private let converter: AVAudioConverter
+    private let converterLock = NSLock()
     private let target: AVAudioFormat
 
     init(writer: AudioChunkWriter, from source: AVAudioFormat, to format: AudioFormat) throws {
@@ -117,7 +118,7 @@ private final class PCMSink: @unchecked Sendable {
 
     var consumer: MicrophoneInput.Consumer {
         { [self] buffer in
-            guard let pcm = convert(buffer) else { return }
+            guard let pcm = converterLock.withLock({ convert(buffer) }) else { return }
             try? writer.append(pcm)
         }
     }

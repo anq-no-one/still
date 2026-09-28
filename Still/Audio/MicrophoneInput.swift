@@ -95,13 +95,13 @@ final class MicrophoneInput {
         #endif
     }
 
-    /// Session activation and engine start can stall while the system
-    /// settles the route, so they run off the main thread. Taps stay on the
-    /// main thread because they touch the consumer list.
+    /// Session activation can stall while the system settles the route, so it
+    /// runs off the main thread. The engine itself starts synchronously in
+    /// `start(format:)`, and taps stay on the main thread because they touch
+    /// the consumer list.
     private func bringUpEngine() async throws {
-        let box = EngineBox(engine: engine)
+        #if os(iOS)
         do {
-            #if os(iOS)
             try await Task.detached(priority: .userInitiated) {
                 let session = AVAudioSession.sharedInstance()
                 try session.setCategory(
@@ -110,16 +110,11 @@ final class MicrophoneInput {
                     options: [.allowBluetoothHFP, .defaultToSpeaker]
                 )
                 try session.setActive(true, options: .notifyOthersOnDeactivation)
-                try box.engine.start()
             }.value
-            #else
-            try await Task.detached(priority: .userInitiated) {
-                try box.engine.start()
-            }.value
-            #endif
         } catch {
             throw CaptureError.inputUnavailable
         }
+        #endif
     }
 
     #if os(macOS)
@@ -146,17 +141,6 @@ final class MicrophoneInput {
             try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         }
         #endif
-    }
-}
-
-/// The engine outlives the bring-up call, but starting it happens on a
-/// background task, so the box carries it across the boundary. Every other
-/// touch stays on the main thread.
-private final class EngineBox: @unchecked Sendable {
-    let engine: AVAudioEngine
-
-    init(engine: AVAudioEngine) {
-        self.engine = engine
     }
 }
 

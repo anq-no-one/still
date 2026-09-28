@@ -30,9 +30,12 @@ final class CallActivityWatcher: CallAppWatcher {
         onDeactivate: @escaping @MainActor (String) -> Void
     ) {
         stop()
+        let source = source
         loop = Task { [weak self] in
             while !Task.isCancelled {
-                self?.poll(onActivate: onActivate, onDeactivate: onDeactivate)
+                let activity = await Task.detached(priority: .utility) { source.currentActivity() }.value
+                guard !Task.isCancelled else { return }
+                self?.poll(activity, onActivate: onActivate, onDeactivate: onDeactivate)
                 try? await Task.sleep(for: Self.pollInterval)
             }
         }
@@ -45,10 +48,11 @@ final class CallActivityWatcher: CallAppWatcher {
     }
 
     private func poll(
+        _ activity: [AudioProcessActivity],
         onActivate: @MainActor (String) -> Void,
         onDeactivate: @MainActor (String) -> Void
     ) {
-        for event in detector.observe(source.currentActivity(), at: now()) {
+        for event in detector.observe(activity, at: now()) {
             switch event {
             case .started(let bundleID): onActivate(bundleID)
             case .ended(let bundleID): onDeactivate(bundleID)
