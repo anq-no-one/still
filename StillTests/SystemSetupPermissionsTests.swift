@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import Still
 
@@ -33,4 +34,24 @@ struct SystemSetupPermissionsTests {
 
         #expect(command.contains("/usr/bin/open '/Appli'\\''cations/Still.app'"))
     }
+
+    @Test
+    func relaunchQuitsEvenWhenHelperCannotStart() {
+        let terminated = TerminationFlag()
+        struct HelperBlocked: Error {}
+        SystemSetupPermissions.relaunch(
+            launcher: { _ in throw HelperBlocked() },
+            terminator: { terminated.set() }
+        )
+
+        #expect(terminated.value)
+    }
+}
+
+private final class TerminationFlag: @unchecked Sendable {
+    private let lock = NSLock()
+    private var triggered = false
+
+    func set() { lock.withLock { triggered = true } }
+    var value: Bool { lock.withLock { triggered } }
 }

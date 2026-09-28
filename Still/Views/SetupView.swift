@@ -95,7 +95,7 @@ struct SetupView: View {
         ) {
             primary(flow.systemAudio == .denied ? "Open System Settings" : "Allow", action: flow.requestSystemAudio)
             if flow.systemAudio == .denied {
-                secondary("I Allowed It — Reopen Still", action: SystemSetupPermissions.relaunch)
+                secondary("I Allowed It — Reopen Still", action: { SystemSetupPermissions.relaunch() })
             }
         }
     }

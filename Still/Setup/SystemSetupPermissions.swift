@@ -72,8 +72,11 @@ final class SystemSetupPermissions: SetupPermissions {
         #endif
     }
 
-    static func relaunch() {
-        #if os(macOS)
+    #if os(macOS)
+    nonisolated static func relaunch(
+        launcher: @Sendable (Process) throws -> Void = { try $0.run() },
+        terminator: @Sendable () -> Void = { Task { @MainActor in NSApp.terminate(nil) } }
+    ) {
         let helper = Process()
         helper.executableURL = URL(fileURLWithPath: "/bin/sh")
         helper.arguments = ["-c", relaunchCommand(
@@ -82,12 +85,14 @@ final class SystemSetupPermissions: SetupPermissions {
         )]
         helper.standardOutput = FileHandle.nullDevice
         helper.standardError = FileHandle.nullDevice
-        guard (try? helper.run()) != nil else { return }
-        Task { @MainActor in NSApp.terminate(nil) }
-        #endif
+        _ = try? launcher(helper)
+        terminator()
     }
+    #else
+    nonisolated static func relaunch() {}
+    #endif
 
-    static func relaunchCommand(processID: Int32, bundlePath: String) -> String {
+    nonisolated static func relaunchCommand(processID: Int32, bundlePath: String) -> String {
         let escaped = bundlePath.replacingOccurrences(of: "'", with: "'\\''")
         return "i=0; while kill -0 \(processID) 2>/dev/null && [ $i -lt 100 ]; do sleep 0.1; i=$((i+1)); done; /usr/bin/open '\(escaped)'"
     }
