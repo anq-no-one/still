@@ -32,12 +32,13 @@ struct RecordingWorkflowTests {
         await workflow.save()
 
         let recording = try #require(library.recordings.first)
-        #expect(recording.transcript == "Transcribed after saving")
+        #expect(recording.transcript.isEmpty)
+        #expect(recording.isProcessing)
         #expect(workflow.state == .saved)
     }
 
     @Test
-    func savesHeardSpeechIntoLibrary() async throws {
+    func filesAPlaceholderImmediatelySoTheLibraryListsItWhileItRenders() async throws {
         let session = FakeTranscriptionSession()
         let library = SpyRecordingLibrary()
         let clock = StubClock(start: Date(timeIntervalSince1970: 1_000))
@@ -51,51 +52,28 @@ struct RecordingWorkflowTests {
         #expect(workflow.state == .saved)
         #expect(library.recordings.count == 1)
         let recording = try #require(library.recordings.first)
-        #expect(recording.transcript == "Transcribed after saving")
-        #expect(recording.title == "Transcribed after saving")
+        #expect(recording.transcript == " Ship the private beta on Friday ")
+        #expect(recording.title == "Ship the private beta on Friday")
         #expect(recording.createdAt == Date(timeIntervalSince1970: 1_000))
         #expect(recording.duration == 90)
+        #expect(recording.isProcessing)
         #expect(session.isRecording == false)
     }
 
     @Test
-    func refusesToSaveSilence() async {
+    func savesSilenceAsAProcessingPlaceholderForTheBackgroundPassToJudge() async throws {
         let session = FakeTranscriptionSession()
         let library = SpyRecordingLibrary()
-        let offlineTranscriber = StubOfflineTranscriber()
-        let workflow = makeWorkflow(session: session, library: library, offlineTranscriber: offlineTranscriber)
+        let workflow = makeWorkflow(session: session, library: library)
 
         await workflow.start()
         session.transcript = "   "
-        offlineTranscriber.result = ""
-        await workflow.save()
-
-        #expect(library.recordings.isEmpty)
-        #expect(workflow.state == .failed(RecordingWorkflowError.emptyTranscript.localizedDescription))
-    }
-
-    @Test
-    func keepsTheRecordingWhenThisDeviceCannotTranscribe() async throws {
-        let session = FakeTranscriptionSession()
-        let offlineTranscriber = StubOfflineTranscriber()
-        offlineTranscriber.error = TranscriptionError.modelNotInstalled
-        let recorder = SpyAudioRecorder()
-        let library = SpyRecordingLibrary()
-        let workflow = makeWorkflow(
-            session: session,
-            recorder: recorder,
-            library: library,
-            offlineTranscriber: offlineTranscriber
-        )
-
-        await workflow.start()
         await workflow.save()
 
         let recording = try #require(library.recordings.first)
         #expect(workflow.state == .saved)
-        #expect(recording.transcript.isEmpty)
-        #expect(recording.segments.isEmpty)
-        #expect(recorder.events.last == .finished)
+        #expect(recording.isProcessing)
+        #expect(recording.transcript == "   ")
     }
 
     @Test
@@ -112,7 +90,7 @@ struct RecordingWorkflowTests {
     }
 
     @Test
-    func savedRecordingMatchesItsAudio() async throws {
+    func savedPlaceholderMatchesItsAudio() async throws {
         let session = FakeTranscriptionSession()
         let recorder = SpyAudioRecorder()
         let library = SpyRecordingLibrary()
@@ -128,17 +106,11 @@ struct RecordingWorkflowTests {
     }
 
     @Test
-    func aFailedRecognizerKeepsTheRecordingAndTranscribesTheAudio() async throws {
+    func aFailedRecognizerKeepsItsPartialDraftInThePlaceholder() async throws {
         let session = FakeTranscriptionSession()
-        let offlineTranscriber = StubOfflineTranscriber()
         let library = SpyRecordingLibrary()
         let clock = StubClock(start: Date(timeIntervalSince1970: 0))
-        let workflow = makeWorkflow(
-            session: session,
-            library: library,
-            offlineTranscriber: offlineTranscriber,
-            clock: clock
-        )
+        let workflow = makeWorkflow(session: session, library: library, clock: clock)
 
         await workflow.start()
         session.transcript = "Partial dr"
@@ -152,8 +124,8 @@ struct RecordingWorkflowTests {
         await workflow.save()
 
         let recording = try #require(library.recordings.first)
-        #expect(recording.transcript == "Transcribed after saving")
-        #expect(offlineTranscriber.calls == 1)
+        #expect(recording.transcript == "Partial dr")
+        #expect(recording.isProcessing)
     }
 
     @Test
@@ -168,15 +140,13 @@ struct RecordingWorkflowTests {
     }
 
     @Test
-    func freeRecordingHidesTheDraftAndTranscribesAfterSaving() async throws {
+    func freeRecordingHidesTheDraftAndFilesAnUntitledPlaceholder() async throws {
         let session = FakeTranscriptionSession()
-        let offlineTranscriber = StubOfflineTranscriber()
         let library = SpyRecordingLibrary()
         let clock = StubClock(start: Date(timeIntervalSince1970: 0))
         let workflow = makeWorkflow(
             session: session,
             library: library,
-            offlineTranscriber: offlineTranscriber,
             showsLiveDraft: false,
             clock: clock
         )
@@ -194,8 +164,8 @@ struct RecordingWorkflowTests {
         await workflow.save()
 
         let recording = try #require(library.recordings.first)
-        #expect(offlineTranscriber.calls == 1)
-        #expect(recording.transcript == "Transcribed after saving")
+        #expect(recording.transcript.isEmpty)
+        #expect(recording.isProcessing)
     }
 
     @Test
@@ -229,47 +199,35 @@ struct RecordingWorkflowTests {
     }
 
     @Test
-    func namesTheSpeakersAfterTheFinalTranscript() async throws {
-        let library = SpyRecordingLibrary()
-        library.speakerNaming = SpeakerNamingContext(ownerName: "Andrii D.")
+    func handsTheCoordinatorEverythingTheBackgroundPassNeeds() async throws {
+        let session = FakeTranscriptionSession()
         let clock = StubClock(start: Date(timeIntervalSince1970: 500))
-        var askedAbout: Date?
-        let workflow = RecordingWorkflow(
-            session: FakeTranscriptionSession(),
-            finalTranscription: FinalTranscription(transcriber: StubOfflineTranscriber(), windowSeconds: 3_600),
-            speakerSeparation: SpeakerSeparation(diarizer: StubDiarizer(turns: [SpeakerTurn(speaker: 0, start: 0, end: 5)])),
-            expectedParticipants: { date in
-                askedAbout = date
-                return ["Anna Kowalska", "Ben Olsen"]
-            },
-            recorder: SpyAudioRecorder(),
-            library: library,
-            showsLiveDraft: false,
-            now: clock.now
-        )
+        let workflow = makeWorkflow(session: session, clock: clock)
 
         await workflow.start()
+        session.transcript = "Planning the launch"
+        workflow.speakerStarted("Anna Kowalska")
         clock.advance(by: 10)
+        workflow.speakerEnded("Anna Kowalska")
         await workflow.save()
 
-        let recording = try #require(library.recordings.first)
-        #expect(recording.speakers.map(\.name) == ["Andrii D."])
-        #expect(recording.segments.allSatisfy { $0.speakerID == recording.speakers[0].id })
-        #expect(askedAbout == Date(timeIntervalSince1970: 500))
-        #expect(recording.expectedParticipants == ["Anna Kowalska", "Ben Olsen"])
+        let draft = try #require(workflow.pendingFinalization)
+        #expect(draft.id == workflow.recordingID)
+        #expect(draft.createdAt == Date(timeIntervalSince1970: 500))
+        #expect(draft.duration == 10)
+        #expect(draft.cues.count == 1)
+        #expect(draft.cues.first?.name == "Anna Kowalska")
     }
 
     private func makeWorkflow(
         session: FakeTranscriptionSession = FakeTranscriptionSession(),
         recorder: SpyAudioRecorder = SpyAudioRecorder(),
         library: SpyRecordingLibrary = SpyRecordingLibrary(),
-        offlineTranscriber: StubOfflineTranscriber = StubOfflineTranscriber(),
         showsLiveDraft: Bool = true,
         clock: StubClock = StubClock(start: Date(timeIntervalSince1970: 0))
     ) -> RecordingWorkflow {
         RecordingWorkflow(
             session: session,
-            finalTranscription: FinalTranscription(transcriber: offlineTranscriber, windowSeconds: 3_600),
             recorder: recorder,
             library: library,
             showsLiveDraft: showsLiveDraft,

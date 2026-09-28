@@ -5,6 +5,9 @@ struct RecordingDetailView: View {
     let library: Library
     let extraction: MemoryExtraction
     let startAt: TimeInterval?
+    /// The Library's current copy, refreshed every render. The editor keeps a
+    /// snapshot for editing, and catches up through it when rendering ends.
+    let latest: Recording
 
     @State private var editor: RecordingEditor
     @State private var player = RecordingPlayer()
@@ -22,6 +25,7 @@ struct RecordingDetailView: View {
         self.library = library
         self.extraction = extraction
         self.startAt = startAt
+        self.latest = recording
         _editor = State(initialValue: RecordingEditor(recording: recording, library: library))
         _title = State(initialValue: recording.title)
         _noteText = State(initialValue: recording.note?.userText ?? "")
@@ -50,6 +54,15 @@ struct RecordingDetailView: View {
                 }
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+
+                if recording.isProcessing {
+                    Label(
+                        "Still is writing the full transcript and notes. You will be notified when it is ready.",
+                        systemImage: "waveform.badge.magnifyingglass"
+                    )
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                }
 
                 if !recording.isProjectConfirmed {
                     ProjectConfirmationBar(
@@ -100,11 +113,17 @@ struct RecordingDetailView: View {
                 Divider()
 
                 if recording.transcript.isEmpty {
-                    ContentUnavailableView(
-                        "No Transcript",
-                        systemImage: "waveform.slash",
-                        description: Text("This device could not turn the recording into text. The audio is saved, so you can still play it.")
-                    )
+                    if recording.isProcessing {
+                        Label("Writing the transcript…", systemImage: "waveform.badge.magnifyingglass")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ContentUnavailableView(
+                            "No Transcript",
+                            systemImage: "waveform.slash",
+                            description: Text("This device could not turn the recording into text. The audio is saved, so you can still play it.")
+                        )
+                    }
                 } else if recording.segments.isEmpty {
                     Text(recording.transcript)
                         .font(.body)
@@ -178,6 +197,12 @@ struct RecordingDetailView: View {
         .task {
             await player.load((try? library.audio(for: recording)) ?? Data())
             if let startAt { player.play(from: startAt) }
+        }
+        .onChange(of: latest) { _, updated in
+            guard editor.recording.isProcessing, !updated.isProcessing, !editor.hasPendingSave else { return }
+            editor.refresh(to: updated)
+            title = updated.title
+            noteText = updated.note?.userText ?? ""
         }
         .onDisappear {
             editor.saveNow()

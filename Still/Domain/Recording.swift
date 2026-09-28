@@ -1,6 +1,6 @@
 import Foundation
 
-struct Recording: Identifiable, Codable, Equatable, Sendable {
+struct Recording: Identifiable, Encodable, Equatable, Sendable {
     let id: UUID
     var title: String
     var transcript: String
@@ -18,6 +18,7 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
     var mixedMediaSpans: [TimeSpan]?
     var memory: RecordingMemory?
     var importedFrom: ImportedFile?
+    var isProcessing = false
 
     init(
         id: UUID = UUID(),
@@ -36,7 +37,8 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         projectAssignedAt: Date? = nil,
         mixedMediaSpans: [TimeSpan]? = nil,
         memory: RecordingMemory? = nil,
-        importedFrom: ImportedFile? = nil
+        importedFrom: ImportedFile? = nil,
+        isProcessing: Bool = false
     ) {
         self.id = id
         self.title = title
@@ -55,6 +57,7 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         self.mixedMediaSpans = mixedMediaSpans
         self.memory = memory
         self.importedFrom = importedFrom
+        self.isProcessing = isProcessing
     }
 
     var isDeleted: Bool {
@@ -93,5 +96,54 @@ struct Recording: Identifiable, Codable, Equatable, Sendable {
         var updated = self
         updated.speakers[index] = change(speakers[index])
         return updated
+    }
+}
+
+extension Recording: Decodable {
+    enum CodingKeys: String, CodingKey {
+        case id
+        case title
+        case transcript
+        case segments
+        case speakers
+        case expectedParticipants
+        case note
+        case createdAt
+        case duration
+        case updatedAt
+        case deletedAt
+        case archivedAt
+        case projectID
+        case projectAssignedAt
+        case mixedMediaSpans
+        case memory
+        case importedFrom
+        case isProcessing
+    }
+
+    /// Payloads sealed before processing existed carry no flag. They describe
+    /// finished recordings, so the absence counts as done rather than stuck.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            id: try container.decode(UUID.self, forKey: .id),
+            title: try container.decode(String.self, forKey: .title),
+            transcript: try container.decode(String.self, forKey: .transcript),
+            segments: try container.decode([TranscriptSegment].self, forKey: .segments),
+            speakers: try container.decode([Speaker].self, forKey: .speakers),
+            expectedParticipants: try container.decodeIfPresent([String].self, forKey: .expectedParticipants),
+            note: try container.decodeIfPresent(Note.self, forKey: .note),
+            createdAt: try container.decode(Date.self, forKey: .createdAt),
+            duration: try container.decode(TimeInterval.self, forKey: .duration),
+            updatedAt: try container.decode(Date.self, forKey: .updatedAt),
+            deletedAt: try container.decodeIfPresent(Date.self, forKey: .deletedAt),
+            archivedAt: try container.decodeIfPresent(Date.self, forKey: .archivedAt),
+            projectID: try container.decodeIfPresent(UUID.self, forKey: .projectID),
+            projectAssignedAt: try container.decodeIfPresent(Date.self, forKey: .projectAssignedAt),
+            mixedMediaSpans: try container.decodeIfPresent([TimeSpan].self, forKey: .mixedMediaSpans),
+            memory: try container.decodeIfPresent(RecordingMemory.self, forKey: .memory),
+            importedFrom: try container.decodeIfPresent(ImportedFile.self, forKey: .importedFrom),
+            isProcessing: try container.decodeIfPresent(Bool.self, forKey: .isProcessing) ?? false
+        )
     }
 }

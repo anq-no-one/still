@@ -83,16 +83,186 @@ struct RecordingCoordinatorTests {
         #expect(library.recordings.isEmpty)
     }
 
+    @Test
+    func stopAndSaveListsTheRecordingBeforeTheTranscriptRenders() async throws {
+        let library = try await makeUnlockedLibrary(context: try makeContext())
+        let session = FakeTranscriptionSession()
+        session.transcript = "Ship the private beta on Friday"
+        let notifier = FakeNotifier()
+        let coordinator = makeCoordinator(library: library, session: session, notifier: notifier)
+
+        await coordinator.start()
+        await coordinator.stopAndSave()
+
+        #expect(coordinator.phase == .idle)
+        let placeholder = try #require(library.recordings.first)
+        #expect(placeholder.transcript == "Ship the private beta on Friday")
+        #expect(placeholder.isProcessing)
+        #expect(coordinator.processingProgress[placeholder.id] != nil)
+
+        await coordinator.waitForBackgroundProcessing()
+
+        let finished = try #require(library.recordings.first)
+        #expect(finished.transcript == "Transcribed after saving")
+        #expect(!finished.isProcessing)
+        #expect(finished.note != nil)
+        #expect(coordinator.processingProgress[placeholder.id] == nil)
+        #expect(notifier.readyTitles == [finished.title])
+    }
+
+    @Test
+    func silenceLeavesNothingBehind() async throws {
+        let library = try await makeUnlockedLibrary(context: try makeContext())
+        let session = FakeTranscriptionSession()
+        session.transcript = "   "
+        let transcriber = StubOfflineTranscriber()
+        transcriber.result = ""
+        let notifier = FakeNotifier()
+        let coordinator = makeCoordinator(library: library, session: session, transcriber: transcriber, notifier: notifier)
+
+        await coordinator.start()
+        await coordinator.stopAndSave()
+        await coordinator.waitForBackgroundProcessing()
+
+        #expect(library.recordings.isEmpty)
+        #expect(notifier.readyTitles.isEmpty)
+    }
+
+    @Test
+    func aFailedFinalPassKeepsTheLiveDraft() async throws {
+        let library = try await makeUnlockedLibrary(context: try makeContext())
+        let session = FakeTranscriptionSession()
+        session.transcript = "Heard while recording"
+        let transcriber = StubOfflineTranscriber()
+        transcriber.error = TranscriptionError.modelNotInstalled
+        let notifier = FakeNotifier()
+        let coordinator = makeCoordinator(library: library, session: session, transcriber: transcriber, notifier: notifier)
+
+        await coordinator.start()
+        await coordinator.stopAndSave()
+        await coordinator.waitForBackgroundProcessing()
+
+        let recording = try #require(library.recordings.first)
+        #expect(recording.transcript == "Heard while recording")
+        #expect(!recording.isProcessing)
+        #expect(notifier.readyTitles.count == 1)
+    }
+
+    @Test
+    func namesTheSpeakersAfterTheFinalTranscript() async throws {
+        let library = try await makeUnlockedLibrary(context: try makeContext())
+        let session = FakeTranscriptionSession()
+        var askedAbout: Date?
+        let coordinator = RecordingCoordinator(
+            library: library,
+            entitlements: Entitlements(source: FakeEntitlementSource(), cache: MemoryEntitlementCache()),
+            makeSession: { session },
+            makeFinalTranscription: { FinalTranscription(transcriber: StubOfflineTranscriber(), windowSeconds: 3_600) },
+            makeSpeakerSeparation: {
+                SpeakerSeparation(diarizer: StubDiarizer(turns: [SpeakerTurn(speaker: 0, start: 0, end: 5)]))
+            },
+            expectedParticipants: { date in
+                askedAbout = date
+                return ["Anna Kowalska", "Ben Olsen"]
+            }
+        )
+
+        await coordinator.start()
+        await coordinator.stopAndSave()
+        await coordinator.waitForBackgroundProcessing()
+
+        let recording = try #require(library.recordings.first)
+        #expect(!recording.speakers.isEmpty)
+        #expect(recording.segments.allSatisfy { segment in recording.speakers.map(\.id).contains(segment.speakerID) })
+        #expect(recording.expectedParticipants == ["Anna Kowalska", "Ben Olsen"])
+        #expect(askedAbout != nil)
+    }
+
+    @Test
+    func deletingWhileProcessingResurrectsNothing() async throws {
+        let library = try await makeUnlockedLibrary(context: try makeContext())
+        let session = FakeTranscriptionSession()
+        session.transcript = "Doomed thought"
+        let transcriber = GatedOfflineTranscriber()
+        let coordinator = makeCoordinator(library: library, session: session, transcriber: transcriber)
+
+        await coordinator.start()
+        await coordinator.stopAndSave()
+        let doomed = try #require(library.recordings.first)
+
+        while !transcriber.entered {
+            await Task.yield()
+        }
+        try library.delete(doomed)
+        coordinator.cancelProcessing(for: doomed.id)
+        transcriber.open()
+        await coordinator.waitForBackgroundProcessing()
+
+        #expect(library.recordings.isEmpty)
+        #expect(coordinator.processingProgress[doomed.id] == nil)
+    }
+
+    @Test
+    func renamingWhileProcessingSurvivesTheFinishedTranscript() async throws {
+        let library = try await makeUnlockedLibrary(context: try makeContext())
+        let session = FakeTranscriptionSession()
+        session.transcript = "Draft words here"
+        let transcriber = GatedOfflineTranscriber()
+        let coordinator = makeCoordinator(library: library, session: session, transcriber: transcriber)
+
+        await coordinator.start()
+        await coordinator.stopAndSave()
+        let placeholder = try #require(library.recordings.first)
+        while !transcriber.entered {
+            await Task.yield()
+        }
+        try library.rename(placeholder, to: "User Title")
+        transcriber.open()
+        await coordinator.waitForBackgroundProcessing()
+
+        let recording = try #require(library.recordings.first)
+        #expect(recording.title == "User Title")
+        #expect(recording.transcript == "Transcribed after saving")
+        #expect(!recording.isProcessing)
+    }
+
+    @Test
+    func noteTextWrittenWhileProcessingSurvivesTheFinishedNote() async throws {
+        let library = try await makeUnlockedLibrary(context: try makeContext())
+        let session = FakeTranscriptionSession()
+        session.transcript = "Draft words here"
+        let transcriber = GatedOfflineTranscriber()
+        let coordinator = makeCoordinator(library: library, session: session, transcriber: transcriber)
+
+        await coordinator.start()
+        await coordinator.stopAndSave()
+        var placeholder = try #require(library.recordings.first)
+        while !transcriber.entered {
+            await Task.yield()
+        }
+        placeholder.note = Note(template: .personalNote, userText: "My take")
+        try library.save(placeholder)
+        transcriber.open()
+        await coordinator.waitForBackgroundProcessing()
+
+        let recording = try #require(library.recordings.first)
+        #expect(recording.note?.userText == "My take")
+        #expect(!(recording.note?.summary.isEmpty ?? true))
+        #expect(!recording.isProcessing)
+    }
+
     private func makeCoordinator(
         library: Library,
         session: FakeTranscriptionSession,
-        transcriber: StubOfflineTranscriber = StubOfflineTranscriber()
+        transcriber: OfflineTranscriber = StubOfflineTranscriber(),
+        notifier: RecordingNotifier? = nil
     ) -> RecordingCoordinator {
         RecordingCoordinator(
             library: library,
             entitlements: Entitlements(source: FakeEntitlementSource(), cache: MemoryEntitlementCache()),
             makeSession: { session },
-            makeFinalTranscription: { FinalTranscription(transcriber: transcriber, windowSeconds: 3_600) }
+            makeFinalTranscription: { FinalTranscription(transcriber: transcriber, windowSeconds: 3_600) },
+            notifier: notifier
         )
     }
 
@@ -127,6 +297,44 @@ struct RecordingCoordinatorTests {
             configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         )
         return ModelContext(container)
+    }
+}
+
+@MainActor
+final class FakeNotifier: RecordingNotifier {
+    private(set) var authorizations = 0
+    private(set) var readyTitles: [String] = []
+
+    func requestAuthorization() async {
+        authorizations += 1
+    }
+
+    func notifyReady(title: String) async {
+        readyTitles.append(title)
+    }
+}
+
+final class GatedOfflineTranscriber: OfflineTranscriber, @unchecked Sendable {
+    var result = "Transcribed after saving"
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<Void, Never>?
+    private var isEntered = false
+
+    var entered: Bool {
+        lock.withLock { isEntered }
+    }
+
+    func segments(of pcm: Data, format: AudioFormat) async throws -> [TranscriptSegment] {
+        lock.withLock { isEntered = true }
+        await withCheckedContinuation { continuation in
+            lock.withLock { self.continuation = continuation }
+        }
+        guard !result.isEmpty else { return [] }
+        return [TranscriptSegment(start: 0, end: 5, text: result, language: "en", confidence: 0.9)]
+    }
+
+    func open() {
+        lock.withLock { continuation }?.resume()
     }
 }
 

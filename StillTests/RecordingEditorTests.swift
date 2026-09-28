@@ -146,6 +146,71 @@ struct RecordingEditorTests {
 }
 
 @MainActor
+struct EditorRefreshTests {
+    @Test
+    func takesInTheFinishedTranscriptWhileTheDetailIsOpen() async throws {
+        let library = try await makeLibrary()
+        let placeholder = Recording(title: "Draft", transcript: "Draft", duration: 60, isProcessing: true)
+        try library.add(placeholder)
+        let editor = RecordingEditor(recording: placeholder, library: library)
+
+        var finished = placeholder
+        finished.transcript = "Final transcript"
+        finished.isProcessing = false
+        try library.save(finished)
+
+        editor.refresh(to: try #require(library.recordings.first))
+
+        #expect(editor.recording.transcript == "Final transcript")
+        #expect(!editor.recording.isProcessing)
+    }
+
+    @Test
+    func refusesTheRefreshWhileAKeystrokeIsStillCoalescing() async throws {
+        let library = try await makeLibrary()
+        let placeholder = Recording(title: "Draft", transcript: "Draft", duration: 60, isProcessing: true)
+        try library.add(placeholder)
+        let editor = RecordingEditor(recording: placeholder, library: library)
+
+        editor.rename(to: "User Title")
+        #expect(editor.hasPendingSave)
+
+        var finished = placeholder
+        finished.transcript = "Final transcript"
+        finished.isProcessing = false
+        editor.refresh(to: finished)
+
+        #expect(editor.recording.title == "User Title")
+        #expect(editor.recording.transcript == "Draft")
+
+        editor.saveNow()
+        #expect(!editor.hasPendingSave)
+        editor.refresh(to: try #require(library.recordings.first))
+        #expect(editor.recording.title == "User Title")
+    }
+
+    private func makeLibrary() async throws -> Library {
+        let container = try ModelContainer(
+            for: EncryptedRecording.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        )
+        let context = ModelContext(container)
+        let library = Library(
+            keyRing: LibraryKeyRing(source: FakeDeviceKeySource()),
+            services: LibraryServices(
+                audioRoot: try Scratch().directory,
+                makeRepository: { key in
+                    MainActor.assumeIsolated { EncryptedRecordingRepository(context: context, key: key) }
+                },
+                makeRecorder: { _ in MainActor.assumeIsolated { SpyAudioRecorder() } }
+            )
+        )
+        await library.unlock()
+        return library
+    }
+}
+
+@MainActor
 struct SpeakerRenameTests {
     @Test
     func renamingASpeakerLeavesTranscriptTextAlone() async throws {

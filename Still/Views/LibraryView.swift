@@ -192,6 +192,9 @@ struct LibraryView: View {
         .onChange(of: coordinator.isRecording) { _, isRecording in
             if isRecording { isCapturing = true }
         }
+        .onChange(of: coordinator.phase) { _, phase in
+            if phase == .idle { isCapturing = false }
+        }
     }
 
     @ViewBuilder
@@ -283,7 +286,9 @@ struct LibraryView: View {
             RecordingRow(
                 recording: recording,
                 project: library.project(withID: recording.projectID),
-                isSelected: navigation.selection == recording.id
+                isSelected: navigation.selection == recording.id,
+                progress: coordinator.processingProgress[recording.id],
+                showsProcessing: recording.isProcessing
             )
                 .tag(recording.id)
                 .swipeActions {
@@ -440,6 +445,7 @@ struct LibraryView: View {
     private func delete(_ recording: Recording) {
         do {
             if navigation.selection == recording.id { navigation.selection = nil }
+            coordinator.cancelProcessing(for: recording.id)
             try library.delete(recording)
         } catch {
             actionError = error.localizedDescription
@@ -518,12 +524,29 @@ private struct RecordingRow: View {
     let recording: Recording
     let project: Project?
     let isSelected: Bool
+    let progress: Double?
+    let showsProcessing: Bool
+
+    private var isProcessing: Bool {
+        progress != nil || showsProcessing
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(recording.title)
                 .font(.headline)
                 .fixedSize(horizontal: false, vertical: true)
+
+            if isProcessing {
+                HStack(spacing: 8) {
+                    ProgressView(value: progress)
+                        .accessibilityLabel("Processing recording")
+                        .accessibilityValue(progressText)
+                    Text("Processing…")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
 
             if !recording.isProjectConfirmed {
                 UnconfirmedProjectBadge(suggested: project)
@@ -544,5 +567,10 @@ private struct RecordingRow: View {
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
+    }
+
+    private var progressText: Text {
+        guard let progress else { return Text("In progress") }
+        return Text(progress, format: .percent.precision(.fractionLength(0)))
     }
 }

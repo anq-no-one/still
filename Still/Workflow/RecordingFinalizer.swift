@@ -25,6 +25,17 @@ struct RecordingFinalizer {
         _ draft: Draft,
         progress: @escaping @Sendable (Double) -> Void = { _ in }
     ) async throws -> Recording {
+        let recording = try await build(draft, progress: progress)
+        try library.add(recording)
+        return recording
+    }
+
+    /// Renders the finished Recording without storing it, so a caller that
+    /// filed a placeholder first can fold the user's interim edits back in.
+    func build(
+        _ draft: Draft,
+        progress: @escaping @Sendable (Double) -> Void = { _ in }
+    ) async throws -> Recording {
         let transcription = try await transcribeAndSeparateSpeakers(draft, progress: progress)
         let vocabulary = library.vocabulary(forProject: draft.suggestedProjectID)
         let segments = VocabularyCorrector.apply(vocabulary, to: transcription?.segments ?? [])
@@ -40,7 +51,7 @@ struct RecordingFinalizer {
         )
         try Task.checkCancellation()
 
-        let recording = Recording(
+        return Recording(
             id: draft.id,
             title: draft.title ?? RecordingTitle.from(transcript: transcript, date: draft.createdAt),
             transcript: transcript,
@@ -54,8 +65,6 @@ struct RecordingFinalizer {
             mixedMediaSpans: draft.mixedMedia.isEmpty ? nil : draft.mixedMedia,
             importedFrom: draft.importedFrom
         )
-        try library.add(recording)
-        return recording
     }
 
     private func transcribeAndSeparateSpeakers(

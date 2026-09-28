@@ -133,6 +133,7 @@ struct DiagnosticJournalTests {
 
         await coordinator.start()
         await coordinator.stopAndSave()
+        await coordinator.waitForBackgroundProcessing()
         var recording = try #require(library.recordings.first)
         recording.title = "Acquisition of Contoso"
         _ = try library.archive(recording, tracks: library.tracks(forRecording: recording.id))

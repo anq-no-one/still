@@ -23,7 +23,7 @@ final class StillEndToEndTests: XCTestCase {
         let recording = app.collectionViews.cells.firstMatch
         waitFor(recording, "the saved Recording in the Library")
         recording.tap()
-        waitForText("forecast", timeout: 20, "the saved transcript")
+        waitForText("forecast", timeout: 120, "the finished transcript to render in the background")
         keepScreenshot("2 Saved transcript")
         navigateBack()
 
@@ -99,7 +99,7 @@ final class StillEndToEndTests: XCTestCase {
         save.tap()
         waitForAbsence(save, timeout: 120, "the final transcript to finish and the sheet to close")
         app.collectionViews.cells.firstMatch.tap()
-        waitForText("forecast", timeout: 20, "the saved transcript")
+        waitForText("forecast", timeout: 120, "the finished transcript to render in the background")
         try audit("detail")
 
         for issue in accessibilityIssues { print("ACCESSIBILITY-ISSUE", issue) }

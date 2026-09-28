@@ -46,7 +46,8 @@ struct EncryptedRecordingRepository: RecordingRepository {
                 projectAssignedAt: content.projectAssignedAt,
                 mixedMediaSpans: content.mixedMediaSpans,
                 memory: content.memory,
-                importedFrom: content.importedFrom
+                importedFrom: content.importedFrom,
+                isProcessing: content.isProcessing
             )
         }
     }
@@ -68,7 +69,8 @@ struct EncryptedRecordingRepository: RecordingRepository {
                     projectAssignedAt: recording.projectAssignedAt,
                     mixedMediaSpans: recording.mixedMediaSpans,
                     memory: recording.memory,
-                    importedFrom: recording.importedFrom
+                    importedFrom: recording.importedFrom,
+                    isProcessing: recording.isProcessing
                 )
             )
         )

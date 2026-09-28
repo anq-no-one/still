@@ -20,6 +20,19 @@ final class RecordingEditor {
         self.library = library
     }
 
+    var hasPendingSave: Bool {
+        pendingSave != nil
+    }
+
+    /// Takes in a newer copy from the Library, for example when the background
+    /// transcript lands while the detail is open. Refuses while an edit is
+    /// still waiting out its coalescing delay, so a keystroke never loses.
+    func refresh(to updated: Recording) {
+        guard pendingSave == nil, updated.id == recording.id else { return }
+        recording = updated
+        saveFailure = nil
+    }
+
     var note: Note {
         recording.note ?? Note(template: .personalNote)
     }
@@ -126,6 +139,7 @@ final class RecordingEditor {
             try? await Task.sleep(for: Self.saveDelay)
             guard !Task.isCancelled else { return }
             self?.write()
+            self?.pendingSave = nil
         }
     }
 

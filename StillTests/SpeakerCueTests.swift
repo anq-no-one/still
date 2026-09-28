@@ -304,7 +304,6 @@ struct SpeakerCueWorkflowTests {
         let clock = StubClock(start: Date(timeIntervalSince1970: 500))
         let workflow = RecordingWorkflow(
             session: FakeTranscriptionSession(),
-            finalTranscription: FinalTranscription(transcriber: StubOfflineTranscriber(), windowSeconds: 3_600),
             recorder: SpyAudioRecorder(),
             library: library,
             showsLiveDraft: false,
@@ -320,18 +319,19 @@ struct SpeakerCueWorkflowTests {
         clock.advance(by: 6)
         await workflow.save()
 
-        let speaker = try #require(library.recordings.first?.speakers.first)
-        #expect(speaker.suggestedName == "Dana Kim")
-        #expect(speaker.name == Speaker.forTrack(.system).name)
+        let draft = try #require(workflow.pendingFinalization)
+        #expect(draft.cues.count == 1)
+        #expect(draft.cues.first?.name == "Dana Kim")
+        #expect(draft.cues.first?.start == 1)
+        #expect(draft.cues.first?.end == 4)
     }
 
     @Test
-    func aRecordingWithoutCuesHasNoSuggestions() async throws {
+    func aRecordingWithoutCuesHandsAnEmptyCueLogToTheBackgroundPass() async throws {
         let library = SpyRecordingLibrary()
         library.capturedTrack = .system
         let workflow = RecordingWorkflow(
             session: FakeTranscriptionSession(),
-            finalTranscription: FinalTranscription(transcriber: StubOfflineTranscriber(), windowSeconds: 3_600),
             recorder: SpyAudioRecorder(),
             library: library,
             showsLiveDraft: false
@@ -340,7 +340,9 @@ struct SpeakerCueWorkflowTests {
         await workflow.start()
         await workflow.save()
 
-        #expect(library.recordings.first?.speakers.allSatisfy { $0.suggestedName == nil } == true)
+        let draft = try #require(workflow.pendingFinalization)
+        #expect(draft.cues.isEmpty)
+        #expect(library.recordings.first?.speakers.isEmpty == true)
     }
 }
 

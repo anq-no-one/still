@@ -79,6 +79,7 @@
 		2A852EA060A146C7A43DA344 /* MicrophoneRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFC7EF849F362990469AEEA1 /* MicrophoneRecorder.swift */; };
 		2B174ACFCC046185B880808E /* KeyGrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32A2BA9C4C1E847D08BDBFF6 /* KeyGrant.swift */; };
 		2B219643F646E85862B42DF0 /* LiveTranscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13BCD2A8FB0EDBCFAB25D240 /* LiveTranscriber.swift */; };
+		2B7FCEDF48F01ABCF9682EA5 /* RecordingNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8643ED7F6A990B6CF0D2EDFE /* RecordingNotifier.swift */; };
 		2CA3D83856455E17BC270379 /* ProjectViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96647A55B2D2413A7434F395 /* ProjectViews.swift */; };
 		2CD953C2DBB33CF3CA81EBD1 /* SemanticIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEEC80EB80793B66B1BB2970 /* SemanticIndex.swift */; };
 		2D6944630F83003F64C2998D /* MixedMedia.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF4833A02F667B1AD77899F /* MixedMedia.swift */; };
@@ -190,6 +191,7 @@
 		6949D34A4C735B67B37288E8 /* StillApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16CC99B5A1788C31E341EB8B /* StillApp.swift */; };
 		69A02230F1E3829BA04F215D /* NearbySync.swift in Sources */ = {isa = PBXBuildFile; fileRef = A19D7504927CA12A370ACCEA /* NearbySync.swift */; };
 		69A525CB9B533A17D42FB7A7 /* FluidSpeakerDiarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FAADF706933D3D24A3DFC34 /* FluidSpeakerDiarizer.swift */; };
+		6AA22AB5FC88B40A9DBE8660 /* RecordingNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8643ED7F6A990B6CF0D2EDFE /* RecordingNotifier.swift */; };
 		6ABBE4CA5956C0347F871C93 /* AutomaticRecording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E8C5C860C0BB63FF3D5816 /* AutomaticRecording.swift */; };
 		6BA879F960DEC668B61DD1BB /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C695EE5B77B7E91520273E6 /* DashboardView.swift */; };
 		6CD067F974930B602E894744 /* VoiceProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE823CE690788A4FDA810317 /* VoiceProfileTests.swift */; };
@@ -676,6 +678,7 @@
 		85CD27C770B2291FD936A16A /* meeting.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = meeting.js; sourceTree = "<group>"; };
 		85D9C7B54F518457E3DF6959 /* MCPAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPAccess.swift; sourceTree = "<group>"; };
 		861AFD94D3EEE3ED1D06A647 /* StillIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StillIntents.swift; sourceTree = "<group>"; };
+		8643ED7F6A990B6CF0D2EDFE /* RecordingNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingNotifier.swift; sourceTree = "<group>"; };
 		87769A803C62067A94CE3D32 /* SettingsPageLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPageLabel.swift; sourceTree = "<group>"; };
 		8855C30165897D18A50C1C35 /* LibrarySearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySearchTests.swift; sourceTree = "<group>"; };
 		89DD4735697D542F3B59FD11 /* NativeMessagingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeMessagingTests.swift; sourceTree = "<group>"; };
@@ -1173,6 +1176,7 @@
 				A341116EE865894AA2B5CE96 /* RecordingCoordinator.swift */,
 				57C706785576B774730D5701 /* RecordingEditor.swift */,
 				7FC27E0DF91202D53D78B024 /* RecordingFinalizer.swift */,
+				8643ED7F6A990B6CF0D2EDFE /* RecordingNotifier.swift */,
 				B8912564CB80223EF40674BD /* RecordingWorkflow.swift */,
 			);
 			path = Workflow;
@@ -1890,6 +1894,7 @@
 				F66FD3F0224F6374DF0457DF /* RecordingMemory.swift in Sources */,
 				06E4BFADF175E8CEF65AB343 /* RecordingMenuBar.swift in Sources */,
 				5E91D4AFD7372A29D2656824 /* RecordingMerge.swift in Sources */,
+				6AA22AB5FC88B40A9DBE8660 /* RecordingNotifier.swift in Sources */,
 				DD46033B5EF50B5C9358488B /* RecordingPlayer.swift in Sources */,
 				F7F54B856D3A70711D918DA8 /* RecordingRepository.swift in Sources */,
 				DA8B5FA11F06F07607E959AB /* RecordingShortcut.swift in Sources */,
@@ -2174,6 +2179,7 @@
 				BC9C80F1CFF59785F05826B6 /* RecordingMemory.swift in Sources */,
 				5137C5D00BFD187CAC7D91C8 /* RecordingMenuBar.swift in Sources */,
 				4C9079EABE0D8846E46BBB95 /* RecordingMerge.swift in Sources */,
+				2B7FCEDF48F01ABCF9682EA5 /* RecordingNotifier.swift in Sources */,
 				1108A3E4F0915DF5C9F6784C /* RecordingPlayer.swift in Sources */,
 				6DF9A3ACCF4E91C511FA2FC3 /* RecordingRepository.swift in Sources */,
 				86CD319F3705718933DFA2C4 /* RecordingShortcut.swift in Sources */,

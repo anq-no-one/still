@@ -209,7 +209,8 @@ struct StillApp: App {
                     await CalendarContext(source: EventKitCalendarSource()).suggestion(at: date)?.participants ?? []
                 },
                 isReady: { setupFlow.isComplete && recordingLibrary.state == .unlocked },
-                audioTarget: audioTarget
+                audioTarget: audioTarget,
+                notifier: SystemRecordingNotifier()
             )
         }
         coordinator = recordingCoordinator

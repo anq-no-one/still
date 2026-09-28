@@ -14,9 +14,8 @@ final class RecordingWorkflow {
     }
 
     private let session: TranscriptionSession
-    private let finalizer: RecordingFinalizer
-    private let expectedParticipants: @MainActor (Date) async -> [String]
     private let recorder: AudioRecorder
+    private let library: RecordingLibrary
     private let showsLiveDraft: Bool
     private let suggestedProjectID: UUID?
     private let now: () -> Date
@@ -29,13 +28,10 @@ final class RecordingWorkflow {
     private var mixedMedia = MixedMediaLog()
 
     private(set) var state: State = .idle
+    private(set) var pendingFinalization: RecordingFinalizer.Draft?
 
     init(
         session: TranscriptionSession,
-        finalTranscription: FinalTranscription,
-        speakerSeparation: SpeakerSeparation = .trackBased,
-        expectedParticipants: @escaping @MainActor (Date) async -> [String] = { _ in [] },
-        noteBuilder: GroundedNoteBuilder = GroundedNoteBuilder(),
         recorder: AudioRecorder,
         library: RecordingLibrary,
         showsLiveDraft: Bool,
@@ -43,14 +39,8 @@ final class RecordingWorkflow {
         now: @escaping () -> Date = Date.init
     ) {
         self.session = session
-        self.finalizer = RecordingFinalizer(
-            finalTranscription: finalTranscription,
-            speakerSeparation: speakerSeparation,
-            noteBuilder: noteBuilder,
-            library: library
-        )
-        self.expectedParticipants = expectedParticipants
         self.recorder = recorder
+        self.library = library
         self.showsLiveDraft = showsLiveDraft
         self.suggestedProjectID = suggestedProjectID
         self.now = now
@@ -98,6 +88,7 @@ final class RecordingWorkflow {
         draftStartFailure = nil
         speakerCues = SpeakerCueLog()
         mixedMedia = MixedMediaLog()
+        pendingFinalization = nil
 
         do {
             try await recorder.start(recordingID: recordingID)
@@ -142,6 +133,10 @@ final class RecordingWorkflow {
         mixedMedia.ended(at: offset)
     }
 
+    /// Stops the capture and files a placeholder immediately, so the Library
+    /// lists the recording while the accurate transcript is still rendering.
+    /// The coordinator picks up `pendingFinalization` and finishes it in the
+    /// background.
     func save() async {
         guard state == .recording else { return }
 
@@ -155,21 +150,28 @@ final class RecordingWorkflow {
         do {
             try await recorder.finish()
             let startedAt = startedAt ?? now()
-            try await finalizer.finalize(
-                RecordingFinalizer.Draft(
+            let draftText = transcript
+            try library.add(
+                Recording(
                     id: recordingID,
+                    title: RecordingTitle.from(transcript: draftText, date: startedAt),
+                    transcript: draftText,
                     createdAt: startedAt,
                     duration: elapsed,
-                    participants: await expectedParticipants(startedAt),
-                    cues: cues,
-                    mixedMedia: mixed,
-                    suggestedProjectID: suggestedProjectID
+                    projectID: suggestedProjectID,
+                    mixedMediaSpans: mixed.isEmpty ? nil : mixed,
+                    isProcessing: true
                 )
             )
+            pendingFinalization = RecordingFinalizer.Draft(
+                id: recordingID,
+                createdAt: startedAt,
+                duration: elapsed,
+                cues: cues,
+                mixedMedia: mixed,
+                suggestedProjectID: suggestedProjectID
+            )
             state = .saved
-        } catch RecordingWorkflowError.emptyTranscript {
-            await recorder.discard()
-            state = .failed(RecordingWorkflowError.emptyTranscript.localizedDescription)
         } catch {
             state = .failed(error.localizedDescription)
         }
@@ -181,6 +183,7 @@ final class RecordingWorkflow {
         stopCapture()
         speakerCues = SpeakerCueLog()
         mixedMedia = MixedMediaLog()
+        pendingFinalization = nil
         await recorder.discard()
         state = .idle
     }

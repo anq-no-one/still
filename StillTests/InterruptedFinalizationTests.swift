@@ -54,6 +54,48 @@ struct InterruptedFinalizationTests {
         #expect(transcriber.calls == 1)
     }
 
+    @Test
+    func aPlaceholderLeftProcessingFinishesAfterTheRelaunch() async throws {
+        let source = FakeDeviceKeySource()
+        let context = try makeContext()
+        let audioRoot = try Scratch().directory
+        let id = UUID()
+
+        let first = await makeLibrary(source: source, context: context, audioRoot: audioRoot)
+        let recorder = try first.makeRecorder()
+        try await recorder.start(recordingID: id)
+        try await recorder.finish()
+        try first.add(
+            Recording(
+                id: id,
+                title: "Draft words here",
+                transcript: "Draft words here",
+                createdAt: Date(timeIntervalSince1970: 2_000),
+                duration: 12,
+                isProcessing: true
+            )
+        )
+
+        let relaunched = await makeLibrary(source: source, context: context, audioRoot: audioRoot)
+        #expect(try #require(relaunched.recordings.first).isProcessing)
+
+        let transcriber = StubOfflineTranscriber()
+        transcriber.result = "Quarterly numbers look fine"
+        let coordinator = RecordingCoordinator(
+            library: relaunched,
+            entitlements: Entitlements(source: FakeEntitlementSource(), cache: MemoryEntitlementCache()),
+            makeSession: { FakeTranscriptionSession() },
+            makeFinalTranscription: { FinalTranscription(transcriber: transcriber, windowSeconds: 3_600) }
+        )
+
+        await coordinator.finishInterruptedProcessing()
+
+        let recording = try #require(relaunched.recordings.first)
+        #expect(recording.transcript.contains("Quarterly"))
+        #expect(!recording.isProcessing)
+        #expect(transcriber.calls == 1)
+    }
+
     private func makeLibrary(source: FakeDeviceKeySource, context: ModelContext, audioRoot: URL) async -> Library {
         let library = Library(
             keyRing: LibraryKeyRing(source: source),
