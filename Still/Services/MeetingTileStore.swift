@@ -34,6 +34,16 @@ enum MeetingTileStore {
         try? FileManager.default.removeItem(at: directory(forRecording: recordingID, in: root))
     }
 
+    static func discardLeftovers(in root: URL) {
+        guard let recordings = try? FileManager.default.contentsOfDirectory(
+            at: root,
+            includingPropertiesForKeys: nil
+        ) else { return }
+        for recording in recordings where UUID(uuidString: recording.lastPathComponent) != nil {
+            try? FileManager.default.removeItem(at: recording.appending(path: directoryName, directoryHint: .isDirectory))
+        }
+    }
+
     private static func fileName(for offset: TimeInterval) -> String {
         String(format: "%010.2f", max(0, offset)) + ".\(frameExtension)"
     }

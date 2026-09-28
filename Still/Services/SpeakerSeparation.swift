@@ -168,11 +168,15 @@ enum SpeakerAssignment {
     ) -> [UUID: Int] {
         var canonical: [Int: Int] = [:]
         for voice in Set(matches.values).sorted() {
-            guard let print = voiceprints[voice] else { canonical[voice] = voice; continue }
+            guard let voiceprint = voiceprints[voice] else {
+                canonical[voice] = voice
+                continue
+            }
             let twin = canonical.keys
-                .filter { voiceprints[$0] != nil }
-                .first { voiceprints[$0]!.distance(to: print) <= maximumMergeDistance }
-            canonical[voice] = twin.flatMap { canonical[$0] } ?? voice
+                .sorted()
+                .compactMap { other in voiceprints[other].map { (other, $0) } }
+                .first { $0.1.distance(to: voiceprint) <= maximumMergeDistance }
+            canonical[voice] = twin.flatMap { canonical[$0.0] } ?? voice
         }
         return matches.mapValues { canonical[$0] ?? $0 }
     }

@@ -161,6 +161,23 @@ struct TileCueBuilderTests {
     }
 
     @Test
+    func unlockSweepsTileFramesLeftByAKilledRecording() throws {
+        let root = try Scratch().directory
+        let cipher = LibraryCipher(key: SymmetricKey(size: .bits256))
+        let id = UUID()
+        try MeetingTileStore.save(Data([1, 2, 3]), offset: 4, recordingID: id, root: root, cipher: cipher)
+        try FileManager.default.createDirectory(
+            at: root.appending(path: "not-a-recording", directoryHint: .isDirectory),
+            withIntermediateDirectories: true
+        )
+
+        MeetingTileStore.discardLeftovers(in: root)
+
+        #expect((try? MeetingTileStore.frames(recordingID: id, root: root, cipher: cipher))?.isEmpty ?? false)
+        #expect(FileManager.default.fileExists(atPath: root.appending(path: "not-a-recording").path))
+    }
+
+    @Test
     func voiceActivityNeedsEnergyAndThenForgets() {
         let monitor = SystemVoiceActivity()
         let base = Date()

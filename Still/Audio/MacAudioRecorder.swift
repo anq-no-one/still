@@ -2,8 +2,8 @@
 import Foundation
 
 struct MeetingTileSource: Sendable {
-    var settings: MeetingTileSettingsStore
-    var isVoiceActive: @Sendable () -> Bool
+    let settings: MeetingTileSettingsStore
+    let isVoiceActive: @Sendable () -> Bool
 }
 
 /// Runs the microphone and system-audio tracks against one recording clock.

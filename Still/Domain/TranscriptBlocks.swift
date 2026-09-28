@@ -3,6 +3,11 @@ import Foundation
 struct TranscriptChunk: Identifiable, Equatable, Sendable {
     var segments: [TranscriptSegment]
 
+    init?(segments: [TranscriptSegment]) {
+        guard !segments.isEmpty else { return nil }
+        self.segments = segments
+    }
+
     var id: UUID {
         segments[0].id
     }
@@ -14,6 +19,12 @@ struct TranscriptBlock: Identifiable, Equatable, Sendable {
     let speakerID: UUID?
     var segments: [TranscriptSegment]
 
+    init?(speakerID: UUID?, segments: [TranscriptSegment]) {
+        guard !segments.isEmpty else { return nil }
+        self.speakerID = speakerID
+        self.segments = segments
+    }
+
     var id: UUID {
         segments[0].id
     }
@@ -23,7 +34,7 @@ struct TranscriptBlock: Identifiable, Equatable, Sendable {
     }
 
     func chunks() -> [TranscriptChunk] {
-        stride(from: 0, to: segments.count, by: Self.headerRepeatInterval).map { start in
+        stride(from: 0, to: segments.count, by: Self.headerRepeatInterval).compactMap { start in
             TranscriptChunk(segments: Array(segments[start..<min(start + Self.headerRepeatInterval, segments.count)]))
         }
     }
@@ -34,8 +45,8 @@ enum TranscriptBlocks {
         segments.reduce(into: []) { blocks, segment in
             if let last = blocks.last, last.speakerID == segment.speakerID {
                 blocks[blocks.count - 1].segments.append(segment)
-            } else {
-                blocks.append(TranscriptBlock(speakerID: segment.speakerID, segments: [segment]))
+            } else if let block = TranscriptBlock(speakerID: segment.speakerID, segments: [segment]) {
+                blocks.append(block)
             }
         }
     }

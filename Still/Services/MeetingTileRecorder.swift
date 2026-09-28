@@ -43,6 +43,9 @@ final class MeetingTileRecorder {
     }
 
     func start(recordingID: UUID) async {
+        if isRunning {
+            cancel()
+        }
         let windows = (try? await TeamsMeetingWindow.fetchWindows()) ?? []
         guard TeamsMeetingWindow.resolve(from: windows) != nil else { return }
         self.recordingID = recordingID
@@ -53,32 +56,41 @@ final class MeetingTileRecorder {
     }
 
     func stop() async -> [SpeakerCue] {
-        timer?.cancel()
-        timer = nil
-        guard let recordingID, let startedAt else { return [] }
-        self.recordingID = nil
-        self.startedAt = nil
+        let id = recordingID
+        let start = startedAt
+        reset()
+        guard let recordingID = id, let startedAt = start else { return [] }
+        let root = root
+        let cipher = cipher
+        let recognizer = recognizer
+        let elapsed = configuration.now().timeIntervalSince(startedAt)
         defer { MeetingTileStore.discard(recordingID: recordingID, root: root) }
-        do {
-            let frames = try MeetingTileStore.frames(recordingID: recordingID, root: root, cipher: cipher)
-            let elapsed = configuration.now().timeIntervalSince(startedAt)
-            var observations: [TileObservation] = []
-            for frame in frames {
-                observations.append(TileObservation(offset: frame.offset, names: try await recognizer.recognizeNames(in: frame.png)))
+        return await Task.detached(priority: .utility) {
+            do {
+                let frames = try MeetingTileStore.frames(recordingID: recordingID, root: root, cipher: cipher)
+                var observations: [TileObservation] = []
+                for frame in frames {
+                    observations.append(TileObservation(offset: frame.offset, names: try await recognizer.recognizeNames(in: frame.png)))
+                }
+                return TileCueBuilder.cues(from: observations, endingAt: elapsed)
+            } catch {
+                return []
             }
-            return TileCueBuilder.cues(from: observations, endingAt: elapsed)
-        } catch {
-            return []
-        }
+        }.value
     }
 
     func cancel() {
+        let id = recordingID
+        reset()
+        if let id {
+            MeetingTileStore.discard(recordingID: id, root: root)
+        }
+    }
+
+    private func reset() {
         timer?.cancel()
         timer = nil
-        if let recordingID {
-            MeetingTileStore.discard(recordingID: recordingID, root: root)
-        }
-        self.recordingID = nil
+        recordingID = nil
         startedAt = nil
     }
 
@@ -125,6 +137,7 @@ final class MeetingTileRecorder {
             group.addTask { try? await collector.wait() }
             group.addTask {
                 try? await Task.sleep(for: .seconds(5))
+                collector.abandon()
                 return nil
             }
             let first = await group.next() ?? nil
@@ -155,6 +168,14 @@ private final class FrameCollector: NSObject, SCStreamOutput, @unchecked Sendabl
     func wait() async throws -> CGImage? {
         try await withCheckedThrowingContinuation { continuation in
             lock.withLock { self.continuation = continuation }
+        }
+    }
+
+    func abandon() {
+        lock.withLock {
+            guard let continuation else { return }
+            self.continuation = nil
+            continuation.resume(returning: nil)
         }
     }
 

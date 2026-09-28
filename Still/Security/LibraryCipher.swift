@@ -1,7 +1,7 @@
 import CryptoKit
 import Foundation
 
-struct LibraryCipher {
+struct LibraryCipher: Sendable {
     private let key: SymmetricKey
 
     init(key: SymmetricKey) {

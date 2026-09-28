@@ -13,8 +13,15 @@ enum TileCueBuilder {
     static let minimumFrames = 2
     static let maximumGap: TimeInterval = 45
 
+    private struct Run {
+        var name: String
+        var start: TimeInterval
+        var frames: Int
+        var last: TimeInterval
+    }
+
     static func cues(from observations: [TileObservation], endingAt end: TimeInterval) -> [SpeakerCue] {
-        var open: [String: (name: String, start: TimeInterval, frames: Int, last: TimeInterval)] = [:]
+        var open: [String: Run] = [:]
         var finished: [SpeakerCue] = []
         for observation in observations.sorted(by: { $0.offset < $1.offset }) {
             let present = Set(observation.names.map(VoiceProfiles.key(for:)).filter { !$0.isEmpty })
@@ -28,16 +35,15 @@ enum TileCueBuilder {
             for name in observation.names {
                 let key = VoiceProfiles.key(for: name)
                 guard !key.isEmpty else { continue }
-                if var run = open[key] {
-                    run.frames += 1
-                    run.last = observation.offset
-                    open[key] = run
+                if open[key] != nil {
+                    open[key]?.frames += 1
+                    open[key]?.last = observation.offset
                 } else {
-                    open[key] = (name, observation.offset, 1, observation.offset)
+                    open[key] = Run(name: name, start: observation.offset, frames: 1, last: observation.offset)
                 }
             }
         }
-        for (_, run) in open where run.frames >= minimumFrames {
+        for run in open.values where run.frames >= minimumFrames {
             finished.append(SpeakerCue(name: run.name, start: run.start, end: max(run.start, end)))
         }
         return finished.sorted { ($0.start, $0.name) < ($1.start, $1.name) }

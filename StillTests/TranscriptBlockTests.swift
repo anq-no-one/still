@@ -69,6 +69,13 @@ struct TranscriptBlockTests {
     }
 
     @Test
+    func emptyInputMakesNoBlocksAndEmptyBlocksRefuseToExist() {
+        #expect(TranscriptBlocks.group([]).isEmpty)
+        #expect(TranscriptBlock(speakerID: UUID(), segments: []) == nil)
+        #expect(TranscriptChunk(segments: []) == nil)
+    }
+
+    @Test
     func groupingKeepsEverySegmentIDStable() {
         let segments = (0..<4).map { index in
             TranscriptSegment(

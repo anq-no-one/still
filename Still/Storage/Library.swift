@@ -215,6 +215,7 @@ final class Library: RecordingLibrary {
             self.key = key
             try recoverInterruptedAudio(cipher: LibraryCipher(key: key))
             discardUnfinishedImports()
+            MeetingTileStore.discardLeftovers(in: services.audioRoot)
             try applyRetention()
             state = .unlocked
             journal?.note(.libraryUnlocked)
