@@ -9,6 +9,7 @@ struct RecordingFinalizer {
         var duration: TimeInterval
         var participants: [String] = []
         var cues: [SpeakerCue] = []
+        var tileCues: [SpeakerCue] = []
         var mixedMedia: [TimeSpan] = []
         var suggestedProjectID: UUID?
         var requiresTranscript = false
@@ -120,6 +121,6 @@ struct RecordingFinalizer {
         var naming = library.speakerNaming
         naming.participants = draft.participants
         let separated = await speakerSeparation.separate(transcription, tracks: tracks, naming: naming)
-        return SpeakerCueMatcher.suggest(draft.cues, for: separated, ownerName: naming.ownerName)
+        return SpeakerCueMatcher.suggest(draft.cues + draft.tileCues, for: separated, ownerName: naming.ownerName)
     }
 }

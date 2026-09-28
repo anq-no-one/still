@@ -82,6 +82,20 @@ struct Recording: Identifiable, Encodable, Equatable, Sendable {
         return renamed
     }
 
+    func mergingSpeaker(_ duplicate: Speaker, into survivor: Speaker) -> Recording {
+        guard duplicate.id != survivor.id,
+              speakers.contains(where: { $0.id == duplicate.id }),
+              speakers.contains(where: { $0.id == survivor.id })
+        else { return self }
+
+        var merged = self
+        merged.segments = segments.map { segment in
+            segment.speakerID == duplicate.id ? segment.attributed(to: survivor) : segment
+        }
+        merged.speakers = speakers.filter { $0.id != duplicate.id }
+        return merged
+    }
+
     func confirmingSuggestedName(of speaker: Speaker) -> Recording {
         updatingSpeaker(speaker) { $0.confirmingSuggestedName() }
     }

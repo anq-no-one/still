@@ -93,6 +93,11 @@ final class RecordingEditor {
         scheduleSave()
     }
 
+    func mergeSpeaker(_ duplicate: Speaker, into survivor: Speaker) {
+        recording = recording.mergingSpeaker(duplicate, into: survivor)
+        scheduleSave()
+    }
+
     func confirmSuggestedName(of speaker: Speaker) {
         recording = recording.confirmingSuggestedName(of: speaker)
         scheduleSave()

@@ -9,10 +9,13 @@ protocol AudioRecorder: AnyObject {
     func start(recordingID: UUID) async throws
     func finish() async throws
     func discard() async
+    func takeTileCues() async -> [SpeakerCue]
 }
 
 extension AudioRecorder {
     var captureNote: String? { nil }
+
+    func takeTileCues() async -> [SpeakerCue] { [] }
 }
 
 enum CaptureError: LocalizedError, Equatable {

@@ -69,6 +69,10 @@ struct StillApp: App {
         #endif
         let microphone = MainActor.assumeIsolated { MicrophoneInput(fixture: audioFixture) }
         let systemAudio = SystemAudioInput()
+        #if os(macOS)
+        let tileVoiceActivity = SystemVoiceActivity()
+        try? systemAudio.attach { _ in { buffer in tileVoiceActivity.ingest(buffer) } }
+        #endif
         let audioTarget = MainActor.assumeIsolated { SystemAudioTarget() }
 
         let supportRoot = URL.applicationSupportDirectory.appending(path: "Still", directoryHint: .isDirectory)
@@ -135,7 +139,11 @@ struct StillApp: App {
                                 microphoneInput: microphone,
                                 systemAudioInput: systemAudio,
                                 capturesSystemAudio: { proEntitlements.allows(.macSystemAudio) },
-                                scope: { audioTarget.scope }
+                                scope: { audioTarget.scope },
+                                tiles: MeetingTileSource(
+                                    settings: UserDefaultsMeetingTileSettings(),
+                                    isVoiceActive: { tileVoiceActivity.isActive() }
+                                )
                             )
                             #else
                             MicrophoneRecorder(root: audioRoot, cipher: LibraryCipher(key: key), input: microphone)

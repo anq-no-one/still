@@ -38,6 +38,17 @@ names, app version, error numbers and random identifiers, sealed with a key that
 device. It never holds audio, transcripts, names, project titles, file paths or keys, and it leaves
 the device only when you export it yourself.
 
+## Meeting-window name tiles (Mac)
+
+When the meeting-window toggle is on, and only while someone is speaking on the call, Still
+photographs the Teams meeting window about once every twenty seconds. Each photograph is
+encrypted with the Library key next to the recording's audio, read on this device for the
+names shown on participant tiles, and deleted the moment the recording stops. A name that
+survives becomes a suggestion you confirm or reject, exactly like a name from the browser
+extensions or your calendar. Refusing the Screen Recording permission or turning the toggle
+off falls back silently to those other sources, and iPhone and iPad never take such
+photographs.
+
 ## Voice profiles
 
 Still remembers a person's voice only when you turn that on for a named speaker. It then suggests
@@ -74,8 +85,8 @@ Library ever reaches the browser.
 - **Speech recognition** — to turn speech into text on your device.
 - **Screen recording (Mac)** — to capture what a call is playing. Still takes audio only, and only
   from call apps and browsers. Music players and other apps are never captured, and an automatic
-  recording hears only the one app or browser that holds the call. No screen image is captured or
-  stored.
+  recording hears only the one app or browser that holds the call. The only images Still ever takes
+  are the meeting-window snapshots described below, and only while that toggle is on.
 - **Calendar** — optional, to suggest a title and the people expected in a meeting.
 - **Local network** — optional, only for syncing directly with your own nearby devices.
 

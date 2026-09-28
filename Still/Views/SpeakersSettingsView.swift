@@ -2,12 +2,25 @@ import SwiftUI
 
 struct SpeakersSettingsView: View {
     let library: Library
+    var tileSettings: MeetingTileSettingsStore = UserDefaultsMeetingTileSettings()
 
     @State private var ownerName = ""
     @State private var ownerNameFailure: String?
+    @State private var identifiesTiles = true
 
     var body: some View {
         Form {
+            #if os(macOS)
+            Section {
+                Toggle("Identify Speakers from the Meeting Window", isOn: $identifiesTiles)
+                    .onChange(of: identifiesTiles) { _, enabled in tileSettings.setEnabled(enabled) }
+            } header: {
+                Text("Meeting Window")
+            } footer: {
+                Text("While a call app plays sound, Still photographs only the meeting window when someone is speaking. On-device text reading suggests names for that recording, then the photographs are deleted. They never leave this Mac. Needs the Screen Recording permission you already granted for call audio. Turn this off to rely on calendar, voice and manual names only.")
+            }
+            #endif
+
             Section {
                 TextField("Your Name", text: $ownerName, prompt: Text("First and last name"))
                     .onSubmit(saveOwnerName)
@@ -41,7 +54,10 @@ struct SpeakersSettingsView: View {
         }
         .formStyle(.grouped)
         .settingsPaneTitle("Speakers")
-        .onAppear { ownerName = library.ownerName ?? "" }
+        .onAppear {
+            ownerName = library.ownerName ?? ""
+            identifiesTiles = tileSettings.isEnabled()
+        }
         .onDisappear(perform: saveOwnerName)
     }
 

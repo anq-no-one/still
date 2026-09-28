@@ -96,6 +96,8 @@ struct SpeakerSeparation: Sendable {
 
 enum SpeakerAssignment {
     static let tolerance: TimeInterval = 1
+    static let minimumVoiceDuration: TimeInterval = 1
+    static let maximumMergeDistance: Float = 0.2
 
     static func assign(
         _ turns: [SpeakerTurn],
@@ -110,8 +112,15 @@ enum SpeakerAssignment {
             }
         }
 
+        let claimedBefore = Set(matches.values)
+        for voice in voicesBelowMinimum(turns, matches: matches, in: transcription) {
+            matches = matches.filter { $0.value != voice }
+        }
+        matches = remappingNearIdenticalVoices(matches, voiceprints: voiceprints)
+        let pruned = claimedBefore.subtracting(matches.values).count > 0
+
         let order = transcription.segments.compactMap { matches[$0.id] }.uniqued()
-        guard order.count > 1 else {
+        guard order.count > 1 || (pruned && order.count == 1) else {
             return recognizing(group, by: order.first.flatMap { voiceprints[$0] }, in: transcription)
         }
 
@@ -137,6 +146,35 @@ enum SpeakerAssignment {
         }
 
         return TranscriptionResult(segments: segments, speakers: speakers)
+    }
+
+    private static func voicesBelowMinimum(
+        _ turns: [SpeakerTurn],
+        matches: [UUID: Int],
+        in transcription: TranscriptionResult
+    ) -> [Int] {
+        let totals = turns.reduce(into: [Int: TimeInterval]()) { totals, turn in
+            guard matches.values.contains(turn.speaker) else { return }
+            for segment in transcription.segments where matches[segment.id] == turn.speaker {
+                totals[turn.speaker, default: 0] += turn.overlap(with: segment)
+            }
+        }
+        return totals.filter { $0.value < minimumVoiceDuration }.map(\.key)
+    }
+
+    private static func remappingNearIdenticalVoices(
+        _ matches: [UUID: Int],
+        voiceprints: [Int: Voiceprint]
+    ) -> [UUID: Int] {
+        var canonical: [Int: Int] = [:]
+        for voice in Set(matches.values).sorted() {
+            guard let print = voiceprints[voice] else { canonical[voice] = voice; continue }
+            let twin = canonical.keys
+                .filter { voiceprints[$0] != nil }
+                .first { voiceprints[$0]!.distance(to: print) <= maximumMergeDistance }
+            canonical[voice] = twin.flatMap { canonical[$0] } ?? voice
+        }
+        return matches.mapValues { canonical[$0] ?? $0 }
     }
 
     private static func recognizing(

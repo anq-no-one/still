@@ -27,6 +27,8 @@ against.
 | A reprocessed or synced Recording erasing a user's review | Each extracted item has a stable identity; reviews and edits merge field by field by their own timestamps and survive a newer extraction pass | `aUserEditSurvivesReprocessing`, `aRegeneratedRunFromAnotherDeviceKeepsTheUsersDecisions` |
 | Content leaking through diagnostics | Reports have no free-text field; the event name comes from a closed set | `DiagnosticsTests` |
 | Unnoticed network use | A test names every file allowed to reach the network and fails on any other | `NetworkBoundaryTests` |
+| A meeting-window photograph outliving its recording | Frames are sealed with the Library key beside the audio, read once on device, and deleted when the recording stops, whether it is saved or discarded | `framesRestEncryptedBesideTheAudioAndVanishAfterwards` |
+| A misread tile name accusing the wrong speaker | Tile names only suggest; a suggestion needs sustained overlap with a diarized voice before it is shown, and the user confirms or rejects it | `stubOCRCuesSuggestNamesThroughTheExistingMatcher` |
 
 ## Residual risks
 
@@ -51,6 +53,10 @@ against.
   tell whether it was written down safely.
 - **The device key rests on Keychain and biometric enforcement.** A jailbroken or compromised OS
   breaks that boundary, and no application-level design can restore it.
+- **Meeting-window detection and tile reading are heuristic.** Teams UI changes can mislead
+  either stage, so every stage degrades to the previous behavior instead of failing: no window
+  means no photographs, no names means no suggestions, and a weak match means no confirmation
+  prompt.
 
 ## Recovery boundaries
 

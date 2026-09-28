@@ -183,6 +183,84 @@ struct SpeakerSeparationTests {
         Data(repeating: 1, count: AudioFormat.transcription.bytesPerSecond)
     }
 
+    @Test
+    func aSliverVoiceBelowOneSecondReturnsItsLinesToTheGroup() async {
+        let transcription = call([
+            (0, 6, "The plan for this week", others),
+            (6, 6.4, "Yeah", others),
+        ])
+        let diarizer = StubDiarizer(turns: [
+            SpeakerTurn(speaker: 0, start: 0, end: 6),
+            SpeakerTurn(speaker: 1, start: 6, end: 6.4),
+        ])
+
+        let result = await SpeakerSeparation(diarizer: diarizer).separate(transcription, tracks: callTracks)
+
+        #expect(result.speakers.map(\.name) == ["You", "Other participants", "Speaker 1"])
+        #expect(result.segments[0].speakerID != others.id)
+        #expect(result.segments[1].speakerID == others.id)
+    }
+
+    @Test
+    func nearIdenticalVoiceprintsMergeIntoOneSpeaker() async throws {
+        let transcription = call([
+            (0, 4, "Welcome everyone", others),
+            (4, 8, "Thanks for having me", others),
+        ])
+        let diarizer = StubDiarizer(turns: [
+            SpeakerTurn(speaker: 0, start: 0, end: 4),
+            SpeakerTurn(speaker: 1, start: 4, end: 8),
+        ])
+        let prints = StubVoiceprints(prints: [
+            0: try #require(Voiceprint([1, 0, 0])),
+            1: try #require(Voiceprint([0.99, 0.01, 0])),
+        ])
+
+        let result = await SpeakerSeparation(diarizer: diarizer, voiceprints: prints)
+            .separate(transcription, tracks: callTracks)
+
+        #expect(result.speakers.map(\.name) == ["You", "Speaker 1"])
+        #expect(result.segments.map(\.speakerID) == [result.speakers[1].id, result.speakers[1].id])
+    }
+
+    @Test
+    func distinctVoiceprintsStaySeparate() async throws {
+        let transcription = call([
+            (0, 4, "Welcome everyone", others),
+            (4, 8, "Thanks for having me", others),
+        ])
+        let diarizer = StubDiarizer(turns: [
+            SpeakerTurn(speaker: 0, start: 0, end: 4),
+            SpeakerTurn(speaker: 1, start: 4, end: 8),
+        ])
+        let prints = StubVoiceprints(prints: [
+            0: try #require(Voiceprint([1, 0, 0])),
+            1: try #require(Voiceprint([0, 1, 0])),
+        ])
+
+        let result = await SpeakerSeparation(diarizer: diarizer, voiceprints: prints)
+            .separate(transcription, tracks: callTracks)
+
+        #expect(result.speakers.map(\.name) == ["You", "Speaker 1", "Speaker 2"])
+    }
+
+    @Test
+    func aFullyClaimedGroupLeavesNoOtherParticipantsBehind() async {
+        let transcription = call([
+            (0, 4, "Welcome everyone", others),
+            (4, 8, "Thanks for having me", others),
+        ])
+        let diarizer = StubDiarizer(turns: [
+            SpeakerTurn(speaker: 0, start: 0, end: 4),
+            SpeakerTurn(speaker: 1, start: 4, end: 8),
+        ])
+
+        let result = await SpeakerSeparation(diarizer: diarizer).separate(transcription, tracks: callTracks)
+
+        #expect(result.speakers.map(\.name) == ["You", "Speaker 1", "Speaker 2"])
+        #expect(!result.segments.contains { $0.speakerID == others.id })
+    }
+
     private func call(_ lines: [(TimeInterval, TimeInterval, String, Speaker)]) -> TranscriptionResult {
         TranscriptionResult(
             segments: lines.map { start, end, text, speaker in

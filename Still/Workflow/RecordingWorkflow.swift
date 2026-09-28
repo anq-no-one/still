@@ -174,6 +174,7 @@ final class RecordingWorkflow {
 
         do {
             try await recorder.finish()
+            let tileCues = await recorder.takeTileCues()
             let startedAt = startedAt ?? now()
             let draftText = transcript
             try library.add(
@@ -193,6 +194,7 @@ final class RecordingWorkflow {
                 createdAt: startedAt,
                 duration: elapsed,
                 cues: cues,
+                tileCues: tileCues,
                 mixedMedia: mixed,
                 suggestedProjectID: suggestedProjectID
             )

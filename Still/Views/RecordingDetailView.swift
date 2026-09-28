@@ -102,6 +102,7 @@ struct RecordingDetailView: View {
                         rename: { editor.renameSpeaker($0, to: $1) },
                         confirmSuggestedName: editor.confirmSuggestedName(of:),
                         rejectSuggestedName: editor.rejectSuggestedName(of:),
+                        merge: { editor.mergeSpeaker($0, into: $1) },
                         remembersVoice: { library.remembersVoice(of: $0.name) },
                         setRemembersVoice: { speaker, remembers in
                             try? remembers ? library.rememberVoice(of: speaker.name) : library.forgetVoice(of: speaker.name)
@@ -138,14 +139,14 @@ struct RecordingDetailView: View {
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
-                    ForEach(visibleSegments) { segment in
-                        SegmentRow(
+                    ForEach(transcriptBlocks) { block in
+                        TranscriptBlockView(
+                            block: block,
+                            speaker: block.speakerID.flatMap { id in recording.speakers.first { $0.id == id } },
                             showsTranslation: showsTranslation,
-                            segment: segment,
-                            speaker: editor.speaker(of: segment),
-                            isMixed: recording.mixedMediaSpans?.contains { $0.overlaps(segment) } ?? false,
-                            play: { player.play(from: segment.start) },
-                            correct: { editor.correct(segment, to: $0) }
+                            isMixed: { segment in recording.mixedMediaSpans?.contains { $0.overlaps(segment) } ?? false },
+                            play: { player.play(from: $0.start) },
+                            correct: { editor.correct($0, to: $1) }
                         )
                     }
                 }
@@ -227,10 +228,12 @@ struct RecordingDetailView: View {
         editor.recording
     }
 
-    private var visibleSegments: [TranscriptSegment] {
-        recording.segments.filter {
-            !DisfluencyFilter.isFillerOnly($0.displayText, language: $0.language)
-        }
+    private var transcriptBlocks: [TranscriptBlock] {
+        TranscriptBlocks.group(
+            recording.segments.filter {
+                !DisfluencyFilter.isFillerOnly($0.displayText, language: $0.language)
+            }
+        )
     }
 
     private var playbackMessage: String? {
@@ -371,29 +374,104 @@ private struct RecordingDetailSkeleton: View {
     }
 }
 
+private struct TranscriptBlockView: View {
+    let block: TranscriptBlock
+    let speaker: Speaker?
+    let showsTranslation: Bool
+    let isMixed: (TranscriptSegment) -> Bool
+    let play: (TranscriptSegment) -> Void
+    let correct: (TranscriptSegment, String) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            TranscriptSpeakerHeader(speakerName: speaker?.name, start: block.start)
+
+            ForEach(block.chunks()) { chunk in
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(chunk.segments) { segment in
+                        SegmentRow(
+                            showsTranslation: showsTranslation,
+                            segment: segment,
+                            speakerName: speaker?.name,
+                            isMixed: isMixed(segment),
+                            play: { play(segment) },
+                            correct: { correct(segment, $0) }
+                        )
+                    }
+                }
+
+                if let last = chunk.segments.last, last.id != block.segments.last?.id {
+                    TranscriptSpeakerHeader(speakerName: speaker?.name, start: last.end, isContinuation: true)
+                }
+            }
+        }
+    }
+}
+
+private struct TranscriptSpeakerHeader: View {
+    let speakerName: String?
+    let start: TimeInterval
+    var isContinuation: Bool = false
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text(initials)
+                .font(.caption2.bold())
+                .foregroundStyle(.white)
+                .frame(width: 28, height: 28)
+                .background(Circle().fill(.secondary))
+                .accessibilityHidden(true)
+
+            Text(speakerName ?? String(localized: "Unknown speaker"))
+                .font(.subheadline.bold())
+
+            Text(start.recordingDurationText)
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(.secondary)
+
+            if isContinuation {
+                Text(String(localized: "continued"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(speakerName ?? "Unknown speaker"), \(start.recordingDurationText)")
+    }
+
+    private var initials: String {
+        guard let speakerName, !speakerName.isEmpty else { return "?" }
+        let words = speakerName.split(separator: " ")
+        let first = words.first?.first.map(String.init) ?? ""
+        let second = words.dropFirst().first?.first.map(String.init) ?? ""
+        let pair = first + second
+        return pair.isEmpty ? "?" : pair
+    }
+}
+
 private struct SegmentRow: View {
     let showsTranslation: Bool
     let segment: TranscriptSegment
-    let speaker: Speaker?
+    let speakerName: String?
     let isMixed: Bool
     let play: () -> Void
     let correct: (String) -> Void
 
     @State private var text: String
     @FocusState private var isEditing: Bool
-    @ScaledMetric(relativeTo: .caption) private var timeColumnWidth = 92
+    @ScaledMetric(relativeTo: .caption) private var timeColumnWidth = 52
 
     init(
         showsTranslation: Bool,
         segment: TranscriptSegment,
-        speaker: Speaker?,
+        speakerName: String?,
         isMixed: Bool,
         play: @escaping () -> Void,
         correct: @escaping (String) -> Void
     ) {
         self.showsTranslation = showsTranslation
         self.segment = segment
-        self.speaker = speaker
+        self.speakerName = speakerName
         self.isMixed = isMixed
         self.play = play
         self.correct = correct
@@ -411,14 +489,8 @@ private struct SegmentRow: View {
                 .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.secondary)
                 .buttonStyle(.plain)
-                .accessibilityHint("Plays the recording from \(segment.startText)")
+                .accessibilityHint("Plays the recording from \(segment.startText), said by \(speakerName ?? "an unknown speaker")")
 
-                if let speaker {
-                    Text(speaker.name)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
                 if isMixed {
                     Image(systemName: "speaker.wave.2")
                         .font(.caption2)

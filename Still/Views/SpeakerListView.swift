@@ -6,6 +6,7 @@ struct SpeakerListView: View {
     let rename: (Speaker, String) -> Void
     let confirmSuggestedName: (Speaker) -> Void
     let rejectSuggestedName: (Speaker) -> Void
+    var merge: (Speaker, Speaker) -> Void = { _, _ in }
     var remembersVoice: (Speaker) -> Bool = { _ in false }
     var setRemembersVoice: (Speaker, Bool) -> Void = { _, _ in }
 
@@ -18,9 +19,11 @@ struct SpeakerListView: View {
                 SpeakerRow(
                     speaker: speaker,
                     suggestions: speaker.isUnnamedGuest ? suggestions : [],
+                    mergeTargets: speakers.filter { $0.id != speaker.id },
                     rename: { rename(speaker, $0) },
                     confirmSuggestedName: { confirmSuggestedName(speaker) },
                     rejectSuggestedName: { rejectSuggestedName(speaker) },
+                    merge: { merge(speaker, $0) },
                     remembersVoice: remembersVoice(speaker),
                     setRemembersVoice: { setRemembersVoice(speaker, $0) }
                 )
@@ -32,9 +35,11 @@ struct SpeakerListView: View {
 private struct SpeakerRow: View {
     let speaker: Speaker
     let suggestions: [String]
+    let mergeTargets: [Speaker]
     let rename: (String) -> Void
     let confirmSuggestedName: () -> Void
     let rejectSuggestedName: () -> Void
+    let merge: (Speaker) -> Void
     let remembersVoice: Bool
     let setRemembersVoice: (Bool) -> Void
 
@@ -44,17 +49,21 @@ private struct SpeakerRow: View {
     init(
         speaker: Speaker,
         suggestions: [String],
+        mergeTargets: [Speaker],
         rename: @escaping (String) -> Void,
         confirmSuggestedName: @escaping () -> Void,
         rejectSuggestedName: @escaping () -> Void,
+        merge: @escaping (Speaker) -> Void,
         remembersVoice: Bool,
         setRemembersVoice: @escaping (Bool) -> Void
     ) {
         self.speaker = speaker
         self.suggestions = suggestions
+        self.mergeTargets = mergeTargets
         self.rename = rename
         self.confirmSuggestedName = confirmSuggestedName
         self.rejectSuggestedName = rejectSuggestedName
+        self.merge = merge
         self.remembersVoice = remembersVoice
         self.setRemembersVoice = setRemembersVoice
         _name = State(initialValue: speaker.name)
@@ -63,6 +72,9 @@ private struct SpeakerRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             field
+            if !speaker.isYou, !mergeTargets.isEmpty {
+                mergeControl
+            }
             if let suggested = speaker.suggestedName {
                 suggestedName(suggested)
             }
@@ -111,6 +123,22 @@ private struct SpeakerRow: View {
         }
         .buttonStyle(.bordered)
         .controlSize(.small)
+    }
+
+    private var mergeControl: some View {
+        Menu {
+            ForEach(mergeTargets) { target in
+                Button("Merge into \(target.name)") {
+                    merge(target)
+                }
+            }
+        } label: {
+            Label("Merge", systemImage: "arrow.triangle.merge")
+                .font(.callout)
+        }
+        .menuStyle(.borderlessButton)
+        .controlSize(.small)
+        .accessibilityHint("Moves every line of \(speaker.name) to the speaker you pick and removes \(speaker.name)")
     }
 
     private var voiceMemory: some View {
