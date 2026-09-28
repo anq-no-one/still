@@ -75,15 +75,22 @@ def committed_canonical_project_text(path)
 end
 
 def xcodegen_regen!
-  sh("xcodegen", "generate", "--spec", File.join(ROOT, "project.yml"), "--project", ROOT)
-  dirty = `git -C #{ROOT.shellescape} status --porcelain -- Still.xcodeproj`.lines.map { |l| l[3..].strip }
-  return if dirty.empty?
-  unless dirty.all? { |p| !canonical_project_text(p).empty? && canonical_project_text(p) == committed_canonical_project_text(p) }
-    UI.user_error!("The regenerated project differs from the commit beyond xcodegen's " \
-      "nondeterministic ID assignment. Commit the regenerated project first.")
+  attempts = (ENV["STILL_XCODEGEN_ATTEMPTS"] || "10").to_i
+  attempts.times do |i|
+    sh("xcodegen", "generate", "--spec", File.join(ROOT, "project.yml"), "--project", ROOT)
+    dirty = `git -C #{ROOT.shellescape} status --porcelain -- Still.xcodeproj`.lines.map { |l| l[3..].strip }
+    return if dirty.empty?
+    if dirty.all? { |p| !canonical_project_text(p).empty? && canonical_project_text(p) == committed_canonical_project_text(p) }
+      sh("git", "-C", ROOT, "checkout", "--", "Still.xcodeproj")
+      UI.message("Ignoring nondeterministic xcodegen ID assignment; building the committed project")
+      return
+    end
+    UI.message("xcodegen output differs beyond IDs (attempt #{i + 1}/#{attempts}); regenerating")
   end
-  sh("git", "-C", ROOT, "checkout", "--", "Still.xcodeproj")
-  UI.message("Ignoring nondeterministic xcodegen ID assignment; building the committed project")
+  UI.user_error!("xcodegen keeps producing a project that differs from the commit beyond " \
+    "nondeterministic ID assignment. Known cause: it randomly swaps the two Still-macOS " \
+    "Embed Dependencies copy phases. Regenerate locally until the committed layout comes out, " \
+    "then commit that project first.")
 end
 
 def build(scheme:, platform:, destination:, version:, build_number:)
