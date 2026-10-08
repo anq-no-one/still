@@ -154,6 +154,33 @@ struct BrowserMeetingBridgeTests {
     }
 
     @Test
+    func theMeetParticipantListReachesTheRecording() async throws {
+        let (bridge, coordinator) = try await make(allowed: [meet])
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .started))
+
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .participants, participants: ["Phil Carter"]))
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .ended))
+        await coordinator.waitForBackgroundProcessing()
+
+        let recording = try #require(coordinator.library.recordings.first)
+        #expect(recording.expectedParticipants == ["Phil Carter"])
+    }
+
+    @Test
+    func participantNamesAreIgnoredUntilTheUserTurnsThemOn() async throws {
+        let (bridge, coordinator) = try await make(allowed: [meet])
+        bridge.suggestsSpeakerNames = false
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .started))
+
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .participants, participants: ["Phil Carter"]))
+        await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .ended))
+        await coordinator.waitForBackgroundProcessing()
+
+        let recording = try #require(coordinator.library.recordings.first)
+        #expect(recording.expectedParticipants == nil)
+    }
+
+    @Test
     func soundFromAnotherTabIsMarkedOnTheSavedRecording() async throws {
         let (bridge, coordinator) = try await make(allowed: [meet])
         await bridge.handle(BrowserMeetingEvent(host: meet, meetingID: "a", phase: .started))

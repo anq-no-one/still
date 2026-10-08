@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Still",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Tells Still when an approved meeting starts and ends, and who is speaking during it. It sends nothing else.",
   "icons": {
     "16": "icon-16.png",

@@ -3,6 +3,7 @@ const SUPPORTED_DOMAINS = ["zoom.us"];
 const MEETING_PHASES = ["started", "ended"];
 const SPEAKER_PHASES = ["speakerStarted", "speakerEnded"];
 const MAXIMUM_SPEAKER_LENGTH = 128;
+const MAXIMUM_PARTICIPANTS = 100;
 
 export function isSupported(host) {
   if (typeof host !== "string") {
@@ -22,12 +23,18 @@ export function meetingSignal(message) {
   if (!message || !isSupported(message.host)) {
     return null;
   }
-  const { host, meetingID, phase, speaker } = message;
+  const { host, meetingID, phase, speaker, participants } = message;
   if (typeof meetingID !== "string") {
     return null;
   }
   if (isMeetingBoundary(phase)) {
     return { host, meetingID, phase };
+  }
+  if (phase === "participants" && Array.isArray(participants)) {
+    const names = participants
+      .filter((name) => typeof name === "string" && name.length > 0 && name.length <= MAXIMUM_SPEAKER_LENGTH)
+      .slice(0, MAXIMUM_PARTICIPANTS);
+    return names.length > 0 ? { host, meetingID, phase, participants: names } : null;
   }
   if (
     SPEAKER_PHASES.includes(phase) &&

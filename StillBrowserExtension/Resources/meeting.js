@@ -6,6 +6,10 @@ const SPEAKER_READERS = {
   "meet.google.com": meetSpeakers,
 };
 
+const ROSTER_READERS = {
+  "meet.google.com": meetRoster,
+};
+
 let reportedStart = false;
 let speaking = new Set();
 
@@ -36,6 +40,32 @@ function meetSpeakers() {
   return names;
 }
 
+function meetRoster() {
+  const names = new Set();
+  for (const tile of document.querySelectorAll("[data-participant-id]")) {
+    const name = meetTileName(tile);
+    if (name) {
+      names.add(name);
+    }
+  }
+  return names;
+}
+
+let reportedRoster = "";
+
+function checkRoster() {
+  const readRoster = ROSTER_READERS[location.host];
+  if (!reportedStart || !readRoster) {
+    return;
+  }
+  const names = [...readRoster()].filter(Boolean).sort();
+  const key = names.join("\n");
+  if (names.length > 0 && key !== reportedRoster) {
+    reportedRoster = key;
+    extensionRuntime.sendMessage({ host: location.host, meetingID: MEETING_ID, phase: "participants", participants: names });
+  }
+}
+
 function report(phase, speaker) {
   extensionRuntime.sendMessage({ host: location.host, meetingID: MEETING_ID, phase, speaker });
 }
@@ -64,6 +94,7 @@ function checkSpeakers() {
 function endMeeting() {
   updateSpeakers(new Set());
   reportedStart = false;
+  reportedRoster = "";
   report("ended");
 }
 
@@ -80,6 +111,7 @@ function check() {
 
 setInterval(check, 2000);
 setInterval(checkSpeakers, 500);
+setInterval(checkRoster, 5000);
 window.addEventListener("pagehide", () => {
   if (reportedStart) {
     endMeeting();

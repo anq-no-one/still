@@ -10,6 +10,7 @@ struct RecordingFinalizer {
         var participants: [String] = []
         var meetingTitle: String?
         var titleSource: TitleSource = .user
+        var roster: [String] = []
         var cues: [SpeakerCue] = []
         var tileCues: [SpeakerCue] = []
         var mixedMedia: [TimeSpan] = []
@@ -87,7 +88,7 @@ struct RecordingFinalizer {
             transcript: transcript,
             segments: segments,
             speakers: transcription?.speakers ?? [],
-            expectedParticipants: draft.participants.isEmpty ? nil : draft.participants,
+            expectedParticipants: Self.expectedParticipants(draft),
             note: note,
             createdAt: draft.createdAt,
             duration: draft.duration,
@@ -97,6 +98,15 @@ struct RecordingFinalizer {
         )
         recording.titleSource = draft.title == nil ? .automatic : draft.titleSource
         return recording
+    }
+
+    private static func expectedParticipants(_ draft: Draft) -> [String]? {
+        var names: [String] = []
+        for name in draft.roster + draft.participants
+        where !GuestNaming.isSelfEntry(name) && !names.contains(where: { VoiceProfiles.key(for: $0) == VoiceProfiles.key(for: name) }) {
+            names.append(name)
+        }
+        return names.isEmpty ? nil : names
     }
 
     private static func title(
@@ -151,6 +161,6 @@ struct RecordingFinalizer {
         var naming = library.speakerNaming
         naming.participants = draft.participants
         let separated = await speakerSeparation.separate(transcription, tracks: tracks, naming: naming)
-        return GuestNaming.name(separated, cues: draft.cues + draft.tileCues, ownerName: naming.ownerName)
+        return GuestNaming.name(separated, cues: draft.cues + draft.tileCues, roster: draft.roster, ownerName: naming.ownerName)
     }
 }

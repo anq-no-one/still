@@ -163,6 +163,10 @@ final class RecordingCoordinator {
         workflow?.otherMediaEnded()
     }
 
+    func participantsSeen(_ names: [String]) {
+        workflow?.participantsSeen(names)
+    }
+
     func speakerEnded(_ name: String) {
         workflow?.speakerEnded(name)
     }

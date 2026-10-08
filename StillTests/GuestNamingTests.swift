@@ -160,6 +160,62 @@ struct GuestNamingTests {
         #expect(speaker?.suggestedName == nil)
     }
 
+    @Test
+    func theOnlyOtherPersonInAOneOnOneCallIsNamedFromTheRoster() throws {
+        let others = Speaker.forTrack(.system)
+        let call = conversation([(you, "Let's start."), (others, "Sure, the build is green.")])
+
+        let named = GuestNaming.name(call, roster: ["Andrii D.", "Phil Carter"], ownerName: "Andrii D.")
+
+        let guest = try #require(named.speakers.first { $0.id == others.id })
+        #expect(guest.name == "Phil Carter")
+        #expect(guest.nameSource == .roster)
+    }
+
+    @Test
+    func theLastUnnamedVoiceGetsTheLastUnclaimedName() throws {
+        let call = conversation([
+            (you, "Hey Phil, how are you?"),
+            (phil, "Good."),
+            (you, "So, Phil, what's next?"),
+            (phil, "Nothing."),
+            (anna, "I have one update."),
+        ])
+
+        let named = GuestNaming.name(call, roster: ["Andrii", "Phil Carter", "Anna Lee"], ownerName: "Andrii")
+
+        #expect(named.speakers.first { $0.id == phil.id }?.name == "Phil Carter")
+        #expect(named.speakers.first { $0.id == anna.id }?.name == "Anna Lee")
+        #expect(named.speakers.first { $0.id == anna.id }?.nameSource == .roster)
+    }
+
+    @Test
+    func twoUnnamedVoicesAndOneNameLeftStayUnnamed() {
+        let call = conversation([(you, "Let's start."), (phil, "Sure."), (anna, "Okay.")])
+
+        let named = GuestNaming.name(call, roster: ["Andrii", "Phil Carter"], ownerName: "Andrii")
+
+        #expect(named.speakers.allSatisfy { $0.nameSource != .roster })
+    }
+
+    @Test
+    func theRostersOwnEntryIsNotAGuest() throws {
+        let others = Speaker.forTrack(.system)
+        let call = conversation([(you, "Let's start."), (others, "Sure.")])
+
+        let named = GuestNaming.name(call, roster: ["You", "Phil Carter"])
+
+        #expect(named.speakers.first { $0.id == others.id }?.name == "Phil Carter")
+    }
+
+    @Test
+    func withoutKnowingTheOwnerTwoRosterNamesNameNobody() {
+        let others = Speaker.forTrack(.system)
+        let call = conversation([(you, "Let's start."), (others, "Sure.")])
+
+        #expect(GuestNaming.name(call, roster: ["Andrii D.", "Phil Carter"]) == call)
+    }
+
     private func conversation(_ lines: [(Speaker, String)]) -> TranscriptionResult {
         var clock: TimeInterval = 0
         let segments = lines.map { speaker, text in

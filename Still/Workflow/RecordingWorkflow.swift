@@ -25,6 +25,7 @@ final class RecordingWorkflow {
     private var finishedAt: Date?
     private var draftStartFailure: String?
     private var speakerCues = SpeakerCueLog()
+    private var roster: [String] = []
     private var mixedMedia = MixedMediaLog()
 
     private(set) var state: State = .idle
@@ -88,6 +89,7 @@ final class RecordingWorkflow {
         finishedAt = nil
         draftStartFailure = nil
         speakerCues = SpeakerCueLog()
+        roster = []
         mixedMedia = MixedMediaLog()
         pendingFinalization = nil
         stopRequested = false
@@ -132,6 +134,13 @@ final class RecordingWorkflow {
         speakerCues.began(name, at: offset)
     }
 
+    func participantsSeen(_ names: [String]) {
+        guard recordingOffset != nil else { return }
+        for name in names where !roster.contains(where: { VoiceProfiles.key(for: $0) == VoiceProfiles.key(for: name) }) {
+            roster.append(name)
+        }
+    }
+
     func speakerEnded(_ name: String) {
         guard let offset = recordingOffset else { return }
         speakerCues.ended(name, at: offset)
@@ -168,7 +177,9 @@ final class RecordingWorkflow {
         state = .finalizing
         stopCapture()
         let cues = speakerCues.cues(closingAt: elapsed)
+        let roster = self.roster
         speakerCues = SpeakerCueLog()
+        self.roster = []
         let mixed = mixedMedia.spans(closingAt: elapsed)
         mixedMedia = MixedMediaLog()
 
@@ -193,6 +204,7 @@ final class RecordingWorkflow {
                 id: recordingID,
                 createdAt: startedAt,
                 duration: elapsed,
+                roster: roster,
                 cues: cues,
                 tileCues: tileCues,
                 mixedMedia: mixed,
@@ -210,6 +222,7 @@ final class RecordingWorkflow {
         stopRequested = true
         stopCapture()
         speakerCues = SpeakerCueLog()
+        roster = []
         mixedMedia = MixedMediaLog()
         pendingFinalization = nil
         await recorder.discard()

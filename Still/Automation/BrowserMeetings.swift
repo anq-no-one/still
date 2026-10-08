@@ -76,6 +76,10 @@ final class BrowserMeetingBridge {
             } else {
                 coordinator.otherMediaEnded()
             }
+        case .participants:
+            guard suggestsSpeakerNames, let names = event.participants,
+                  activeMeetingID == nil || activeMeetingID == event.meetingID else { return }
+            coordinator.participantsSeen(names)
         case .speakerStarted, .speakerEnded:
             guard suggestsSpeakerNames,
                   let speaker = event.speaker, activeMeetingID == nil || activeMeetingID == event.meetingID else { return }

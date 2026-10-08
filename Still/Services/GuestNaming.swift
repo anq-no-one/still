@@ -10,7 +10,28 @@ enum GuestNaming {
     ) -> TranscriptionResult {
         let cued = SpeakerCueMatcher.suggest(cues, for: transcription, ownerName: ownerName)
         let votes = SpokenNames.votes(in: cued)
-        return resolve(cued, votes: votes, roster: roster, ownerName: ownerName)
+        return resolve(cued, votes: votes, roster: rosterNames(roster), ownerName: ownerName)
+    }
+
+    static let selfEntries: Set<String> = ["you", "me", "вы", "ви", "я", "du", "vous", "toi", "tú", "tu", "ty", "jij", "sie", "lei"]
+
+    static func isSelfEntry(_ name: String) -> Bool {
+        selfEntries.contains(VoiceProfiles.key(for: withoutParenthetical(name)))
+    }
+
+    static func rosterNames(_ roster: [String]) -> [String] {
+        var names: [String] = []
+        for name in roster.map(withoutParenthetical) where !name.isEmpty && !isSelfEntry(name) {
+            if !names.contains(where: { VoiceProfiles.key(for: $0) == VoiceProfiles.key(for: name) }) {
+                names.append(name)
+            }
+        }
+        return names
+    }
+
+    private static func withoutParenthetical(_ name: String) -> String {
+        name.replacingOccurrences(of: #"\s*\([^)]*\)"#, with: "", options: .regularExpression)
+            .trimmingCharacters(in: .whitespaces)
     }
 
     private struct Candidate {
@@ -59,6 +80,12 @@ enum GuestNaming {
             guard !taken.contains(key), !isOwner(candidate.name) else { continue }
             taken.insert(key)
             decided[candidate.speakerID] = candidate
+        }
+
+        let unclaimed = roster.filter { !taken.contains(VoiceProfiles.key(for: $0)) && !isOwner($0) }
+        let unnamed = transcription.speakers.filter { $0.isUnnamedGuest && decided[$0.id]?.applies != true }
+        if unclaimed.count == 1, unnamed.count == 1 {
+            decided[unnamed[0].id] = Candidate(speakerID: unnamed[0].id, name: unclaimed[0], source: .roster, applies: true, score: 0)
         }
 
         var result = transcription

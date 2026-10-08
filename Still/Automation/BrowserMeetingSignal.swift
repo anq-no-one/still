@@ -8,6 +8,7 @@ struct BrowserMeetingEvent: Codable, Equatable, Sendable {
         case speakerEnded
         case mediaStarted
         case mediaEnded
+        case participants
 
         var isAboutSpeaker: Bool {
             self == .speakerStarted || self == .speakerEnded
@@ -20,6 +21,7 @@ struct BrowserMeetingEvent: Codable, Equatable, Sendable {
     var browserBundleID: String?
     var tabID: Int?
     var speaker: String?
+    var participants: [String]?
 }
 
 enum BrowserMeetingSignal {
@@ -27,6 +29,7 @@ enum BrowserMeetingSignal {
     static let maximumHostLength = 253
     static let maximumMeetingIDLength = 512
     static let maximumSpeakerLength = 128
+    static let maximumParticipants = 100
 
     private static let hostCharacters = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyz0123456789.-")
 
@@ -73,6 +76,14 @@ enum BrowserMeetingSignal {
         guard isValid(event) else { return nil }
 
         var validated = event
+        validated.participants = nil
+        if event.phase == .participants {
+            validated.speaker = nil
+            let names = (event.participants ?? []).compactMap(speakerName(from:)).prefix(maximumParticipants)
+            guard !names.isEmpty else { return nil }
+            validated.participants = Array(names)
+            return validated
+        }
         guard event.phase.isAboutSpeaker else {
             validated.speaker = nil
             return validated
