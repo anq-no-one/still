@@ -19,8 +19,8 @@ struct FailingTextModel: ModelTextGenerator {
 }
 
 struct LocalModelTitleTests {
-    private func segments(_ text: String) -> [TranscriptSegment] {
-        words(text)
+    private func segments(_ text: String) -> TitleRequest {
+        TitleRequest(segments: words(text), calendarTitle: nil, language: "en")
     }
 
     @Test
@@ -35,7 +35,7 @@ struct LocalModelTitleTests {
     func anEmptyTranscriptNeedsNoModel() async {
         let model = StubTextModel(output: #"{"title":"Anything"}"#)
 
-        #expect(await LocalModelTitle(model: model).title(for: []) == nil)
+        #expect(await LocalModelTitle(model: model).title(for: TitleRequest(segments: [], calendarTitle: nil, language: nil)) == nil)
     }
 
     @Test
@@ -46,6 +46,18 @@ struct LocalModelTitleTests {
 
             #expect(title == nil, "output: \(output)")
         }
+    }
+
+    @Test
+    func theFirstGeneratorWithAUsableTitleWins() async {
+        let title = await TitleChain.first(of: [
+            { _ in nil },
+            { _ in "Hey, how are you?" },
+            { _ in "Onboarding Screens Review" },
+            { _ in "Too Late" },
+        ], for: segments("We review the onboarding screens ."))
+
+        #expect(title == "Onboarding Screens Review")
     }
 
     @Test
@@ -157,7 +169,7 @@ struct LocalModelNoteGeneratorTests {
 struct RecordingFinalizerTitleTests {
     private func finalizer(
         library: SpyRecordingLibrary,
-        makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)?
+        makeTitle: (@MainActor @Sendable (TitleRequest) async -> String?)?
     ) -> RecordingFinalizer {
         RecordingFinalizer(
             finalTranscription: FinalTranscription(transcriber: StubOfflineTranscriber(), windowSeconds: 3_600),

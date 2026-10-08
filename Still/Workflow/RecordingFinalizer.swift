@@ -8,6 +8,8 @@ struct RecordingFinalizer {
         var createdAt: Date
         var duration: TimeInterval
         var participants: [String] = []
+        var meetingTitle: String?
+        var titleSource: TitleSource = .user
         var cues: [SpeakerCue] = []
         var tileCues: [SpeakerCue] = []
         var mixedMedia: [TimeSpan] = []
@@ -20,14 +22,14 @@ struct RecordingFinalizer {
     let speakerSeparation: SpeakerSeparation
     let noteBuilder: GroundedNoteBuilder
     let library: RecordingLibrary
-    let makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)?
+    let makeTitle: (@MainActor @Sendable (TitleRequest) async -> String?)?
 
     init(
         finalTranscription: FinalTranscription,
         speakerSeparation: SpeakerSeparation,
         noteBuilder: GroundedNoteBuilder,
         library: RecordingLibrary,
-        makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)? = nil
+        makeTitle: (@MainActor @Sendable (TitleRequest) async -> String?)? = nil
     ) {
         self.finalTranscription = finalTranscription
         self.speakerSeparation = speakerSeparation
@@ -71,10 +73,15 @@ struct RecordingFinalizer {
         if let draftTitle = draft.title {
             finishedTitle = draftTitle
         } else {
-            finishedTitle = await Self.title(for: segments, transcript: transcript, date: draft.createdAt, makeTitle: makeTitle)
+            finishedTitle = await Self.title(
+                for: segments,
+                transcript: transcript,
+                draft: draft,
+                makeTitle: makeTitle
+            )
         }
 
-        return Recording(
+        var recording = Recording(
             id: draft.id,
             title: finishedTitle,
             transcript: transcript,
@@ -88,19 +95,26 @@ struct RecordingFinalizer {
             mixedMediaSpans: draft.mixedMedia.isEmpty ? nil : draft.mixedMedia,
             importedFrom: draft.importedFrom
         )
+        recording.titleSource = draft.title == nil ? .automatic : draft.titleSource
+        return recording
     }
 
     private static func title(
         for segments: [TranscriptSegment],
         transcript: String,
-        date: Date,
-        makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)?
+        draft: Draft,
+        makeTitle: (@MainActor @Sendable (TitleRequest) async -> String?)?
     ) async -> String {
-        if let makeTitle, let generated = await makeTitle(segments), !generated.isEmpty {
+        let language = segments.lazy.compactMap(\.language).first
+        let calendarTitle = draft.meetingTitle.flatMap(TitleText.cleaned)
+        let request = TitleRequest(segments: segments, calendarTitle: calendarTitle, language: language)
+        if let makeTitle, let generated = await makeTitle(request).flatMap(TitleText.cleaned) {
             return generated
         }
-        let language = segments.lazy.compactMap(\.language).first
-        return RecordingTitle.from(transcript: transcript, date: date, language: language)
+        if let calendarTitle {
+            return calendarTitle
+        }
+        return RecordingTitle.from(transcript: transcript, date: draft.createdAt, language: language)
     }
 
     private func transcribeAndSeparateSpeakers(

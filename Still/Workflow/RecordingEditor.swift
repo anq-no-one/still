@@ -38,7 +38,9 @@ final class RecordingEditor {
     }
 
     func rename(to title: String) {
+        guard title != recording.title else { return }
         recording.title = title
+        recording.titleSource = .user
         scheduleSave()
     }
 

@@ -213,9 +213,14 @@ struct StillApp: App {
             guard LocalModelExtractor.canRun, memoryInstaller.state == .installed else { return GroundedNoteBuilder() }
             return GroundedNoteBuilder(preferred: LocalModelNoteGenerator(model: detailsModel))
         }
-        let makeDetailsTitle: @MainActor @Sendable ([TranscriptSegment]) async -> String? = { segments in
-            guard LocalModelExtractor.canRun, memoryInstaller.state == .installed else { return nil }
-            return await LocalModelTitle(model: detailsModel).title(for: segments)
+        let makeDetailsTitle: @MainActor @Sendable (TitleRequest) async -> String? = { request in
+            await TitleChain.first(of: [
+                { await FoundationModelTitle().title(for: $0) },
+                { request in
+                    guard LocalModelExtractor.canRun, memoryInstaller.state == .installed else { return nil }
+                    return await LocalModelTitle(model: detailsModel).title(for: request)
+                },
+            ], for: request)
         }
         let recordingCoordinator = MainActor.assumeIsolated {
             RecordingCoordinator(
@@ -226,8 +231,8 @@ struct StillApp: App {
                 makeSpeakerSeparation: makeSpeakerSeparation,
                 makeNoteBuilder: makePreferredNoteBuilder,
                 makeTitle: makeDetailsTitle,
-                expectedParticipants: { date in
-                    await CalendarContext(source: EventKitCalendarSource()).suggestion(at: date)?.participants ?? []
+                meetingContext: { date in
+                    await CalendarContext(source: EventKitCalendarSource()).suggestion(at: date)
                 },
                 isReady: { setupFlow.isComplete && recordingLibrary.state == .unlocked },
                 audioTarget: audioTarget,

@@ -161,9 +161,9 @@ struct RecordingCoordinatorTests {
             makeSpeakerSeparation: {
                 SpeakerSeparation(diarizer: StubDiarizer(turns: [SpeakerTurn(speaker: 0, start: 0, end: 5)]))
             },
-            expectedParticipants: { date in
+            meetingContext: { date in
                 askedAbout = date
-                return ["Anna Kowalska", "Ben Olsen"]
+                return MeetingContext(title: "Design Huddle", participants: ["Anna Kowalska", "Ben Olsen"])
             }
         )
 

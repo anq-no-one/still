@@ -32,6 +32,7 @@ struct RecordingContent: Encodable {
     var memory: RecordingMemory?
     var importedFrom: ImportedFile?
     var isProcessing = false
+    var titleSource: TitleSource?
 }
 
 extension RecordingContent: Decodable {
@@ -51,6 +52,7 @@ extension RecordingContent: Decodable {
         case memory
         case importedFrom
         case isProcessing
+        case titleSource
     }
 
     init(from decoder: Decoder) throws {
@@ -70,5 +72,6 @@ extension RecordingContent: Decodable {
         memory = try container.decodeIfPresent(RecordingMemory.self, forKey: .memory)
         importedFrom = try container.decodeIfPresent(ImportedFile.self, forKey: .importedFrom)
         isProcessing = try container.decodeIfPresent(Bool.self, forKey: .isProcessing) ?? false
+        titleSource = try container.decodeIfPresent(TitleSource.self, forKey: .titleSource)
     }
 }

@@ -8,32 +8,24 @@ extension LocalLanguageModel: ModelTextGenerator {}
 
 struct LocalModelTitle<Model: ModelTextGenerator>: Sendable {
     static var maximumTokens: Int { 64 }
-    static var maximumLength: Int { 52 }
+    static var characterBudget: Int { 6_000 }
 
     let model: Model
 
-    func title(for segments: [TranscriptSegment]) async -> String? {
-        let sentences = ExtractiveNoteGenerator.sentences(in: segments)
-        let transcript = sentences.map(\.text).joined(separator: " ")
-        guard !transcript.isEmpty else { return nil }
+    func title(for request: TitleRequest) async -> String? {
+        let excerpt = request.excerpt(characterBudget: Self.characterBudget)
+        guard !excerpt.isEmpty else { return nil }
         guard let output = try? await model.generate(
-            system: Self.instructions,
-            user: String(transcript.prefix(2_000)),
+            system: MeetingTitlePrompt.instructions(language: request.language),
+            user: MeetingTitlePrompt.prompt(excerpt: excerpt, calendarTitle: request.calendarTitle),
             schema: Self.schema,
             maximumTokens: Self.maximumTokens
         ) else { return nil }
         guard let data = output.data(using: .utf8),
               let response = try? JSONDecoder().decode(Response.self, from: data)
         else { return nil }
-        let title = response.title.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !title.isEmpty, title.count <= Self.maximumLength else { return nil }
-        return title
+        return TitleText.cleaned(response.title)
     }
-
-    static var instructions: String { """
-        Read the meeting transcript and write a short title for it, at most seven words.
-        Use the transcript's own words. Never invent names, dates or facts.
-        """ }
 
     static var schema: String { """
         {"type":"object","properties":{"title":{"type":"string","minLength":1,"maxLength":52}},\
@@ -42,6 +34,39 @@ struct LocalModelTitle<Model: ModelTextGenerator>: Sendable {
 
     struct Response: Decodable {
         let title: String
+    }
+}
+
+enum MeetingTitlePrompt {
+    static func instructions(language: String?) -> String {
+        let languageName = language.flatMap { Locale(identifier: "en").localizedString(forLanguageCode: $0) }
+        let writeIn = languageName.map { "Write the title in \($0)." } ?? "Write the title in the language of the transcript."
+        return """
+            You name recorded meetings. You read excerpts taken from the start, middle and end of a meeting \
+            transcript and write one short, specific title of at most seven words in Title Case. \
+            The title says what the meeting was about: its topic, project or main decision. \
+            Never use greetings, small talk or filler words. Never invent names, dates or facts. \
+            \(writeIn)
+            """
+    }
+
+    static func prompt(excerpt: String, calendarTitle: String?) -> String {
+        let hint = calendarTitle.map { "The calendar event for this meeting is called \"\($0)\".\n" } ?? ""
+        return "\(hint)Transcript excerpts:\n\(excerpt)"
+    }
+}
+
+enum TitleChain {
+    static func first(
+        of generators: [@MainActor @Sendable (TitleRequest) async -> String?],
+        for request: TitleRequest
+    ) async -> String? {
+        for generate in generators {
+            if let title = await generate(request).flatMap(TitleText.cleaned) {
+                return title
+            }
+        }
+        return nil
     }
 }
 

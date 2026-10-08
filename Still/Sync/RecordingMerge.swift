@@ -14,7 +14,20 @@ enum RecordingMerge {
         let older = local.updatedAt >= remote.updatedAt ? remote : local
 
         var merged = newer
-        merged.title = union(local.title, remote.title)
+        switch (local.isTitleChosenByUser, remote.isTitleChosenByUser) {
+        case (true, true):
+            merged.title = union(local.title, remote.title)
+            merged.titleSource = .user
+        case (true, false):
+            merged.title = local.title
+            merged.titleSource = .user
+        case (false, true):
+            merged.title = remote.title
+            merged.titleSource = .user
+        case (false, false):
+            merged.title = newer.title
+            merged.titleSource = .automatic
+        }
         merged.segments = mergeSegments(newer.segments, older.segments)
         merged.note = mergeNote(newer.note, older.note)
         merged.memory = RecordingMemory.merge(newer.memory, older.memory)

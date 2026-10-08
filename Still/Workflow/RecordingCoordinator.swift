@@ -22,8 +22,8 @@ final class RecordingCoordinator {
     private let makeFinalTranscription: () -> FinalTranscription
     private let makeSpeakerSeparation: () -> SpeakerSeparation
     private let makeNoteBuilder: @MainActor () -> GroundedNoteBuilder
-    private let makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)?
-    private let expectedParticipants: @MainActor (Date) async -> [String]
+    private let makeTitle: (@MainActor @Sendable (TitleRequest) async -> String?)?
+    private let meetingContext: @MainActor (Date) async -> MeetingContext?
     private let isReady: @MainActor () -> Bool
     private let notifier: RecordingNotifier?
     let audioTarget: SystemAudioTarget
@@ -40,8 +40,8 @@ final class RecordingCoordinator {
         makeFinalTranscription: @escaping () -> FinalTranscription,
         makeSpeakerSeparation: @escaping () -> SpeakerSeparation = { .trackBased },
         makeNoteBuilder: @escaping @MainActor () -> GroundedNoteBuilder = { GroundedNoteBuilder() },
-        makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)? = nil,
-        expectedParticipants: @escaping @MainActor (Date) async -> [String] = { _ in [] },
+        makeTitle: (@MainActor @Sendable (TitleRequest) async -> String?)? = nil,
+        meetingContext: @escaping @MainActor (Date) async -> MeetingContext? = { _ in nil },
         isReady: @escaping @MainActor () -> Bool = { true },
         audioTarget: SystemAudioTarget = SystemAudioTarget(),
         notifier: RecordingNotifier? = nil
@@ -55,7 +55,7 @@ final class RecordingCoordinator {
         self.makeSpeakerSeparation = makeSpeakerSeparation
         self.makeNoteBuilder = makeNoteBuilder
         self.makeTitle = makeTitle
-        self.expectedParticipants = expectedParticipants
+        self.meetingContext = meetingContext
         self.notifier = notifier
     }
 
@@ -197,14 +197,12 @@ final class RecordingCoordinator {
                     notify: false
                 )
             } else {
-                let untitled = recording.title == RecordingTitle.from(transcript: "", date: recording.createdAt)
                 await finalize(
                     RecordingFinalizer.Draft(
                         id: recording.id,
-                        title: untitled ? nil : recording.title,
+                        title: recording.isTitleChosenByUser ? recording.title : nil,
                         createdAt: recording.createdAt,
                         duration: recording.duration,
-                        participants: await expectedParticipants(recording.createdAt),
                         suggestedProjectID: recording.projectID,
                         requiresTranscript: true
                     ),
@@ -241,8 +239,11 @@ final class RecordingCoordinator {
                 makeTitle: makeTitle
             )
             var draft = draft
-            if draft.participants.isEmpty {
-                draft.participants = await expectedParticipants(draft.createdAt)
+            if draft.participants.isEmpty || draft.meetingTitle == nil, let context = await meetingContext(draft.createdAt) {
+                if draft.participants.isEmpty {
+                    draft.participants = context.participants
+                }
+                draft.meetingTitle = draft.meetingTitle ?? context.title
             }
             var finished = try await finalizer.build(draft, progress: reportProgress(for: draft.id))
             try Task.checkCancellation()
@@ -257,9 +258,11 @@ final class RecordingCoordinator {
             }
             if let previous, stored.title != previous.title {
                 finished.title = stored.title
+                finished.titleSource = stored.titleSource
             } else if finished.transcript.isEmpty, let previous, !previous.transcript.isEmpty {
                 finished.transcript = previous.transcript
                 finished.title = previous.title
+                finished.titleSource = previous.titleSource
             }
             if let userNote = stored.note, userNote != previous?.note {
                 finished.note = mergeUserNote(userNote, into: finished.note)

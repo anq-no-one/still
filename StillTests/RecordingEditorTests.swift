@@ -139,6 +139,32 @@ struct RecordingEditorTests {
         #expect(editor.saveFailure == nil)
     }
 
+    @Test
+    func aTypedTitleBelongsToTheUser() async throws {
+        let library = try await makeLibrary()
+        var recording = Recording(title: "Hey how are you", transcript: "Hey how are you", duration: 60)
+        recording.titleSource = .automatic
+        try library.add(recording)
+        let editor = RecordingEditor(recording: recording, library: library)
+
+        editor.rename(to: "Design Huddle")
+        editor.saveNow()
+
+        #expect(library.recordings.first?.titleSource == .user)
+    }
+
+    @Test
+    func reapplyingTheSameTitleKeepsItAutomatic() async throws {
+        let library = try await makeLibrary()
+        var recording = Recording(title: "Quarterly Review", transcript: "numbers", duration: 60)
+        recording.titleSource = .automatic
+        let editor = RecordingEditor(recording: recording, library: library)
+
+        editor.rename(to: "Quarterly Review")
+
+        #expect(editor.recording.titleSource == .automatic)
+    }
+
     private func makeLibrary() async throws -> Library {
         let container = try ModelContainer(
             for: EncryptedRecording.self,

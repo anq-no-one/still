@@ -253,6 +253,7 @@ final class Library: RecordingLibrary {
     func rename(_ recording: Recording, to title: String) throws {
         var updated = recording
         updated.title = title
+        updated.titleSource = .user
         try write(updated)
     }
 

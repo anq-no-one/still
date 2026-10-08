@@ -45,7 +45,7 @@ final class MediaImporter {
     private let makeFinalTranscription: () -> FinalTranscription
     private let makeSpeakerSeparation: () -> SpeakerSeparation
     private let makeNoteBuilder: @MainActor () -> GroundedNoteBuilder
-    private let makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)?
+    private let makeTitle: (@MainActor @Sendable (TitleRequest) async -> String?)?
     private let isReady: @MainActor () -> Bool
     private let now: () -> Date
     private let handOverFolders: [URL]
@@ -60,7 +60,7 @@ final class MediaImporter {
         makeFinalTranscription: @escaping () -> FinalTranscription,
         makeSpeakerSeparation: @escaping () -> SpeakerSeparation = { .trackBased },
         makeNoteBuilder: @escaping @MainActor () -> GroundedNoteBuilder = { GroundedNoteBuilder() },
-        makeTitle: (@MainActor @Sendable ([TranscriptSegment]) async -> String?)? = nil,
+        makeTitle: (@MainActor @Sendable (TitleRequest) async -> String?)? = nil,
         isReady: @escaping @MainActor () -> Bool = { true },
         now: @escaping () -> Date = Date.init,
         handOverFolders: [URL] = MediaImporter.handOverFolders
@@ -148,9 +148,9 @@ final class MediaImporter {
             try await finalizer().finalize(
                 RecordingFinalizer.Draft(
                     id: id,
-                    title: source.title,
                     createdAt: source.createdAt ?? now(),
                     duration: duration,
+                    meetingTitle: source.title,
                     suggestedProjectID: library.defaultProjectID,
                     requiresTranscript: true,
                     importedFrom: source.imported

@@ -29,7 +29,7 @@ struct EncryptedRecordingRepository: RecordingRepository {
                 RecordingContent.self,
                 from: try cipher.open(record.sealedContent)
             )
-            return Recording(
+            var recording = Recording(
                 id: record.id,
                 title: content.title,
                 transcript: content.transcript,
@@ -49,6 +49,8 @@ struct EncryptedRecordingRepository: RecordingRepository {
                 importedFrom: content.importedFrom,
                 isProcessing: content.isProcessing
             )
+            recording.titleSource = content.titleSource
+            return recording
         }
     }
 
@@ -70,7 +72,8 @@ struct EncryptedRecordingRepository: RecordingRepository {
                     mixedMediaSpans: recording.mixedMediaSpans,
                     memory: recording.memory,
                     importedFrom: recording.importedFrom,
-                    isProcessing: recording.isProcessing
+                    isProcessing: recording.isProcessing,
+                    titleSource: recording.titleSource
                 )
             )
         )

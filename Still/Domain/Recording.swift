@@ -19,6 +19,7 @@ struct Recording: Identifiable, Encodable, Equatable, Sendable {
     var memory: RecordingMemory?
     var importedFrom: ImportedFile?
     var isProcessing = false
+    var titleSource: TitleSource?
 
     init(
         id: UUID = UUID(),
@@ -58,6 +59,24 @@ struct Recording: Identifiable, Encodable, Equatable, Sendable {
         self.memory = memory
         self.importedFrom = importedFrom
         self.isProcessing = isProcessing
+    }
+
+    var isTitleChosenByUser: Bool {
+        switch titleSource {
+        case .user: true
+        case .automatic: false
+        case nil: !Self.looksGenerated(title, transcript: transcript, createdAt: createdAt)
+        }
+    }
+
+    private static func looksGenerated(_ title: String, transcript: String, createdAt: Date) -> Bool {
+        if title == RecordingTitle.dateTitle(createdAt) || title == RecordingTitle.from(transcript: transcript, date: createdAt) {
+            return true
+        }
+        let titleWords = TitleText.normalizedWords(title)
+        let openingWords = TitleText.normalizedWords(DisfluencyFilter.cleaned(transcript, language: nil))
+        let compared = min(3, titleWords.count)
+        return compared > 0 && Array(titleWords.prefix(compared)) == Array(openingWords.prefix(compared))
     }
 
     var isDeleted: Bool {
@@ -137,6 +156,7 @@ extension Recording: Decodable {
         case memory
         case importedFrom
         case isProcessing
+        case titleSource
     }
 
     /// Payloads sealed before processing existed carry no flag. They describe
@@ -163,5 +183,6 @@ extension Recording: Decodable {
             importedFrom: try container.decodeIfPresent(ImportedFile.self, forKey: .importedFrom),
             isProcessing: try container.decodeIfPresent(Bool.self, forKey: .isProcessing) ?? false
         )
+        titleSource = try container.decodeIfPresent(TitleSource.self, forKey: .titleSource)
     }
 }
