@@ -17,16 +17,14 @@ enum RecordingMerge {
         switch (local.isTitleChosenByUser, remote.isTitleChosenByUser) {
         case (true, true):
             merged.title = union(local.title, remote.title)
-            merged.titleSource = .user
         case (true, false):
             merged.title = local.title
-            merged.titleSource = .user
+            merged.titleSource = local.titleSource
         case (false, true):
             merged.title = remote.title
-            merged.titleSource = .user
+            merged.titleSource = remote.titleSource
         case (false, false):
-            merged.title = newer.title
-            merged.titleSource = .automatic
+            break
         }
         merged.segments = mergeSegments(newer.segments, older.segments)
         merged.note = mergeNote(newer.note, older.note)

@@ -138,7 +138,7 @@ struct TitleSourceTests {
         let merged = RecordingMerge.merge(local, remote)
 
         #expect(merged.title == "Board prep")
-        #expect(merged.titleSource == .user)
+        #expect(merged.isTitleChosenByUser)
     }
 
     @Test

@@ -25,7 +25,7 @@ def load():
 
 def save(catalog):
     with open(CATALOG, "w") as file:
-        json.dump(catalog, file, ensure_ascii=False, indent=2, sort_keys=True)
+        json.dump(catalog, file, ensure_ascii=False, indent=2, separators=(",", " : "))
         file.write("\n")
 
 

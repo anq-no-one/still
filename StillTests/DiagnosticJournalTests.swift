@@ -140,7 +140,7 @@ struct DiagnosticJournalTests {
         try library.confirmProjects(of: [recording.id])
 
         let entries = try journal.entries()
-        #expect(entries.map(\.code) == [.recordingStarted, .recordingSaved, .exportFinished, .projectConfirmed])
+        #expect(entries.map(\.code) == [.recordingStarted, .recordingSaved, .speakersNamed, .exportFinished, .projectConfirmed])
         #expect(Set(entries.compactMap(\.correlationID)) == [recording.id])
 
         let export = scratch.directory.appending(path: "journal.txt")
