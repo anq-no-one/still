@@ -119,7 +119,13 @@ struct LibraryView: View {
         } detail: {
             Group {
                 if let recording = selected {
-                    RecordingDetailView(recording: recording, library: library, extraction: extraction, startAt: navigation.startTime)
+                    RecordingDetailView(
+                        recording: recording,
+                        library: library,
+                        extraction: extraction,
+                        startAt: navigation.startTime,
+                        regenerateTitle: { [coordinator] in await coordinator.regeneratedTitle(for: $0) }
+                    )
                         .id(recording.id)
                 } else if let dashboard = detailDashboard {
                     DashboardView(dashboard: dashboard, library: library, open: openSource)

@@ -251,6 +251,76 @@ struct RecordingCoordinatorTests {
         #expect(!recording.isProcessing)
     }
 
+    @Test
+    func retitlingRenamesOldAutomaticTitlesFromTheWholeCall() async throws {
+        let library = try await makeUnlockedLibrary(context: try makeContext())
+        let segments = words("Hey how are you ? We review the pricing page .")
+        try library.add(Recording(title: "Hey how are you", transcript: segments.plainText, segments: segments, duration: 60))
+        let coordinator = makeTitlingCoordinator(library: library) { _ in "Pricing Page Review" }
+
+        await coordinator.retitleAutomaticTitles(tier: "model-1", ledger: MemoryRetitleLedger())
+
+        let recording = try #require(library.recordings.first)
+        #expect(recording.title == "Pricing Page Review")
+        #expect(recording.titleSource == .automatic)
+    }
+
+    @Test
+    func retitlingLeavesUserTitlesAlone() async throws {
+        let library = try await makeUnlockedLibrary(context: try makeContext())
+        let segments = words("We review the pricing page .")
+        var recording = Recording(title: "Board prep", transcript: segments.plainText, segments: segments, duration: 60)
+        recording.titleSource = .user
+        try library.add(recording)
+        let coordinator = makeTitlingCoordinator(library: library) { _ in "Pricing Page Review" }
+
+        await coordinator.retitleAutomaticTitles(tier: "model-1", ledger: MemoryRetitleLedger())
+
+        #expect(library.recordings.first?.title == "Board prep")
+    }
+
+    @Test
+    func retitlingVisitsEachRecordingOncePerTier() async throws {
+        let library = try await makeUnlockedLibrary(context: try makeContext())
+        let segments = words("We review the pricing page .")
+        try library.add(Recording(title: "We review the pricing page", transcript: segments.plainText, segments: segments, duration: 60))
+        let asked = Box(0)
+        let coordinator = makeTitlingCoordinator(library: library) { _ in
+            asked.value += 1
+            return "Pricing Page Review"
+        }
+        let ledger = MemoryRetitleLedger()
+
+        await coordinator.retitleAutomaticTitles(tier: "model-1", ledger: ledger)
+        await coordinator.retitleAutomaticTitles(tier: "model-1", ledger: ledger)
+
+        #expect(asked.value == 1)
+    }
+
+    @Test
+    func regeneratingAskesForAFreshTitleEvenForAUserTitle() async throws {
+        let library = try await makeUnlockedLibrary(context: try makeContext())
+        let segments = words("We review the pricing page .")
+        var recording = Recording(title: "Board prep", transcript: segments.plainText, segments: segments, duration: 60)
+        recording.titleSource = .user
+        let coordinator = makeTitlingCoordinator(library: library) { _ in "Pricing Page Review" }
+
+        #expect(await coordinator.regeneratedTitle(for: recording) == "Pricing Page Review")
+    }
+
+    private func makeTitlingCoordinator(
+        library: Library,
+        makeTitle: @escaping @MainActor @Sendable (TitleRequest) async -> String?
+    ) -> RecordingCoordinator {
+        RecordingCoordinator(
+            library: library,
+            entitlements: Entitlements(source: FakeEntitlementSource(), cache: MemoryEntitlementCache()),
+            makeSession: { FakeTranscriptionSession() },
+            makeFinalTranscription: { FinalTranscription(transcriber: StubOfflineTranscriber(), windowSeconds: 3_600) },
+            makeTitle: makeTitle
+        )
+    }
+
     private func makeCoordinator(
         library: Library,
         session: FakeTranscriptionSession,

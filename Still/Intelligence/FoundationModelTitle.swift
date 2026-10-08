@@ -10,6 +10,10 @@ struct GeneratedMeetingTitle {
 struct FoundationModelTitle: Sendable {
     static let characterBudget = 4_000
 
+    static var isAvailable: Bool {
+        SystemLanguageModel.default.isAvailable
+    }
+
     func title(for request: TitleRequest) async -> String? {
         let model = SystemLanguageModel.default
         guard model.isAvailable else { return nil }

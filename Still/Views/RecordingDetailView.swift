@@ -5,6 +5,7 @@ struct RecordingDetailView: View {
     let library: Library
     let extraction: MemoryExtraction
     let startAt: TimeInterval?
+    let regenerateTitle: @MainActor (Recording) async -> String
     /// The Library's current copy, refreshed every render. The editor keeps a
     /// snapshot for editing, and catches up through it when rendering ends.
     let latest: Recording
@@ -22,9 +23,17 @@ struct RecordingDetailView: View {
     @State private var findsNoVocabularyChanges = false
     @State private var playingEvidenceID: NoteItem.ID?
     @State private var detailReady = false
+    @State private var isRegeneratingTitle = false
 
-    init(recording: Recording, library: Library, extraction: MemoryExtraction, startAt: TimeInterval? = nil) {
+    init(
+        recording: Recording,
+        library: Library,
+        extraction: MemoryExtraction,
+        startAt: TimeInterval? = nil,
+        regenerateTitle: @escaping @MainActor (Recording) async -> String
+    ) {
         self.library = library
+        self.regenerateTitle = regenerateTitle
         self.extraction = extraction
         self.startAt = startAt
         self.latest = recording
@@ -171,6 +180,18 @@ struct RecordingDetailView: View {
             }
             ToolbarItem {
                 ExportMenu(recording: recording, library: library)
+            }
+            ToolbarItem {
+                Button("Regenerate Title", systemImage: "wand.and.stars") {
+                    isRegeneratingTitle = true
+                    Task {
+                        let generated = await regenerateTitle(editor.recording)
+                        editor.applyGeneratedTitle(generated)
+                        title = generated
+                        isRegeneratingTitle = false
+                    }
+                }
+                .disabled(recording.segments.isEmpty || isRegeneratingTitle)
             }
             ToolbarItem {
                 Button("Apply Project Vocabulary", systemImage: "character.book.closed") {

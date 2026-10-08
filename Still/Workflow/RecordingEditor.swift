@@ -37,6 +37,12 @@ final class RecordingEditor {
         recording.note ?? Note(template: .personalNote)
     }
 
+    func applyGeneratedTitle(_ title: String) {
+        recording.title = title
+        recording.titleSource = .automatic
+        scheduleSave()
+    }
+
     func rename(to title: String) {
         guard title != recording.title else { return }
         recording.title = title

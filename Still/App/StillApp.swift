@@ -299,6 +299,9 @@ struct StillApp: App {
             await proEntitlements.refresh()
             await syncEngine.syncIfEnabled()
             await recordingCoordinator.finishInterruptedProcessing()
+            let titleTier = FoundationModelTitle.isAvailable ? "apple-1"
+                : memoryInstaller.state == .installed ? "mlx-1" : "extractive-1"
+            await recordingCoordinator.retitleAutomaticTitles(tier: titleTier, ledger: UserDefaultsRetitleLedger())
         }
         #if os(macOS)
         shortcut = MainActor.assumeIsolated {

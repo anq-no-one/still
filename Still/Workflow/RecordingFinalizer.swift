@@ -105,8 +105,24 @@ struct RecordingFinalizer {
         draft: Draft,
         makeTitle: (@MainActor @Sendable (TitleRequest) async -> String?)?
     ) async -> String {
+        await chooseTitle(
+            segments: segments,
+            transcript: transcript,
+            calendarTitle: draft.meetingTitle,
+            date: draft.createdAt,
+            makeTitle: makeTitle
+        )
+    }
+
+    static func chooseTitle(
+        segments: [TranscriptSegment],
+        transcript: String,
+        calendarTitle: String?,
+        date: Date,
+        makeTitle: (@MainActor @Sendable (TitleRequest) async -> String?)?
+    ) async -> String {
         let language = segments.lazy.compactMap(\.language).first
-        let calendarTitle = draft.meetingTitle.flatMap(TitleText.cleaned)
+        let calendarTitle = calendarTitle.flatMap(TitleText.cleaned)
         let request = TitleRequest(segments: segments, calendarTitle: calendarTitle, language: language)
         if let makeTitle, let generated = await makeTitle(request).flatMap(TitleText.cleaned) {
             return generated
@@ -114,7 +130,7 @@ struct RecordingFinalizer {
         if let calendarTitle {
             return calendarTitle
         }
-        return RecordingTitle.from(transcript: transcript, date: draft.createdAt, language: language)
+        return RecordingTitle.from(transcript: transcript, date: date, language: language)
     }
 
     private func transcribeAndSeparateSpeakers(

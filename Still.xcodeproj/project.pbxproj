@@ -39,6 +39,7 @@
 		141EDBEF638A5E9A123F3CCF /* ParakeetEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9606E84C14B167BF5DBF52BF /* ParakeetEngine.swift */; };
 		1522093B7A05E2DF61D4F5ED /* AppLockSettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0192E394250083860497333 /* AppLockSettingsSection.swift */; };
 		15473B8E30C3D6B04AC94CEE /* OwnerNameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B122FF6D23D8F48A1023628C /* OwnerNameTests.swift */; };
+		15C2FBE4C0BBBBFC96658828 /* RetitleLedger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FFAF4BBB80242F075069177 /* RetitleLedger.swift */; };
 		1617D328EC7640C0ADB9FBAD /* CloudKitSyncTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6B476449F16529A7AFEBE1 /* CloudKitSyncTransportTests.swift */; };
 		16BD8496DADAD2C0F972BEC0 /* VoiceProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 919A7CF683831357B18795E5 /* VoiceProfile.swift */; };
 		170FC85355A9BC905110A309 /* ModelPackInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0837C7A3BCBCA1D03A047E7F /* ModelPackInstaller.swift */; };
@@ -240,6 +241,7 @@
 		7AE363D4415508CF4D1EC211 /* MicrophoneSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A67AEC89038D78957809DF02 /* MicrophoneSettingsView.swift */; };
 		7AFE886426DD0D2FBE025B6D /* AudioChunkSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4821DEE18DBF24CA0CB88D68 /* AudioChunkSync.swift */; };
 		7CB6427407896697E1B3E244 /* PreferencesTransferSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E879004B54804518CDA5FD8 /* PreferencesTransferSection.swift */; };
+		7D78F667DC903C4070614F1D /* RetitleLedger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FFAF4BBB80242F075069177 /* RetitleLedger.swift */; };
 		7D8C3DAC4916F2B1B50061E3 /* RecordingEditorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34A8F2B1E779EE782BC8F7DA /* RecordingEditorTests.swift */; };
 		7D989348FC78151F015C79EE /* NoDiagnosticsSink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5843C0EA5B0697DF375321E8 /* NoDiagnosticsSink.swift */; };
 		7E82B868032AEF8F3E5F042A /* MicrophoneSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A67AEC89038D78957809DF02 /* MicrophoneSettingsView.swift */; };
@@ -546,10 +548,10 @@
 		3C751C86AF58EADE58333C54 /* Embed Dependencies */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = Contents/Helpers;
-			dstSubfolderSpec = 1;
+			dstPath = "";
+			dstSubfolderSpec = 6;
 			files = (
-				A6F9C15C2C82A5A95BC0A5DA /* StillMCPHelper in Embed Dependencies */,
+				386CC47CBED9C773A07C2873 /* StillNativeHost in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -557,10 +559,10 @@
 		637B4BA22A327BC208728672 /* Embed Dependencies */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 6;
+			dstPath = Contents/Helpers;
+			dstSubfolderSpec = 1;
 			files = (
-				386CC47CBED9C773A07C2873 /* StillNativeHost in Embed Dependencies */,
+				A6F9C15C2C82A5A95BC0A5DA /* StillMCPHelper in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -749,6 +751,7 @@
 		9E512F773134875CB94BE865 /* IntentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentTests.swift; sourceTree = "<group>"; };
 		9EAB57718B69A61CE3A638F7 /* TeamsMeetingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamsMeetingWindow.swift; sourceTree = "<group>"; };
 		9FF48364166C05F6BC4339C8 /* MediaFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaFixtures.swift; sourceTree = "<group>"; };
+		9FFAF4BBB80242F075069177 /* RetitleLedger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetitleLedger.swift; sourceTree = "<group>"; };
 		A089264B9CF415D01009C495 /* ProjectTasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectTasksView.swift; sourceTree = "<group>"; };
 		A0A22692B9E537288917439F /* BrowserMeetingSignal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserMeetingSignal.swift; sourceTree = "<group>"; };
 		A19D7504927CA12A370ACCEA /* NearbySync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbySync.swift; sourceTree = "<group>"; };
@@ -1245,6 +1248,7 @@
 				7FC27E0DF91202D53D78B024 /* RecordingFinalizer.swift */,
 				8643ED7F6A990B6CF0D2EDFE /* RecordingNotifier.swift */,
 				B8912564CB80223EF40674BD /* RecordingWorkflow.swift */,
+				9FFAF4BBB80242F075069177 /* RetitleLedger.swift */,
 			);
 			path = Workflow;
 			sourceTree = "<group>";
@@ -1979,6 +1983,7 @@
 				C24A08C0F85D8D91B73FC694 /* RecoveryCode.swift in Sources */,
 				44E2EBD491E670FCF9F0C3E4 /* Retention.swift in Sources */,
 				B197074BC04EE7F59C0FD5CD /* RetentionSettingsView.swift in Sources */,
+				7D78F667DC903C4070614F1D /* RetitleLedger.swift in Sources */,
 				F44FE8EC11445980A9A410A9 /* SecuritySettingsView.swift in Sources */,
 				2CD953C2DBB33CF3CA81EBD1 /* SemanticIndex.swift in Sources */,
 				4A1FA95321C3DDD8D7F124FA /* SettingsPageLabel.swift in Sources */,
@@ -2283,6 +2288,7 @@
 				4CEB78E31E88FD0F9B14A5BD /* RecoveryCode.swift in Sources */,
 				3D512EB1AD61BC8173C7B899 /* Retention.swift in Sources */,
 				519FCA5B4D8BBAFAD6607213 /* RetentionSettingsView.swift in Sources */,
+				15C2FBE4C0BBBBFC96658828 /* RetitleLedger.swift in Sources */,
 				5BA2871F78E0BDC2500E43FF /* SecuritySettingsView.swift in Sources */,
 				F888839BB2D81FABBD635B1D /* SemanticIndex.swift in Sources */,
 				7A04583BBBEF0E638060EFEC /* SettingsPageLabel.swift in Sources */,

@@ -180,6 +180,34 @@ final class RecordingCoordinator {
         library.journal
     }
 
+    func regeneratedTitle(for recording: Recording) async -> String {
+        await RecordingFinalizer.chooseTitle(
+            segments: recording.segments,
+            transcript: recording.transcript,
+            calendarTitle: await meetingContext(recording.createdAt)?.title,
+            date: recording.createdAt,
+            makeTitle: makeTitle
+        )
+    }
+
+    func retitleAutomaticTitles(tier: String, ledger: RetitleLedger) async {
+        let candidates = library.recordingsInEveryProject.filter { recording in
+            !recording.isDeleted && !recording.isProcessing && !recording.segments.isEmpty
+                && !recording.isTitleChosenByUser && !ledger.isDone(recording.id, tier: tier)
+        }
+        for recording in candidates {
+            let title = await regeneratedTitle(for: recording)
+            ledger.markDone(recording.id, tier: tier)
+            guard var current = library.recordingsInEveryProject.first(where: { $0.id == recording.id }),
+                  current.title == recording.title, !current.isTitleChosenByUser, !current.isProcessing
+            else { continue }
+            current.titleSource = .automatic
+            guard current.title != title else { continue }
+            current.title = title
+            try? library.save(current)
+        }
+    }
+
     func finishInterruptedProcessing() async {
         guard isReady(), workflow == nil else { return }
 
