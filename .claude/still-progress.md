@@ -167,3 +167,10 @@ Deployment target is now iOS/macOS 26.
 - 2026-09-25: all slices #35–#54 implemented on main (pushed b72655a): +#48 dashboard/decision history, #49 preference transfer, accessibility audit E2E (setup, library, settings, access pass), accent/record colors meet contrast. main: 572 unit, E2E 4/4, 429 strings × 10 languages.
 - Blocked on user: 1Password CLI not configured ("No accounts configured") → no ASC key → no TestFlight (#32). Firebase project creation needs explicit OK. GitHub issues not closed (needs OK).
 - Not verifiable here: iPhone 13 / base M1 measurements (#30), native-speaker review (#29), real Zoom/Teams/Meet calls (#39/#40).
+
+## Names, titles, background — 2026-10-08 (spec #72, tickets #73–#78)
+- Done on main: #78 Dock Quit / Cmd+Q hide to menu bar (BackgroundPresence, QuitOrigin), launch at login on after setup; #73 titles via Apple on-device model → MLX → calendar title → key-sentence fallback, titleSource automatic/user; #75 Regenerate Title + background retitle (UserDefaultsRetitleLedger per tier); #74 GuestNaming: NLTagger vocatives/self-intros + cue agreement, journal `speakersNamed` counts; #76 Meet roster (`participants` phase, extension 1.1) and roster elimination.
+- Chrome extension is loaded unpacked from Artifacts/ChromiumExtension: reload it in chrome://extensions after `bin/chromium-extension.sh`.
+- Meet active-speaker selectors are obfuscated classes and unverified on a live call; roster + spoken names do not depend on them.
+- Uncommitted WIP in main checkout (detail perf: AudioChunkStore, RecordingPlayer, Library, RecordingDetailView, two tests) is not from this pass; it was preserved, not committed.
+- Release: env APP_STORE_* key reaches app 6815369488 (anq.no.one team R3XFQ7K885); pass it as STILL_OP_* when 1Password does not answer.
