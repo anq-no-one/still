@@ -30,7 +30,7 @@ struct StillApp: App {
     private let shortcut: RecordingShortcut
     private let login: LaunchAtLogin
     private let mediaHint: MediaPlaybackHint
-    @NSApplicationDelegateAdaptor private var reopener: LibraryWindowReopener
+    @NSApplicationDelegateAdaptor private var presence: BackgroundPresence
     #endif
 
     static let libraryWindowID = "library"
@@ -305,7 +305,11 @@ struct StillApp: App {
                 Task { await recordingCoordinator.toggle() }
             }
         }
-        login = MainActor.assumeIsolated { LaunchAtLogin(service: MainAppLoginItem()) }
+        login = MainActor.assumeIsolated {
+            let login = LaunchAtLogin(service: MainAppLoginItem())
+            LaunchAtLoginDefault.apply(to: login, setupComplete: setupFlow.isComplete)
+            return login
+        }
         mediaHint = MainActor.assumeIsolated { MediaPlaybackHint(source: CoreAudioActivitySource()) }
         #endif
 
@@ -423,12 +427,13 @@ struct StillApp: App {
                 navigation: navigation,
                 lock: lock,
                 shortcut: shortcut,
-                hint: mediaHint
+                hint: mediaHint,
+                quit: { [presence] in presence.quitCompletely() }
             )
             .stillAppearance(preferences)
         } label: {
             RecordingMenuBarLabel(coordinator: coordinator, hint: mediaHint, automatic: automatic)
-                .modifier(LibraryWindowOpenerInstaller(reopener: reopener))
+                .modifier(LibraryWindowOpenerInstaller(presence: presence))
         }
         .menuBarExtraStyle(.window)
         #else
@@ -459,5 +464,10 @@ struct StillApp: App {
             )
         }
         .stillAppearance(preferences)
+        #if os(macOS)
+        .onChange(of: setup.isComplete) { _, complete in
+            LaunchAtLoginDefault.apply(to: login, setupComplete: complete)
+        }
+        #endif
     }
 }

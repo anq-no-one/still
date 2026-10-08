@@ -35,6 +35,7 @@ struct RecordingMenuBarPanel: View {
     let lock: AppLock
     let shortcut: RecordingShortcut
     let hint: MediaPlaybackHint
+    let quit: () -> Void
 
     @Environment(\.openWindow) private var openWindow
     @State private var tick = Date.now
@@ -91,7 +92,7 @@ struct RecordingMenuBarPanel: View {
                     Text("Settings…")
                 }
                 Spacer()
-                Button("Quit") { NSApp.terminate(nil) }
+                Button("Quit Still") { quit() }
             }
             .controlSize(.small)
         }
