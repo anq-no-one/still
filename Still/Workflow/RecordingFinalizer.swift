@@ -151,6 +151,6 @@ struct RecordingFinalizer {
         var naming = library.speakerNaming
         naming.participants = draft.participants
         let separated = await speakerSeparation.separate(transcription, tracks: tracks, naming: naming)
-        return SpeakerCueMatcher.suggest(draft.cues + draft.tileCues, for: separated, ownerName: naming.ownerName)
+        return GuestNaming.name(separated, cues: draft.cues + draft.tileCues, ownerName: naming.ownerName)
     }
 }

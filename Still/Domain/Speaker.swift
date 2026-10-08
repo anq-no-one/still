@@ -9,6 +9,8 @@ struct Speaker: Identifiable, Codable, Equatable, Sendable {
         case owner
         case user
         case callCue
+        case spoken
+        case roster
     }
 
     let id: UUID
@@ -60,7 +62,7 @@ struct Speaker: Identifiable, Codable, Equatable, Sendable {
         guard !isYou else { return false }
         switch nameSource {
         case .none, .track, .diarization: return true
-        case .calendar, .voiceProfile, .owner, .user, .callCue: return false
+        case .calendar, .voiceProfile, .owner, .user, .callCue, .spoken, .roster: return false
         }
     }
 

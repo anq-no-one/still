@@ -185,6 +185,8 @@ private struct SpeakerRow: View {
         case .voiceProfile: return "Recognized by voice"
         case .calendar: return "From your calendar"
         case .callCue: return "From the call"
+        case .spoken: return "Heard by name in the call"
+        case .roster: return "From the participant list"
         default: return nil
         }
     }

@@ -13,6 +13,7 @@ enum JournalCode: String, Codable, CaseIterable, Sendable {
     case setupStepShown
     case recordingStarted
     case recordingSaved
+    case speakersNamed
     case recordingCancelled
     case recordingFailed
     case recordingDeleted

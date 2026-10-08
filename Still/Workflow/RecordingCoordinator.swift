@@ -241,6 +241,13 @@ final class RecordingCoordinator {
         }
     }
 
+    static func namingCounts(of recording: Recording, draft: RecordingFinalizer.Draft) -> String {
+        let guests = recording.speakers.filter { !$0.isYou }
+        let applied = guests.filter { [.callCue, .spoken, .roster].contains($0.nameSource) }.count
+        let suggested = guests.filter { $0.suggestedName != nil }.count
+        return "guests=\(guests.count) cues=\(draft.cues.count) tileCues=\(draft.tileCues.count) applied=\(applied) suggested=\(suggested)"
+    }
+
     static func awaitsProcessing(_ recording: Recording, tracks: [AudioTrack]) -> Bool {
         guard !recording.isProjectConfirmed, !tracks.isEmpty else { return false }
         if recording.isProcessing { return true }
@@ -298,6 +305,7 @@ final class RecordingCoordinator {
             try library.save(finished)
             processingProgress[draft.id] = nil
             journal?.record(.recordingSaved, correlationID: draft.id)
+            journal?.record(.speakersNamed, correlationID: draft.id, detail: Self.namingCounts(of: finished, draft: draft))
             if notify {
                 await notifier?.requestAuthorization()
                 await notifier?.notifyReady(title: finished.title)
