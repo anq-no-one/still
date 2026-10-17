@@ -70,6 +70,16 @@ struct ExtractiveNoteGeneratorTests {
     }
 
     @Test
+    func fragmentsWithoutSubstanceBecomeNoActionsOrDecisions() async throws {
+        let segments = words("I'll check . We'll do Yeah . We agreed . I will send the release notes by Monday .")
+
+        let note = try await ExtractiveNoteGenerator().note(template: .meeting, segments: segments)
+
+        #expect(note.actions.map(\.text) == ["I will send the release notes by Monday ."])
+        #expect(note.decisions.isEmpty)
+    }
+
+    @Test
     func summaryKeepsTranscriptOrder() async throws {
         let segments = words("First a very long opening statement about the plan . Short . Then another extended closing statement .")
 
@@ -171,26 +181,4 @@ func words(_ text: String) -> [TranscriptSegment] {
     }
 }
 
-struct EvidencePlaybackTests {
-    private let tapped = UUID()
-    private let other = UUID()
 
-    @Test
-    func tappingThePlayingRowPauses() {
-        #expect(EvidencePlayback.shouldPause(tapped: tapped, playingID: tapped, playerIsPlaying: true))
-        #expect(EvidencePlayback.isShowingPlaying(tapped, playingID: tapped, playerIsPlaying: true))
-    }
-
-    @Test
-    func tappingAnotherRowStartsItInstead() {
-        #expect(!EvidencePlayback.shouldPause(tapped: other, playingID: tapped, playerIsPlaying: true))
-        #expect(!EvidencePlayback.isShowingPlaying(other, playingID: tapped, playerIsPlaying: true))
-    }
-
-    @Test
-    func aPausedPlayerNeverShowsPlaying() {
-        #expect(!EvidencePlayback.shouldPause(tapped: tapped, playingID: tapped, playerIsPlaying: false))
-        #expect(!EvidencePlayback.isShowingPlaying(tapped, playingID: tapped, playerIsPlaying: false))
-        #expect(!EvidencePlayback.isShowingPlaying(tapped, playingID: nil, playerIsPlaying: false))
-    }
-}

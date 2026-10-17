@@ -43,9 +43,20 @@ struct ExtractiveNoteGenerator: NoteGenerator, Sendable {
         Self.sentences(in: segments)
             .filter { sentence in
                 let lowered = sentence.text.lowercased()
-                return cues.contains { lowered.contains($0) }
+                return cues.contains { lowered.contains($0) } && Self.isSubstantive(sentence.text, cues: cues)
             }
             .map { NoteItem(text: $0.text, sourceSegmentIDs: $0.sourceIDs) }
+    }
+
+    /// Fragments like "I'll check." match a cue but say nothing. A claim must
+    /// keep at least three content words once its cues are stripped.
+    static func isSubstantive(_ sentence: String, cues: [String]) -> Bool {
+        var remainder = sentence.lowercased()
+        for cue in cues {
+            remainder = remainder.replacingOccurrences(of: cue, with: " ")
+        }
+        let words = remainder.split(whereSeparator: { !$0.isLetter && !$0.isNumber })
+        return words.filter { $0.count > 1 }.count >= 3
     }
 
     /// Word-level recognizer output becomes sentences, so a quoted claim reads

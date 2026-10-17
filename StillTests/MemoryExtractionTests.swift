@@ -391,6 +391,17 @@ struct ExtractiveExtractorTests {
     }
 
     @Test
+    func fragmentsWithoutSubstanceBecomeNoCandidates() async throws {
+        let segments = words("I'll check . We'll do Yeah . We agreed . I will send the release notes by Monday .")
+            .map { ExtractionSegment(id: $0.id, start: $0.start, end: $0.end, text: $0.text, speaker: "Anna") }
+
+        let candidates = try await ExtractiveExtractor().candidates(from: segments, language: "en")
+
+        #expect(candidates.map(\.kind) == [.task])
+        #expect(candidates.first?.text == "I will send the release notes by Monday .")
+    }
+
+    @Test
     func windowsBreakBetweenSentences() {
         let segments = words("We agreed to ship on Friday . I will send the notes by Monday .")
             .map { ExtractionSegment(id: $0.id, start: $0.start, end: $0.end, text: $0.text, speaker: nil) }
@@ -544,27 +555,27 @@ struct FakeExtractor: Extractor {
 
 struct MemoryRowMenuTests {
     @Test
-    func aProposedTaskOffersAcceptEditShowSourceAndDismiss() {
+    func aProposedTaskOffersAcceptEditAndDismiss() {
         let item = MemoryItem(kind: .task, text: "Send the notes", sourceSegmentIDs: [UUID()], sourceStart: 3)
 
         #expect(item.status == .proposed)
-        #expect(MemoryRowMenu.actions(for: item, canEdit: true) == [.approve, .edit, .showSource, .decline])
+        #expect(MemoryRowMenu.actions(for: item, canEdit: true) == [.approve, .edit, .decline])
     }
 
     @Test
     func withoutAnEditorThereIsNoEditAction() {
         let item = MemoryItem(kind: .fact, text: "Ships Friday", sourceSegmentIDs: [UUID()], sourceStart: 3)
 
-        #expect(MemoryRowMenu.actions(for: item, canEdit: false) == [.approve, .showSource, .decline])
+        #expect(MemoryRowMenu.actions(for: item, canEdit: false) == [.approve, .decline])
     }
 
     @Test
-    func aConfirmedFactKeepsOnlyEditShowSourceAndReject() {
+    func aConfirmedFactKeepsOnlyEditAndReject() {
         let item = MemoryItem(kind: .fact, text: "Ships Friday", sourceSegmentIDs: [UUID()], sourceStart: 3)
             .reviewed(.approved)
 
         #expect(item.status == .confirmed)
-        #expect(MemoryRowMenu.actions(for: item, canEdit: true) == [.edit, .showSource, .decline])
+        #expect(MemoryRowMenu.actions(for: item, canEdit: true) == [.edit, .decline])
     }
 
     @Test

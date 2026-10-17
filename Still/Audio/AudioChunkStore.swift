@@ -187,6 +187,21 @@ enum AudioChunkStore {
         return (clamped.withUnsafeBufferPointer { Data(buffer: $0) }, format)
     }
 
+    static func playbackSidecar(forRecording id: UUID, in root: URL) -> URL {
+        directory(forRecording: id, in: root).appendingPathComponent("mixed.playback")
+    }
+
+    static func discardPlaybackSidecars(in root: URL) {
+        let contents = (try? FileManager.default.contentsOfDirectory(
+            at: root,
+            includingPropertiesForKeys: nil
+        )) ?? []
+        for directory in contents {
+            guard let id = UUID(uuidString: directory.lastPathComponent) else { continue }
+            try? FileManager.default.removeItem(at: playbackSidecar(forRecording: id, in: root))
+        }
+    }
+
     static func interruptedRecordings(
         in root: URL,
         cipher: LibraryCipher,

@@ -34,6 +34,7 @@ struct ExportMenu: View {
                 preview: preview("Archive")
             )
         }
+        .help("Export")
     }
 
     private func preview(_ label: String) -> SharePreview<Never, Never> {
@@ -50,20 +51,20 @@ struct ExportMenu: View {
     private var mixedAudio: @Sendable () throws -> Data {
         let library = library
         let recording = recording
-        return { try MainActor.assumeIsolated { try library.audio(for: recording) } }
+        return { try MainActorExport.run { try library.audio(for: recording) } }
     }
 
     private func trackAudio(_ track: AudioTrack) -> @Sendable () throws -> Data {
         let library = library
         let recording = recording
-        return { try MainActor.assumeIsolated { try library.audio(for: recording, track: track) } }
+        return { try MainActorExport.run { try library.audio(for: recording, track: track) } }
     }
 
     private var archive: @Sendable () throws -> Data {
         let library = library
         let recording = recording
         return {
-            try MainActor.assumeIsolated {
+            try MainActorExport.run {
                 try library.archive(recording, tracks: library.tracks(forRecording: recording.id))
             }
         }

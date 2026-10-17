@@ -118,7 +118,7 @@ struct LibraryView: View {
             }
         } detail: {
             Group {
-                if let recording = selected {
+                if let recording = detailRecording {
                     RecordingDetailView(
                         recording: recording,
                         library: library,
@@ -204,6 +204,8 @@ struct LibraryView: View {
         .onChange(of: coordinator.phase) { _, phase in
             if phase == .idle { isCapturing = false }
         }
+        .onAppear { selectLatestWhenNothingSelected() }
+        .onChange(of: library.recordings.count) { _, _ in selectLatestWhenNothingSelected() }
     }
 
     @ViewBuilder
@@ -246,6 +248,21 @@ struct LibraryView: View {
 
     private var selected: Recording? {
         library.recordings.first { $0.id == navigation.selection }
+    }
+
+    private var detailRecording: Recording? {
+        #if os(macOS)
+        DetailFallback.recording(selected: navigation.selection, recordings: library.recordings)
+        #else
+        selected
+        #endif
+    }
+
+    private func selectLatestWhenNothingSelected() {
+        #if os(macOS)
+        guard navigation.selection == nil, let latest = library.recordings.first else { return }
+        navigation.selection = latest.id
+        #endif
     }
 
     private var shownRecordings: [Recording] {

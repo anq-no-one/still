@@ -47,12 +47,6 @@ struct LibraryServices {
     }
 }
 
-struct AudioDecodeInputs: Sendable {
-    let id: UUID
-    let audioRoot: URL
-    let keyBytes: Data
-}
-
 @MainActor
 @Observable
 final class Library: RecordingLibrary {
@@ -71,7 +65,7 @@ final class Library: RecordingLibrary {
     private var vocabularyRepository: ProjectVocabularyRepository?
     private var key: SymmetricKey?
     private var accountKeys: AccountKeys?
-    private var audioCache: (id: UUID, chunkCount: Int, wav: Data)?
+    private var dashboardCache: (key: String, dashboard: Dashboard?) = ("", nil)
 
     private(set) var state: State = .locked
     private(set) var storedRecordings: [Recording] = []
@@ -214,6 +208,7 @@ final class Library: RecordingLibrary {
             self.repository = repository
             self.key = key
             try recoverInterruptedAudio(cipher: LibraryCipher(key: key))
+            AudioChunkStore.discardPlaybackSidecars(in: services.audioRoot)
             discardUnfinishedImports()
             MeetingTileStore.discardLeftovers(in: services.audioRoot)
             try applyRetention()
@@ -328,31 +323,6 @@ final class Library: RecordingLibrary {
             let captured = try capturedAudio(forRecording: recording.id)
             return WAVFile.data(pcm: captured.pcm, format: captured.format)
         }
-    }
-
-    func decodedAudio(for recording: Recording) async -> Data {
-        let chunkCount = AudioChunkStore.chunkCount(forRecording: recording.id, in: services.audioRoot)
-        if let audioCache, audioCache.id == recording.id, audioCache.chunkCount == chunkCount {
-            return audioCache.wav
-        }
-        guard let inputs = audioInputs(for: recording.id) else { return Data() }
-        let decoded = await AudioPlaybackThread.shared.run { Library.decodeAudio(inputs) }
-        audioCache = (recording.id, decoded.chunkCount, decoded.wav)
-        return decoded.wav
-    }
-
-    nonisolated static func decodeAudio(_ inputs: AudioDecodeInputs) -> (wav: Data, chunkCount: Int) {
-        let cipher = LibraryCipher(key: SymmetricKey(data: inputs.keyBytes))
-        let chunkCount = AudioChunkStore.chunkCount(forRecording: inputs.id, in: inputs.audioRoot)
-        guard let mixed = try? AudioChunkStore.mixed(forRecording: inputs.id, in: inputs.audioRoot, cipher: cipher) else {
-            return (Data(), chunkCount)
-        }
-        return (WAVFile.data(pcm: mixed.pcm, format: mixed.format), chunkCount)
-    }
-
-    private func audioInputs(for id: UUID) -> AudioDecodeInputs? {
-        guard let key else { return nil }
-        return AudioDecodeInputs(id: id, audioRoot: services.audioRoot, keyBytes: key.rawBytes)
     }
 
     func audio(for recording: Recording, track: AudioTrack) throws -> Data {
@@ -840,7 +810,19 @@ final class Library: RecordingLibrary {
     }
 
     func dashboard(at date: Date = .now) -> Dashboard {
-        Dashboard(recordings: recordings, now: date)
+        let key = dashboardCacheKey(date: date)
+        if key == dashboardCache.key, let cached = dashboardCache.dashboard {
+            return cached
+        }
+        let built = Dashboard(recordings: recordings, now: date)
+        dashboardCache = (key, built)
+        return built
+    }
+
+    private func dashboardCacheKey(date: Date) -> String {
+        let fingerprint = (try? JSONEncoder().encode(storedRecordings))?.hashValue ?? 0
+        let minute = Int(date.timeIntervalSinceReferenceDate / 60)
+        return "\(fingerprint)|\(projectSelection)|\(minute)"
     }
 
     private func updateMemoryItem(

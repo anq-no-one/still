@@ -4,7 +4,6 @@ struct MemorySectionsView: View {
     let recordingID: UUID
     let library: Library
     let extraction: MemoryExtraction
-    let play: (TimeInterval) -> Void
 
     @State private var failure: String?
 
@@ -16,9 +15,9 @@ struct MemorySectionsView: View {
                         .font(.callout)
                 }
 
-                MemorySection(title: "Decisions", items: visible(.decision), play: play, review: review, edit: nil)
-                MemorySection(title: "Facts", items: visible(.fact), play: play, review: review, edit: nil)
-                MemorySection(title: "Proposed Tasks", items: visible(.task), play: play, review: review, edit: edit)
+                MemorySection(title: "Decisions", items: visible(.decision), review: review, edit: nil)
+                MemorySection(title: "Facts", items: visible(.fact), review: review, edit: nil)
+                MemorySection(title: "Proposed Tasks", items: visible(.task), review: review, edit: edit)
 
                 if let failure {
                     Label(failure, systemImage: "exclamationmark.triangle.fill")
@@ -76,7 +75,6 @@ struct MemorySectionsView: View {
 private struct MemorySection: View {
     let title: LocalizedStringKey
     let items: [MemoryItem]
-    let play: (TimeInterval) -> Void
     let review: (MemoryItem, MemoryReview) -> Void
     let edit: ((MemoryItem, String) -> Void)?
 
@@ -87,7 +85,7 @@ private struct MemorySection: View {
                     .font(.headline)
 
                 ForEach(items) { item in
-                    MemoryRow(item: item, play: play, review: review, edit: edit)
+                    MemoryRow(item: item, review: review, edit: edit)
                 }
             }
         }
@@ -98,7 +96,6 @@ enum MemoryRowMenu {
     enum Action: Hashable, Sendable {
         case approve
         case edit
-        case showSource
         case decline
     }
 
@@ -110,7 +107,6 @@ enum MemoryRowMenu {
         if canEdit {
             actions.append(.edit)
         }
-        actions.append(.showSource)
         actions.append(.decline)
         return actions
     }
@@ -118,7 +114,6 @@ enum MemoryRowMenu {
 
 private struct MemoryRow: View {
     let item: MemoryItem
-    let play: (TimeInterval) -> Void
     let review: (MemoryItem, MemoryReview) -> Void
     let edit: ((MemoryItem, String) -> Void)?
 
@@ -128,11 +123,9 @@ private struct MemoryRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Button(item.sourceStart.recordingDurationText) { play(item.sourceStart) }
+                Text(item.sourceStart.recordingDurationText)
                     .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.secondary)
-                    .buttonStyle(.plain)
-                    .accessibilityHint("Plays the recording from \(item.sourceStart.recordingDurationText)")
 
                 if isEditing {
                     TextField("Task", text: $draft, axis: .vertical)
@@ -214,10 +207,6 @@ private struct MemoryRow: View {
             Button("Edit", systemImage: "pencil") {
                 draft = item.text
                 isEditing = true
-            }
-        case .showSource:
-            Button("Show source", systemImage: "play") {
-                play(item.sourceStart)
             }
         case .decline:
             Button(item.kind == .task ? "Dismiss" : "Reject", systemImage: "xmark", role: .destructive) {

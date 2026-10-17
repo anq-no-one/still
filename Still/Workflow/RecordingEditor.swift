@@ -11,6 +11,7 @@ final class RecordingEditor {
 
     private let library: Library
     private var pendingSave: Task<Void, Never>?
+    private var needsSave = false
 
     private(set) var recording: Recording
     private(set) var saveFailure: String?
@@ -143,10 +144,12 @@ final class RecordingEditor {
     func saveNow() {
         pendingSave?.cancel()
         pendingSave = nil
+        guard needsSave else { return }
         write()
     }
 
     private func scheduleSave() {
+        needsSave = true
         pendingSave?.cancel()
         pendingSave = Task { [weak self] in
             try? await Task.sleep(for: Self.saveDelay)
@@ -160,6 +163,7 @@ final class RecordingEditor {
         do {
             try library.save(recording)
             saveFailure = nil
+            needsSave = false
         } catch {
             saveFailure = error.localizedDescription
         }

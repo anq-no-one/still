@@ -59,7 +59,6 @@ struct NetworkBoundaryTests {
             "FinalTranscription.swift",
             "OfflineTranscriber.swift",
             "LibrarySearch.swift",
-            "RecordingPlayer.swift",
             "RecordingDocument.swift",
             "AudioChunkStore.swift",
             "Library.swift",

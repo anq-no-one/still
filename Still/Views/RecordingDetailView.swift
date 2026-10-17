@@ -11,7 +11,6 @@ struct RecordingDetailView: View {
     let latest: Recording
 
     @State private var editor: RecordingEditor
-    @State private var player = RecordingPlayer()
     @State private var title: String
     @State private var noteText: String
     @State private var copiedNote = false
@@ -21,9 +20,9 @@ struct RecordingDetailView: View {
     @State private var translationFailure: String?
     @State private var vocabularyChanges: [VocabularyChange] = []
     @State private var findsNoVocabularyChanges = false
-    @State private var playingEvidenceID: NoteItem.ID?
-    @State private var detailReady = false
     @State private var isRegeneratingTitle = false
+    @State private var transcriptBlocks: [TranscriptBlock]?
+    @State private var visibleSegmentBudget = TranscriptPaging.initialSegmentBudget
 
     init(
         recording: Recording,
@@ -44,7 +43,7 @@ struct RecordingDetailView: View {
 
     var body: some View {
         Group {
-            if detailReady {
+            ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 24) {
                 TextField("Title", text: $title, axis: .vertical)
@@ -59,10 +58,6 @@ struct RecordingDetailView: View {
                         Label(file.name, systemImage: file.kind == .video ? "film" : "waveform")
                             .lineLimit(1)
                             .accessibilityLabel("Imported from \(file.name)")
-                    }
-                    if player.isPlaying {
-                        Button("Pause", systemImage: "pause.fill") { player.pause() }
-                            .buttonStyle(.borderless)
                     }
                 }
                 .font(.subheadline)
@@ -90,7 +85,7 @@ struct RecordingDetailView: View {
                     )
                 }
 
-                if let message = editor.saveFailure ?? playbackMessage ?? translationFailure {
+                if let message = editor.saveFailure ?? translationFailure {
                     Label(message, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(.red)
                 }
@@ -100,8 +95,7 @@ struct RecordingDetailView: View {
                 MemorySectionsView(
                     recordingID: recording.id,
                     library: library,
-                    extraction: extraction,
-                    play: { player.play(from: $0) }
+                    extraction: extraction
                 )
 
                 if !recording.speakers.isEmpty {
@@ -130,42 +124,16 @@ struct RecordingDetailView: View {
 
                 Divider()
 
-                if recording.transcript.isEmpty {
-                    if recording.isProcessing {
-                        Label("Writing the transcript…", systemImage: "waveform.badge.magnifyingglass")
-                            .font(.body)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ContentUnavailableView(
-                            "No Transcript",
-                            systemImage: "waveform.slash",
-                            description: Text("This device could not turn the recording into text. The audio is saved, so you can still play it.")
-                        )
+                transcriptSection
                     }
-                } else if recording.segments.isEmpty {
-                    Text(recording.transcript)
-                        .font(.body)
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                } else {
-                    ForEach(transcriptBlocks) { block in
-                        TranscriptBlockView(
-                            block: block,
-                            speaker: block.speakerID.flatMap { id in recording.speakers.first { $0.id == id } },
-                            showsTranslation: showsTranslation,
-                            isMixed: { segment in recording.mixedMediaSpans?.contains { $0.overlaps(segment) } ?? false },
-                            play: { player.play(from: $0.start) },
-                            correct: { editor.correct($0, to: $1) }
-                        )
-                    }
-                }
-            }
                     .padding(28)
                     .frame(maxWidth: 760, alignment: .leading)
                     .frame(maxWidth: .infinity)
                 }
-            } else {
-                RecordingDetailSkeleton(title: latest.title)
+                .task(id: refreshKey) {
+                    await loadTranscript()
+                    scrollToStartTime(using: proxy)
+                }
             }
         }
         #if os(macOS)
@@ -177,6 +145,7 @@ struct RecordingDetailView: View {
             ToolbarItem {
                 Toggle("Translate to \(readingLanguageName)", systemImage: "translate", isOn: $showsTranslation)
                     .disabled(recording.segments.isEmpty)
+                    .help("Translate to \(readingLanguageName)")
             }
             ToolbarItem {
                 ExportMenu(recording: recording, library: library)
@@ -192,6 +161,7 @@ struct RecordingDetailView: View {
                     }
                 }
                 .disabled(recording.segments.isEmpty || isRegeneratingTitle)
+                .help("Regenerate Title")
             }
             ToolbarItem {
                 Button("Apply Project Vocabulary", systemImage: "character.book.closed") {
@@ -202,6 +172,7 @@ struct RecordingDetailView: View {
                     findsNoVocabularyChanges = vocabularyChanges.isEmpty
                 }
                 .disabled(library.vocabulary(forProject: recording.projectID).activeTerms.isEmpty)
+                .help("Apply Project Vocabulary")
             }
         }
         .alert("Nothing to Change", isPresented: $findsNoVocabularyChanges) {
@@ -228,20 +199,16 @@ struct RecordingDetailView: View {
                 showsTranslation = false
             }
         }
-        .task(id: latest.id) {
-            detailReady = false
-            await player.load(await library.decodedAudio(for: recording))
-            if let startAt { player.play(from: startAt) }
-            detailReady = true
-        }
         .onChange(of: latest) { _, updated in
             guard editor.recording.isProcessing, !updated.isProcessing, !editor.hasPendingSave else { return }
             editor.refresh(to: updated)
             title = updated.title
             noteText = updated.note?.userText ?? ""
+            refreshTranscriptBlocks()
         }
         .onDisappear {
-            editor.saveNow()
+            let pending = editor
+            Task { @MainActor in pending.saveNow() }
         }
     }
 
@@ -249,23 +216,40 @@ struct RecordingDetailView: View {
         editor.recording
     }
 
-    private var transcriptBlocks: [TranscriptBlock] {
-        TranscriptBlocks.group(
+    private var refreshKey: String {
+        "\(latest.id.uuidString)-\(latest.updatedAt.timeIntervalSince1970)"
+    }
+
+    private func loadTranscript() async {
+        transcriptBlocks = nil
+        let key = refreshKey
+        let segments = editor.recording.segments
+        let blocks = await Task.detached(priority: .userInitiated) {
+            TranscriptBlocks.group(
+                segments.filter {
+                    !DisfluencyFilter.isFillerOnly($0.displayText, language: $0.language)
+                }
+            )
+        }.value
+        guard key == refreshKey else { return }
+        transcriptBlocks = blocks
+        if let covering = TranscriptPaging.budgetCovering(blocks, startAt: startAt) {
+            visibleSegmentBudget = covering
+        }
+    }
+
+    private func refreshTranscriptBlocks() {
+        transcriptBlocks = TranscriptBlocks.group(
             recording.segments.filter {
                 !DisfluencyFilter.isFillerOnly($0.displayText, language: $0.language)
             }
         )
     }
 
-    private var playbackMessage: String? {
-        switch player.state {
-        case .noAudio where !recording.segments.isEmpty:
-            "The audio for this recording was removed. The transcript is unchanged."
-        case .unreadable(let message):
-            message
-        case .noAudio, .ready:
-            nil
-        }
+    private func scrollToStartTime(using proxy: ScrollViewProxy) {
+        guard let startAt, let blocks = transcriptBlocks else { return }
+        guard let target = blocks.first(where: { $0.segments.contains { $0.start >= startAt } }) else { return }
+        proxy.scrollTo(target.id, anchor: .top)
     }
 
     private var readingLanguage: Locale.Language {
@@ -295,9 +279,9 @@ struct RecordingDetailView: View {
         VStack(alignment: .leading, spacing: 18) {
             noteActions
 
-            NoteSectionView(title: "Summary", items: editor.note.summary, player: player, playingID: playingEvidenceID, toggleEvidence: toggleEvidence)
-            NoteSectionView(title: "Decisions", items: editor.note.decisions, player: player, playingID: playingEvidenceID, toggleEvidence: toggleEvidence)
-            NoteSectionView(title: "Action Items", items: editor.note.actions, player: player, playingID: playingEvidenceID, toggleEvidence: toggleEvidence)
+            NoteSectionView(title: "Summary", items: editor.note.summary)
+            NoteSectionView(title: "Decisions", items: editor.note.decisions)
+            NoteSectionView(title: "Action Items", items: editor.note.actions)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("Your Notes")
@@ -350,48 +334,52 @@ struct RecordingDetailView: View {
         }
     }
 
-    private func toggleEvidence(_ item: NoteItem) {
-        if EvidencePlayback.shouldPause(tapped: item.id, playingID: playingEvidenceID, playerIsPlaying: player.isPlaying) {
-            player.pause()
-            playingEvidenceID = nil
-        } else {
-            openEvidence(item)
-        }
-    }
-
-    private func openEvidence(_ item: NoteItem) {
-        guard let first = item.sourceSegmentIDs.first,
-              let segment = editor.segment(withID: first)
-        else { return }
-
-        playingEvidenceID = item.id
-        player.play(from: segment.start)
-    }
-}
-
-private struct RecordingDetailSkeleton: View {
-    let title: String
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                Text(title)
-                    .font(.largeTitle.bold())
-                ProgressView("Loading Audio")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                ForEach(0..<4, id: \.self) { _ in
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(.secondary.opacity(0.15))
-                        .frame(height: 48)
-                        .redacted(reason: .placeholder)
+    @ViewBuilder
+    private var transcriptSection: some View {
+        if let blocks = transcriptBlocks {
+            if recording.transcript.isEmpty {
+                if recording.isProcessing {
+                    Label("Writing the transcript…", systemImage: "waveform.badge.magnifyingglass")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ContentUnavailableView(
+                        "No Transcript",
+                        systemImage: "waveform.slash",
+                        description: Text("This device could not turn the recording into text.")
+                    )
+                }
+            } else if recording.segments.isEmpty {
+                Text(recording.transcript)
+                    .font(.body)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                let page = TranscriptPaging.visibleBlocks(blocks, segmentBudget: visibleSegmentBudget)
+                ForEach(page.blocks) { block in
+                    TranscriptBlockView(
+                        block: block,
+                        speaker: block.speakerID.flatMap { id in recording.speakers.first { $0.id == id } },
+                        showsTranslation: showsTranslation,
+                        isMixed: { segment in recording.mixedMediaSpans?.contains { $0.overlaps(segment) } ?? false },
+                        correct: {
+                            editor.correct($0, to: $1)
+                            refreshTranscriptBlocks()
+                        }
+                    )
+                }
+                if page.hasMore {
+                    Button("Show more of the transcript", systemImage: "chevron.down") {
+                        visibleSegmentBudget += TranscriptPaging.pageSegmentBudget
+                    }
+                    .buttonStyle(.borderless)
                 }
             }
-            .padding(28)
-            .frame(maxWidth: 760, alignment: .leading)
-            .frame(maxWidth: .infinity)
+        } else {
+            ProgressView("Loading transcript…")
+                .font(.body)
+                .foregroundStyle(.secondary)
         }
-        .accessibilityLabel("Loading recording")
     }
 }
 
@@ -400,7 +388,6 @@ private struct TranscriptBlockView: View {
     let speaker: Speaker?
     let showsTranslation: Bool
     let isMixed: (TranscriptSegment) -> Bool
-    let play: (TranscriptSegment) -> Void
     let correct: (TranscriptSegment, String) -> Void
 
     var body: some View {
@@ -415,7 +402,6 @@ private struct TranscriptBlockView: View {
                             segment: segment,
                             speakerName: speaker?.name,
                             isMixed: isMixed(segment),
-                            play: { play(segment) },
                             correct: { correct(segment, $0) }
                         )
                     }
@@ -475,7 +461,6 @@ private struct SegmentRow: View {
     let segment: TranscriptSegment
     let speakerName: String?
     let isMixed: Bool
-    let play: () -> Void
     let correct: (String) -> Void
 
     @State private var text: String
@@ -487,14 +472,12 @@ private struct SegmentRow: View {
         segment: TranscriptSegment,
         speakerName: String?,
         isMixed: Bool,
-        play: @escaping () -> Void,
         correct: @escaping (String) -> Void
     ) {
         self.showsTranslation = showsTranslation
         self.segment = segment
         self.speakerName = speakerName
         self.isMixed = isMixed
-        self.play = play
         self.correct = correct
         _text = State(initialValue: segment.displayText)
     }
@@ -502,15 +485,10 @@ private struct SegmentRow: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
-                Button(action: play) {
-                    Text(segment.startText)
-                        .frame(minWidth: 44, minHeight: 44, alignment: .topLeading)
-                        .contentShape(.rect)
-                }
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(.secondary)
-                .buttonStyle(.plain)
-                .accessibilityHint("Plays the recording from \(segment.startText), said by \(speakerName ?? "an unknown speaker")")
+                Text(segment.startText)
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel("\(segment.startText), said by \(speakerName ?? "an unknown speaker")")
 
                 if isMixed {
                     Image(systemName: "speaker.wave.2")
