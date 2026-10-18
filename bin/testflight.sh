@@ -42,6 +42,17 @@ export STILL_OP_APP_STORE_KEY_ID="$(op_read "$OP_ITEM/APP_STORE_KEY_ID")"
 export STILL_OP_APP_STORE_ISSUER_ID="$(op_read "$OP_ITEM/APP_STORE_ISSUER_ID")"
 export STILL_OP_APP_STORE_KEY_CONTENT="$(op_read "$OP_ITEM/APP_STORE_KEY_CONTENT")"
 
+for field in TEAM_ID APP_STORE_KEY_ID APP_STORE_ISSUER_ID APP_STORE_KEY_CONTENT; do
+  var="STILL_OP_$field"
+  value="${!var}"
+  if [[ "$field" == "APP_STORE_KEY_CONTENT" ]]; then
+    shape="length=${#value}, looks_pem=$([[ "$value" == *BEGIN* ]] && echo yes || echo no)"
+  else
+    shape="length=${#value}"
+  fi
+  echo "-- credential $field: $shape"
+done
+
 echo "-- iOS TestFlight build and upload"
 fastlane ios beta
 

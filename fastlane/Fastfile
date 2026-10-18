@@ -19,7 +19,7 @@ end
 
 def asc_api_key
   @asc_api_key ||= begin
-    content = op_field("APP_STORE_KEY_CONTENT")
+    content = op_field("APP_STORE_KEY_CONTENT").delete("\0")
     key = app_store_connect_api_key(
       key_id: op_field("APP_STORE_KEY_ID"),
       issuer_id: op_field("APP_STORE_ISSUER_ID"),
