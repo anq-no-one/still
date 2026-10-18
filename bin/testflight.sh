@@ -32,15 +32,26 @@ for item in json.load(sys.stdin):
   return 1
 }
 
-echo "-- 1Password sign-in (the only authorization this run needs)"
-op signin --account my.1password.com
-op whoami
+if [[ -n "${STILL_ASC_KEY_FILE:-}" ]]; then
+  echo "-- Key-file mode: using $STILL_ASC_KEY_FILE, no 1Password needed"
+  : "${STILL_ASC_KEY_ID:?set STILL_ASC_KEY_ID to the key's 10-character ID}"
+  : "${STILL_ASC_ISSUER_ID:?set STILL_ASC_ISSUER_ID to the team's issuer UUID}"
+  : "${STILL_TEAM_ID:?set STILL_TEAM_ID to the 10-character team ID}"
+  export STILL_OP_TEAM_ID="$STILL_TEAM_ID"
+  export STILL_OP_APP_STORE_KEY_ID="$STILL_ASC_KEY_ID"
+  export STILL_OP_APP_STORE_ISSUER_ID="$STILL_ASC_ISSUER_ID"
+  export STILL_OP_APP_STORE_KEY_CONTENT="key-file-mode"
+else
+  echo "-- 1Password sign-in (the only authorization this run needs)"
+  op signin --account my.1password.com
+  op whoami
 
-echo "-- Reading TestFlight credentials into this shell only"
-export STILL_OP_TEAM_ID="$(op_read "$OP_ITEM/TEAM_ID")"
-export STILL_OP_APP_STORE_KEY_ID="$(op_read "$OP_ITEM/APP_STORE_KEY_ID")"
-export STILL_OP_APP_STORE_ISSUER_ID="$(op_read "$OP_ITEM/APP_STORE_ISSUER_ID")"
-export STILL_OP_APP_STORE_KEY_CONTENT="$(op_read "$OP_ITEM/APP_STORE_KEY_CONTENT")"
+  echo "-- Reading TestFlight credentials into this shell only"
+  export STILL_OP_TEAM_ID="$(op_read "$OP_ITEM/TEAM_ID")"
+  export STILL_OP_APP_STORE_KEY_ID="$(op_read "$OP_ITEM/APP_STORE_KEY_ID")"
+  export STILL_OP_APP_STORE_ISSUER_ID="$(op_read "$OP_ITEM/APP_STORE_ISSUER_ID")"
+  export STILL_OP_APP_STORE_KEY_CONTENT="$(op_read "$OP_ITEM/APP_STORE_KEY_CONTENT")"
+fi
 
 check_shape() {
   local field="$1" value="$2" ok=1 detail=""
@@ -62,14 +73,16 @@ check_shape() {
   return $((1 - ok))
 }
 
-valid=0
-for field in TEAM_ID APP_STORE_KEY_ID APP_STORE_ISSUER_ID APP_STORE_KEY_CONTENT; do
-  var="STILL_OP_$field"
-  check_shape "$field" "${!var}" || valid=1
-done
-if (( valid )); then
-  echo "!! Fix the fields of '$OP_ITEM' in 1Password (or point STILL_OP_ASC_KEY_ITEM at the right item), then re-run."
-  exit 1
+if [[ -z "${STILL_ASC_KEY_FILE:-}" ]]; then
+  valid=0
+  for field in TEAM_ID APP_STORE_KEY_ID APP_STORE_ISSUER_ID APP_STORE_KEY_CONTENT; do
+    var="STILL_OP_$field"
+    check_shape "$field" "${!var}" || valid=1
+  done
+  if (( valid )); then
+    echo "!! Fix the fields of '$OP_ITEM' in 1Password (or point STILL_OP_ASC_KEY_ITEM at the right item), then re-run."
+    exit 1
+  fi
 fi
 
 echo "-- iOS TestFlight build and upload"
