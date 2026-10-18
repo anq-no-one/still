@@ -19,11 +19,12 @@ end
 
 def asc_api_key
   @asc_api_key ||= begin
+    content = op_field("APP_STORE_KEY_CONTENT")
     key = app_store_connect_api_key(
       key_id: op_field("APP_STORE_KEY_ID"),
       issuer_id: op_field("APP_STORE_ISSUER_ID"),
-      key_content: op_field("APP_STORE_KEY_CONTENT"),
-      is_key_content_base64: true,
+      key_content: content,
+      is_key_content_base64: !content.include?("BEGIN"),
       in_house: false
     )
     @key_path = File.join(Dir.mktmpdir("still-asc"), "AuthKey_#{key[:key_id]}.p8")
