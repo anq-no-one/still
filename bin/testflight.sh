@@ -16,14 +16,31 @@ exec > >(tee -a "$LOG") 2>&1
 
 OP_ITEM="${STILL_OP_ASC_KEY_ITEM:-op://Personal/colouring - App Store Connect API}"
 
+op_read() {
+  local value
+  if value="$(op read "$1" 2>/dev/null)"; then
+    printf '%s' "$value"
+    return 0
+  fi
+  echo "!! Could not read $1"
+  echo "-- 1Password item names visible to this sign-in (titles only, no secrets):"
+  op item list --format json 2>/dev/null | python3 -c "
+import json,sys
+for item in json.load(sys.stdin):
+    print('   ', item.get('vault',{}).get('name','?'), '/', item.get('title','?'))
+" || op item list || true
+  return 1
+}
+
 echo "-- 1Password sign-in (the only authorization this run needs)"
 op signin --account my.1password.com
+op whoami
 
 echo "-- Reading TestFlight credentials into this shell only"
-export STILL_OP_TEAM_ID="$(op read "$OP_ITEM/TEAM_ID")"
-export STILL_OP_APP_STORE_KEY_ID="$(op read "$OP_ITEM/APP_STORE_KEY_ID")"
-export STILL_OP_APP_STORE_ISSUER_ID="$(op read "$OP_ITEM/APP_STORE_ISSUER_ID")"
-export STILL_OP_APP_STORE_KEY_CONTENT="$(op read "$OP_ITEM/APP_STORE_KEY_CONTENT")"
+export STILL_OP_TEAM_ID="$(op_read "$OP_ITEM/TEAM_ID")"
+export STILL_OP_APP_STORE_KEY_ID="$(op_read "$OP_ITEM/APP_STORE_KEY_ID")"
+export STILL_OP_APP_STORE_ISSUER_ID="$(op_read "$OP_ITEM/APP_STORE_ISSUER_ID")"
+export STILL_OP_APP_STORE_KEY_CONTENT="$(op_read "$OP_ITEM/APP_STORE_KEY_CONTENT")"
 
 echo "-- iOS TestFlight build and upload"
 fastlane ios beta
