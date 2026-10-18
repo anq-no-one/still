@@ -5,7 +5,10 @@ MAC_APP := $(DERIVED_DATA)/Build/Products/Debug/Still.app
 IOS_APP := $(DERIVED_DATA)/Build/Products/Debug-iphonesimulator/Still.app
 BUNDLE_ID := com.andrii.still
 
-.PHONY: run-mac run-ios
+.PHONY: run-mac run-ios testflight
+
+testflight:
+	bin/testflight.sh
 
 run-mac:
 	pkill -x Still || true
