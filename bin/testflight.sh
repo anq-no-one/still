@@ -42,16 +42,35 @@ export STILL_OP_APP_STORE_KEY_ID="$(op_read "$OP_ITEM/APP_STORE_KEY_ID")"
 export STILL_OP_APP_STORE_ISSUER_ID="$(op_read "$OP_ITEM/APP_STORE_ISSUER_ID")"
 export STILL_OP_APP_STORE_KEY_CONTENT="$(op_read "$OP_ITEM/APP_STORE_KEY_CONTENT")"
 
+check_shape() {
+  local field="$1" value="$2" ok=1 detail=""
+  case "$field" in
+    TEAM_ID | APP_STORE_KEY_ID)
+      [[ "$value" =~ ^[A-Z0-9]{10}$ ]] || { ok=0; detail="want 10 uppercase letters/digits"; } ;;
+    APP_STORE_ISSUER_ID)
+      [[ "$value" =~ ^[0-9a-fA-F-]{36}$ ]] || { ok=0; detail="want a 36-character UUID"; } ;;
+    APP_STORE_KEY_CONTENT)
+      if [[ "$value" == *BEGIN* ]]; then
+        (( ${#value} > 150 && ${#value} < 4000 )) || { ok=0; detail="PEM looks truncated or padded"; }
+      else
+        [[ "$value" =~ ^[A-Za-z0-9+/=$'\n']+$ && ${#value} -gt 100 ]] || { ok=0; detail="want the .p8 PEM text or its base64"; }
+      fi ;;
+  esac
+  local status="ok"
+  (( ok )) || status="MALFORMED ($detail)"
+  echo "-- credential $field: length=${#value} $status"
+  return $((1 - ok))
+}
+
+valid=0
 for field in TEAM_ID APP_STORE_KEY_ID APP_STORE_ISSUER_ID APP_STORE_KEY_CONTENT; do
   var="STILL_OP_$field"
-  value="${!var}"
-  if [[ "$field" == "APP_STORE_KEY_CONTENT" ]]; then
-    shape="length=${#value}, looks_pem=$([[ "$value" == *BEGIN* ]] && echo yes || echo no)"
-  else
-    shape="length=${#value}"
-  fi
-  echo "-- credential $field: $shape"
+  check_shape "$field" "${!var}" || valid=1
 done
+if (( valid )); then
+  echo "!! Fix the fields of '$OP_ITEM' in 1Password (or point STILL_OP_ASC_KEY_ITEM at the right item), then re-run."
+  exit 1
+fi
 
 echo "-- iOS TestFlight build and upload"
 fastlane ios beta
