@@ -198,23 +198,32 @@ final class Library: RecordingLibrary {
         state = .unlocking
         journal?.note(.libraryUnlockStarted)
         do {
-            let key = try await keyRing.unlock(reason: reason)
+            let key = try await Perf.trace("library.unlock.key") { try await keyRing.unlock(reason: reason) }
             let repository = services.makeRepository(key)
-            storedRecordings = try repository.load()
-            try loadProjects(with: key)
-            try loadVocabularies(with: key)
-            settings = LibrarySettings.load(from: services.settingsFile, cipher: LibraryCipher(key: key))
-            accountKeys = try loadAccountKeys(with: key)
+            storedRecordings = try Perf.measure("library.unlock.loadRecordings") { try repository.load() }
+            try Perf.measure("library.unlock.loadProjects") {
+                try loadProjects(with: key)
+                try loadVocabularies(with: key)
+                settings = LibrarySettings.load(from: services.settingsFile, cipher: LibraryCipher(key: key))
+                accountKeys = try loadAccountKeys(with: key)
+            }
             self.repository = repository
             self.key = key
-            try recoverInterruptedAudio(cipher: LibraryCipher(key: key))
-            AudioChunkStore.discardPlaybackSidecars(in: services.audioRoot)
-            discardUnfinishedImports()
-            MeetingTileStore.discardLeftovers(in: services.audioRoot)
-            try applyRetention()
+            try Perf.measure("library.unlock.housekeeping") {
+                try recoverInterruptedAudio(cipher: LibraryCipher(key: key))
+                AudioChunkStore.discardPlaybackSidecars(in: services.audioRoot)
+                discardUnfinishedImports()
+                MeetingTileStore.discardLeftovers(in: services.audioRoot)
+                try applyRetention()
+            }
             state = .unlocked
             journal?.note(.libraryUnlocked)
-            semanticIndex = SemanticIndex(engine: await services.makeEmbeddingEngine())
+            DevLog.event("library.unlocked", [
+                "recordings": String(storedRecordings.count),
+                "segments": String(storedRecordings.reduce(0) { $0 + $1.segments.count }),
+                "projects": String(storedProjects.count),
+            ])
+            semanticIndex = SemanticIndex(engine: await Perf.trace("library.unlock.embeddingEngine") { await services.makeEmbeddingEngine() })
             semanticIndex.rebuildInBackground(storedRecordings)
         } catch {
             repository = nil
@@ -777,6 +786,12 @@ final class Library: RecordingLibrary {
         )
     }
 
+    func debugAudioSource(forRecording id: UUID) -> DebugAudioSource? {
+        guard let key else { return nil }
+
+        return DebugAudioSource(recordingID: id, root: services.audioRoot, cipher: LibraryCipher(key: key), tracks: tracks(forRecording: id))
+    }
+
     func capturedTracks(forRecording id: UUID) throws -> [CapturedTrack] {
         guard let key else { throw LibraryError.locked }
 
@@ -968,7 +983,9 @@ final class Library: RecordingLibrary {
 
         let recording = storedRecordings.first { $0.id == incoming.id }
             .map { incoming.keepingLatestProject(of: $0).keepingMemory(of: $0) } ?? incoming
-        try repository.save(recording)
+        try Perf.measure("library.write", ["recordingID": recording.id.uuidString, "segments": String(recording.segments.count)]) {
+            try repository.save(recording)
+        }
         if let index = storedRecordings.firstIndex(where: { $0.id == recording.id }) {
             storedRecordings[index] = recording
         } else {

@@ -11,6 +11,7 @@ struct NetworkBoundaryTests {
         "CloudKitSyncTransport.swift": "iCloud sync, only after the user turns it on",
         "NetworkNearbySession.swift": "Direct device sync, only after pairing",
         "StoreKitEntitlementSource.swift": "App Store purchase and restore",
+        "BuildChannel.swift": "AppTransaction tells TestFlight from the App Store; StoreKit may refresh it from Apple",
         "StillApp.swift": "Composition root: names the transports above, calls none of them",
     ]
 

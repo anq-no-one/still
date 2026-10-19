@@ -8,6 +8,7 @@ struct CaptureView: View {
     @State private var tick = Date.now
 
     var body: some View {
+        let _ = Perf.count("render.CaptureView")
         VStack(spacing: 20) {
             VStack(spacing: 6) {
                 Label(statusTitle, systemImage: "lock.fill")

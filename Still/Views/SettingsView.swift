@@ -27,6 +27,7 @@ struct SettingsView: View {
     private var layout: SettingsLayout { preferences.layout }
 
     var body: some View {
+        let _ = Perf.count("render.SettingsView")
         #if os(macOS)
         NavigationSplitView {
             List(selection: selectedPage) {
@@ -96,7 +97,7 @@ struct SettingsView: View {
         case .storage:
             RetentionSettingsView(library: library)
         case .diagnostics:
-            DiagnosticsSettingsView(diagnostics: diagnostics)
+            DiagnosticsSettingsView(diagnostics: diagnostics, library: library)
         case .appearance:
             AppearanceSettingsView(preferences: preferences)
         case .transfer:

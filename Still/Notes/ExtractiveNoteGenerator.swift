@@ -109,13 +109,26 @@ struct GroundedNoteBuilder: Sendable {
     ) async -> Note {
         let template = NoteTemplateSelector.template(segments: segments, duration: duration, tracks: tracks)
 
-        if let preferred,
-           let generated = try? await preferred.note(template: template, segments: segments),
-           NoteSchema.isGrounded(generated, in: segments) {
-            return generated
+        if let preferred {
+            do {
+                let generated = try await preferred.note(template: template, segments: segments)
+                if NoteSchema.isGrounded(generated, in: segments) {
+                    AITrace.record("note.chosen", ["source": "model", "template": String(describing: template), "note": AITrace.json(generated)])
+                    return generated
+                }
+                AITrace.record("note.rejected", ["reason": "notGrounded", "note": AITrace.json(generated)])
+            } catch {
+                AITrace.record("note.rejected", ["reason": String(describing: error)])
+            }
         }
 
-        return (try? await fallback.note(template: template, segments: segments))
+        let note = (try? await fallback.note(template: template, segments: segments))
             ?? Note(template: template)
+        AITrace.record("note.chosen", [
+            "source": preferred == nil ? "extractive (no model)" : "extractive fallback",
+            "template": String(describing: template),
+            "note": AITrace.json(note),
+        ])
+        return note
     }
 }

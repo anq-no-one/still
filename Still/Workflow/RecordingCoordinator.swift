@@ -95,20 +95,26 @@ final class RecordingCoordinator {
     func start(capturing scope: SystemAudioScope = .callApps) async {
         guard canStart else { return }
 
+        Interactions.begin("record.start", ["scope": String(describing: scope)])
+        let span = Perf.begin("record.start")
         audioTarget.scope = scope
         startFailure = nil
         do {
             let workflow = RecordingWorkflow(
                 session: makeSession(),
-                recorder: try library.makeRecorder(),
+                recorder: try Perf.measure("record.makeRecorder") { try library.makeRecorder() },
                 library: library,
                 showsLiveDraft: entitlements.allows(.liveTranscript),
                 suggestedProjectID: library.defaultProjectID
             )
             self.workflow = workflow
             await workflow.start()
+            Perf.end(span, ["recordingID": workflow.recordingID.uuidString, "state": String(describing: workflow.state)])
+            Interactions.reached("record.start", String(describing: workflow.state))
             journal?.record(.recordingStarted, correlationID: workflow.recordingID, detail: scope.triggerBundleID)
         } catch {
+            Perf.end(span, ["error": String(describing: error)])
+            Interactions.reached("record.start", "failed")
             workflow = nil
             startFailure = error.localizedDescription
             journal?.fail(.recordingFailed, error: error)
@@ -119,7 +125,11 @@ final class RecordingCoordinator {
         guard let workflow else { return }
 
         let wasCapturing = isCapturing
-        await workflow.save()
+        Interactions.begin("record.stop", ["recordingID": workflow.recordingID.uuidString])
+        await Perf.trace("record.stop", ["recordingID": workflow.recordingID.uuidString, "elapsedS": String(format: "%.0f", workflow.elapsed)]) {
+            await workflow.save()
+        }
+        Interactions.reached("record.stop", "listed", ["state": String(describing: workflow.state)])
         switch workflow.state {
         case .saved:
             guard let draft = workflow.pendingFinalization else { return }
@@ -185,6 +195,12 @@ final class RecordingCoordinator {
     }
 
     func regeneratedTitle(for recording: Recording) async -> String {
+        await AITrace.$recordingID.withValue(recording.id) {
+            await regeneratedTitleTraced(for: recording)
+        }
+    }
+
+    private func regeneratedTitleTraced(for recording: Recording) async -> String {
         await RecordingFinalizer.chooseTitle(
             segments: recording.segments,
             transcript: recording.transcript,
@@ -269,6 +285,14 @@ final class RecordingCoordinator {
     }
 
     private func finalize(_ draft: RecordingFinalizer.Draft, previous: Recording?, notify: Bool) async {
+        await AITrace.$recordingID.withValue(draft.id) {
+            await Perf.trace("finalize.total", ["recordingID": draft.id.uuidString, "durationS": String(format: "%.0f", draft.duration)]) {
+                await finalizeTraced(draft, previous: previous, notify: notify)
+            }
+        }
+    }
+
+    private func finalizeTraced(_ draft: RecordingFinalizer.Draft, previous: Recording?, notify: Bool) async {
         do {
             let finalizer = RecordingFinalizer(
                 finalTranscription: makeFinalTranscription(),

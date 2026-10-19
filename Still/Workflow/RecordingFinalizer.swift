@@ -57,29 +57,37 @@ struct RecordingFinalizer {
     ) async throws -> Recording {
         let transcription = try await transcribeAndSeparateSpeakers(draft, progress: progress)
         let vocabulary = library.vocabulary(forProject: draft.suggestedProjectID)
-        let segments = VocabularyCorrector.apply(vocabulary, to: transcription?.segments ?? [])
+        let segments = Perf.measure("finalize.vocabulary", ["recordingID": draft.id.uuidString]) {
+            VocabularyCorrector.apply(vocabulary, to: transcription?.segments ?? [])
+        }
         let transcript = segments.plainText
         guard !transcript.isEmpty || transcription == nil else {
             throw RecordingWorkflowError.emptyTranscript
         }
 
-        let note = await noteBuilder.note(
-            segments: segments,
-            duration: draft.duration,
-            tracks: library.tracks(forRecording: draft.id)
-        )
+        let note = await Perf.trace("finalize.note", ["recordingID": draft.id.uuidString, "segments": String(segments.count)]) {
+            await AITrace.$stage.withValue("note") {
+                await noteBuilder.note(
+                    segments: segments,
+                    duration: draft.duration,
+                    tracks: library.tracks(forRecording: draft.id)
+                )
+            }
+        }
         try Task.checkCancellation()
 
         let finishedTitle: String
         if let draftTitle = draft.title {
             finishedTitle = draftTitle
         } else {
-            finishedTitle = await Self.title(
-                for: segments,
-                transcript: transcript,
-                draft: draft,
-                makeTitle: makeTitle
-            )
+            finishedTitle = await Perf.trace("finalize.title", ["recordingID": draft.id.uuidString]) {
+                await Self.title(
+                    for: segments,
+                    transcript: transcript,
+                    draft: draft,
+                    makeTitle: makeTitle
+                )
+            }
         }
 
         var recording = Recording(
@@ -134,33 +142,73 @@ struct RecordingFinalizer {
         let language = segments.lazy.compactMap(\.language).first
         let calendarTitle = calendarTitle.flatMap(TitleText.cleaned)
         let request = TitleRequest(segments: segments, calendarTitle: calendarTitle, language: language)
-        if let makeTitle, let generated = await makeTitle(request).flatMap(TitleText.cleaned) {
+        if let makeTitle, let generated = await AITrace.$stage.withValue("title", operation: { await makeTitle(request) }).flatMap(TitleText.cleaned) {
+            AITrace.record("title.chosen", ["source": "model", "title": generated, "calendarTitle": calendarTitle ?? "-"])
             return generated
         }
         if let calendarTitle {
+            AITrace.record("title.chosen", ["source": "calendar", "title": calendarTitle])
             return calendarTitle
         }
-        return RecordingTitle.from(transcript: transcript, date: date, language: language)
+        let fallback = RecordingTitle.from(transcript: transcript, date: date, language: language)
+        AITrace.record("title.chosen", ["source": "keySentence", "title": fallback])
+        return fallback
     }
 
     private func transcribeAndSeparateSpeakers(
         _ draft: Draft,
         progress: @escaping @Sendable (Double) -> Void
     ) async throws -> TranscriptionResult? {
-        let tracks = try library.capturedTracks(forRecording: draft.id)
+        let id = draft.id.uuidString
+        let tracks = try Perf.measure("finalize.loadTracks", ["recordingID": id]) {
+            try library.capturedTracks(forRecording: draft.id)
+        }
+        let audioSeconds = tracks.reduce(0) { $0 + $1.format.duration(ofBytes: $1.pcm.count) }
         let transcription: TranscriptionResult
+        let transcribe = Perf.begin("finalize.transcribe")
         do {
             transcription = try await finalTranscription.run(
                 tracks: tracks,
                 checkpoints: try library.checkpointStore(forRecording: draft.id),
                 progress: progress
             )
+            let ms = Perf.end(transcribe, [
+                "recordingID": id,
+                "tracks": tracks.map(\.track.rawValue).joined(separator: ","),
+                "audioS": String(format: "%.1f", audioSeconds),
+                "segments": String(transcription.segments.count),
+            ])
+            DevLog.event("finalize.transcribe.speed", [
+                "recordingID": id,
+                "realtimeFactor": String(format: "%.3f", ms / 1000 / max(audioSeconds, 0.001)),
+            ])
         } catch is TranscriptionError where !draft.requiresTranscript {
+            Perf.end(transcribe, ["recordingID": id, "error": "transcriptionError"])
             return nil
+        } catch {
+            Perf.end(transcribe, ["recordingID": id, "error": String(describing: error)])
+            throw error
         }
         var naming = library.speakerNaming
         naming.participants = draft.participants
-        let separated = await speakerSeparation.separate(transcription, tracks: tracks, naming: naming)
-        return GuestNaming.name(separated, cues: draft.cues + draft.tileCues, roster: draft.roster, ownerName: naming.ownerName)
+        let separated = await Perf.trace("finalize.separateSpeakers", ["recordingID": id, "audioS": String(format: "%.1f", audioSeconds)]) {
+            await speakerSeparation.separate(transcription, tracks: tracks, naming: naming)
+        }
+        AITrace.record("speakers.separated", [
+            "stage": "speakers",
+            "speakers": AITrace.speakers(separated.speakers),
+            "segments": String(separated.segments.count),
+        ])
+        let named = Perf.measure("finalize.nameGuests", ["recordingID": id, "cues": String(draft.cues.count + draft.tileCues.count)]) {
+            GuestNaming.name(separated, cues: draft.cues + draft.tileCues, roster: draft.roster, ownerName: naming.ownerName)
+        }
+        AITrace.record("speakers.named", [
+            "stage": "speakers",
+            "speakers": AITrace.speakers(named.speakers),
+            "roster": draft.roster.joined(separator: ", "),
+            "participants": draft.participants.joined(separator: ", "),
+            "cues": (draft.cues + draft.tileCues).map { "\($0.name)@\(Int($0.start))-\(Int($0.end))" }.joined(separator: "; "),
+        ])
+        return named
     }
 }

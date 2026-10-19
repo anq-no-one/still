@@ -174,3 +174,10 @@ Deployment target is now iOS/macOS 26.
 - Meet active-speaker selectors are obfuscated classes and unverified on a live call; roster + spoken names do not depend on them.
 - Uncommitted WIP in main checkout (detail perf: AudioChunkStore, RecordingPlayer, Library, RecordingDetailView, two tests) is not from this pass; it was preserved, not committed.
 - Release: env APP_STORE_* key reaches app 6815369488 (anq.no.one team R3XFQ7K885); pass it as STILL_OP_* when 1Password does not answer.
+
+## TestFlight debug bundle — 2026-10-19
+- Debug/TestFlight builds (channel from AppTransaction, `BuildChannel.swift`) keep a sealed developer log and AI trace (`Still/Diagnostics/DevLog.swift`, `AITrace.swift`), spans with thread/CPU (`Perf.swift`), input→frame waits, main-thread hang watchdog, 5 s CPU/memory samples, render counters (`Responsiveness.swift`), MetricKit payloads. App Store channel deletes all of it.
+- Ladybug "Debug Bundle" button (Library toolbar, recording detail, Settings › Diagnostics) zips logs, performance.txt, OSLog of this launch, and per recording WAV tracks, recording.json, transcript.txt, note.md, ai-trace. Layout and jq recipes: `docs/debug-bundle.md`.
+- Spotted while instrumenting, not fixed yet (wait for bundle data): `SemanticIndex.update` re-embeds every segment on main on each `Library.write` (every edit and memory chunk); `RecordingDetailView.refreshKey` includes `updatedAt`, so every save reloads the transcript; `MemoryExtraction` and `Library` writes run on main.
+- `testPrimaryScreensPassTheAccessibilityAudit` is flaky on the iOS 27.0 simulator runtime: fails on baseline main too (contrast on "Add" in detail), passes alone.
+- dSYMs of every TestFlight build are copied to `~/Library/Developer/Xcode/Archives/Still-dSYMs/<scheme>-<version>-<build>` by the Fastfile.

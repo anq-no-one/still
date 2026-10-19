@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DiagnosticsSettingsView: View {
     let diagnostics: Diagnostics
+    var library: Library?
 
     @State private var exported: URL?
     @State private var isMovingExport = false
@@ -13,6 +14,17 @@ struct DiagnosticsSettingsView: View {
 
     var body: some View {
         Form {
+            if let library, diagnostics.developer.allowsDebugBundle {
+                Section {
+                    LabeledContent(String("Developer log"), value: Int64(DevLog.main.storedBytes + DevLog.ai.storedBytes), format: .byteCount(style: .file))
+                    DebugBundleButton(diagnostics: diagnostics, library: library)
+                } header: {
+                    Text(verbatim: "TestFlight Debug Bundle")
+                } footer: {
+                    Text(verbatim: "Only in TestFlight builds: logs, timings, hangs, original audio and every on-device AI result, zipped for the developer. Nothing leaves the device until you share it.")
+                }
+            }
+
             Section {
                 LabeledContent("Size", value: Int64(journal.storedBytes), format: .byteCount(style: .file))
                 Button("Export Journal as Text", systemImage: "square.and.arrow.up", action: export)

@@ -79,11 +79,18 @@ final class MemoryExtraction {
         defer { processingIDs.remove(recordingID) }
 
         do {
-            try await extract(recording, restarting: restarting)
+            try await AITrace.$recordingID.withValue(recordingID) {
+                try await AITrace.$stage.withValue("memory") {
+                    try await Perf.trace("memory.recording", ["recordingID": recordingID.uuidString, "segments": String(recording.segments.count)]) {
+                        try await extract(recording, restarting: restarting)
+                    }
+                }
+            }
             lastFailure = nil
         } catch is CancellationError {
             return
         } catch {
+            DevLog.error("memory.failed", error, ["recordingID": recordingID.uuidString])
             lastFailure = error.localizedDescription
         }
     }
@@ -114,7 +121,15 @@ final class MemoryExtraction {
         let language = recording.segments.lazy.compactMap(\.language).first
         for index in run.completedChunks..<windows.count {
             try Task.checkCancellation()
-            let candidates = try await candidates(in: windows[index], language: language)
+            let chunk = Perf.begin("memory.chunk")
+            let (candidates, extractorID) = try await candidates(in: windows[index], language: language)
+            Perf.end(chunk, [
+                "recordingID": recording.id.uuidString,
+                "chunk": "\(index + 1)/\(windows.count)",
+                "extractor": extractorID,
+                "segments": String(windows[index].count),
+                "candidates": String(candidates.count),
+            ])
             try Task.checkCancellation()
 
             guard var latest = library.recordings.first(where: { $0.id == recording.id }),
@@ -123,22 +138,32 @@ final class MemoryExtraction {
                   latest.isReadyForExtraction
             else { return }
 
-            let outcome = validator.validate(candidates, against: latest.segments, speakers: latest.speakers)
+            let outcome = Perf.measure("memory.validate") {
+                validator.validate(candidates, against: latest.segments, speakers: latest.speakers)
+            }
+            AITrace.record("memory.validated", [
+                "chunk": "\(index + 1)/\(windows.count)",
+                "extractor": extractorID,
+                "candidates": candidates.map { "\($0.kind.rawValue): \($0.text) [cites \($0.citedSegmentIDs.count)] owner=\($0.owner ?? "-") due=\($0.due ?? "-")" }.joined(separator: "\n"),
+                "kept": outcome.items.map { "\($0.kind.rawValue): \($0.extractedText)" }.joined(separator: "\n"),
+                "withheld": String(outcome.withheld),
+            ])
             latest.memory = memory.absorbing(outcome.items, withheld: outcome.withheld, completedChunks: index + 1)
             try library.save(latest)
         }
     }
 
-    private func candidates(in window: [ExtractionSegment], language: String?) async throws -> [ExtractionCandidate] {
+    private func candidates(in window: [ExtractionSegment], language: String?) async throws -> ([ExtractionCandidate], String) {
         if let preferred = preferred() {
             do {
-                return try await preferred.candidates(from: window, language: language)
+                return (try await preferred.candidates(from: window, language: language), preferred.id)
             } catch is CancellationError {
                 throw CancellationError()
             } catch {
-                return try await fallback.candidates(from: window, language: language)
+                AITrace.record("memory.modelFailed", ["extractor": preferred.id, "error": String(describing: error)])
+                return (try await fallback.candidates(from: window, language: language), "\(fallback.id) (after \(preferred.id) failed)")
             }
         }
-        return try await fallback.candidates(from: window, language: language)
+        return (try await fallback.candidates(from: window, language: language), fallback.id)
     }
 }

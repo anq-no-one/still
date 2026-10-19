@@ -93,6 +93,10 @@ final class DiagnosticJournal {
     static let detailLimit = 4096
 
     func record(_ code: JournalCode, correlationID: UUID? = nil, detail: String? = nil) {
+        var fields: [String: String] = [:]
+        if let correlationID { fields["recordingID"] = correlationID.uuidString }
+        if let detail { fields["detail"] = detail }
+        DevLog.event("journal.\(code.rawValue)", fields)
         note(code)
         append(
             JournalEntry(
@@ -113,6 +117,7 @@ final class DiagnosticJournal {
 
     @discardableResult
     func fail(_ code: JournalCode, error: (any Error)? = nil, correlationID: UUID = UUID()) -> UUID {
+        DevLog.error("journal.\(code.rawValue)", error, ["recordingID": correlationID.uuidString])
         let entry = JournalEntry(
             at: now(),
             appVersion: appVersion,

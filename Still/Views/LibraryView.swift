@@ -29,6 +29,7 @@ struct LibraryView: View {
     @State private var selectedIDs: Set<Recording.ID> = []
 
     var body: some View {
+        let _ = Perf.count("render.LibraryView")
         NavigationSplitView {
             recordingList
             .contextMenu(forSelectionType: Recording.ID.self) { ids in
@@ -105,6 +106,11 @@ struct LibraryView: View {
                     }
                     .disabled(!importer.canStart)
                 }
+                if diagnostics.developer.allowsDebugBundle {
+                    ToolbarItem {
+                        DebugBundleButton(diagnostics: diagnostics, library: library)
+                    }
+                }
                 #if os(iOS)
                 ToolbarItem(placement: .bottomBar) {
                     recordButton
@@ -112,7 +118,10 @@ struct LibraryView: View {
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Settings", systemImage: "gearshape") { isShowingSettings = true }
+                    Button("Settings", systemImage: "gearshape") {
+                        Interactions.begin("open.settings")
+                        isShowingSettings = true
+                    }
                 }
                 #endif
             }
@@ -123,6 +132,7 @@ struct LibraryView: View {
                         recording: recording,
                         library: library,
                         extraction: extraction,
+                        diagnostics: diagnostics,
                         startAt: navigation.startTime,
                         regenerateTitle: { [coordinator] in await coordinator.regeneratedTitle(for: $0) }
                     )
@@ -146,6 +156,7 @@ struct LibraryView: View {
         }
         .sheet(isPresented: $isCapturing) {
             CaptureView(coordinator: coordinator)
+                .perfScreen("capture")
         }
         .sheet(isPresented: showsImport) {
             MediaImportView(importer: importer)
@@ -182,6 +193,7 @@ struct LibraryView: View {
                 preferencesExporter: preferencesExporter,
                 preferencesImporter: preferencesImporter
             )
+            .perfScreen("settings")
             .presentationSizing(.page)
         }
         #endif
@@ -206,6 +218,18 @@ struct LibraryView: View {
         }
         .onAppear { selectLatestWhenNothingSelected() }
         .onChange(of: library.recordings.count) { _, _ in selectLatestWhenNothingSelected() }
+        .onChange(of: navigation.selection) { _, id in
+            guard let id else { return }
+            Interactions.begin("open.recording", ["recordingID": id.uuidString])
+        }
+        .onChange(of: query) { _, value in
+            guard !value.isEmpty else { return }
+            Interactions.begin("search.type", ["queryLength": String(value.count)])
+        }
+        .onChange(of: isCapturing) { _, capturing in
+            if capturing { Interactions.begin("open.capture") }
+        }
+        .perfScreen("library")
     }
 
     @ViewBuilder
@@ -271,11 +295,13 @@ struct LibraryView: View {
     }
 
     private var results: [SearchResult] {
-        LibrarySearch.results(
-            for: query,
-            in: shownRecordings,
-            semanticIndex: entitlements.allows(.semanticSearch) ? library.semanticIndex : nil
-        )
+        Perf.measure("search.results", ["queryLength": String(query.count)]) {
+            LibrarySearch.results(
+                for: query,
+                in: shownRecordings,
+                semanticIndex: entitlements.allows(.semanticSearch) ? library.semanticIndex : nil
+            )
+        }
     }
 
     @ViewBuilder
@@ -558,6 +584,7 @@ private struct RecordingRow: View {
     }
 
     var body: some View {
+        let _ = Perf.count("render.RecordingRow")
         VStack(alignment: .leading, spacing: 5) {
             Text(recording.title)
                 .font(.headline)

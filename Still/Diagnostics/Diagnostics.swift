@@ -46,6 +46,8 @@ final class Diagnostics {
 
     private(set) var isEnabled: Bool
     let journal: DiagnosticJournal
+    let developer: DeveloperDiagnostics
+    private let bundleContext: @MainActor () -> [String: String]
 
     init(
         settings: DiagnosticsSettingsStore,
@@ -54,15 +56,24 @@ final class Diagnostics {
             fileURL: URL.temporaryDirectory.appending(path: "still-journal-\(UUID().uuidString).jsonl"),
             key: SymmetricKey(size: .bits256)
         ),
+        developer: DeveloperDiagnostics = DeveloperDiagnostics(),
+        bundleContext: @escaping @MainActor () -> [String: String] = { [:] },
         environment: @escaping () -> (appVersion: String, systemVersion: String, deviceClass: String) = Diagnostics.systemEnvironment,
         now: @escaping () -> Date = Date.init
     ) {
         self.settings = settings
         self.sink = sink
         self.journal = journal
+        self.developer = developer
+        self.bundleContext = bundleContext
         self.environment = environment
         self.now = now
         isEnabled = settings.isEnabled()
+    }
+
+    func debugBundleBuilder(library: Library) -> DebugBundleBuilder? {
+        guard developer.allowsDebugBundle else { return nil }
+        return DebugBundleBuilder(library: library, journal: journal, developer: developer, context: bundleContext)
     }
 
     func enable() {

@@ -8,6 +8,7 @@ struct MemorySectionsView: View {
     @State private var failure: String?
 
     var body: some View {
+        let _ = Perf.count("render.MemorySectionsView")
         if let recording, recording.isReadyForExtraction {
             VStack(alignment: .leading, spacing: 18) {
                 if extraction.processingIDs.contains(recordingID) || recording.needsExtraction {

@@ -103,6 +103,36 @@ actor LocalLanguageModel {
     }
 
     func generate(system: String, user: String, schema: String, maximumTokens: Int) async throws -> String {
+        let span = Perf.begin("mlx.generate")
+        let model = directory.lastPathComponent
+        do {
+            let (output, tokens) = try await generateCounting(system: system, user: user, schema: schema, maximumTokens: maximumTokens)
+            let ms = Perf.end(span, [
+                "recordingID": AITrace.recordingID?.uuidString ?? "-",
+                "stage": AITrace.stage ?? "-",
+                "model": model,
+                "promptChars": String(system.count + user.count),
+                "tokens": String(tokens),
+                "tokensPerSecond": String(format: "%.1f", Double(tokens) / max(span.elapsedMS / 1000, 0.001)),
+            ])
+            AITrace.record("mlx.generate", ms: ms, [
+                "model": model,
+                "system": system,
+                "user": user,
+                "schema": schema,
+                "maximumTokens": String(maximumTokens),
+                "output": output,
+                "tokens": String(tokens),
+            ])
+            return output
+        } catch {
+            let ms = Perf.end(span, ["stage": AITrace.stage ?? "-", "model": model, "error": String(describing: error)])
+            AITrace.record("mlx.generate.failed", ms: ms, ["model": model, "system": system, "user": user, "error": String(describing: error)])
+            throw error
+        }
+    }
+
+    private func generateCounting(system: String, user: String, schema: String, maximumTokens: Int) async throws -> (String, Int) {
         let container = try await loaded()
         return try await container.perform { context in
             let tokenizer = context.tokenizer
@@ -126,6 +156,7 @@ actor LocalLanguageModel {
             )
 
             var output = ""
+            var tokens = 0
             try GuidedGenerationLoop.run(
                 input: input,
                 context: context,
@@ -134,17 +165,25 @@ actor LocalLanguageModel {
                 vocabSize: grammarTokenizer.vocabSize
             ) { delta in
                 output += delta
+                tokens += 1
                 return !Task.isCancelled
             }
             try Task.checkCancellation()
-            return output
+            return (output, tokens)
         }
     }
 
     private func loaded() async throws -> ModelContainer {
         if let container { return container }
 
-        let loaded = try await LLMModelFactory.shared.loadContainer(from: directory, using: TransformersTokenizerLoader())
+        let footprintBefore = ResourceSampler.footprintBytes()
+        let loaded = try await Perf.trace("mlx.load", ["model": directory.lastPathComponent]) {
+            try await LLMModelFactory.shared.loadContainer(from: directory, using: TransformersTokenizerLoader())
+        }
+        DevLog.event("mlx.loaded", [
+            "model": directory.lastPathComponent,
+            "footprintDeltaMB": String(format: "%.0f", (Double(ResourceSampler.footprintBytes()) - Double(footprintBefore)) / 1_048_576),
+        ])
         container = loaded
         return loaded
     }

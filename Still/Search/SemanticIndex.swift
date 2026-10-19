@@ -45,7 +45,9 @@ final class SemanticIndex {
         let live = recordings.filter { !$0.isDeleted }
         return Task { @MainActor in
             let built = await Task.detached(priority: .utility) {
-                Dictionary(uniqueKeysWithValues: live.map { ($0.id, Self.entries(for: $0, engine: engine)) })
+                Perf.measure("semantic.rebuild", ["recordings": String(live.count)]) {
+                    Dictionary(uniqueKeysWithValues: live.map { ($0.id, Self.entries(for: $0, engine: engine)) })
+                }
             }.value
 
             entriesByRecording = built
@@ -64,7 +66,9 @@ final class SemanticIndex {
 
         guard let engine else { return }
 
-        entriesByRecording[recording.id] = Self.entries(for: recording, engine: engine)
+        entriesByRecording[recording.id] = Perf.measure("semantic.update", ["recordingID": recording.id.uuidString, "segments": String(recording.segments.count)]) {
+            Self.entries(for: recording, engine: engine)
+        }
     }
 
     func remove(_ recordingID: UUID) {

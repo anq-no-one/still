@@ -38,6 +38,11 @@ names, app version, error numbers and random identifiers, sealed with a key that
 device. It never holds audio, transcripts, names, project titles, file paths or keys, and it leaves
 the device only when you export it yourself.
 
+TestFlight beta builds also keep a developer log on the device: timings, hangs, memory and CPU
+samples, and the prompts and answers of the on-device models. It is sealed with the same device
+key and leaves the device only when a tester taps Debug Bundle and shares it. The App Store build
+keeps none of it and deletes any log a beta left behind.
+
 ## Meeting-window name tiles (Mac)
 
 When the meeting-window toggle is on, and only while someone is speaking on the call, Still

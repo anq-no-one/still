@@ -4,6 +4,7 @@ import Translation
 struct RecordingDetailView: View {
     let library: Library
     let extraction: MemoryExtraction
+    let diagnostics: Diagnostics?
     let startAt: TimeInterval?
     let regenerateTitle: @MainActor (Recording) async -> String
     /// The Library's current copy, refreshed every render. The editor keeps a
@@ -28,10 +29,12 @@ struct RecordingDetailView: View {
         recording: Recording,
         library: Library,
         extraction: MemoryExtraction,
+        diagnostics: Diagnostics? = nil,
         startAt: TimeInterval? = nil,
         regenerateTitle: @escaping @MainActor (Recording) async -> String
     ) {
         self.library = library
+        self.diagnostics = diagnostics
         self.regenerateTitle = regenerateTitle
         self.extraction = extraction
         self.startAt = startAt
@@ -42,6 +45,7 @@ struct RecordingDetailView: View {
     }
 
     var body: some View {
+        let _ = Perf.count("render.RecordingDetailView")
         Group {
             ScrollViewReader { proxy in
                 ScrollView {
@@ -150,11 +154,18 @@ struct RecordingDetailView: View {
             ToolbarItem {
                 ExportMenu(recording: recording, library: library)
             }
+            if let diagnostics, diagnostics.developer.allowsDebugBundle {
+                ToolbarItem {
+                    DebugBundleButton(diagnostics: diagnostics, library: library, recordingID: recording.id)
+                }
+            }
             ToolbarItem {
                 Button("Regenerate Title", systemImage: "wand.and.stars") {
                     isRegeneratingTitle = true
+                    Interactions.begin("title.regenerate", ["recordingID": recording.id.uuidString])
                     Task {
                         let generated = await regenerateTitle(editor.recording)
+                        Interactions.reached("title.regenerate", "titleShown")
                         editor.applyGeneratedTitle(generated)
                         title = generated
                         isRegeneratingTitle = false
@@ -206,6 +217,7 @@ struct RecordingDetailView: View {
             noteText = updated.note?.userText ?? ""
             refreshTranscriptBlocks()
         }
+        .perfScreen("detail")
         .onDisappear {
             let pending = editor
             Task { @MainActor in pending.saveNow() }
@@ -224,26 +236,33 @@ struct RecordingDetailView: View {
         transcriptBlocks = nil
         let key = refreshKey
         let segments = editor.recording.segments
+        let span = Perf.begin("detail.loadTranscript")
         let blocks = await Task.detached(priority: .userInitiated) {
-            TranscriptBlocks.group(
-                segments.filter {
-                    !DisfluencyFilter.isFillerOnly($0.displayText, language: $0.language)
-                }
-            )
+            Perf.measure("detail.groupTranscript", ["segments": String(segments.count)]) {
+                TranscriptBlocks.group(
+                    segments.filter {
+                        !DisfluencyFilter.isFillerOnly($0.displayText, language: $0.language)
+                    }
+                )
+            }
         }.value
+        Perf.end(span, ["recordingID": latest.id.uuidString, "segments": String(segments.count), "blocks": String(blocks.count)])
         guard key == refreshKey else { return }
         transcriptBlocks = blocks
+        Interactions.reached("open.recording", "transcriptShown", ["segments": String(segments.count)])
         if let covering = TranscriptPaging.budgetCovering(blocks, startAt: startAt) {
             visibleSegmentBudget = covering
         }
     }
 
     private func refreshTranscriptBlocks() {
-        transcriptBlocks = TranscriptBlocks.group(
-            recording.segments.filter {
-                !DisfluencyFilter.isFillerOnly($0.displayText, language: $0.language)
-            }
-        )
+        transcriptBlocks = Perf.measure("detail.refreshTranscriptBlocks", ["segments": String(recording.segments.count)]) {
+            TranscriptBlocks.group(
+                recording.segments.filter {
+                    !DisfluencyFilter.isFillerOnly($0.displayText, language: $0.language)
+                }
+            )
+        }
     }
 
     private func scrollToStartTime(using proxy: ScrollViewProxy) {

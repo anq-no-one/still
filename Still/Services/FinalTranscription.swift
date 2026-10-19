@@ -64,7 +64,17 @@ struct FinalTranscription: Sendable {
                 let window = captured.pcm[start..<min(start + bytesPerWindow, captured.pcm.count)]
                 let offset = captured.startOffset + TimeInterval(index) * windowSeconds
 
+                let windowSpan = Perf.begin("transcribe.window")
                 let produced = try await transcriber.segments(of: Data(window), format: captured.format)
+                let audioSeconds = captured.format.duration(ofBytes: window.count)
+                Perf.end(windowSpan, [
+                    "recordingID": AITrace.recordingID?.uuidString ?? "-",
+                    "track": captured.track.rawValue,
+                    "window": String(index),
+                    "audioS": String(format: "%.1f", audioSeconds),
+                    "segments": String(produced.count),
+                    "realtimeFactor": String(format: "%.3f", windowSpan.elapsedMS / 1000 / max(audioSeconds, 0.001)),
+                ])
                 checkpoint.segments += produced.map { $0.offset(by: offset).attributed(to: speaker) }
                 checkpoint.completedWindows[captured.track.rawValue] = index + 1
                 checkpoints.save(checkpoint)

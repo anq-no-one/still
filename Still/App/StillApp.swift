@@ -35,7 +35,10 @@ struct StillApp: App {
 
     static let libraryWindowID = "library"
 
+    @Environment(\.scenePhase) private var scenePhase
+
     init() {
+        let launch = Perf.begin("launch.init")
         #if DEBUG
         UITestLaunch.resetIfRequested(keychainService: KeychainDeviceKeySource.defaultService)
         #endif
@@ -118,6 +121,13 @@ struct StillApp: App {
             return journal
         }
 
+        let developer = MainActor.assumeIsolated {
+            DeveloperDiagnostics(
+                directory: supportRoot.appending(path: "Diagnostics/Developer", directoryHint: .isDirectory),
+                key: (try? KeychainDeviceKeySource().journalKey()) ?? SymmetricKey(size: .bits256)
+            )
+        }
+
         let recordingLibrary = MainActor.assumeIsolated {
             Library(
                 keyRing: LibraryKeyRing(source: KeychainDeviceKeySource()),
@@ -184,7 +194,22 @@ struct StillApp: App {
         }
         library = recordingLibrary
         diagnostics = MainActor.assumeIsolated {
-            Diagnostics(settings: UserDefaultsDiagnosticsSettings(), sink: NoDiagnosticsSink(), journal: journal)
+            Diagnostics(
+                settings: UserDefaultsDiagnosticsSettings(),
+                sink: NoDiagnosticsSink(),
+                journal: journal,
+                developer: developer,
+                bundleContext: {
+                    [
+                        "transcriptionPack": "\(installers.transcription.pack.id)@\(installers.transcription.pack.version) \(installers.transcription.state)",
+                        "speakerPack": "\(installers.speakers.pack.id)@\(installers.speakers.pack.version) \(installers.speakers.state)",
+                        "meetingMemoryPack": "\(installers.meetingMemory.pack.id)@\(installers.meetingMemory.pack.version) \(installers.meetingMemory.state)",
+                        "localModelCanRun": String(LocalModelExtractor.canRun),
+                        "appleFoundationModel": String(FoundationModelTitle.isAvailable),
+                        "semanticSearch": String(proEntitlements.allows(.semanticSearch)),
+                    ]
+                }
+            )
         }
 
         let syncEngine = MainActor.assumeIsolated {
@@ -294,14 +319,17 @@ struct StillApp: App {
             #endif
         }
         Task { @MainActor in
-            await recordingLibrary.unlock()
+            await developer.start()
+            await Perf.trace("launch.unlock") { await recordingLibrary.unlock() }
             memoryExtraction.start()
             await proEntitlements.refresh()
             await syncEngine.syncIfEnabled()
             await recordingCoordinator.finishInterruptedProcessing()
             let titleTier = FoundationModelTitle.isAvailable ? "apple-1"
                 : memoryInstaller.state == .installed ? "mlx-1" : "extractive-1"
-            await recordingCoordinator.retitleAutomaticTitles(tier: titleTier, ledger: UserDefaultsRetitleLedger())
+            await Perf.trace("launch.retitle") {
+                await recordingCoordinator.retitleAutomaticTitles(tier: titleTier, ledger: UserDefaultsRetitleLedger())
+            }
         }
         #if os(macOS)
         shortcut = MainActor.assumeIsolated {
@@ -385,6 +413,7 @@ struct StillApp: App {
             PreferencesImporter(library: recordingLibrary, appLock: appLock)
             #endif
         }
+        Perf.end(launch)
     }
 
     var body: some Scene {
@@ -393,6 +422,7 @@ struct StillApp: App {
             libraryView
         }
         .defaultSize(width: 980, height: 680)
+        .onChange(of: scenePhase) { _, phase in diagnostics.developer.sceneBecame(String(describing: phase)) }
         .commands {
             CommandGroup(after: .newItem) {
                 MediaImportCommand(importer: importer, navigation: navigation)
@@ -422,6 +452,7 @@ struct StillApp: App {
                     login: login,
                     mediaHint: mediaHint
                 )
+                .perfScreen("settings")
             }
         }
         .windowResizability(.contentMinSize)
@@ -449,6 +480,7 @@ struct StillApp: App {
             libraryView
                 .onOpenURL { navigation.handOver($0) }
         }
+        .onChange(of: scenePhase) { _, phase in diagnostics.developer.sceneBecame(String(describing: phase)) }
         #endif
     }
 
@@ -472,6 +504,7 @@ struct StillApp: App {
             )
         }
         .stillAppearance(preferences)
+        .onAppear { [developer = diagnostics.developer] in developer.firstFrame() }
         #if os(macOS)
         .onChange(of: setup.isComplete) { _, complete in
             LaunchAtLoginDefault.apply(to: login, setupComplete: complete)
