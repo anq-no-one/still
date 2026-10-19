@@ -91,4 +91,4 @@ fastlane ios beta
 echo "-- macOS TestFlight build and upload"
 fastlane mac beta
 
-echo "-- done: signed archives and dSYMs are in Release/build/"
+echo "-- done: signed archives are in Release/build/, dSYMs of every build in ~/Library/Developer/Xcode/Archives/Still-dSYMs/"

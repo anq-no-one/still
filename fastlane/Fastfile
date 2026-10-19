@@ -131,11 +131,23 @@ def verify_runs_on_deployment_target!(scheme)
   UI.user_error!("#{scheme} imports #{offending.join(', ')}, which the deployment target's Swift runtime lacks") unless offending.empty?
 end
 
+DSYM_STORE = File.expand_path(ENV.fetch("STILL_DSYM_STORE", "~/Library/Developer/Xcode/Archives/Still-dSYMs"))
+
+def keep_dsyms!(scheme:, version:, build_number:)
+  source = File.join(BUILD_DIR, "#{scheme}.xcarchive", "dSYMs")
+  UI.user_error!("#{scheme} archive has no dSYMs at #{source}") unless Dir.exist?(source)
+  destination = File.join(DSYM_STORE, "#{scheme}-#{version}-#{build_number}")
+  FileUtils.mkdir_p(destination)
+  sh("ditto", source, File.join(destination, "dSYMs"))
+  UI.success("Kept dSYMs in #{destination}")
+end
+
 def ship(scheme:, platform:, destination:, tf_platform:, pkg: false)
   xcodegen_regen!
   version = marketing_version
   build_number = next_build_number(platform)
   build(scheme: scheme, platform: platform, destination: destination, version: version, build_number: build_number)
+  keep_dsyms!(scheme: scheme, version: version, build_number: build_number)
   verify_runs_on_deployment_target!(scheme)
   if pkg
     upload_to_testflight(api_key: asc_api_key, app_platform: "osx", pkg: lane_context[SharedValues::PKG_OUTPUT_PATH], skip_waiting_for_build_processing: true)
