@@ -25,8 +25,9 @@ struct ProjectCreationField: View {
             HStack {
                 TextField("New Project", text: $name)
                     .onSubmit(submit)
-                Button("Add", systemImage: "plus", action: submit)
-                    .disabled(trimmedName.isEmpty)
+                if !trimmedName.isEmpty {
+                    Button("Add", systemImage: "plus", action: submit)
+                }
             }
             if let errorMessage {
                 Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
