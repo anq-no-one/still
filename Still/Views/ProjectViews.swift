@@ -58,11 +58,58 @@ struct ProjectDot: View {
     let color: ProjectColor
 
     var body: some View {
-        Image(systemName: "circle.fill")
-            .foregroundStyle(color.color)
-            .imageScale(.small)
+        color.swatch()
             .accessibilityHidden(true)
     }
+}
+
+extension ProjectColor {
+    /// Menus on macOS draw symbol images as black templates, so the swatch is
+    /// a drawn bitmap that keeps its color everywhere.
+    func swatch(selected: Bool = false) -> Image {
+        #if os(macOS)
+        Image(nsImage: ProjectSwatch.platformImage(self, selected: selected)).renderingMode(.original)
+        #else
+        Image(uiImage: ProjectSwatch.platformImage(self, selected: selected)).renderingMode(.original)
+        #endif
+    }
+}
+
+enum ProjectSwatch {
+    static let side: CGFloat = 12
+
+    private static func dotRect(in rect: CGRect) -> CGRect {
+        rect.insetBy(dx: side * 0.32, dy: side * 0.32)
+    }
+
+    #if os(macOS)
+    static func platformImage(_ color: ProjectColor, selected: Bool = false) -> NSImage {
+        let image = NSImage(size: NSSize(width: side, height: side), flipped: false) { rect in
+            NSColor(color.color).setFill()
+            NSBezierPath(ovalIn: rect).fill()
+            if selected {
+                NSColor.white.setFill()
+                NSBezierPath(ovalIn: dotRect(in: rect)).fill()
+            }
+            return true
+        }
+        image.isTemplate = false
+        return image
+    }
+    #else
+    static func platformImage(_ color: ProjectColor, selected: Bool = false) -> UIImage {
+        UIGraphicsImageRenderer(size: CGSize(width: side, height: side)).image { context in
+            let rect = CGRect(x: 0, y: 0, width: side, height: side)
+            UIColor(color.color).setFill()
+            context.cgContext.fillEllipse(in: rect)
+            if selected {
+                UIColor.white.setFill()
+                context.cgContext.fillEllipse(in: dotRect(in: rect))
+            }
+        }
+        .withRenderingMode(.alwaysOriginal)
+    }
+    #endif
 }
 
 /// Buttons that move recordings, shared by the context menu and the detail
@@ -90,10 +137,10 @@ struct ProjectAssignmentButtons: View {
                 Label {
                     Text(project.name)
                 } icon: {
-                    Image(systemName: current == project.id ? "checkmark.circle.fill" : "circle.fill")
-                        .foregroundStyle(project.color.color)
+                    project.color.swatch(selected: current == project.id)
                 }
             }
+            .accessibilityAddTraits(current == project.id ? .isSelected : [])
         }
     }
 }

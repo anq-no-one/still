@@ -203,6 +203,30 @@ struct DebugBundleTests {
     }
 
     @Test
+    func aChannelStoreKitCouldNotNameAtLaunchIsAskedAgainWithoutLosingTheLog() async throws {
+        let scratch = try Scratch()
+        let (log, ai) = (DevLogStream(category: "a"), DevLogStream(category: "b"))
+        let key = SymmetricKey(size: .bits256)
+        log.configure(directory: scratch.directory, name: "devlog", key: key)
+        ai.configure(directory: scratch.directory, name: "ai-trace", key: key)
+        let developer = DeveloperDiagnostics(streams: (log, ai))
+        let diagnostics = Diagnostics(settings: MemoryDiagnosticsSettings(), sink: SpyDiagnosticsSink(), developer: developer)
+        let library = try await makeLibrary(source: FakeDeviceKeySource(), audioRoot: scratch.directory)
+        let answers = Answers([.unknown, .testFlight])
+
+        await developer.start(startsMonitors: false) { await answers.next() }
+        log.append(DevLog.record(.event, "while.unknown"))
+        await log.flush()
+        #expect(diagnostics.debugBundleBuilder(library: library) == nil)
+
+        await developer.resolveAgainIfUnknown()
+        await log.flush()
+
+        #expect(diagnostics.debugBundleBuilder(library: library) != nil)
+        #expect(try log.records().map(\.name).contains("while.unknown"))
+    }
+
+    @Test
     func aBundleCarriesTheOriginalTracksTranscriptAndModelAnswers() async throws {
         let scratch = try Scratch()
         let source = FakeDeviceKeySource()
@@ -376,5 +400,17 @@ struct AITraceTests {
         let record = try #require(try DevLog.ai.records { $0.name == marker }.first)
         #expect(record.fields?["recordingID"] == id.uuidString)
         #expect(record.fields?["stage"] == "title")
+    }
+}
+
+private actor Answers {
+    private var remaining: [BuildChannel]
+
+    init(_ answers: [BuildChannel]) {
+        remaining = answers
+    }
+
+    func next() -> BuildChannel {
+        remaining.isEmpty ? .unknown : remaining.removeFirst()
     }
 }

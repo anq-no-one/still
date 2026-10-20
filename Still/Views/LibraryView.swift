@@ -379,8 +379,7 @@ struct LibraryView: View {
                     Label {
                         Text(project.name)
                     } icon: {
-                        Image(systemName: "circle.fill")
-                            .foregroundStyle(project.color.color)
+                        project.color.swatch()
                     }
                     .tag(ProjectScope?.some(.project(project.id)))
                 }

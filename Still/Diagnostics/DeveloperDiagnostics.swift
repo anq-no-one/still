@@ -13,6 +13,8 @@ final class DeveloperDiagnostics {
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var reportedFirstFrame = false
     @ObservationIgnored private let streams: [DevLogStream]
+    @ObservationIgnored private var resolver: () async -> BuildChannel = { await BuildChannelResolver.resolve() }
+    @ObservationIgnored private var startsMonitors = true
 
     private static let openSessionKey = "still.developer.sessionOpen"
 
@@ -43,8 +45,23 @@ final class DeveloperDiagnostics {
         startsMonitors: Bool = true,
         resolve: @escaping () async -> BuildChannel = { await BuildChannelResolver.resolve() }
     ) async {
-        let channel = await resolve()
+        resolver = resolve
+        self.startsMonitors = startsMonitors
+        apply(await resolve())
+    }
+
+    /// StoreKit sometimes cannot answer at launch. An unknown channel keeps
+    /// holding records in memory, neither writing nor deleting them, until a
+    /// later attempt names the channel.
+    func resolveAgainIfUnknown() async {
+        guard channel == .unknown else { return }
+        apply(await resolver())
+    }
+
+    private func apply(_ channel: BuildChannel) {
+        guard self.channel == .unknown else { return }
         self.channel = channel
+        guard channel != .unknown else { return }
         let collects = channel.collectsDeveloperDiagnostics
         for stream in streams {
             stream.setEnabled(collects)
@@ -86,6 +103,8 @@ final class DeveloperDiagnostics {
             defaults.set(false, forKey: Self.openSessionKey)
         } else if phase == "active", channel.collectsDeveloperDiagnostics {
             defaults.set(true, forKey: Self.openSessionKey)
+        } else if phase == "active", channel == .unknown {
+            Task { await resolveAgainIfUnknown() }
         }
         DevLog.event("scene.\(phase)")
     }

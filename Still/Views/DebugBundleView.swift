@@ -24,12 +24,13 @@ struct DebugBundleView: View {
     @State private var bundle: URL?
     @State private var problem: String?
     @State private var isSaving = false
+    @State private var saved: String?
 
     init(builder: DebugBundleBuilder, library: Library, recordingID: UUID? = nil) {
         self.builder = builder
         self.library = library
         givenRecordingID = recordingID
-        _scope = State(initialValue: recordingID == nil ? .latest : .given)
+        _scope = State(initialValue: recordingID == nil ? .lastFive : .given)
     }
 
     var body: some View {
@@ -62,6 +63,10 @@ struct DebugBundleView: View {
                     } else {
                         Button(String("Prepare Debug Bundle"), systemImage: "ladybug", action: prepare)
                     }
+                    if let saved {
+                        Label(saved, systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    }
                     if let problem {
                         Label(problem, systemImage: "exclamationmark.triangle.fill")
                             .foregroundStyle(.red)
@@ -78,8 +83,14 @@ struct DebugBundleView: View {
             .onChange(of: scope) { bundle = nil }
             .onChange(of: includesAudio) { bundle = nil }
             .fileMover(isPresented: $isSaving, file: bundle) { result in
-                if case .failure(let error) = result { problem = error.localizedDescription }
-                bundle = nil
+                switch result {
+                case .success(let url):
+                    saved = "Saved to \(url.deletingLastPathComponent().lastPathComponent)"
+                    bundle = nil
+                case .failure(let error):
+                    problem = error.localizedDescription
+                    DevLog.error("debugBundle.saveFailed", error)
+                }
             }
         }
         .perfScreen("debugBundle")
@@ -115,6 +126,7 @@ struct DebugBundleView: View {
 
     private func prepare() {
         problem = nil
+        saved = nil
         step = "Starting"
         let request = DebugBundleRequest(recordingIDs: recordingIDs, includesAudio: includesAudio)
         Task {
@@ -137,12 +149,13 @@ struct DebugBundleButton: View {
     let diagnostics: Diagnostics
     let library: Library
     var recordingID: UUID?
+    var title = "Debug Bundle"
 
     @State private var isPresented = false
 
     var body: some View {
         if let builder = diagnostics.debugBundleBuilder(library: library) {
-            Button(String("Debug Bundle"), systemImage: "ladybug") {
+            Button(title, systemImage: "ladybug") {
                 Interactions.begin("debugBundle.open")
                 isPresented = true
             }

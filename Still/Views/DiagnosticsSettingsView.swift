@@ -16,18 +16,20 @@ struct DiagnosticsSettingsView: View {
         Form {
             if let library, diagnostics.developer.allowsDebugBundle {
                 Section {
+                    DebugBundleButton(diagnostics: diagnostics, library: library, title: "Export Diagnostics (Zip with Audio)")
                     LabeledContent(String("Developer log"), value: Int64(DevLog.main.storedBytes + DevLog.ai.storedBytes), format: .byteCount(style: .file))
-                    DebugBundleButton(diagnostics: diagnostics, library: library)
                 } header: {
-                    Text(verbatim: "TestFlight Debug Bundle")
+                    Text(verbatim: "Diagnostics for the Developer")
                 } footer: {
-                    Text(verbatim: "Only in TestFlight builds: logs, timings, hangs, original audio and every on-device AI result, zipped for the developer. Nothing leaves the device until you share it.")
+                    Text(verbatim: "Only in TestFlight builds: one zip with the journal, logs, timings, hangs, the original audio tracks, transcripts, notes and every on-device AI result. Nothing leaves the device until you share or save it.")
                 }
             }
 
             Section {
                 LabeledContent("Size", value: Int64(journal.storedBytes), format: .byteCount(style: .file))
-                Button("Export Journal as Text", systemImage: "square.and.arrow.up", action: export)
+                if !diagnostics.developer.allowsDebugBundle {
+                    Button("Export Journal as Text", systemImage: "square.and.arrow.up", action: export)
+                }
                 if let problem = journal.writeProblem ?? exportProblem {
                     Label(problem, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(.red)
@@ -54,6 +56,7 @@ struct DiagnosticsSettingsView: View {
         }
         .formStyle(.grouped)
         .settingsPaneTitle("Diagnostics")
+        .task { await diagnostics.developer.resolveAgainIfUnknown() }
         .fileMover(isPresented: $isMovingExport, file: exported) { result in
             if case .failure(let error) = result {
                 exportProblem = error.localizedDescription

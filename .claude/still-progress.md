@@ -181,3 +181,9 @@ Deployment target is now iOS/macOS 26.
 - Spotted while instrumenting, not fixed yet (wait for bundle data): `SemanticIndex.update` re-embeds every segment on main on each `Library.write` (every edit and memory chunk); `RecordingDetailView.refreshKey` includes `updatedAt`, so every save reloads the transcript; `MemoryExtraction` and `Library` writes run on main.
 - `testPrimaryScreensPassTheAccessibilityAudit` is flaky on the iOS 27.0 simulator runtime: fails on baseline main too (contrast on "Add" in detail), passes alone.
 - dSYMs of every TestFlight build are copied to `~/Library/Developer/Xcode/Archives/Still-dSYMs/<scheme>-<version>-<build>` by the Fastfile.
+
+## Feedback 2026-10-20 (Obsidian still_development)
+- Saving an export failed on Mac ("don't have permission to access <folder>"): the sandbox held only `files.user-selected.read-only`; now read-write (`project.yml`, `Still-macOS.entitlements`, `MacEntitlementsTests`).
+- Project colors showed black in Mac menus: menus template SF Symbols, so swatches are drawn bitmaps (`ProjectSwatch`, `ProjectColor.swatch`).
+- Settings › Diagnostics in TestFlight now exports the zip with audio instead of the text journal; an unknown build channel no longer deletes the log and is retried.
+- Still open from `bugs 19 oct report.md`: titles from location address, generated summary with who said what, owners on decisions/action items, remove Proposed Tasks, speakers UI (hide merge, spacing), Teams speaker names, freeze while scrolling a long note.

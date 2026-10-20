@@ -1,10 +1,13 @@
 # TestFlight debug bundle
 
 Debug and TestFlight builds show a ladybug **Debug Bundle** button in the Library toolbar, on each
-recording, and in Settings › Diagnostics. It zips what the device recorded and opens the share sheet
-(AirDrop, Mail, Save to Files). The App Store build hides it; the channel comes from
-`AppTransaction.environment` at run time (`BuildChannel.swift`), because TestFlight and the App Store
-ship the same binary.
+recording, and as **Export Diagnostics (Zip with Audio)** in Settings › Diagnostics, where it replaces
+the plain-text journal export. It zips what the device recorded (the last five recordings by default)
+and offers Share (AirDrop, Mail) or Save to Files; the Mac app holds user-selected read-write access
+for that save. The App Store build hides it; the channel comes from `AppTransaction.environment` at
+run time (`BuildChannel.swift`), because TestFlight and the App Store ship the same binary. When
+StoreKit cannot answer at launch the channel stays unknown: records are held in memory, nothing is
+written or deleted, and the app asks again when it becomes active or Settings › Diagnostics opens.
 
 ## Contents
 
