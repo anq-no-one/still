@@ -1,6 +1,24 @@
 #if os(macOS)
 import Foundation
 
+@MainActor
+protocol MicrophoneTrack: AnyObject {
+    var captureNote: String? { get }
+    func start(recordingID: UUID) async throws
+    func finish() async throws
+    func discard() async
+}
+
+@MainActor
+protocol SystemAudioTrack: AnyObject {
+    func start(recordingID: UUID, startOffset: TimeInterval, scope: SystemAudioScope) async throws
+    func finish() async throws
+    func discard() async
+}
+
+extension MicrophoneRecorder: MicrophoneTrack {}
+extension SystemAudioRecorder: SystemAudioTrack {}
+
 struct MeetingTileSource: Sendable {
     let settings: MeetingTileSettingsStore
     let isVoiceActive: @Sendable () -> Bool
@@ -13,8 +31,8 @@ struct MeetingTileSource: Sendable {
 final class MacAudioRecorder: AudioRecorder {
     private let root: URL
     private let cipher: LibraryCipher
-    private let microphone: MicrophoneRecorder
-    private let systemAudio: SystemAudioRecorder
+    private let microphone: MicrophoneTrack
+    private let systemAudio: SystemAudioTrack
     private let capturesSystemAudio: () -> Bool
     private let scope: @MainActor () -> SystemAudioScope
     private let tiles: MeetingTileSource?
@@ -32,7 +50,7 @@ final class MacAudioRecorder: AudioRecorder {
         microphone.captureNote ?? systemAudioNote
     }
 
-    init(
+    convenience init(
         root: URL,
         cipher: LibraryCipher,
         microphoneInput: MicrophoneInput,
@@ -43,10 +61,32 @@ final class MacAudioRecorder: AudioRecorder {
         tiles: MeetingTileSource? = nil,
         now: @escaping () -> Date = Date.init
     ) {
+        self.init(
+            root: root,
+            cipher: cipher,
+            microphone: MicrophoneRecorder(root: root, cipher: cipher, input: microphoneInput, format: format),
+            systemAudio: SystemAudioRecorder(root: root, cipher: cipher, input: systemAudioInput, format: format),
+            capturesSystemAudio: capturesSystemAudio,
+            scope: scope,
+            tiles: tiles,
+            now: now
+        )
+    }
+
+    init(
+        root: URL,
+        cipher: LibraryCipher,
+        microphone: MicrophoneTrack,
+        systemAudio: SystemAudioTrack,
+        capturesSystemAudio: @escaping () -> Bool,
+        scope: @escaping @MainActor () -> SystemAudioScope,
+        tiles: MeetingTileSource? = nil,
+        now: @escaping () -> Date = Date.init
+    ) {
         self.root = root
         self.cipher = cipher
-        microphone = MicrophoneRecorder(root: root, cipher: cipher, input: microphoneInput, format: format)
-        systemAudio = SystemAudioRecorder(root: root, cipher: cipher, input: systemAudioInput, format: format)
+        self.microphone = microphone
+        self.systemAudio = systemAudio
         self.capturesSystemAudio = capturesSystemAudio
         self.scope = scope
         self.tiles = tiles
@@ -95,7 +135,12 @@ final class MacAudioRecorder: AudioRecorder {
             self.tileRecorder = nil
         }
         if isCapturingSystemAudio {
-            try await systemAudio.finish()
+            do {
+                try await systemAudio.finish()
+            } catch {
+                systemAudioNote = CaptureError.systemAudioUnavailable.localizedDescription
+                DevLog.error("record.systemAudioFinishFailed", error)
+            }
             isCapturingSystemAudio = false
         }
         try await microphone.finish()

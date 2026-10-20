@@ -121,6 +121,7 @@ final class RecordingWorkflow {
         }
 
         if stopRequested {
+            session.stop()
             await recorder.discard()
             state = .idle
             return

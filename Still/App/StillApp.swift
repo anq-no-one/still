@@ -18,6 +18,7 @@ struct StillApp: App {
     private let preferencesImporter: PreferencesImporter
     #if os(macOS)
     private let automatic: AutomaticRecording
+    private let callEnd: CallEndWatch
     private let browser: BrowserMeetingBridge
     private let aiTools: MCPAccess
     private let chromium: ChromiumConnections
@@ -363,6 +364,11 @@ struct StillApp: App {
                     await CalendarContext(source: EventKitCalendarSource()).suggestion(at: date) != nil
                 }
             )
+        }
+        callEnd = MainActor.assumeIsolated {
+            let watch = CallEndWatch(coordinator: recordingCoordinator)
+            watch.start()
+            return watch
         }
         browser = MainActor.assumeIsolated {
             let bridge = BrowserMeetingBridge(
