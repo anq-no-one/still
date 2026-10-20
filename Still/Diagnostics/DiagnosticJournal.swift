@@ -28,6 +28,7 @@ enum JournalCode: String, Codable, CaseIterable, Sendable {
     case syncStarted
     case syncFinished
     case syncFailed
+    case syncJoined
     case exportFinished
     case exportFailed
     case journalExported

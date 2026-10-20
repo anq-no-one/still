@@ -21,6 +21,7 @@ against.
 | A revocation interrupted part way | The replacement key is written beside the old one and only promoted once every Recording and chunk is re-sealed | `RotationSafetyTests` |
 | A Mac that excludes a project | Each project, and No Project, has its own random key. Recording payloads and synced audio are sealed with it, so the account key alone opens only project names and colors. A device downloads payloads only for the projects it holds | `anExcludedMacReceivesNothingOfAProject` |
 | A forged or replayed key grant | Grants use HPKE in authenticated mode, bound to the recipient and project. A device accepts a project key only from a device the account vouches for | `aTamperedGrantIsRejected`, `aGrantFromAnUntrustedDeviceIsIgnored` |
+| Devices on one Apple Account joining one Library | The Library key and project keys travel in iCloud Keychain, which is end-to-end encrypted; CloudKit still holds only ciphertext. A device adopts the keys there and re-seals its local data under them; a project turned off on a device is never held there | `devicesOnOneAppleAccountShareEveryRecordingWithoutAPairingCode`, `aDeviceThatTurnsAProjectOffDoesNotReceiveIt` |
 | A new device joining the wrong account | Both screens show a nine-digit code derived from both device keys, and both users confirm it before any key moves | `bothScreensShowTheSameCodeBeforeJoining` |
 | A project turned off before its only copy left the Mac | The Mac keeps the project's recordings and key until another device holds the project and the cloud has every confirmed copy. No deletion is ever pushed | `aProjectLeavesAMacOnlyAfterAnotherDeviceHasEveryCopy`, `aLoneHolderNeverDropsItsOnlyCopy` |
 | A generated statement with no evidence | Extracted decisions, facts and tasks are kept only when every cited segment exists and its words support the statement; the rest are withheld and only counted. They are sealed inside the Recording and stay marked automatically extracted until the user confirms them | `ProvenanceTests`, `MemoryExtractionTests` |
@@ -45,6 +46,9 @@ against.
   whatever it already had. Rotation protects everything written afterwards, not the past.
 - **Device and project ids are not encrypted.** A device record lists its kind (Mac, iPhone, iPad),
   its public key, and the random ids of the projects it requests and holds. Names stay sealed.
+- **iCloud Keychain is the trust root for automatic joining.** Anyone who can add a device to the
+  Apple Account and pass its iCloud Keychain check can read the Library. The pairing code remains for
+  devices on different Apple Accounts.
 - **The join code has no commitment round.** Someone who controls the iCloud records could try to
   grind device keys until a nine-digit code matches. The code passes through 400,000 rounds of
   PBKDF2, so each guess costs a key pair plus that work, which puts a match out of practical reach

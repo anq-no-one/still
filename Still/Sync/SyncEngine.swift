@@ -37,9 +37,13 @@ final class SyncEngine {
     private let transport: SyncTransport
     private let settings: SyncSettingsStore
     private let identity: DeviceIdentity
+    private let sharedKeys: SharedKeyStore?
+    private let afterSync: @MainActor () async -> Void
     private let now: () -> Date
 
     private(set) var isEnabled: Bool
+    private(set) var isSyncing = false
+    private var schedule: Task<Void, Never>?
     private(set) var lastFailure: String?
     private(set) var lastSyncedAt: Date?
     private(set) var joinRequests: [JoinRequest] = []
@@ -51,12 +55,16 @@ final class SyncEngine {
         transport: SyncTransport,
         settings: SyncSettingsStore,
         identity: DeviceIdentity = DeviceIdentity(),
+        sharedKeys: SharedKeyStore? = nil,
+        afterSync: @escaping @MainActor () async -> Void = {},
         now: @escaping () -> Date = Date.init
     ) {
+        self.afterSync = afterSync
         self.library = library
         self.transport = transport
         self.settings = settings
         self.identity = identity
+        self.sharedKeys = sharedKeys
         self.now = now
         isEnabled = settings.isEnabled()
         lastSyncedAt = settings.lastSyncedAt()
@@ -84,8 +92,20 @@ final class SyncEngine {
     }
 
     func syncIfEnabled() async {
-        guard isEnabled else { return }
+        guard isEnabled, library.state == .unlocked else { return }
         await sync()
+    }
+
+    /// Every device keeps pulling while it runs, so a Mac that sits in the
+    /// menu bar for days still receives what the others record.
+    func keepSyncing(every interval: Duration) {
+        guard schedule == nil else { return }
+        schedule = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: interval)
+                await self?.syncIfEnabled()
+            }
+        }
     }
 
     func sync() async {
@@ -93,10 +113,14 @@ final class SyncEngine {
             lastFailure = SyncError.disabled.localizedDescription
             return
         }
+        guard !isSyncing else { return }
+        isSyncing = true
+        defer { isSyncing = false }
 
         let correlationID = UUID()
         library.journal?.record(.syncStarted, correlationID: correlationID)
         do {
+            try await shareKeys()
             var server = ServerState(try await transport.pull(payloadsFor: library.heldScopeIDs), library: library)
             if try receiveGrants(from: server) {
                 server = ServerState(try await transport.pull(payloadsFor: library.heldScopeIDs), library: library)
@@ -114,6 +138,7 @@ final class SyncEngine {
             lastSyncedAt = stamp
             lastFailure = nil
             library.journal?.record(.syncFinished, correlationID: correlationID)
+            await afterSync()
         } catch {
             lastFailure = error.localizedDescription
             library.journal?.fail(.syncFailed, error: error, correlationID: correlationID)
@@ -152,6 +177,30 @@ final class SyncEngine {
             return
         }
         await syncIfEnabled()
+    }
+
+    private func shareKeys() async throws {
+        guard let sharedKeys else { return }
+
+        let stored: SharedAccountKeys?
+        do {
+            stored = try sharedKeys.load()
+        } catch {
+            DevLog.error("sync.sharedKeysUnreadable", error)
+            return
+        }
+        if let stored {
+            try await library.adopt(stored)
+        }
+
+        let mine = try library.sharedAccountKeys()
+        let merged = stored.map { $0.merging(mine) } ?? mine
+        guard merged != stored else { return }
+        do {
+            try sharedKeys.save(merged)
+        } catch {
+            DevLog.error("sync.sharedKeysUnsaved", error)
+        }
     }
 
     private func receiveGrants(from server: ServerState) throws -> Bool {
@@ -304,7 +353,7 @@ final class SyncEngine {
             )
         }
 
-        for recording in library.storedRecordings where recording.isProjectConfirmed {
+        for recording in library.storedRecordings where !recording.isProcessing {
             guard server.recording(recording.id) != recording,
                   let change = try library.syncChange(for: recording, deviceID: identity.id)
             else { continue }

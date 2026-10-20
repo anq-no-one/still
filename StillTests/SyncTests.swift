@@ -190,17 +190,19 @@ struct SyncEngineTests {
     }
 
     @Test
-    func keepsAnUnconfirmedRecordingOnThisDevice() async throws {
+    func anUnconfirmedRecordingSyncsUnderItsSuggestedProject() async throws {
         let transport = SpySyncTransport()
         let library = try await makeLibrary()
         let engine = makeEngine(library: library, transport: transport)
         let project = try library.createProject(named: "Acme", color: .blue)
-        try library.add(Recording(title: "Suggested", transcript: "text", duration: 60, projectID: project.id))
+        let recording = Recording(title: "Suggested", transcript: "text", duration: 60, projectID: project.id)
+        try library.add(recording)
 
         engine.enable()
         await engine.sync()
 
-        #expect(!transport.pushed.flatMap { $0 }.contains { $0.kind == .recording })
+        let sent = try #require(transport.pushed.flatMap { $0 }.first { $0.id == recording.id })
+        #expect(sent.scopeID == project.id)
     }
 
     @Test
@@ -224,7 +226,7 @@ struct SyncEngineTests {
     }
 
     @Test
-    func aCorrectedProjectCountsAsConfirmed() async throws {
+    func aCorrectedProjectReachesTheCloudUnderTheNewProject() async throws {
         let transport = SpySyncTransport()
         let library = try await makeLibrary()
         let engine = makeEngine(library: library, transport: transport)
@@ -235,12 +237,12 @@ struct SyncEngineTests {
         engine.enable()
 
         await engine.sync()
-        #expect(!transport.pushed.flatMap { $0 }.contains { $0.id == recording.id })
+        #expect(transport.pushed.flatMap { $0 }.first { $0.id == recording.id }?.scopeID == wrong.id)
 
         try library.assign([recording.id], toProject: right.id)
         await engine.sync()
 
-        let sent = try #require(transport.pushed.flatMap { $0 }.first { $0.id == recording.id })
+        let sent = try #require(transport.pushed.flatMap { $0 }.last { $0.id == recording.id })
         #expect(try library.openRecording(from: sent).projectID == right.id)
     }
 

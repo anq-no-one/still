@@ -214,14 +214,27 @@ struct StillApp: App {
         }
 
         let syncEngine = MainActor.assumeIsolated {
-            SyncEngine(
+            let identity = DeviceIdentity(
+                agreementKey: (try? KeychainDeviceKeySource().agreementKey()) ?? .init(),
+                kind: .current
+            )
+            let audioSync = LibraryAudioSync(
+                library: recordingLibrary,
+                chunks: AudioChunkSync(
+                    audioRoot: audioRoot,
+                    transport: CloudKitAudioChunkTransport(deviceID: identity.id),
+                    keepsAudio: { recordingLibrary.keepsAudio(forRecording: $0) },
+                    sealing: { recordingLibrary.audioSealing(forRecording: $0) }
+                ),
+                ledger: UserDefaultsAudioSyncLedger()
+            )
+            return SyncEngine(
                 library: recordingLibrary,
                 transport: CloudKitSyncTransport(),
                 settings: UserDefaultsSyncSettings(),
-                identity: DeviceIdentity(
-                    agreementKey: (try? KeychainDeviceKeySource().agreementKey()) ?? .init(),
-                    kind: .current
-                )
+                identity: identity,
+                sharedKeys: CloudKitSyncTransport.isProvisioned ? ICloudKeychainSharedKeyStore() : nil,
+                afterSync: { await audioSync.run() }
             )
         }
         sync = syncEngine
@@ -325,6 +338,7 @@ struct StillApp: App {
             memoryExtraction.start()
             await proEntitlements.refresh()
             await syncEngine.syncIfEnabled()
+            syncEngine.keepSyncing(every: .seconds(180))
             await recordingCoordinator.finishInterruptedProcessing()
             let titleTier = FoundationModelTitle.isAvailable ? "apple-1"
                 : memoryInstaller.state == .installed ? "mlx-1" : "extractive-1"
@@ -428,7 +442,12 @@ struct StillApp: App {
             libraryView
         }
         .defaultSize(width: 980, height: 680)
-        .onChange(of: scenePhase) { _, phase in diagnostics.developer.sceneBecame(String(describing: phase)) }
+        .onChange(of: scenePhase) { _, phase in
+            diagnostics.developer.sceneBecame(String(describing: phase))
+            if phase == .active {
+                Task { await sync.syncIfEnabled() }
+            }
+        }
         .commands {
             CommandGroup(after: .newItem) {
                 MediaImportCommand(importer: importer, navigation: navigation)
@@ -486,7 +505,12 @@ struct StillApp: App {
             libraryView
                 .onOpenURL { navigation.handOver($0) }
         }
-        .onChange(of: scenePhase) { _, phase in diagnostics.developer.sceneBecame(String(describing: phase)) }
+        .onChange(of: scenePhase) { _, phase in
+            diagnostics.developer.sceneBecame(String(describing: phase))
+            if phase == .active {
+                Task { await sync.syncIfEnabled() }
+            }
+        }
         #endif
     }
 

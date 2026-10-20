@@ -12,7 +12,9 @@ and even then it travels and rests as ciphertext your own devices can open.
 
 Recordings, transcripts, notes, facts and tasks, speaker names and voice profiles live in an encrypted Library on your device.
 Audio is written in encrypted pieces as you record. The encryption key is held in this device's
-keychain. If you turn on App Lock, Still also asks for Face ID, Touch ID or your device passcode
+keychain. With iCloud sync on, Still also keeps the Library and project keys in iCloud Keychain,
+which Apple encrypts end to end, so your devices on the same Apple Account open one Library
+without a pairing code. If you turn on App Lock, Still also asks for Face ID, Touch ID or your device passcode
 before it shows your Library.
 
 Still never uploads this content anywhere on its own.
@@ -25,7 +27,7 @@ happens, and only for that purpose:
 | You do this | What travels |
 |---|---|
 | Approve the model download | A request to the model host for the transcription, speaker and language model files. No content of yours is sent. |
-| Turn on iCloud sync | Encrypted recordings to your own iCloud account. Apple stores ciphertext; it cannot read your transcripts, notes, audio, or key. Each project has its own key, so a Mac receives only the projects you keep on it. |
+| Turn on iCloud sync | Encrypted recordings and their original audio to your own iCloud account, and the keys to iCloud Keychain. Apple stores ciphertext; it cannot read your transcripts, notes, audio, or keys. Each project has its own key, so a Mac receives every project except the ones you turn off on it. |
 | Turn on nearby sync and pair a device | The same encrypted data, directly to the device you paired, over your local network. |
 | Buy or restore Still Pro | A purchase request to Apple. Apple tells us whether you own the product, nothing else. |
 | Share or export | Only what you chose, only to where you chose, through the system share sheet. |

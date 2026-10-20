@@ -1,6 +1,7 @@
 import CloudKit
 import Foundation
 import OSLog
+import Synchronization
 
 struct CloudKitSyncTransport: SyncTransport {
     static let recordType = "StillSyncChange"
@@ -144,5 +145,97 @@ struct CloudKitSyncTransport: SyncTransport {
             scopeID: (record["scopeID"] as? String).flatMap(UUID.init(uuidString:)),
             recipientID: (record["recipientID"] as? String).flatMap(UUID.init(uuidString:))
         )
+    }
+}
+
+/// Audio lives in its own zone so the record pull never walks thousands of
+/// chunks. It reuses the record type and fields already deployed to the
+/// production schema, because TestFlight and App Store builds cannot add new
+/// ones. Each recording keeps one index record of chunk digests, so an
+/// inventory is a single fetch instead of a query that would need an index.
+struct CloudKitAudioChunkTransport: AudioChunkTransport {
+    static let zoneID = CKRecordZone.ID(zoneName: "Audio")
+    private static let zoneReady = Mutex(false)
+    private static let log = Logger(subsystem: "com.andrii.still", category: "sync")
+
+    private let container: @Sendable () -> CKContainer?
+    private let deviceID: UUID
+
+    init(
+        deviceID: UUID,
+        container: @escaping @Sendable () -> CKContainer? = { CloudKitSyncTransport.isProvisioned ? CKContainer.default() : nil }
+    ) {
+        self.deviceID = deviceID
+        self.container = container
+    }
+
+    func upload(_ payload: AudioChunkPayload, digest: String) async throws {
+        try await reachingCloudKit { database in
+            let record = CKRecord(recordType: CloudKitSyncTransport.recordType, recordID: Self.recordID(AudioChunkIndex.recordName(for: payload.id)))
+            fill(record, payload: payload.sealed)
+            _ = try await database.modifyRecords(saving: [record], deleting: [], savePolicy: .allKeys)
+        }
+    }
+
+    func commit(_ digests: [AudioChunkID: String], forRecording id: UUID) async throws {
+        guard !digests.isEmpty else { return }
+        try await reachingCloudKit { database in
+            let recordID = Self.recordID(AudioChunkIndex.indexRecordName(forRecording: id))
+            let existing = try? await database.record(for: recordID)
+            var index = (existing?["payload"] as? Data).flatMap { try? JSONDecoder().decode(AudioChunkIndex.self, from: $0) }
+                ?? AudioChunkIndex()
+            index.add(digests)
+            let record = existing ?? CKRecord(recordType: CloudKitSyncTransport.recordType, recordID: recordID)
+            fill(record, payload: try JSONEncoder().encode(index))
+            _ = try await database.modifyRecords(saving: [record], deleting: [], savePolicy: .allKeys)
+        }
+    }
+
+    func inventory(forRecording id: UUID) async throws -> [AudioChunkID: String] {
+        try await reachingCloudKit { database in
+            let recordID = Self.recordID(AudioChunkIndex.indexRecordName(forRecording: id))
+            let result = try await database.records(for: [recordID], desiredKeys: ["payload"])
+            guard let record = try? result[recordID]?.get(),
+                  let data = record["payload"] as? Data,
+                  let index = try? JSONDecoder().decode(AudioChunkIndex.self, from: data)
+            else { return [:] }
+            return index.digests(forRecording: id)
+        }
+    }
+
+    func download(_ id: AudioChunkID) async throws -> AudioChunkPayload {
+        try await reachingCloudKit { database in
+            let record = try await database.record(for: Self.recordID(AudioChunkIndex.recordName(for: id)))
+            guard let sealed = record["payload"] as? Data else { throw SyncError.unreachable }
+            return AudioChunkPayload(id: id, sealed: sealed)
+        }
+    }
+
+    private func fill(_ record: CKRecord, payload: Data) {
+        record["kind"] = "audio" as NSString
+        record["updatedAt"] = Date() as NSDate
+        record["deviceID"] = deviceID.uuidString as NSString
+        record["payload"] = payload as NSData
+    }
+
+    private static func recordID(_ name: String) -> CKRecord.ID {
+        CKRecord.ID(recordName: name, zoneID: zoneID)
+    }
+
+    private func reachingCloudKit<Result>(_ work: (CKDatabase) async throws -> Result) async throws -> Result {
+        guard let container = container() else { throw SyncError.unreachable }
+        let database = container.privateCloudDatabase
+
+        do {
+            if !Self.zoneReady.withLock({ $0 }) {
+                _ = try await database.modifyRecordZones(saving: [CKRecordZone(zoneID: Self.zoneID)], deleting: [])
+                Self.zoneReady.withLock { $0 = true }
+            }
+            return try await work(database)
+        } catch {
+            Self.log.error("CloudKit audio failed: \(error, privacy: .public)")
+            DevLog.error("sync.audioFailed", error)
+            throw SyncError.unreachable
+        }
     }
 }

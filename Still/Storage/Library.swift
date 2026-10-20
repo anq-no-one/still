@@ -568,6 +568,38 @@ final class Library: RecordingLibrary {
         )
     }
 
+    func sharedAccountKeys() throws -> SharedAccountKeys {
+        guard let accountKeys else { throw LibraryError.locked }
+
+        return SharedAccountKeys(account: try accountInvitation(), scopeKeys: accountKeys.scopeKeys)
+    }
+
+    func wantsScope(_ scope: UUID) -> Bool {
+        if scope == accountKeys?.noProjectScopeID {
+            return projectSelection.includes(.noProject)
+        }
+        return projectSelection.includes(.project(scope))
+    }
+
+    func adopt(_ shared: SharedAccountKeys) async throws {
+        guard key != nil, accountKeys != nil else { throw LibraryError.locked }
+
+        if shared.account.accountID != accountID || shared.account.accountKey != key?.rawBytes {
+            try await join(shared.account, reason: String(localized: "Join your other devices' Still Library"))
+            journal?.record(.syncJoined)
+        }
+        guard let key, var keys = accountKeys else { throw LibraryError.locked }
+
+        var changed = false
+        for (scope, bytes) in shared.scopeKeys where wantsScope(scope) && keys.key(for: scope)?.rawBytes != bytes {
+            keys.hold(SymmetricKey(data: bytes), for: scope)
+            changed = true
+        }
+        guard changed else { return }
+        try keys.save(to: services.keysFile, cipher: LibraryCipher(key: key))
+        accountKeys = keys
+    }
+
     func sealForAccount(_ data: Data) throws -> Data {
         guard let key else { throw LibraryError.locked }
 
