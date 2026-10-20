@@ -187,3 +187,10 @@ Deployment target is now iOS/macOS 26.
 - Project colors showed black in Mac menus: menus template SF Symbols, so swatches are drawn bitmaps (`ProjectSwatch`, `ProjectColor.swatch`).
 - Settings › Diagnostics in TestFlight now exports the zip with audio instead of the text journal; an unknown build channel no longer deletes the log and is retried.
 - Still open from `bugs 19 oct report.md`: titles from location address, generated summary with who said what, owners on decisions/action items, remove Proposed Tasks, speakers UI (hide merge, spacing), Teams speaker names, freeze while scrolling a long note.
+
+## Feedback 2026-10-20 evening (mic + sync)
+- Mic left open after a meeting: `MacAudioRecorder.finish` now always finishes the microphone even if system audio throws; `RecordingWorkflow.start` stops a live transcript that started after a stop; `CallEndWatch` saves any Mac recording that overlapped a call once no call app/browser has held the mic for 30 s (`CallEndDetector`, `MicrophoneReleaseTests`).
+- Sync never crossed devices. Causes: separate accounts per device (pairing code never entered), only confirmed-project recordings pushed, sync only at launch, audio transport never wired. Now: keys shared through iCloud Keychain (`SharedAccountKeys`, `ICloudKeychainSharedKeyStore`, `Library.adopt`), every non-processing recording pushed, `keepSyncing(every: 180s)` + sync on scene active, audio via `CloudKitAudioChunkTransport` (zone "Audio", existing `StillSyncChange` record type, per-recording index record) and `LibraryAudioSync` with a settled ledger.
+- Joining re-seals local audio on the main actor once; watch for a pause on a device with a big library.
+- The Obsidian vault moved to `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Obsidian/`.
+- Still open from `bugs 19 oct report.md`: titles from location address, generated summary with who said what, owners on decisions/action items, remove Proposed Tasks, speakers UI, Teams speaker names, freeze while scrolling.
