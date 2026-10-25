@@ -19,6 +19,8 @@ final class SystemAudioRecorder: NSObject {
     private var output: SystemAudioOutput?
     private var scope: SystemAudioScope = .callApps
     private var launchObserver: NSObjectProtocol?
+    private let streamLog = SystemAudioStreamLog()
+    private static var capturedApps: [String] = []
 
     init(root: URL, cipher: LibraryCipher, input: SystemAudioInput, format: AudioFormat = .transcription) {
         self.root = root
@@ -45,13 +47,21 @@ final class SystemAudioRecorder: NSObject {
             format: format,
             startOffset: startOffset
         )
-        let output = SystemAudioOutput(writer: writer, input: input)
-        let stream = SCStream(filter: filter, configuration: configuration, delegate: nil)
+        let output = SystemAudioOutput(writer: writer, input: input, startedAt: ProcessInfo.processInfo.systemUptime)
+        let stream = SCStream(filter: filter, configuration: configuration, delegate: streamLog)
 
         do {
             try stream.addStreamOutput(output, type: .audio, sampleHandlerQueue: sampleQueue)
             try await stream.startCapture()
+            AudioDiagnostics.event("audio.system.started", [
+                "scope": String(describing: scope),
+                "sampleRate": String(configuration.sampleRate),
+                "channels": String(configuration.channelCount),
+                "startOffsetS": String(format: "%.3f", startOffset),
+                "apps": Self.capturedApps.joined(separator: ","),
+            ])
         } catch {
+            AudioDiagnostics.error("audio.system.captureFailed", error, ["scope": String(describing: scope)])
             try? AudioChunkStore.discard(
                 AudioChunkStore.trackDirectory(forRecording: recordingID, track: .system, in: root)
             )
@@ -68,6 +78,7 @@ final class SystemAudioRecorder: NSObject {
     func finish() async throws {
         stopFollowingLaunches()
         try? await stream?.stopCapture()
+        output?.meter.flush(reason: "finished")
         stream = nil
         output = nil
         try writer?.finish()
@@ -77,6 +88,7 @@ final class SystemAudioRecorder: NSObject {
     func discard() async {
         stopFollowingLaunches()
         try? await stream?.stopCapture()
+        output?.meter.flush(reason: "discarded")
         stream = nil
         output = nil
         try? writer?.finish()
@@ -88,6 +100,7 @@ final class SystemAudioRecorder: NSObject {
         guard let display = content.displays.first else { throw CaptureError.inputUnavailable }
 
         let apps = content.applications.filter { scope.includes($0.bundleIdentifier) }
+        capturedApps = apps.map(\.bundleIdentifier)
         return SCContentFilter(display: display, including: apps, exceptingWindows: [])
     }
 
@@ -114,28 +127,64 @@ final class SystemAudioRecorder: NSObject {
 
     private func refilter() async {
         try? await Task.sleep(for: Self.launchSettleDelay)
-        guard let stream, let filter = try? await Self.filter(for: scope) else { return }
-        try? await stream.updateContentFilter(filter)
+        guard let stream else { return }
+        do {
+            let filter = try await Self.filter(for: scope)
+            try await stream.updateContentFilter(filter)
+            AudioDiagnostics.event("audio.system.refiltered", ["apps": Self.capturedApps.joined(separator: ",")])
+        } catch {
+            AudioDiagnostics.error("audio.system.refilterFailed", error)
+        }
+    }
+}
+
+/// ScreenCaptureKit stops a stream on its own when the display sleeps, the
+/// permission is revoked or the captured app quits; without a delegate the
+/// recording would go on writing nothing from the system side.
+private final class SystemAudioStreamLog: NSObject, SCStreamDelegate {
+    func stream(_ stream: SCStream, didStopWithError error: any Error) {
+        AudioDiagnostics.error("audio.system.streamStopped", error)
     }
 }
 
 private final class SystemAudioOutput: NSObject, SCStreamOutput {
     private let writer: AudioChunkWriter
     private let input: SystemAudioInput
+    private let startedAt: Double
+    private nonisolated(unsafe) var reportedFirstBuffer = false
+    let meter = AudioTapMeter(track: "system")
 
-    init(writer: AudioChunkWriter, input: SystemAudioInput) {
+    init(writer: AudioChunkWriter, input: SystemAudioInput, startedAt: Double) {
         self.writer = writer
         self.input = input
+        self.startedAt = startedAt
     }
 
     func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
-        guard type == .audio, sampleBuffer.isValid else { return }
+        guard type == .audio else { return }
+        guard sampleBuffer.isValid else {
+            meter.dropped()
+            return
+        }
+        if !reportedFirstBuffer {
+            reportedFirstBuffer = true
+            AudioDiagnostics.event("audio.system.firstBuffer", ["afterStartMS": String(format: "%.0f", (ProcessInfo.processInfo.systemUptime - startedAt) * 1000)])
+        }
         guard let target = input.pcmFormat, let converted = Self.convert(sampleBuffer, to: target),
               let channel = converted.int16ChannelData
-        else { return }
+        else {
+            meter.dropped()
+            return
+        }
 
-        try? writer.append(Data(bytes: channel[0], count: Int(converted.frameLength) * Int(target.streamDescription.pointee.mBytesPerFrame)))
+        do {
+            try writer.append(Data(bytes: channel[0], count: Int(converted.frameLength) * Int(target.streamDescription.pointee.mBytesPerFrame)))
+        } catch {
+            meter.writeFailed()
+        }
         input.deliver(converted)
+        let start = sampleBuffer.presentationTimeStamp
+        meter.add(converted, startSeconds: start.isValid ? start.seconds : nil)
     }
 
     private static func convert(_ sampleBuffer: CMSampleBuffer, to target: AVAudioFormat) -> AVAudioPCMBuffer? {

@@ -58,11 +58,20 @@ final class MCPSession {
             return nil
         }
 
+        let span = Perf.begin("mcp.request")
+        var fields = ["method": request.method, "requestBytes": String(line.count)]
+        if let tool = request.params?["name"]?.stringValue { fields["tool"] = tool }
+        let reply: Data?
         do {
-            return encode(.success(id, try respond(to: request)))
+            reply = encode(.success(id, try respond(to: request)))
         } catch {
-            return encode(.failure(id, error))
+            fields["errorCode"] = String(error.code)
+            fields["error"] = error.message
+            reply = encode(.failure(id, error))
         }
+        fields["replyBytes"] = String(reply?.count ?? 0)
+        Perf.end(span, fields)
+        return reply
     }
 
     private func respond(to request: JSONRPCRequest) throws(JSONRPCError) -> JSONValue {

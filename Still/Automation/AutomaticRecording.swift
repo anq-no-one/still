@@ -140,13 +140,16 @@ final class AutomaticRecording {
     }
 
     private func appBecameActive(_ processBundleID: String) async {
-        guard isWatching,
-              triggeredBy == nil,
-              !coordinator.isRecording,
-              let owner = CallApp.owner(of: processBundleID),
-              let app = apps.first(where: { $0.isAllowed && $0.bundleID == owner.bundleID })
-        else { return }
+        let skipped = { (reason: String) in
+            DevLog.event("call.autoRecord.skipped", ["process": processBundleID, "reason": reason])
+        }
+        guard isWatching else { return skipped("notWatching") }
+        guard triggeredBy == nil else { return skipped("alreadyTriggeredBy:\(triggeredBy ?? "")") }
+        guard !coordinator.isRecording else { return skipped("alreadyRecording") }
+        guard let owner = CallApp.owner(of: processBundleID) else { return skipped("unknownApp") }
+        guard let app = apps.first(where: { $0.isAllowed && $0.bundleID == owner.bundleID }) else { return skipped("appNotAllowed") }
 
+        DevLog.event("call.autoRecord.started", ["app": app.bundleID, "process": processBundleID])
         triggeredBy = app.bundleID
         startedAt = now()
         isKept = false
@@ -162,6 +165,7 @@ final class AutomaticRecording {
         finish()
         guard coordinator.isCapturing else { return }
 
+        DevLog.event("call.autoRecord.ended", ["app": triggeredBy, "kept": String(wasMeeting)])
         if wasMeeting {
             await coordinator.stopAndSave()
         } else {
@@ -172,10 +176,14 @@ final class AutomaticRecording {
 
     private func isMeeting() async -> Bool {
         guard let startedAt else { return false }
-        if isKept || now().timeIntervalSince(startedAt) >= Self.meetingLength {
+        let lasted = now().timeIntervalSince(startedAt)
+        if isKept || lasted >= Self.meetingLength {
+            DevLog.event("call.autoRecord.meeting", ["kept": String(isKept), "lastedS": String(format: "%.0f", lasted)])
             return true
         }
-        return await meetingEvidence(startedAt)
+        let evidence = await meetingEvidence(startedAt)
+        DevLog.event("call.autoRecord.meeting", ["calendarEvidence": String(evidence), "lastedS": String(format: "%.0f", lasted)])
+        return evidence
     }
 
     private func finish() {

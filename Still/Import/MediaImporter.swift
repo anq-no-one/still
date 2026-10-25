@@ -140,7 +140,9 @@ final class MediaImporter {
             try ensureSpace(for: sound)
             recordingID = id
             library.journal?.record(.importStarted, correlationID: id)
-            let duration = try await decode(sound, as: id)
+            let duration = try await Perf.trace("import.decode", ["recordingID": id.uuidString, "type": url.pathExtension.lowercased()]) {
+                try await decode(sound, as: id)
+            }
             try Task.checkCancellation()
             try library.commitImport(forRecording: id)
 

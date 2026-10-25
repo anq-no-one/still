@@ -55,7 +55,11 @@ struct CloudKitSyncTransport: SyncTransport {
                 return record
             }
 
-            _ = try await database.modifyRecords(saving: records, deleting: [], savePolicy: .changedKeys)
+            let saved = try await database.modifyRecords(saving: records, deleting: [], savePolicy: .changedKeys)
+            var fields = ["records": String(records.count)]
+            if let failed = CloudKitDiagnostics.failures(saved.saveResults) { fields["failed"] = failed }
+            if let failed = CloudKitDiagnostics.failures(existing) { fields["lookupFailed"] = failed }
+            DevLog.event("sync.cloudKit.pushed", fields)
         }
     }
 
@@ -74,6 +78,9 @@ struct CloudKitSyncTransport: SyncTransport {
                 changes += batch.modificationResultsByID.values.compactMap { result in
                     (try? result.get()).flatMap { Self.change(from: $0.record) }
                 }
+                if let failed = CloudKitDiagnostics.failures(batch.modificationResultsByID) {
+                    DevLog.event("sync.cloudKit.pullRecordsFailed", ["failed": failed])
+                }
                 token = batch.changeToken
                 moreComing = batch.moreComing
             }
@@ -84,10 +91,20 @@ struct CloudKitSyncTransport: SyncTransport {
             var payloads: [CKRecord.ID: Data] = [:]
             for start in stride(from: 0, to: wanted.count, by: Self.fetchBatchSize) {
                 let ids = wanted[start..<min(start + Self.fetchBatchSize, wanted.count)].map(Self.recordID(for:))
-                for (id, result) in try await database.records(for: ids, desiredKeys: ["payload"]) {
+                let results = try await database.records(for: ids, desiredKeys: ["payload"])
+                for (id, result) in results {
                     payloads[id] = (try? result.get())?["payload"] as? Data
                 }
+                if let failed = CloudKitDiagnostics.failures(results) {
+                    DevLog.event("sync.cloudKit.payloadsFailed", ["failed": failed, "requested": String(ids.count)])
+                }
             }
+            DevLog.event("sync.cloudKit.pulled", [
+                "changes": String(changes.count),
+                "wanted": String(wanted.count),
+                "payloads": String(payloads.count),
+                "heldScopes": String(scopes.count),
+            ])
 
             return changes
                 .map { change in
@@ -100,7 +117,11 @@ struct CloudKitSyncTransport: SyncTransport {
     }
 
     private func reachingCloudKit<Result>(_ work: (CKDatabase) async throws -> Result) async throws -> Result {
-        guard let container = container() else { throw SyncError.unreachable }
+        guard let container = container() else {
+            DevLog.event("sync.cloudKit.noContainer", ["provisioned": String(Self.isProvisioned)])
+            throw SyncError.unreachable
+        }
+        await Self.reportAccount(of: container)
         let database = container.privateCloudDatabase
 
         do {
@@ -108,7 +129,18 @@ struct CloudKitSyncTransport: SyncTransport {
             return try await work(database)
         } catch {
             Self.log.error("CloudKit failed: \(error, privacy: .public)")
+            DevLog.error("sync.cloudKit.failed", error, CloudKitDiagnostics.fields(for: error))
             throw SyncError.unreachable
+        }
+    }
+
+    static func reportAccount(of container: CKContainer) async {
+        guard CloudKitDiagnostics.shouldReportAccount() else { return }
+        do {
+            let status = try await container.accountStatus()
+            DevLog.event("sync.cloudKit.account", ["status": CloudKitDiagnostics.name(of: status), "container": container.containerIdentifier ?? "-"])
+        } catch {
+            DevLog.error("sync.cloudKit.accountUnknown", error, CloudKitDiagnostics.fields(for: error))
         }
     }
 
@@ -223,7 +255,11 @@ struct CloudKitAudioChunkTransport: AudioChunkTransport {
     }
 
     private func reachingCloudKit<Result>(_ work: (CKDatabase) async throws -> Result) async throws -> Result {
-        guard let container = container() else { throw SyncError.unreachable }
+        guard let container = container() else {
+            DevLog.event("sync.audio.noContainer")
+            throw SyncError.unreachable
+        }
+        await CloudKitSyncTransport.reportAccount(of: container)
         let database = container.privateCloudDatabase
 
         do {
@@ -234,7 +270,7 @@ struct CloudKitAudioChunkTransport: AudioChunkTransport {
             return try await work(database)
         } catch {
             Self.log.error("CloudKit audio failed: \(error, privacy: .public)")
-            DevLog.error("sync.audioFailed", error)
+            DevLog.error("sync.audioFailed", error, CloudKitDiagnostics.fields(for: error))
             throw SyncError.unreachable
         }
     }

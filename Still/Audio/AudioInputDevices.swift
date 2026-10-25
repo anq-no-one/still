@@ -61,6 +61,28 @@ final class CoreAudioInputDevices: AudioInputDevices {
         deviceIDs().first { device($0)?.uid == uid }
     }
 
+    nonisolated static func describe(_ id: AudioDeviceID) -> String {
+        var transport: UInt32 = 0
+        _ = read(id, kAudioDevicePropertyTransportType, into: &transport)
+        var rate: Float64 = 0
+        _ = read(id, kAudioDevicePropertyNominalSampleRate, into: &rate)
+        let kind = withUnsafeBytes(of: transport.bigEndian) { String(decoding: $0, as: UTF8.self) }
+        let name = device(id).map { "\($0.name) [\($0.uid)]" } ?? "device \(id)"
+        return "\(name) \(kind.trimmingCharacters(in: .controlCharacters)) \(Int(rate))Hz"
+    }
+
+    nonisolated static func diagnosticFields() -> [String: String] {
+        var input = AudioDeviceID(0)
+        var output = AudioDeviceID(0)
+        _ = read(system, kAudioHardwarePropertyDefaultInputDevice, into: &input)
+        _ = read(system, kAudioHardwarePropertyDefaultOutputDevice, into: &output)
+        return [
+            "defaultInput": input == 0 ? "none" : describe(input),
+            "defaultOutput": output == 0 ? "none" : describe(output),
+            "inputs": deviceIDs().filter(hasInput).map(describe).joined(separator: " | "),
+        ]
+    }
+
     private nonisolated static func deviceIDs() -> [AudioDeviceID] {
         var address = address(kAudioHardwarePropertyDevices)
         var size: UInt32 = 0

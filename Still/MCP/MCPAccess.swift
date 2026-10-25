@@ -112,17 +112,21 @@ final class MCPAccess {
                 Task { @MainActor in self?.serve(connection) }
             }
             failure = nil
+            DevLog.event("mcp.listening")
         } catch {
+            DevLog.error("mcp.listenFailed", error)
             failure = error.localizedDescription
         }
     }
 
     func serve(_ connection: MCPConnection) {
         guard isEnabled else {
+            DevLog.event("mcp.connectionRefused", ["reason": "disabled"])
             connection.close()
             return
         }
         connections[connection.id] = connection
+        DevLog.event("mcp.connected", ["connection": connection.id.uuidString, "open": String(connections.count)])
 
         let session = MCPSession(
             source: source,
@@ -139,10 +143,12 @@ final class MCPAccess {
             connection.close()
             self?.connections[connection.id] = nil
             self?.clients.removeAll { $0.id == connection.id }
+            DevLog.event("mcp.disconnected", ["connection": connection.id.uuidString])
         }
     }
 
     private func register(_ client: MCPClientInfo, on connectionID: UUID) {
+        DevLog.event("mcp.client", ["name": client.name, "version": client.version ?? "-", "allowed": String(isAllowed(client)), "connection": connectionID.uuidString])
         guard isAllowed(client) else {
             if isEnabled, !waitingClients.contains(client.name) {
                 waitingClients.append(client.name)

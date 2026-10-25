@@ -47,6 +47,11 @@ final class AudioChunkWriter: @unchecked Sendable {
 
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try writeManifest(isComplete: false)
+        LiveObjects.created(Self.self)
+    }
+
+    deinit {
+        LiveObjects.destroyed(Self.self)
     }
 
     /// Capture runs on the audio thread, which cannot wait for anyone and has
@@ -70,6 +75,9 @@ final class AudioChunkWriter: @unchecked Sendable {
                 pending.removeFirst(chunkBytes)
             }
         } catch {
+            if writeFailure == nil {
+                AudioDiagnostics.error("audio.chunk.writeFailed", error, ["track": directory.lastPathComponent, "chunk": String(nextIndex)])
+            }
             writeFailure = error
             throw error
         }
@@ -90,8 +98,10 @@ final class AudioChunkWriter: @unchecked Sendable {
     /// existing chunk at that index rather than failing, so a re-import or a
     /// repeated sync writes the same slot cleanly.
     private func flush(_ bytes: Data) throws {
-        try cipher.seal(Data(bytes))
-            .write(to: AudioChunkStore.chunkURL(in: directory, index: nextIndex), options: .atomic)
+        try Perf.measure("audio.chunk.write", ["track": directory.lastPathComponent, "bytes": String(bytes.count), "chunk": String(nextIndex)]) {
+            try cipher.seal(Data(bytes))
+                .write(to: AudioChunkStore.chunkURL(in: directory, index: nextIndex), options: .atomic)
+        }
         nextIndex += 1
     }
 

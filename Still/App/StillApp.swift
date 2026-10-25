@@ -433,6 +433,82 @@ struct StillApp: App {
             PreferencesImporter(library: recordingLibrary, appLock: appLock)
             #endif
         }
+        let appDiagnostics = diagnostics
+        #if os(macOS)
+        let automaticRecording = automatic
+        let mcp = aiTools
+        let microphoneChoice = microphones
+        #endif
+        MainActor.assumeIsolated {
+            let state = appDiagnostics.state
+            let permissions = SystemSetupPermissions()
+            state.register("recording") {
+                [
+                    "phase": String(describing: recordingCoordinator.phase),
+                    "capturing": String(recordingCoordinator.isCapturing),
+                    "elapsedS": String(format: "%.0f", recordingCoordinator.elapsed),
+                    "currentRecordingID": DiagnosticRecording.id?.uuidString ?? "-",
+                ]
+            }
+            state.register("library") {
+                [
+                    "state": String(describing: recordingLibrary.state),
+                    "recordings": String(recordingLibrary.storedRecordings.count),
+                    "processing": String(recordingLibrary.storedRecordings.filter(\.isProcessing).count),
+                    "projects": String(recordingLibrary.projects.count),
+                ]
+            }
+            state.register("sync") {
+                [
+                    "enabled": String(syncEngine.isEnabled),
+                    "syncing": String(syncEngine.isSyncing),
+                    "lastSyncedAt": syncEngine.lastSyncedAt?.formatted(.iso8601) ?? "never",
+                    "lastFailure": syncEngine.lastFailure ?? "-",
+                    "joinRequests": String(syncEngine.joinRequests.count),
+                    "invitation": String(syncEngine.invitation != nil),
+                    "device": syncEngine.deviceID.uuidString,
+                    "cloudKitProvisioned": String(CloudKitSyncTransport.isProvisioned),
+                ]
+            }
+            state.register("models") {
+                [
+                    "transcription": String(describing: installers.transcription.state),
+                    "speakers": String(describing: installers.speakers.state),
+                    "meetingMemory": String(describing: installers.meetingMemory.state),
+                    "localModelCanRun": String(LocalModelExtractor.canRun),
+                ]
+            }
+            state.register("permissions") {
+                [
+                    "microphone": String(describing: permissions.microphone),
+                    "systemAudio": String(describing: permissions.systemAudio),
+                    "calendar": String(describing: permissions.calendar),
+                    "setupComplete": String(setupFlow.isComplete),
+                ]
+            }
+            #if os(macOS)
+            state.register("automaticRecording") {
+                [
+                    "watching": String(automaticRecording.isWatching),
+                    "triggeredBy": automaticRecording.triggeredBy ?? "-",
+                    "allowedApps": automaticRecording.apps.filter(\.isAllowed).map(\.bundleID).joined(separator: ","),
+                ]
+            }
+            state.register("aiTools") {
+                [
+                    "enabled": String(mcp.isEnabled),
+                    "clients": mcp.clients.map(\.name).joined(separator: ","),
+                    "waiting": mcp.waitingClients.joined(separator: ","),
+                    "approved": mcp.approvedClients.joined(separator: ","),
+                    "failure": mcp.failure ?? "-",
+                ]
+            }
+            state.register("microphone") {
+                ["captureDevice": microphoneChoice.captureDeviceUID ?? "system default"]
+            }
+            #endif
+            appDiagnostics.developer.whenCollecting { AudioRouteLog.start() }
+        }
         Perf.end(launch)
     }
 

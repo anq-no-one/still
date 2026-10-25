@@ -11,6 +11,8 @@ final class MicrophoneInput {
     private var engine = AVAudioEngine()
     private let consumers = ConsumerList()
     private let fixture: AudioFixture?
+    nonisolated let meter = AudioTapMeter(track: "microphone")
+    private var configurationObserver: NSObjectProtocol?
 
     #if os(macOS)
     var preferredDevice: @MainActor () -> String? = { nil }
@@ -38,7 +40,10 @@ final class MicrophoneInput {
 
         do {
             let format = engine.inputNode.outputFormat(forBus: 0)
-            guard format.sampleRate > 0 else { throw CaptureError.inputUnavailable }
+            guard format.sampleRate > 0 else {
+                AudioDiagnostics.event("audio.mic.noInputFormat", deviceFields())
+                throw CaptureError.inputUnavailable
+            }
 
             let id = consumers.insert(try makeConsumer(format))
             if !wasRunning {
@@ -49,6 +54,9 @@ final class MicrophoneInput {
                     consumers.remove(id)
                     throw error
                 }
+                AudioDiagnostics.event("audio.mic.started", AudioDiagnostics.formatFields(format).merging(deviceFields()) { first, _ in first })
+            } else {
+                AudioDiagnostics.event("audio.mic.joined", ["consumers": "shared"])
             }
             return id
         } catch {
@@ -64,14 +72,46 @@ final class MicrophoneInput {
 
     private func start(format: AVAudioFormat) throws {
         let input = engine.inputNode
-        input.installTap(onBus: 0, bufferSize: 4_096, format: format, block: Self.tap(delivering: consumers))
+        input.installTap(onBus: 0, bufferSize: 4_096, format: format, block: Self.tap(delivering: consumers, meter: meter))
         engine.prepare()
         do {
             try engine.start()
         } catch {
+            AudioDiagnostics.error("audio.mic.engineStartFailed", error, AudioDiagnostics.formatFields(format).merging(deviceFields()) { first, _ in first })
             input.removeTap(onBus: 0)
             throw CaptureError.inputUnavailable
         }
+        observeConfigurationChanges()
+    }
+
+    private func observeConfigurationChanges() {
+        if let configurationObserver { NotificationCenter.default.removeObserver(configurationObserver) }
+        configurationObserver = NotificationCenter.default.addObserver(
+            forName: .AVAudioEngineConfigurationChange,
+            object: engine,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                var fields = AudioDiagnostics.formatFields(self.engine.inputNode.outputFormat(forBus: 0))
+                fields["engineRunning"] = String(self.engine.isRunning)
+                fields.merge(self.deviceFields()) { first, _ in first }
+                AudioDiagnostics.event("audio.mic.configurationChanged", fields)
+            }
+        }
+    }
+
+    private func deviceFields() -> [String: String] {
+        #if os(macOS)
+        var device = AudioDeviceID(0)
+        var size = UInt32(MemoryLayout<AudioDeviceID>.size)
+        guard let unit = engine.inputNode.audioUnit,
+              AudioUnitGetProperty(unit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &device, &size) == noErr
+        else { return ["device": "unknown"] }
+        return ["device": CoreAudioInputDevices.describe(device), "preferredDevice": preferredDevice() ?? "system default"]
+        #else
+        return AudioRouteLog.sessionFields()
+        #endif
     }
 
     private func stop() {
@@ -81,11 +121,18 @@ final class MicrophoneInput {
         }
         engine.stop()
         engine.inputNode.removeTap(onBus: 0)
+        if let configurationObserver { NotificationCenter.default.removeObserver(configurationObserver) }
+        configurationObserver = nil
+        meter.flush(reason: "stopped")
+        AudioDiagnostics.event("audio.mic.stopped", deviceFields())
         deactivateSession()
     }
 
-    private nonisolated static func tap(delivering consumers: ConsumerList) -> AVAudioNodeTapBlock {
-        { buffer, _ in consumers.deliver(buffer) }
+    private nonisolated static func tap(delivering consumers: ConsumerList, meter: AudioTapMeter) -> AVAudioNodeTapBlock {
+        { buffer, when in
+            consumers.deliver(buffer)
+            meter.add(buffer, startSeconds: when.isSampleTimeValid && when.sampleRate > 0 ? Double(when.sampleTime) / when.sampleRate : nil)
+        }
     }
 
     private func prepareInput() {
@@ -112,6 +159,7 @@ final class MicrophoneInput {
                 try session.setActive(true, options: .notifyOthersOnDeactivation)
             }.value
         } catch {
+            AudioDiagnostics.error("audio.mic.sessionActivationFailed", error, AudioRouteLog.sessionFields())
             throw CaptureError.inputUnavailable
         }
         #endif
@@ -119,12 +167,15 @@ final class MicrophoneInput {
 
     #if os(macOS)
     private func selectPreferredDevice() {
-        guard let uid = preferredDevice(),
-              var device = CoreAudioInputDevices.deviceID(forUID: uid),
+        guard let uid = preferredDevice() else { return }
+        guard var device = CoreAudioInputDevices.deviceID(forUID: uid),
               let unit = engine.inputNode.audioUnit
-        else { return }
+        else {
+            AudioDiagnostics.event("audio.mic.preferredDeviceMissing", ["uid": uid])
+            return
+        }
 
-        AudioUnitSetProperty(
+        let status = AudioUnitSetProperty(
             unit,
             kAudioOutputUnitProperty_CurrentDevice,
             kAudioUnitScope_Global,
@@ -132,6 +183,7 @@ final class MicrophoneInput {
             &device,
             UInt32(MemoryLayout<AudioDeviceID>.size)
         )
+        AudioDiagnostics.event("audio.mic.deviceSelected", ["device": CoreAudioInputDevices.describe(device), "status": String(status)])
     }
     #endif
 

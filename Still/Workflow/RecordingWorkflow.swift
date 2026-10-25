@@ -93,10 +93,14 @@ final class RecordingWorkflow {
         mixedMedia = MixedMediaLog()
         pendingFinalization = nil
         stopRequested = false
+        DiagnosticRecording.began(recordingID)
 
         do {
-            try await recorder.start(recordingID: recordingID)
+            try await Perf.trace("record.recorderStart", ["recordingID": recordingID.uuidString]) {
+                try await recorder.start(recordingID: recordingID)
+            }
         } catch {
+            DevLog.error("record.recorderStartFailed", error, ["recordingID": recordingID.uuidString])
             fail(with: error)
             return
         }
@@ -118,6 +122,7 @@ final class RecordingWorkflow {
             // The audio is the part worth keeping. A recognizer that will not
             // start costs the live preview, not the recording.
             draftStartFailure = error.localizedDescription
+            DevLog.error("record.liveDraftStartFailed", error, ["recordingID": recordingID.uuidString])
         }
 
         if stopRequested {
@@ -169,6 +174,7 @@ final class RecordingWorkflow {
             stopRequested = true
             stopCapture()
             await recorder.discard()
+            DiagnosticRecording.ended(recordingID)
             state = .idle
             return
         case .recording:
@@ -211,8 +217,12 @@ final class RecordingWorkflow {
                 mixedMedia: mixed,
                 suggestedProjectID: suggestedProjectID
             )
+            DevLog.event("record.captureSaved", ["recordingID": recordingID.uuidString, "durationS": String(format: "%.1f", elapsed)])
+            DiagnosticRecording.ended(recordingID)
             state = .saved
         } catch {
+            DevLog.error("record.saveFailed", error, ["recordingID": recordingID.uuidString])
+            DiagnosticRecording.ended(recordingID)
             state = .failed(error.localizedDescription)
         }
     }
@@ -227,6 +237,8 @@ final class RecordingWorkflow {
         mixedMedia = MixedMediaLog()
         pendingFinalization = nil
         await recorder.discard()
+        DevLog.event("record.captureCancelled", ["recordingID": recordingID.uuidString])
+        DiagnosticRecording.ended(recordingID)
         state = .idle
     }
 
@@ -241,6 +253,7 @@ final class RecordingWorkflow {
     }
 
     private func fail(with error: Error) {
+        DiagnosticRecording.ended(recordingID)
         finishedAt = now()
         state = .failed(error.localizedDescription)
     }

@@ -24,6 +24,11 @@ final class LiveTranscriber: TranscriptionSession {
         self.input = input
         self.systemAudio = systemAudio
         self.engine = engine
+        LiveObjects.created(Self.self)
+    }
+
+    deinit {
+        LiveObjects.destroyed(Self.self)
     }
 
     func start() async throws {
@@ -37,9 +42,14 @@ final class LiveTranscriber: TranscriptionSession {
         consumer = try await input.attach { format in
             try samples.consumer(from: format, source: .microphone)
         }
-        systemAudioConsumer = try? systemAudio?.attach { format in
-            try samples.consumer(from: format, source: .systemAudio)
+        do {
+            systemAudioConsumer = try systemAudio?.attach { format in
+                try samples.consumer(from: format, source: .systemAudio)
+            }
+        } catch {
+            AudioDiagnostics.error("live.systemAudioAttachFailed", error)
         }
+        AudioDiagnostics.event("live.started", ["systemAudio": String(systemAudioConsumer != nil)])
         self.samples = samples
         isRecording = true
 
@@ -74,7 +84,12 @@ final class LiveTranscriber: TranscriptionSession {
 
         let stretch = samples.openStretch(sealingAfter: Self.sealSeconds * ParakeetEngine.sampleRate)
         do {
-            let words = try await engine.words(in: stretch.samples)
+            let words = try await Perf.trace("live.update", [
+                "audioS": String(format: "%.1f", Double(stretch.samples.count) / Double(ParakeetEngine.sampleRate)),
+                "sealed": String(stretch.isSealed),
+            ].merging(DiagnosticRecording.fields) { first, _ in first }) {
+                try await engine.words(in: stretch.samples)
+            }
             let text = TranscriptPhrases.plainText(of: words)
             if stretch.isSealed {
                 sealed = [sealed, text].filter { !$0.isEmpty }.joined(separator: " ")
@@ -83,6 +98,7 @@ final class LiveTranscriber: TranscriptionSession {
                 transcript = [sealed, text].filter { !$0.isEmpty }.joined(separator: " ")
             }
         } catch {
+            AudioDiagnostics.error("live.updateFailed", error)
             failure = error.localizedDescription
             stop()
         }

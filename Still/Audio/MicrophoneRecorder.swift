@@ -25,7 +25,10 @@ final class MicrophoneRecorder: AudioRecorder {
     }
 
     func start(recordingID: UUID) async throws {
-        guard await hasMicrophonePermission() else { throw CaptureError.microphonePermissionDenied }
+        guard await hasMicrophonePermission() else {
+            AudioDiagnostics.event("audio.mic.permissionDenied")
+            throw CaptureError.microphonePermissionDenied
+        }
 
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         try AudioStorage.assertRoom(at: root, format: format)
@@ -36,7 +39,7 @@ final class MicrophoneRecorder: AudioRecorder {
 
         do {
             consumer = try await input.attach { inputFormat in
-                try PCMSink(writer: writer, from: inputFormat, to: format).consumer
+                try PCMSink(writer: writer, from: inputFormat, to: format, meter: input.meter).consumer
             }
         } catch {
             try? writer.finish()
@@ -81,9 +84,11 @@ final class MicrophoneRecorder: AudioRecorder {
         let session = AVAudioSession.sharedInstance()
         interruptionObservers = [
             center.addObserver(forName: AVAudioSession.interruptionNotification, object: session, queue: .main) { [weak self] _ in
+                AudioDiagnostics.event("audio.mic.endedByInterruption")
                 Task { @MainActor in try? await self?.finish() }
             },
             center.addObserver(forName: AVAudioSession.mediaServicesWereResetNotification, object: session, queue: .main) { [weak self] _ in
+                AudioDiagnostics.event("audio.mic.endedByMediaServicesReset")
                 Task { @MainActor in try? await self?.finish() }
             },
         ]
@@ -100,26 +105,36 @@ private final class PCMSink: @unchecked Sendable {
     private let converter: AVAudioConverter
     private let converterLock = NSLock()
     private let target: AVAudioFormat
+    private let meter: AudioTapMeter
 
-    init(writer: AudioChunkWriter, from source: AVAudioFormat, to format: AudioFormat) throws {
+    init(writer: AudioChunkWriter, from source: AVAudioFormat, to format: AudioFormat, meter: AudioTapMeter) throws {
         guard let target = AVAudioFormat(
             commonFormat: .pcmFormatInt16,
             sampleRate: Double(format.sampleRate),
             channels: AVAudioChannelCount(format.channels),
             interleaved: true
         ), let converter = AVAudioConverter(from: source, to: target) else {
+            AudioDiagnostics.event("audio.mic.noConverter", AudioDiagnostics.formatFields(source))
             throw CaptureError.inputUnavailable
         }
 
         self.writer = writer
         self.converter = converter
         self.target = target
+        self.meter = meter
     }
 
     var consumer: MicrophoneInput.Consumer {
         { [self] buffer in
-            guard let pcm = converterLock.withLock({ convert(buffer) }) else { return }
-            try? writer.append(pcm)
+            guard let pcm = converterLock.withLock({ convert(buffer) }) else {
+                meter.dropped()
+                return
+            }
+            do {
+                try writer.append(pcm)
+            } catch {
+                meter.writeFailed()
+            }
         }
     }
 

@@ -16,6 +16,8 @@ final class DeveloperDiagnostics {
     @ObservationIgnored private let streams: [DevLogStream]
     @ObservationIgnored private var resolver: () async -> BuildChannel = { await BuildChannelResolver.resolve() }
     @ObservationIgnored private var startsMonitors = true
+    @ObservationIgnored private var collectingHooks: [@MainActor () -> Void] = []
+    @ObservationIgnored private var isCollecting = false
 
     private static let openSessionKey = "still.developer.sessionOpen"
 
@@ -99,11 +101,24 @@ final class DeveloperDiagnostics {
         watchdog.start()
         sampler.start()
         memoryPressure.start()
+        isCollecting = true
+        collectingHooks.forEach { $0() }
+        collectingHooks.removeAll()
         Interactions.observeAllInput()
         if let metricKitDirectory {
             let collector = MetricKitCollector(directory: metricKitDirectory)
             collector.start()
             metrics = collector
+        }
+    }
+
+    /// Runs `body` once developer diagnostics are on, for monitors that live
+    /// outside this module, such as audio route logging.
+    func whenCollecting(_ body: @escaping @MainActor () -> Void) {
+        if isCollecting {
+            body()
+        } else {
+            collectingHooks.append(body)
         }
     }
 

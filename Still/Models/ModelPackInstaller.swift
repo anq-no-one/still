@@ -58,6 +58,9 @@ final class ModelPackInstaller {
         guard state != .installed else { return }
         approval.markApproved(pack)
 
+        let install = Perf.begin("model.install")
+        let pack = pack
+        DevLog.event("model.install.started", ["pack": "\(pack.id)@\(pack.version)", "files": String(pack.files.count), "bytes": String(pack.totalBytes)])
         do {
             try checkDevice()
             try createRoot()
@@ -79,13 +82,16 @@ final class ModelPackInstaller {
                     continue
                 }
 
-                try await downloader.download(
-                    from: pack.remoteURL(of: file),
-                    resumingInto: destination
-                )
+                try await Perf.trace("model.download", ["pack": pack.id, "file": file.path, "bytes": String(file.bytes)]) {
+                    try await downloader.download(
+                        from: pack.remoteURL(of: file),
+                        resumingInto: destination
+                    )
+                }
 
                 state = .verifying
-                guard try FileDigest.sha256(of: destination) == file.sha256 else {
+                guard try Perf.measure("model.verify", ["pack": pack.id, "file": file.path], { try FileDigest.sha256(of: destination) }) == file.sha256 else {
+                    DevLog.event("model.verifyFailed", ["pack": pack.id, "file": file.path])
                     try? FileManager.default.removeItem(at: destination)
                     throw ModelPackError.corruptDownload(path: file.path)
                 }
@@ -95,7 +101,10 @@ final class ModelPackInstaller {
             }
 
             state = .installed
+            Perf.end(install, ["pack": pack.id, "result": "installed"])
         } catch {
+            Perf.end(install, ["pack": pack.id, "result": "failed", "completedBytes": String(completedBytes)])
+            DevLog.error("model.install.failed", error, ["pack": "\(pack.id)@\(pack.version)", "completedBytes": String(completedBytes)])
             state = .failed(error.localizedDescription)
         }
     }

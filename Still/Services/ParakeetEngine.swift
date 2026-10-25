@@ -37,16 +37,23 @@ actor ParakeetEngine {
         if let manager { return manager }
 
         guard ModelPackInstaller.isInstalled(pack: pack, root: root) else {
+            DevLog.event("parakeet.notInstalled", ["pack": pack.id])
             throw TranscriptionError.modelNotInstalled
         }
 
         do {
-            let models = try AsrModels.loadLocal(from: pack.installedDirectory(in: root))
-            let manager = AsrManager()
-            try await manager.loadModels(models)
+            let footprintBefore = ProcessProbe.memory().footprintMB
+            let manager = try await Perf.trace("parakeet.load", ["pack": "\(pack.id)@\(pack.version)"]) {
+                let models = try AsrModels.loadLocal(from: pack.installedDirectory(in: root))
+                let manager = AsrManager()
+                try await manager.loadModels(models)
+                return manager
+            }
+            DevLog.event("parakeet.loaded", ["footprintDeltaMB": String(format: "%.0f", ProcessProbe.memory().footprintMB - footprintBefore)])
             self.manager = manager
             return manager
         } catch {
+            DevLog.error("parakeet.loadFailed", error, ["pack": pack.id])
             throw TranscriptionError.recognitionFailed
         }
     }

@@ -91,6 +91,11 @@ final class MacAudioRecorder: AudioRecorder {
         self.scope = scope
         self.tiles = tiles
         self.now = now
+        LiveObjects.created(Self.self)
+    }
+
+    deinit {
+        LiveObjects.destroyed(Self.self)
     }
 
     func start(recordingID: UUID) async throws {
@@ -100,17 +105,22 @@ final class MacAudioRecorder: AudioRecorder {
         let startedAt = now()
         try await microphone.start(recordingID: recordingID)
 
-        guard capturesSystemAudio() else { return }
+        guard capturesSystemAudio() else {
+            AudioDiagnostics.event("audio.system.skipped", ["reason": "notEntitled"])
+            return
+        }
 
+        let scope = scope()
         do {
             try await systemAudio.start(
                 recordingID: recordingID,
                 startOffset: now().timeIntervalSince(startedAt),
-                scope: scope()
+                scope: scope
             )
             isCapturingSystemAudio = true
         } catch {
             systemAudioNote = CaptureError.systemAudioUnavailable.localizedDescription
+            AudioDiagnostics.error("audio.system.startFailed", error, ["scope": String(describing: scope)])
         }
 
         if isCapturingSystemAudio, let tiles, tiles.settings.isEnabled() {
@@ -121,6 +131,7 @@ final class MacAudioRecorder: AudioRecorder {
             )
             await recorder.start(recordingID: recordingID)
             tileRecorder = recorder.isRunning ? recorder : nil
+            AudioDiagnostics.event("audio.tiles.started", ["running": String(recorder.isRunning)])
         }
     }
 

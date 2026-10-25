@@ -136,10 +136,14 @@ final class AudioChunkSync {
     @discardableResult
     func sync(recordingID: UUID) async -> Bool {
         guard let sealing = sealing(recordingID) else {
+            DevLog.event("sync.audio.recording", ["recordingID": recordingID.uuidString, "result": "noSealingKey"])
             state = .complete
             return false
         }
 
+        var fields = ["recordingID": recordingID.uuidString]
+        let span = Perf.begin("sync.audio.recording")
+        defer { Perf.end(span, fields) }
         do {
             let remote = try await transport.inventory(forRecording: recordingID)
             let toUpload = try localPayloads(for: recordingID).compactMap { local -> (AudioChunkPayload, String)? in
@@ -153,7 +157,13 @@ final class AudioChunkSync {
                 : []
 
             let total = toUpload.count + toDownload.count
+            fields["remote"] = String(remote.count)
+            fields["local"] = String(local.count)
+            fields["toUpload"] = String(toUpload.count)
+            fields["toDownload"] = String(toDownload.count)
+            fields["keepsAudio"] = String(keepsAudio(recordingID))
             guard total > 0 else {
+                fields["result"] = local.isEmpty ? "nothingLocal" : "settled"
                 state = .complete
                 return !local.isEmpty
             }
@@ -174,14 +184,20 @@ final class AudioChunkSync {
             }
             try await transport.commit(uploaded, forRecording: recordingID)
 
+            var unopenable = 0
             for id in toDownload.sorted(by: Self.isOrdered) {
                 guard hasRoomForAnotherChunk() else {
+                    fields["result"] = "storageBlocked"
                     state = .storageBlocked
                     return false
                 }
 
                 let payload = try await transport.download(id)
-                guard let localSealed = sealing.incoming(payload.sealed, digest: remote[id]) else { continue }
+                guard let localSealed = sealing.incoming(payload.sealed, digest: remote[id]) else {
+                    unopenable += 1
+                    fields["unopenable"] = String(unopenable)
+                    continue
+                }
 
                 try AudioChunkStore.writeSealed(
                     localSealed,
@@ -194,9 +210,13 @@ final class AudioChunkSync {
                 state = .transferring(completed: done, total: total)
             }
 
+            fields["result"] = "transferred"
+            fields["done"] = String(done)
             state = .complete
             return false
         } catch {
+            fields["result"] = "failed"
+            fields["error"] = String(describing: error)
             state = .failed(error.localizedDescription)
             return false
         }
@@ -283,6 +303,7 @@ final class LibraryAudioSync {
         let pending = library.storedRecordings
             .filter { !$0.isProcessing && !$0.isDeleted && !ledger.isSettled($0.id) }
             .sorted { $0.createdAt > $1.createdAt }
+        DevLog.event("sync.audio.run", ["pending": String(pending.count), "recordings": String(library.storedRecordings.count)])
         for recording in pending {
             guard library.state == .unlocked else { return }
             if await chunks.sync(recordingID: recording.id) {

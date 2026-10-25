@@ -42,6 +42,7 @@ struct DebugBundleBuilder {
     let journal: DiagnosticJournal
     let developer: DeveloperDiagnostics
     let context: @MainActor () -> [String: String]
+    var state: DebugStateRegistry?
     var log: DevLogStream = DevLog.main
     var aiLog: DevLogStream = DevLog.ai
     var parent = URL.temporaryDirectory.appending(path: "DebugBundles", directoryHint: .isDirectory)
@@ -82,6 +83,7 @@ struct DebugBundleBuilder {
         let sessionStats = Perf.snapshot()
         let metricKit = developer.metricKitDirectory
         let crashes = developer.crashesDirectory
+        let appState = state?.snapshot() ?? [:]
 
         let report: @Sendable (String) -> Void = { step in Task { @MainActor in progress(step) } }
         let logs = (main: log, ai: aiLog)
@@ -95,6 +97,7 @@ struct DebugBundleBuilder {
                 sessionStats: sessionStats,
                 metricKit: metricKit,
                 crashes: crashes,
+                appState: appState,
                 progress: report
             )
         }.value
@@ -159,6 +162,7 @@ struct DebugBundleBuilder {
         sessionStats: [String: PerfStat],
         metricKit: URL?,
         crashes: URL?,
+        appState: [String: [String: String]],
         progress: @Sendable (String) -> Void
     ) throws {
         let encoder = DevLogStream.plainEncoder
@@ -166,6 +170,7 @@ struct DebugBundleBuilder {
         try encoder.encode(device).write(to: folder.appending(path: "device.json"))
         try encoder.encode(librarySummary).write(to: folder.appending(path: "library-summary.json"))
         try preferences().write(to: folder.appending(path: "preferences.json"))
+        try encoder.encode(appState).write(to: folder.appending(path: "state.json"))
 
         progress("Writing developer log")
         _ = try logs.main.export(to: folder.appending(path: "devlog.jsonl"))
@@ -361,6 +366,8 @@ struct DebugBundleBuilder {
         device.json           build, channel, OS, hardware, model availability
         library-summary.json  every recording's shape (no content)
         preferences.json      app preferences (keys and secrets live in the Keychain, not here)
+        state.json            what each part of the app was doing when the bundle was made: recording, sync,
+                              models, call detection, AI tools, permissions
         journal.txt           90-day diagnostic journal
         devlog.jsonl          developer log: events, errors, spans (ms, thread, cpuMS), interactions, hangs, resource samples
         ai-trace.jsonl        every on-device model call: prompt, raw output, timing, and validation outcome

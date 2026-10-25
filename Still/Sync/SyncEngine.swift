@@ -119,19 +119,36 @@ final class SyncEngine {
 
         let correlationID = UUID()
         library.journal?.record(.syncStarted, correlationID: correlationID)
+        let span = Perf.begin("sync.run")
+        var fields = ["device": identity.id.uuidString, "heldScopes": String(library.heldScopeIDs.count), "step": "shareKeys"]
         do {
             try await shareKeys()
+            fields["step"] = "pull"
             var server = ServerState(try await transport.pull(payloadsFor: library.heldScopeIDs), library: library)
+            fields["pulled"] = Self.describe(server.changes)
+            fields["devices"] = String(server.devices.count)
+            fields["step"] = "grants"
             if try receiveGrants(from: server) {
+                fields["step"] = "pullAfterGrant"
                 server = ServerState(try await transport.pull(payloadsFor: library.heldScopeIDs), library: library)
+                fields["pulledAfterGrant"] = Self.describe(server.changes)
             }
+            fields["step"] = "apply"
             try apply(server)
+            fields["step"] = "outgoing"
             let outgoing = try outgoingChanges(against: server)
+            fields["pushed"] = Self.describe(outgoing)
             if !outgoing.isEmpty {
+                fields["step"] = "push"
                 try await transport.push(outgoing)
             }
+            fields["step"] = "release"
             try releaseLeavingScopes(server: server, pushed: outgoing)
             refreshJoining(server)
+            fields["joinRequests"] = String(joinRequests.count)
+            fields["invitation"] = String(invitation != nil)
+            fields["step"] = "done"
+            Perf.end(span, fields)
 
             let stamp = now()
             settings.setLastSyncedAt(stamp)
@@ -140,9 +157,17 @@ final class SyncEngine {
             library.journal?.record(.syncFinished, correlationID: correlationID)
             await afterSync()
         } catch {
+            fields["error"] = String(describing: error)
+            Perf.end(span, fields)
+            DevLog.error("sync.failed", error, fields)
             lastFailure = error.localizedDescription
             library.journal?.fail(.syncFailed, error: error, correlationID: correlationID)
         }
+    }
+
+    private static func describe(_ changes: [SyncChange]) -> String {
+        let counts = Dictionary(grouping: changes, by: { String(describing: $0.kind) }).mapValues(\.count)
+        return changes.isEmpty ? "0" : counts.sorted { $0.key < $1.key }.map { "\($0.key)=\($0.value)" }.joined(separator: ",")
     }
 
     func approve(_ request: JoinRequest) async {
@@ -160,7 +185,9 @@ final class SyncEngine {
             ])
             joinRequests.removeAll { $0.id == request.id }
             lastFailure = nil
+            DevLog.event("sync.joinApproved", ["device": request.device.id.uuidString])
         } catch {
+            DevLog.error("sync.joinApproveFailed", error, ["device": request.device.id.uuidString])
             lastFailure = error.localizedDescription
         }
     }
@@ -172,7 +199,9 @@ final class SyncEngine {
             try await library.join(invitation.account)
             self.invitation = nil
             lastFailure = nil
+            DevLog.event("sync.invitationAccepted")
         } catch {
+            DevLog.error("sync.invitationAcceptFailed", error)
             lastFailure = error.localizedDescription
             return
         }
@@ -189,6 +218,7 @@ final class SyncEngine {
             DevLog.error("sync.sharedKeysUnreadable", error)
             return
         }
+        DevLog.event("sync.sharedKeys", ["stored": String(stored != nil)])
         if let stored {
             try await library.adopt(stored)
         }
@@ -210,7 +240,10 @@ final class SyncEngine {
         for grant in server.grants(to: identity.id) {
             guard let payload = grant.payload,
                   let opened = try? KeyGrant.open(payload, subject: grant.scopeID, as: identity)
-            else { continue }
+            else {
+                DevLog.event("sync.grantUnopenable", ["grant": grant.id.uuidString, "scope": grant.scopeID?.uuidString ?? "account"])
+                continue
+            }
 
             if let scope = grant.scopeID {
                 guard server.trustedKeys.contains(opened.sender),

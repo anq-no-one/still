@@ -47,6 +47,7 @@ final class Diagnostics {
     private(set) var isEnabled: Bool
     let journal: DiagnosticJournal
     let developer: DeveloperDiagnostics
+    let state = DebugStateRegistry()
     private let bundleContext: @MainActor () -> [String: String]
 
     init(
@@ -73,7 +74,7 @@ final class Diagnostics {
 
     func debugBundleBuilder(library: Library) -> DebugBundleBuilder? {
         guard developer.allowsDebugBundle else { return nil }
-        return DebugBundleBuilder(library: library, journal: journal, developer: developer, context: bundleContext)
+        return DebugBundleBuilder(library: library, journal: journal, developer: developer, context: bundleContext, state: state)
     }
 
     func enable() {

@@ -58,6 +58,17 @@ final class BrowserMeetingBridge {
     }
 
     func handle(_ event: BrowserMeetingEvent) async {
+        DevLog.event("browser.meeting", [
+            "phase": String(describing: event.phase),
+            "host": event.host,
+            "browser": event.browserBundleID ?? "-",
+            "meetingID": event.meetingID,
+            "allowed": String(isAllowed(event.host)),
+            "activeMeeting": activeMeetingID.map { $0 == event.meetingID ? "this" : "other" } ?? "none",
+            "recording": String(coordinator.isRecording),
+            "speaker": event.speaker ?? "",
+            "participants": String(event.participants?.count ?? 0),
+        ])
         guard isAllowed(event.host) else { return }
 
         switch event.phase {
@@ -92,6 +103,7 @@ final class BrowserMeetingBridge {
     }
 
     func browserQuit(_ bundleID: String) async {
+        DevLog.event("browser.quit", ["browser": bundleID, "activeMeeting": String(activeMeetingID != nil)])
         guard activeMeetingID != nil, activeBrowser == nil || activeBrowser == bundleID else { return }
         await endActiveMeeting()
     }

@@ -37,7 +37,9 @@ final class NearbySync {
     private var localConfirmed = false
     private var peerConfirmed = false
 
-    private(set) var state: State = .off
+    private(set) var state: State = .off {
+        didSet { DevLog.event("sync.nearby.state", ["state": String(describing: state)]) }
+    }
 
     init(session: NearbySession) {
         self.session = session

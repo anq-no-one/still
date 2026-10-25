@@ -252,11 +252,14 @@ struct DebugBundleTests {
         ai.append(DevLog.record(.ai, "mlx.generate", fields: ["recordingID": recording.id.uuidString, "output": "{\"title\":\"Budget\"}"]))
         ai.append(DevLog.record(.ai, "mlx.generate", fields: ["recordingID": other.id.uuidString, "output": "unrelated answer"]))
 
+        let state = DebugStateRegistry()
+        state.register("sync") { ["lastFailure": "zoneNotFound"] }
         let builder = DebugBundleBuilder(
             library: library,
             journal: DiagnosticJournal(fileURL: scratch.directory.appending(path: "journal.jsonl"), key: SymmetricKey(size: .bits256)),
             developer: DeveloperDiagnostics(),
             context: { ["meetingMemoryPack": "qwen"] },
+            state: state,
             log: log,
             aiLog: ai,
             parent: scratch.directory.appending(path: "bundles")
@@ -291,6 +294,8 @@ struct DebugBundleTests {
         #expect(threads.contains("Thread main"))
         #expect(images.contains { $0.name.contains("StillTests") })
         #expect(memory.contains("footprintMB"))
+        let appState = try String(contentsOf: folder.appending(path: "state.json"), encoding: .utf8)
+        #expect(appState.contains("zoneNotFound"))
     }
 
     @Test

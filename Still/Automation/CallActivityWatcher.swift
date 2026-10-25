@@ -52,7 +52,14 @@ final class CallActivityWatcher: CallAppWatcher {
         onActivate: @MainActor (String) -> Void,
         onDeactivate: @MainActor (String) -> Void
     ) {
-        for event in detector.observe(activity, at: now()) {
+        let events = detector.observe(activity, at: now())
+        if !events.isEmpty {
+            DevLog.event("call.detected", [
+                "events": events.map { String(describing: $0) }.joined(separator: ","),
+                "audioProcesses": activity.map { "\($0.bundleID)[mic=\($0.usesMicrophone) out=\($0.playsAudio)]" }.joined(separator: " "),
+            ])
+        }
+        for event in events {
             switch event {
             case .started(let bundleID): onActivate(bundleID)
             case .ended(let bundleID): onDeactivate(bundleID)
