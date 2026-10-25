@@ -184,6 +184,7 @@ actor LocalLanguageModel {
             "model": directory.lastPathComponent,
             "footprintDeltaMB": String(format: "%.0f", (Double(ResourceSampler.footprintBytes()) - Double(footprintBefore)) / 1_048_576),
         ])
+        MLXMemoryProbe.register()
         container = loaded
         return loaded
     }

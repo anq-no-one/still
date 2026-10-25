@@ -81,6 +81,7 @@ struct DebugBundleBuilder {
         }
         let sessionStats = Perf.snapshot()
         let metricKit = developer.metricKitDirectory
+        let crashes = developer.crashesDirectory
 
         let report: @Sendable (String) -> Void = { step in Task { @MainActor in progress(step) } }
         let logs = (main: log, ai: aiLog)
@@ -93,6 +94,7 @@ struct DebugBundleBuilder {
                 recordings: chosen,
                 sessionStats: sessionStats,
                 metricKit: metricKit,
+                crashes: crashes,
                 progress: report
             )
         }.value
@@ -156,6 +158,7 @@ struct DebugBundleBuilder {
         recordings: [DebugBundleRecording],
         sessionStats: [String: PerfStat],
         metricKit: URL?,
+        crashes: URL?,
         progress: @Sendable (String) -> Void
     ) throws {
         let encoder = DevLogStream.plainEncoder
@@ -179,6 +182,14 @@ struct DebugBundleBuilder {
         if let metricKit, FileManager.default.fileExists(atPath: metricKit.path(percentEncoded: false)) {
             try FileManager.default.copyItem(at: metricKit, to: folder.appending(path: "metrickit", directoryHint: .isDirectory))
         }
+        if let crashes, FileManager.default.fileExists(atPath: crashes.path(percentEncoded: false)) {
+            try FileManager.default.copyItem(at: crashes, to: folder.appending(path: "crashes", directoryHint: .isDirectory))
+        }
+
+        progress("Reading threads and memory")
+        try StackSampler.allThreadsReport().write(to: folder.appending(path: "threads.txt"), atomically: true, encoding: .utf8)
+        try encoder.encode(BinaryImages.snapshot()).write(to: folder.appending(path: "images.json"))
+        try encoder.encode(memorySnapshot()).write(to: folder.appending(path: "memory.json"))
 
         let recordingsFolder = folder.appending(path: "recordings", directoryHint: .isDirectory)
         for (index, entry) in recordings.enumerated() {
@@ -300,6 +311,22 @@ struct DebugBundleBuilder {
         return lines.joined(separator: "\n") + "\n"
     }
 
+    private struct MemorySnapshot: Encodable {
+        let process: MemoryBreakdown
+        let probes: [String: String]
+        let liveObjects: [String: Int]
+        let threads: [ThreadUsage]
+    }
+
+    nonisolated private static func memorySnapshot() -> MemorySnapshot {
+        MemorySnapshot(
+            process: ProcessProbe.memory(),
+            probes: ResourceProbes.read(),
+            liveObjects: LiveObjects.snapshot(),
+            threads: ProcessProbe.threads()
+        )
+    }
+
     nonisolated private static func preferences() throws -> Data {
         let domain = Bundle.main.bundleIdentifier.flatMap { UserDefaults.standard.persistentDomain(forName: $0) } ?? [:]
         let described = domain.mapValues { value -> String in
@@ -340,6 +367,10 @@ struct DebugBundleBuilder {
         performance.txt       span percentiles, interaction waits, worst main-thread hangs
         oslog-this-launch.txt the system log for this launch, including frameworks
         metrickit/            MetricKit metric and diagnostic payloads (crashes, hangs with call stacks)
+        crashes/              what earlier launches left when they crashed: signal or exception, stack, images
+        threads.txt           every thread's name, CPU and call stack when the bundle was made
+        images.json           loaded binaries with UUID and load address, for atos with the build's dSYM
+        memory.json           memory breakdown, MLX memory, live objects per type, per-thread CPU
         recordings/           \(recordingCount) recording(s): original tracks as WAV, recording.json,
                               transcript.txt with timings and speakers, note.md, per-recording ai-trace and devlog
 

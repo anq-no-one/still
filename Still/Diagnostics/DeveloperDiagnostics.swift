@@ -9,6 +9,7 @@ final class DeveloperDiagnostics {
     @ObservationIgnored let directory: URL?
     @ObservationIgnored private let watchdog = MainThreadWatchdog()
     @ObservationIgnored private let sampler = ResourceSampler()
+    @ObservationIgnored private let memoryPressure = MemoryPressureMonitor()
     @ObservationIgnored private var metrics: MetricKitCollector?
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var reportedFirstFrame = false
@@ -27,6 +28,7 @@ final class DeveloperDiagnostics {
         self.directory = directory
         self.defaults = defaults
         self.streams = [streams.main, streams.ai]
+        ProcessProbe.registerMainThread()
         if let directory, let key {
             streams.main.configure(directory: directory, name: "devlog", key: key)
             streams.ai.configure(directory: directory, name: "ai-trace", key: key)
@@ -68,6 +70,7 @@ final class DeveloperDiagnostics {
         }
         guard collects else {
             if let metricKitDirectory { try? FileManager.default.removeItem(at: metricKitDirectory) }
+            if let directory { Self.removeCrashFiles(in: directory) }
             return
         }
 
@@ -87,13 +90,30 @@ final class DeveloperDiagnostics {
         DevLog.event("session.start", fields)
 
         guard startsMonitors else { return }
+        if let directory {
+            for report in CrashMarker.collectPrevious(in: directory) {
+                DevLog.event("crash.previous", report.fields)
+            }
+            CrashMarker.install(in: directory)
+        }
         watchdog.start()
         sampler.start()
+        memoryPressure.start()
         Interactions.observeAllInput()
         if let metricKitDirectory {
             let collector = MetricKitCollector(directory: metricKitDirectory)
             collector.start()
             metrics = collector
+        }
+    }
+
+    var crashesDirectory: URL? {
+        directory.map(CrashMarker.crashesDirectory(in:))
+    }
+
+    private static func removeCrashFiles(in directory: URL) {
+        for url in [CrashMarker.markerURL(in: directory), CrashMarker.imagesURL(in: directory), CrashMarker.crashesDirectory(in: directory)] {
+            try? FileManager.default.removeItem(at: url)
         }
     }
 

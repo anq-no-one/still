@@ -285,6 +285,12 @@ struct DebugBundleTests {
         #expect(device.contains("qwen"))
         #expect(performance.contains("finalize.total"))
         #expect(FileManager.default.fileExists(atPath: entry.appending(path: "recording.json").path(percentEncoded: false)))
+        let threads = try String(contentsOf: folder.appending(path: "threads.txt"), encoding: .utf8)
+        let images = try JSONDecoder().decode([BinaryImage].self, from: Data(contentsOf: folder.appending(path: "images.json")))
+        let memory = try String(contentsOf: folder.appending(path: "memory.json"), encoding: .utf8)
+        #expect(threads.contains("Thread main"))
+        #expect(images.contains { $0.name.contains("StillTests") })
+        #expect(memory.contains("footprintMB"))
     }
 
     @Test
