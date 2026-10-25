@@ -9,12 +9,17 @@ final class GlobalRecordingShortcut: HotKeyRegistrar {
     private var hotKey: EventHotKeyRef?
     private var handler: EventHandlerRef?
     private var action: @MainActor () -> Void = {}
+    private nonisolated let id: UInt32
+
+    init(id: UInt32 = 1) {
+        self.id = id
+    }
 
     func register(_ combo: KeyCombo, action: @escaping @MainActor () -> Void) -> Bool {
         unregister()
         self.action = action
         installHandler()
-        let id = EventHotKeyID(signature: OSType(0x53_54_4C_4C), id: 1)
+        let id = EventHotKeyID(signature: OSType(0x53_54_4C_4C), id: id)
         let status = RegisterEventHotKey(combo.keyCode, combo.modifiers, id, GetApplicationEventTarget(), 0, &hotKey)
         guard status == noErr else {
             unregister()
@@ -36,9 +41,20 @@ final class GlobalRecordingShortcut: HotKeyRegistrar {
 
         InstallEventHandler(
             GetApplicationEventTarget(),
-            { _, _, context in
+            { _, event, context in
                 guard let context else { return noErr }
+                var pressed = EventHotKeyID()
+                GetEventParameter(
+                    event,
+                    EventParamName(kEventParamDirectObject),
+                    EventParamType(typeEventHotKeyID),
+                    nil,
+                    MemoryLayout<EventHotKeyID>.size,
+                    nil,
+                    &pressed
+                )
                 let shortcut = Unmanaged<GlobalRecordingShortcut>.fromOpaque(context).takeUnretainedValue()
+                guard pressed.id == shortcut.id else { return OSStatus(eventNotHandledErr) }
                 Task { @MainActor in shortcut.action() }
                 return noErr
             },

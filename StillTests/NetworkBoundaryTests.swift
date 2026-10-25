@@ -9,6 +9,7 @@ struct NetworkBoundaryTests {
     private static let approvedFiles: [String: String] = [
         "ModelFileDownloader.swift": "Model pack download, only after the user approves it",
         "CloudKitSyncTransport.swift": "iCloud sync, only after the user turns it on",
+        "CloudKitBugReportTransport.swift": "TestFlight bug reports to the user's own Mac through their private iCloud, only when they press Submit",
         "NetworkNearbySession.swift": "Direct device sync, only after pairing",
         "StoreKitEntitlementSource.swift": "App Store purchase and restore",
         "BuildChannel.swift": "AppTransaction tells TestFlight from the App Store; StoreKit may refresh it from Apple",

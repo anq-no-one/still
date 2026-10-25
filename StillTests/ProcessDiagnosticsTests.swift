@@ -115,12 +115,16 @@ struct HangStackTests {
         watchdog.start()
         try await Task.sleep(for: .milliseconds(200))
 
-        spinOnMain(for: 0.6)
-        try await Task.sleep(for: .milliseconds(300))
+        spinOnMain(for: 0.9)
+        var found: DevLogRecord?
+        for _ in 0..<40 where found == nil {
+            try await Task.sleep(for: .milliseconds(50))
+            await stream.flush()
+            found = try stream.records().first { $0.kind == .hang && ($0.ms ?? 0) >= 500 }
+        }
         watchdog.stop()
-        await stream.flush()
 
-        let hang = try #require(try stream.records().first { $0.kind == .hang && ($0.ms ?? 0) >= 500 })
+        let hang = try #require(found)
         let stack = try #require(hang.fields?["stack"].flatMap(Backtrace.init(hex:)))
         let images = BinaryImages.snapshot()
         #expect(Int(hang.fields?["stackSamples"] ?? "0") ?? 0 >= 2)

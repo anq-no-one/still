@@ -1,13 +1,18 @@
 import CryptoKit
 import Foundation
 import Observation
+#if os(macOS)
+import AppKit
+#else
+import UIKit
+#endif
 
 @MainActor
 @Observable
 final class DeveloperDiagnostics {
     private(set) var channel: BuildChannel = .unknown
     @ObservationIgnored let directory: URL?
-    @ObservationIgnored private let watchdog = MainThreadWatchdog()
+    @ObservationIgnored private let watchdog: MainThreadWatchdog
     @ObservationIgnored private let sampler = ResourceSampler()
     @ObservationIgnored private let memoryPressure = MemoryPressureMonitor()
     @ObservationIgnored private var metrics: MetricKitCollector?
@@ -18,18 +23,30 @@ final class DeveloperDiagnostics {
     @ObservationIgnored private var startsMonitors = true
     @ObservationIgnored private var collectingHooks: [@MainActor () -> Void] = []
     @ObservationIgnored private var isCollecting = false
+    @ObservationIgnored let savedBundles: DebugBundleStore?
 
     private static let openSessionKey = "still.developer.sessionOpen"
+    #if os(macOS)
+    private static let willTerminate = NSApplication.willTerminateNotification
+    #else
+    private static let willTerminate = UIApplication.willTerminateNotification
+    #endif
 
     init(
         directory: URL? = nil,
         key: SymmetricKey? = nil,
         defaults: UserDefaults = .standard,
-        streams: (main: DevLogStream, ai: DevLogStream) = (DevLog.main, DevLog.ai)
+        streams: (main: DevLogStream, ai: DevLogStream) = (DevLog.main, DevLog.ai),
+        savedBundles: DebugBundleStore? = nil
     ) {
+        self.savedBundles = savedBundles
         self.directory = directory
         self.defaults = defaults
         self.streams = [streams.main, streams.ai]
+        let markers = directory.map { ProblemMarkers(directory: $0.appending(path: "Markers", directoryHint: .isDirectory)) }
+        watchdog = MainThreadWatchdog(stream: streams.main) {
+            markers?.capture(ProblemMarker(reason: .longHang, note: "main thread blocked for 2 s", screen: "-"))
+        }
         ProcessProbe.registerMainThread()
         if let directory, let key {
             streams.main.configure(directory: directory, name: "devlog", key: key)
@@ -73,11 +90,17 @@ final class DeveloperDiagnostics {
         guard collects else {
             if let metricKitDirectory { try? FileManager.default.removeItem(at: metricKitDirectory) }
             if let directory { Self.removeCrashFiles(in: directory) }
+            if let markersDirectory { try? FileManager.default.removeItem(at: markersDirectory) }
+            savedBundles?.removeAll()
             return
         }
 
         let previousSessionOpen = defaults.bool(forKey: Self.openSessionKey)
         defaults.set(true, forKey: Self.openSessionKey)
+        let defaults = defaults
+        NotificationCenter.default.addObserver(forName: Self.willTerminate, object: nil, queue: nil) { _ in
+            defaults.set(false, forKey: Self.openSessionKey)
+        }
         let environment = Diagnostics.systemEnvironment()
         var fields = [
             "channel": channel.rawValue,
@@ -93,8 +116,14 @@ final class DeveloperDiagnostics {
 
         guard startsMonitors else { return }
         if let directory {
-            for report in CrashMarker.collectPrevious(in: directory) {
+            let crashes = CrashMarker.collectPrevious(in: directory)
+            for report in crashes {
                 DevLog.event("crash.previous", report.fields)
+            }
+            if let crash = crashes.first {
+                previousLaunchProblem = "Still crashed last time (\(crash.title))."
+            } else if previousSessionOpen {
+                previousLaunchProblem = "Still quit unexpectedly last time."
             }
             CrashMarker.install(in: directory)
         }
@@ -120,6 +149,22 @@ final class DeveloperDiagnostics {
         } else {
             collectingHooks.append(body)
         }
+    }
+
+    var markersDirectory: URL? {
+        directory?.appending(path: "Markers", directoryHint: .isDirectory)
+    }
+
+    var markers: ProblemMarkers? {
+        markersDirectory.map { ProblemMarkers(directory: $0) }
+    }
+
+    /// Set when the last launch crashed or ended without going to the
+    /// background first, so the app can offer to report it.
+    private(set) var previousLaunchProblem: String?
+
+    func dismissPreviousLaunchProblem() {
+        previousLaunchProblem = nil
     }
 
     var crashesDirectory: URL? {

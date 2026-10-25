@@ -234,14 +234,10 @@ final class MainThreadWatchdog: Sendable {
 
     static func stackFields(_ samples: [Backtrace]) -> [String: String] {
         guard let heaviest = StackSampler.heaviest(samples) else { return [:] }
-        let images = BinaryImages.snapshot()
         return [
             "stack": heaviest.hex,
             "stackSamples": String(samples.count),
             "stackProfile": StackSampler.profile(samples, limit: 12).map { "\($0.count)x0x\(String($0.address, radix: 16))" }.joined(separator: " "),
-            "stackSymbols": heaviest.symbolicated(with: images).prefix(16)
-                .map { $0.trimmingCharacters(in: .whitespaces) }
-                .joined(separator: " | "),
         ]
     }
 }

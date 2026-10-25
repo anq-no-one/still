@@ -53,4 +53,17 @@ struct MacEntitlementsTests {
 
         #expect(plist["com.apple.security.files.user-selected.read-write"] as? Bool == true)
     }
+
+    @Test
+    func theMacAppCanSaveDebugBundlesToDownloads() throws {
+        let file = URL(filePath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appending(path: "Still/Still-macOS.entitlements")
+        let plist = try #require(
+            PropertyListSerialization.propertyList(from: Data(contentsOf: file), format: nil) as? [String: Any]
+        )
+
+        #expect(plist["com.apple.security.files.downloads.read-write"] as? Bool == true)
+    }
 }

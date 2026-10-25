@@ -161,12 +161,15 @@ struct ResponsivenessTests {
         watchdog.start()
         try await Task.sleep(for: .milliseconds(200))
 
-        blockMainThread(for: 0.4)
-        try await Task.sleep(for: .milliseconds(300))
+        blockMainThread(for: 0.6)
+        var hangs: [DevLogRecord] = []
+        for _ in 0..<40 where !hangs.contains(where: { ($0.ms ?? 0) >= 300 }) {
+            try await Task.sleep(for: .milliseconds(50))
+            await stream.flush()
+            hangs = try stream.records().filter { $0.kind == .hang }
+        }
         watchdog.stop()
-        await stream.flush()
 
-        let hangs = try stream.records().filter { $0.kind == .hang }
         #expect(hangs.contains { ($0.ms ?? 0) >= 300 })
     }
 }

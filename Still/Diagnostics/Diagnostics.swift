@@ -48,6 +48,8 @@ final class Diagnostics {
     let journal: DiagnosticJournal
     let developer: DeveloperDiagnostics
     let state = DebugStateRegistry()
+    var bugReports: BugReportCourier?
+    var problemReport: ProblemReportRequest?
     private let bundleContext: @MainActor () -> [String: String]
 
     init(
@@ -75,6 +77,20 @@ final class Diagnostics {
     func debugBundleBuilder(library: Library) -> DebugBundleBuilder? {
         guard developer.allowsDebugBundle else { return nil }
         return DebugBundleBuilder(library: library, journal: journal, developer: developer, context: bundleContext, state: state)
+    }
+
+    /// Opens the report sheet from anywhere: a shortcut, the menu bar, a
+    /// shake. The moment is marked first, before the sheet changes anything.
+    func requestProblemReport(from source: ProblemReportRequest.Source, recordingID: UUID? = nil) {
+        guard developer.allowsDebugBundle else { return }
+        let request = ProblemReportRequest(source: source, recordingID: recordingID)
+        if source != .button {
+            developer.markers?.capture(
+                ProblemMarker(id: request.id, reason: .tester, note: "opened from \(source.rawValue)", screen: Interactions.screen),
+                state: state.snapshot()
+            )
+        }
+        problemReport = request
     }
 
     func enable() {
@@ -135,4 +151,18 @@ struct UserDefaultsDiagnosticsSettings: DiagnosticsSettingsStore, @unchecked Sen
     func setEnabled(_ enabled: Bool) {
         defaults.set(enabled, forKey: key)
     }
+}
+
+struct ProblemReportRequest: Identifiable, Equatable, Sendable {
+    enum Source: String, Sendable {
+        case button
+        case shortcut
+        case menuBar
+        case shake
+        case previousLaunch
+    }
+
+    var id = UUID()
+    var source: Source
+    var recordingID: UUID?
 }

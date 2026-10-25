@@ -25,6 +25,8 @@ struct DebugAudioSource: Sendable {
 struct DebugBundleRequest: Sendable {
     var recordingIDs: [UUID]
     var includesAudio: Bool
+    var note = ""
+    var attachments: [BugReportAttachment] = []
 }
 
 struct DebugBundleRecording: Sendable {
@@ -84,6 +86,8 @@ struct DebugBundleBuilder {
         let metricKit = developer.metricKitDirectory
         let crashes = developer.crashesDirectory
         let appState = state?.snapshot() ?? [:]
+        let markers = developer.markersDirectory
+        let tester = (note: request.note, attachments: request.attachments)
 
         let report: @Sendable (String) -> Void = { step in Task { @MainActor in progress(step) } }
         let logs = (main: log, ai: aiLog)
@@ -98,6 +102,8 @@ struct DebugBundleBuilder {
                 metricKit: metricKit,
                 crashes: crashes,
                 appState: appState,
+                markers: markers,
+                tester: tester,
                 progress: report
             )
         }.value
@@ -163,8 +169,23 @@ struct DebugBundleBuilder {
         metricKit: URL?,
         crashes: URL?,
         appState: [String: [String: String]],
+        markers: URL?,
+        tester: (note: String, attachments: [BugReportAttachment]),
         progress: @Sendable (String) -> Void
     ) throws {
+        if !tester.note.isEmpty {
+            try tester.note.write(to: folder.appending(path: "note.txt"), atomically: true, encoding: .utf8)
+        }
+        if !tester.attachments.isEmpty {
+            let attachments = folder.appending(path: "attachments", directoryHint: .isDirectory)
+            try FileManager.default.createDirectory(at: attachments, withIntermediateDirectories: true)
+            for attachment in tester.attachments {
+                try attachment.data.write(to: attachments.appending(path: attachment.name))
+            }
+        }
+        if let markers, FileManager.default.fileExists(atPath: markers.path(percentEncoded: false)) {
+            try FileManager.default.copyItem(at: markers, to: folder.appending(path: "markers", directoryHint: .isDirectory))
+        }
         let encoder = DevLogStream.plainEncoder
         encoder.outputFormatting.insert(.prettyPrinted)
         try encoder.encode(device).write(to: folder.appending(path: "device.json"))
@@ -363,6 +384,9 @@ struct DebugBundleBuilder {
         """
         Still debug bundle
 
+        note.txt              what the tester said went wrong (bug reports)
+        attachments/          screenshots and photos the tester attached
+        markers/              moments a tester marked, or main hung over 2 s: threads, memory, state then
         device.json           build, channel, OS, hardware, model availability
         library-summary.json  every recording's shape (no content)
         preferences.json      app preferences (keys and secrets live in the Keychain, not here)

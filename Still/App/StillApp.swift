@@ -1,6 +1,11 @@
 import CryptoKit
 import SwiftData
 import SwiftUI
+#if os(macOS)
+import Carbon.HIToolbox
+#else
+import UIKit
+#endif
 
 @main
 struct StillApp: App {
@@ -29,6 +34,7 @@ struct StillApp: App {
     private let preferences: SettingsPreferences
     #if os(macOS)
     private let shortcut: RecordingShortcut
+    private let reportShortcut = GlobalRecordingShortcut(id: 2)
     private let login: LaunchAtLogin
     private let mediaHint: MediaPlaybackHint
     @NSApplicationDelegateAdaptor private var presence: BackgroundPresence
@@ -125,7 +131,8 @@ struct StillApp: App {
         let developer = MainActor.assumeIsolated {
             DeveloperDiagnostics(
                 directory: supportRoot.appending(path: "Diagnostics/Developer", directoryHint: .isDirectory),
-                key: (try? KeychainDeviceKeySource().journalKey()) ?? SymmetricKey(size: .bits256)
+                key: (try? KeychainDeviceKeySource().journalKey()) ?? SymmetricKey(size: .bits256),
+                savedBundles: DebugBundleStore(directory: DebugBundleStore.bundlesDirectory)
             )
         }
 
@@ -238,6 +245,34 @@ struct StillApp: App {
             )
         }
         sync = syncEngine
+        let reporting = diagnostics
+        let bugReports = MainActor.assumeIsolated {
+            #if os(macOS)
+            let device = Host.current().localizedName ?? "Mac"
+            let canReceive = true
+            #else
+            let device = UIDevice.current.model
+            let canReceive = false
+            #endif
+            #if DEBUG
+            let receivesByDefault = true
+            #else
+            let receivesByDefault = false
+            #endif
+            let courier = BugReportCourier(
+                transport: CloudKitBugReportTransport(deviceID: syncEngine.deviceID),
+                settings: UserDefaultsBugReportSettings(),
+                accountKey: {
+                    let account = try recordingLibrary.accountInvitation()
+                    return (account.accountID, account.accountKey)
+                },
+                device: device,
+                canReceive: canReceive,
+                receivesByDefault: receivesByDefault
+            )
+            reporting.bugReports = courier
+            return courier
+        }
         let makeFinalTranscription = { FinalTranscription(transcriber: ParakeetOfflineTranscriber(engine: speech)) }
         let makeSpeakerSeparation = {
             SpeakerSeparation(
@@ -335,6 +370,9 @@ struct StillApp: App {
         Task { @MainActor in
             await developer.start()
             await Perf.trace("launch.unlock") { await recordingLibrary.unlock() }
+            #if os(macOS)
+            if developer.allowsDebugBundle { bugReports.keepCollecting(every: .seconds(300)) }
+            #endif
             memoryExtraction.start()
             await proEntitlements.refresh()
             await syncEngine.syncIfEnabled()
@@ -508,6 +546,14 @@ struct StillApp: App {
             }
             #endif
             appDiagnostics.developer.whenCollecting { AudioRouteLog.start() }
+            #if os(macOS)
+            let reportShortcut = reportShortcut
+            appDiagnostics.developer.whenCollecting {
+                let combo = KeyCombo(keyCode: UInt32(kVK_ANSI_D), modifiers: UInt32(controlKey | optionKey | cmdKey), key: "D")
+                let registered = reportShortcut.register(combo) { appDiagnostics.requestProblemReport(from: .shortcut) }
+                DevLog.event("bugReport.shortcut", ["registered": String(registered)])
+            }
+            #endif
         }
         Perf.end(launch)
     }
@@ -568,14 +614,23 @@ struct StillApp: App {
                 lock: lock,
                 shortcut: shortcut,
                 hint: mediaHint,
+                reportProblem: diagnostics.developer.allowsDebugBundle ? { [diagnostics] in diagnostics.requestProblemReport(from: .menuBar) } : nil,
                 quit: { [presence] in presence.quitCompletely() }
             )
             .stillAppearance(preferences)
         } label: {
             RecordingMenuBarLabel(coordinator: coordinator, hint: mediaHint, automatic: automatic)
                 .modifier(LibraryWindowOpenerInstaller(presence: presence))
+                .modifier(ProblemReportWindowOpener(diagnostics: diagnostics))
         }
         .menuBarExtraStyle(.window)
+
+        Window(String("Report a Problem"), id: ProblemReportWindowOpener.windowID) {
+            ProblemReportWindow(diagnostics: diagnostics, library: library)
+                .stillAppearance(preferences)
+        }
+        .defaultSize(width: 560, height: 720)
+        .defaultLaunchBehavior(.suppressed)
         #else
         WindowGroup {
             libraryView
@@ -609,6 +664,7 @@ struct StillApp: App {
                 navigation: navigation
             )
         }
+        .modifier(ProblemReportPresenter(diagnostics: diagnostics, library: library))
         .stillAppearance(preferences)
         .onAppear { [developer = diagnostics.developer] in developer.firstFrame() }
         #if os(macOS)

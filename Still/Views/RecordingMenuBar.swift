@@ -35,6 +35,7 @@ struct RecordingMenuBarPanel: View {
     let lock: AppLock
     let shortcut: RecordingShortcut
     let hint: MediaPlaybackHint
+    var reportProblem: (() -> Void)?
     let quit: () -> Void
 
     @Environment(\.openWindow) private var openWindow
@@ -85,6 +86,11 @@ struct RecordingMenuBarPanel: View {
             Toggle("Record Calls Automatically", isOn: watching)
                 .toggleStyle(.switch)
                 .controlSize(.small)
+
+            if let reportProblem {
+                Button(String("Report a Problem… (⌃⌥⌘D)"), systemImage: "ladybug", action: reportProblem)
+                    .controlSize(.small)
+            }
 
             HStack {
                 Button("Open Library") { openLibrary() }
