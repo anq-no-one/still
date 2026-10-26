@@ -31,13 +31,16 @@ def unpack(source):
     name = os.path.splitext(os.path.basename(source))[0]
     target = os.path.join(UNPACKED, name)
     if not os.path.isdir(target):
-        os.makedirs(target)
+        os.makedirs(UNPACKED, exist_ok=True)
         with zipfile.ZipFile(source) as archive:
-            for member in archive.namelist():
-                path = os.path.realpath(os.path.join(target, member))
-                if not path.startswith(os.path.realpath(target) + os.sep):
-                    sys.exit(f"refusing {member}: it would land outside {target}")
-            archive.extractall(target)
+            members = archive.namelist()
+            nested = all(member.startswith(name + "/") for member in members)
+            destination = UNPACKED if nested else target
+            for member in members:
+                path = os.path.realpath(os.path.join(destination, member))
+                if not path.startswith(os.path.realpath(destination) + os.sep):
+                    sys.exit(f"refusing {member}: it would land outside {destination}")
+            archive.extractall(destination)
     return find_root(target)
 
 
@@ -119,9 +122,11 @@ class Symbolicator:
 def symbolicate_threads(text, images, symbols):
     out = []
     for line in text.splitlines():
+        frame = re.match(r"^\s*(\d+) ", line)
         match = ADDRESS.search(line)
-        if match and re.match(r"^\s*\d+ ", line):
-            out.append(symbols.lines([int(match.group(0), 16)], images)[0])
+        if frame and match:
+            described = symbols.lines([int(match.group(0), 16)], images)[0]
+            out.append(f"{int(frame.group(1)):3d}" + described[3:])
         else:
             out.append(line)
     return "\n".join(out) + "\n"
