@@ -31,12 +31,14 @@ struct DebugBundleView: View {
     @State private var attachments: [BugReportAttachment] = []
     @State private var photoItems: [PhotosPickerItem] = []
     @State private var isImportingImages = false
+    @State private var isPickingPhotos = false
     @State private var step: String?
     @State private var bundle: URL?
     @State private var problem: String?
     @State private var saved: String?
     @State private var markedAt: Date?
     @State private var savedBundles: [SavedBundle] = []
+    @FocusState private var isWritingNote: Bool
 
     private let store = DebugBundleStore(directory: DebugBundleStore.bundlesDirectory)
 
@@ -53,21 +55,28 @@ struct DebugBundleView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField(String("What went wrong?"), text: $note, prompt: Text(verbatim: "What did you do, what did you expect, what happened?"), axis: .vertical)
+                    TextField(String("What went wrong?"), text: $note, prompt: Text(verbatim: "What did you do, and what happened?"), axis: .vertical)
                         .lineLimit(3...8)
+                        .focused($isWritingNote)
                         .accessibilityIdentifier("bugReport.note")
+                } header: {
+                    Text(verbatim: "What Happened")
+                }
+
+                Section {
                     attachmentList
                     attachmentButtons
-                    Button(String("Mark This Moment"), systemImage: "flag", action: mark)
-                        .help(String("Keep what every thread, the memory and the app look like right now"))
-                    if let markedAt {
-                        Label(String("Marked at \(markedAt.formatted(date: .omitted, time: .standard))"), systemImage: "flag.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                } header: {
-                    Text(verbatim: "Report a Problem")
                 } footer: {
-                    Text(verbatim: "Attach screenshots or photos of what you saw. Mark This Moment keeps the app's state now, even if you send the report later.")
+                    Text(verbatim: "Attach screenshots or photos of what you saw.")
+                }
+
+                Section {
+                    Button(String("Mark This Moment"), systemImage: "flag", action: mark)
+                    if let markedAt {
+                        LabeledContent(String("Marked at"), value: markedAt.formatted(date: .omitted, time: .standard))
+                    }
+                } footer: {
+                    Text(verbatim: "Keeps every thread, the memory and the app's state as they are now, even if you send the report later.")
                 }
 
                 Section {
@@ -91,7 +100,6 @@ struct DebugBundleView: View {
                     } else {
                         if courier != nil {
                             Button(String("Submit Bug Report"), systemImage: "paperplane") { prepare(submitting: true) }
-                                .buttonStyle(.borderedProminent)
                                 .accessibilityIdentifier("bugReport.submit")
                         }
                         Button(String("Save Debug Bundle"), systemImage: "ladybug") { prepare(submitting: false) }
@@ -132,6 +140,10 @@ struct DebugBundleView: View {
             }
             .formStyle(.grouped)
             .navigationTitle(String("Report a Problem"))
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .photosPicker(isPresented: $isPickingPhotos, selection: $photoItems, maxSelectionCount: 6, matching: .images)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(String("Done")) { dismiss() }
@@ -170,18 +182,14 @@ struct DebugBundleView: View {
         }
     }
 
+    @ViewBuilder
     private var attachmentButtons: some View {
-        HStack {
-            PhotosPicker(selection: $photoItems, maxSelectionCount: 6, matching: .images) {
-                Label(String("Add Photos"), systemImage: "photo.on.rectangle")
-            }
-            Button(String("Add Image File…"), systemImage: "doc.badge.plus") { isImportingImages = true }
-            #if os(macOS)
-            Button(String("Paste Screenshot"), systemImage: "doc.on.clipboard", action: pasteImage)
-                .help(String("Attach the image on the clipboard, for example from ⌃⇧⌘4"))
-            #endif
-        }
-        .buttonStyle(.bordered)
+        Button(String("Add Photos"), systemImage: "photo.on.rectangle") { isPickingPhotos = true }
+        Button(String("Add Image File…"), systemImage: "doc.badge.plus") { isImportingImages = true }
+        #if os(macOS)
+        Button(String("Paste Screenshot"), systemImage: "doc.on.clipboard", action: pasteImage)
+            .help(String("Attach the image on the clipboard, for example from ⌃⇧⌘4"))
+        #endif
     }
 
     @ViewBuilder
@@ -239,12 +247,17 @@ struct DebugBundleView: View {
     }
 
     private func mark() {
+        isWritingNote = false
         let marker = ProblemMarker(reason: .tester, note: note, screen: Interactions.screen)
-        markers?.capture(marker, state: builder.state?.snapshot())
+        let state = builder.state?.snapshot()
+        if let markers {
+            Task.detached(priority: .userInitiated) { markers.capture(marker, state: state) }
+        }
         markedAt = marker.at
     }
 
     private func prepare(submitting: Bool) {
+        isWritingNote = false
         problem = nil
         saved = nil
         step = "Starting"
@@ -438,7 +451,7 @@ struct ProblemReportPresenter: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .safeAreaInset(edge: .top) {
+            .safeAreaInset(edge: .bottom) {
                 if let problem = diagnostics.developer.previousLaunchProblem, diagnostics.developer.allowsDebugBundle {
                     PreviousLaunchBanner(message: problem) {
                         diagnostics.developer.dismissPreviousLaunchProblem()
@@ -515,25 +528,50 @@ private struct PreviousLaunchBanner: View {
     let report: () -> Void
     let dismiss: () -> Void
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
-                .accessibilityHidden(true)
-            Text(verbatim: message)
-                .font(.callout)
-            Spacer()
-            Button(String("Report"), action: report)
-                .buttonStyle(.borderedProminent)
-            Button(String("Dismiss"), systemImage: "xmark", action: dismiss)
-                .labelStyle(.iconOnly)
-                .buttonStyle(.borderless)
-                .accessibilityLabel(String("Dismiss"))
+        Group {
+            if typeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 10) {
+                    notice
+                    HStack { actions }
+                }
+            } else {
+                HStack(spacing: 12) {
+                    notice
+                    Spacer()
+                    actions
+                }
+            }
         }
         .padding(10)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
         .padding(.horizontal)
         .accessibilityElement(children: .contain)
+    }
+
+    private var notice: some View {
+        Label {
+            Text(verbatim: message)
+                .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
+        } icon: {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.orange)
+                .accessibilityHidden(true)
+        }
+    }
+
+    @ViewBuilder
+    private var actions: some View {
+        Button(String("Report"), action: report)
+            .buttonStyle(.borderedProminent)
+            .fixedSize()
+        Button(String("Dismiss"), systemImage: "xmark", action: dismiss)
+            .labelStyle(.iconOnly)
+            .buttonStyle(.borderless)
+            .accessibilityLabel(String("Dismiss"))
     }
 }
 

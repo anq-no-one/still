@@ -72,6 +72,46 @@ final class StillEndToEndTests: XCTestCase {
         waitFor(app.staticTexts["Keep Audio"], "the retention choices")
     }
 
+    func testReportAProblemWithANoteAndKeepTheBundle() throws {
+        launch(resetting: true)
+        completeOnboarding()
+        waitFor(app.staticTexts["No Recordings Yet"], "an empty, unlocked Library")
+
+        tap("Report a Problem")
+        let note = app.descendants(matching: .any)["bugReport.note"]
+        waitFor(note, "the note field of the report")
+        note.tap()
+        note.typeText("Library froze after sync")
+        tap("Mark This Moment")
+        waitForText("Marked at", timeout: 20, "the moment to be marked")
+
+        let save = app.buttons["bugReport.save"]
+        scrollTo(save)
+        save.tap()
+        let share = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Share Still-Debug'")).firstMatch
+        scrollTo(share, timeout: 120)
+        tap("Done")
+        tap("Report a Problem")
+        waitUntilStill(app.descendants(matching: .any)["bugReport.note"], "the report to finish opening again")
+        keepScreenshot("5 Report a Problem")
+        try audit("report", for: XCUIAccessibilityAuditType.all.subtracting(.dynamicType))
+        scrollTo(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Delete Still-Debug'")).firstMatch)
+
+        app.terminate()
+        launch(resetting: false, textSize: "UICTContentSizeCategoryAccessibilityXL")
+        waitFor(app.staticTexts["No Recordings Yet"], timeout: 30, "the Library at the largest text sizes")
+        waitForText("quit unexpectedly", timeout: 15, "the offer to report the launch the test cut short")
+        keepScreenshot("6 Report the last launch, large text")
+        try audit("previous launch banner, large text", for: [.textClipped, .elementDetection, .sufficientElementDescription])
+        tap("Report")
+        waitUntilStill(app.descendants(matching: .any)["bugReport.note"], "the report to finish opening at the largest text sizes")
+        keepScreenshot("7 Report a Problem, large text")
+        try audit("report large text", for: [.textClipped, .elementDetection, .sufficientElementDescription])
+
+        for issue in accessibilityIssues { print("ACCESSIBILITY-ISSUE", issue) }
+        XCTAssertTrue(accessibilityIssues.isEmpty, accessibilityIssues.joined(separator: "\n"))
+    }
+
     func testPrimaryScreensPassTheAccessibilityAudit() throws {
         launch(resetting: true)
         waitFor(app.buttons["Continue"], "the first setup step")
@@ -106,14 +146,15 @@ final class StillEndToEndTests: XCTestCase {
         XCTAssertTrue(accessibilityIssues.isEmpty, accessibilityIssues.joined(separator: "\n"))
     }
 
-    private func audit(_ screen: String) throws {
+    private func audit(_ screen: String, for types: XCUIAccessibilityAuditType = .all) throws {
         keepScreenshot("audit \(screen)")
         let systemDrawn: Set<String> = ["Done", "Search Recordings", "Recordings"]
-        try app.performAccessibilityAudit { issue in
+        try app.performAccessibilityAudit(for: types) { issue in
             let label = issue.element?.label ?? ""
             let isWarning = issue.compactDescription.localizedCaseInsensitiveContains("nearly passed")
             let isUnlocated = issue.element == nil
-            if !isWarning, !isUnlocated, !systemDrawn.contains(label) {
+            let isOffscreen = issue.element.map { !self.app.frame.contains($0.frame) } ?? false
+            if !isWarning, !isUnlocated, !isOffscreen, !systemDrawn.contains(label) {
                 let element = issue.element
                 let detail = "\(label) type=\(element?.elementType.rawValue ?? 0) id=\(element?.identifier ?? "") value=\(String(describing: element?.value ?? "").prefix(40)) frame=\(element?.frame ?? .zero)"
                 self.accessibilityIssues.append("[\(screen)] \(issue.compactDescription): \(detail)")
@@ -122,9 +163,10 @@ final class StillEndToEndTests: XCTestCase {
         }
     }
 
-    private func launch(resetting: Bool, handingOver fixture: String? = nil) {
+    private func launch(resetting: Bool, handingOver fixture: String? = nil, textSize: String? = nil) {
         continueAfterFailure = false
         app.launchArguments = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+        if let textSize { app.launchArguments += ["-UIPreferredContentSizeCategoryName", textSize] }
         var environment = [
             "STILL_AUDIO_FIXTURE": "meeting",
             "STILL_UI_TEST_RESET": resetting ? "1" : "0",
@@ -173,6 +215,28 @@ final class StillEndToEndTests: XCTestCase {
         let button = app.buttons[label]
         waitFor(button, "the \(label) button")
         button.tap()
+    }
+
+    private func waitUntilStill(_ element: XCUIElement, _ what: String) {
+        waitFor(element, what)
+        var last = element.frame
+        let deadline = Date.now.addingTimeInterval(10)
+        while Date.now < deadline {
+            Thread.sleep(forTimeInterval: 0.25)
+            let current = element.frame
+            if current == last { return }
+            last = current
+        }
+        XCTFail("Timed out waiting for \(what): it kept moving.")
+    }
+
+    private func scrollTo(_ element: XCUIElement, timeout: TimeInterval = 15) {
+        let deadline = Date.now.addingTimeInterval(timeout)
+        while Date.now < deadline, !(element.exists && element.isHittable) {
+            app.swipeUp()
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        waitFor(element, "the element scrolled into view")
     }
 
     private func navigateBack() {

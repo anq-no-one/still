@@ -87,6 +87,7 @@ struct ProblemMarkerTests {
         await developer.start(startsMonitors: false) { .testFlight }
 
         diagnostics.requestProblemReport(from: .shortcut)
+        _ = await diagnostics.markerCapture?.value
         diagnostics.requestProblemReport(from: .button)
 
         #expect(diagnostics.problemReport?.source == .button)

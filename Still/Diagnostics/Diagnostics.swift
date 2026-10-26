@@ -50,6 +50,7 @@ final class Diagnostics {
     let state = DebugStateRegistry()
     var bugReports: BugReportCourier?
     var problemReport: ProblemReportRequest?
+    @ObservationIgnored private(set) var markerCapture: Task<URL?, Never>?
     private let bundleContext: @MainActor () -> [String: String]
 
     init(
@@ -84,11 +85,10 @@ final class Diagnostics {
     func requestProblemReport(from source: ProblemReportRequest.Source, recordingID: UUID? = nil) {
         guard developer.allowsDebugBundle else { return }
         let request = ProblemReportRequest(source: source, recordingID: recordingID)
-        if source != .button {
-            developer.markers?.capture(
-                ProblemMarker(id: request.id, reason: .tester, note: "opened from \(source.rawValue)", screen: Interactions.screen),
-                state: state.snapshot()
-            )
+        if source != .button, let markers = developer.markers {
+            let marker = ProblemMarker(id: request.id, reason: .tester, note: "opened from \(source.rawValue)", screen: Interactions.screen)
+            let snapshot = state.snapshot()
+            markerCapture = Task.detached(priority: .userInitiated) { markers.capture(marker, state: snapshot) }
         }
         problemReport = request
     }
