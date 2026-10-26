@@ -297,6 +297,8 @@ struct DebugBundleTests {
         #expect(threads.contains("Thread main"))
         #expect(images.contains { $0.name.contains("StillTests") })
         #expect(memory.contains("footprintMB"))
+        let summary = try String(contentsOf: folder.appending(path: "summary.md"), encoding: .utf8)
+        #expect(summary.hasPrefix("# Still bug report summary"))
         let appState = try String(contentsOf: folder.appending(path: "state.json"), encoding: .utf8)
         #expect(appState.contains("zoneNotFound"))
     }

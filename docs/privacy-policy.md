@@ -40,10 +40,16 @@ names, app version, error numbers and random identifiers, sealed with a key that
 device. It never holds audio, transcripts, names, project titles, file paths or keys, and it leaves
 the device only when you export it yourself.
 
-TestFlight beta builds also keep a developer log on the device: timings, hangs, memory and CPU
-samples, and the prompts and answers of the on-device models. It is sealed with the same device
-key and leaves the device only when a tester taps Debug Bundle and shares it. The App Store build
-keeps none of it and deletes any log a beta left behind.
+TestFlight beta builds also keep a developer log on the device: timings, hangs with call stacks,
+memory, thread and CPU samples, audio levels and dropouts, sync steps, crash notes, and the prompts
+and answers of the on-device models. It is sealed with the same device key. A tester can turn it
+into a bug report with a note and screenshots; saved reports stay on the device (on a Mac, in
+Downloads › Still Debug Bundles, newest 10) until shared or deleted. Submit Bug Report sends the
+report through the tester's own private iCloud database, sealed with a key from their Still
+Library, to the Mac in that Library that collects bug reports, which saves it to Downloads › Still
+Bug Reports and removes it from iCloud. Apple stores only ciphertext. The App Store build keeps
+none of it, offers no report, and deletes any log, crash note, marker or saved bundle a beta left
+behind.
 
 ## Meeting-window name tiles (Mac)
 

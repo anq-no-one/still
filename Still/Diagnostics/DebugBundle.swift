@@ -198,9 +198,19 @@ struct DebugBundleBuilder {
         _ = try logs.ai.export(to: folder.appending(path: "ai-trace.jsonl"))
 
         progress("Summarising performance")
-        let records = try logs.main.records { $0.kind != .sample && $0.kind != .counter }
+        let allRecords = try logs.main.records()
+        let records = allRecords.filter { $0.kind != .sample && $0.kind != .counter }
         try performanceReport(records: records, sessionStats: sessionStats)
             .write(to: folder.appending(path: "performance.txt"), atomically: true, encoding: .utf8)
+        let summary = DebugBundleSummary.Input(
+            device: device,
+            note: tester.note,
+            attachments: tester.attachments.map(\.name),
+            records: allRecords,
+            markers: markers.map { ProblemMarkers(directory: $0).all() } ?? [],
+            crashes: crashes.map(Self.crashReports(in:)) ?? []
+        )
+        try DebugBundleSummary.make(summary).write(to: folder.appending(path: "summary.md"), atomically: true, encoding: .utf8)
 
         progress("Reading system log")
         try systemLog().write(to: folder.appending(path: "oslog-this-launch.txt"), atomically: true, encoding: .utf8)
@@ -353,6 +363,13 @@ struct DebugBundleBuilder {
         )
     }
 
+    nonisolated private static func crashReports(in directory: URL) -> [CrashReport] {
+        let folders = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
+        return folders.flatMap { folder -> [CrashReport] in
+            (try? Data(contentsOf: folder.appending(path: "crash.json"))).flatMap { try? JSONDecoder().decode([CrashReport].self, from: $0) } ?? []
+        }
+    }
+
     nonisolated private static func preferences() throws -> Data {
         let domain = Bundle.main.bundleIdentifier.flatMap { UserDefaults.standard.persistentDomain(forName: $0) } ?? [:]
         let described = domain.mapValues { value -> String in
@@ -384,6 +401,7 @@ struct DebugBundleBuilder {
         """
         Still debug bundle
 
+        summary.md            start here: tester note, marked moments, crashes, hangs, memory, CPU, audio, sync, errors
         note.txt              what the tester said went wrong (bug reports)
         attachments/          screenshots and photos the tester attached
         markers/              moments a tester marked, or main hung over 2 s: threads, memory, state then

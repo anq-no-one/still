@@ -94,3 +94,4 @@ xcodebuild test -project Still.xcodeproj -scheme Still-macOS \
 - `docs/security-review.md`, `docs/privacy-policy.md` — privacy claims the code must keep true
 - `docs/models/`, `docs/research/` — Parakeet model notes
 - `docs/localization.md` — supported languages, string catalog, accessibility
+- `docs/debug-bundle.md` — what a debug bundle or bug report holds; triage one with `bin/debug-bundle.sh <zip>`, and reports from testers with `bin/bug-reports.sh`

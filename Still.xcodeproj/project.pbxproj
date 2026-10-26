@@ -70,6 +70,7 @@
 		2031E3F2C13FADD4002D5E88 /* TeamsMeetingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EAB57718B69A61CE3A638F7 /* TeamsMeetingWindow.swift */; };
 		21AC7E6395618A53DDD180C9 /* SpeakersSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1EA286254BF5C9C9CE97C07 /* SpeakersSettingsView.swift */; };
 		229EBCA14F4CCD9EFF0A5598 /* RecordingWorkflow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8912564CB80223EF40674BD /* RecordingWorkflow.swift */; };
+		22C6B692F0403D3945609BA1 /* DebugBundleSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECC1507057EE9D1EC6FA0D06 /* DebugBundleSummaryTests.swift */; };
 		2330BE39B2636C273E60875D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA32BEE17A571A79F05C30CC /* SettingsView.swift */; };
 		235B4DA83C4B6551A9A097F2 /* RecordingTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DFF14A037F3E0F48687D740 /* RecordingTitle.swift */; };
 		23BAEBC2B4ECB91EB155A204 /* MainActorExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201DF8A99F2A1824DE4A26F9 /* MainActorExport.swift */; };
@@ -420,6 +421,7 @@
 		B8B874F59706A7C23A100102 /* JSONRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FBB0F3AFE8E7F3BE14D659C /* JSONRPC.swift */; };
 		B8DD4A1D37C715AE7A92541C /* Still.storekit in Resources */ = {isa = PBXBuildFile; fileRef = D82252AF57447EA6F7D07F2A /* Still.storekit */; };
 		B9BB4F2274654969D4952A04 /* SystemAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD84D8B2CDE6A9B204A7603 /* SystemAudioRecorder.swift */; };
+		BAE6B28BE512F98B1B74361B /* DebugBundleSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A7A813756C5E6028BD0681 /* DebugBundleSummary.swift */; };
 		BB791C5FD069978AE1176C71 /* NoteClipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939431C1086E7ABCBBF2B48 /* NoteClipboard.swift */; };
 		BBDDCB8D75FAAD9316E28374 /* TranscriptPhrases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 082A792DC7C4BAF583D102E8 /* TranscriptPhrases.swift */; };
 		BC10DC2E9F19FD49185B2FE5 /* EntitlementsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 104FA6868E717D1D91A00F9C /* EntitlementsTests.swift */; };
@@ -439,6 +441,7 @@
 		C22FE5A2DAC26C442DE967D0 /* TranscriptionSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BC420DCDF72289386E9958 /* TranscriptionSession.swift */; };
 		C24A08C0F85D8D91B73FC694 /* RecoveryCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C0C747D43BC104C5592372D /* RecoveryCode.swift */; };
 		C29106BACC19B87A9CFBC8C6 /* PreferencesFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2AD6FCB299BB01B963B40A1 /* PreferencesFile.swift */; };
+		C2B2CA5A9FC68D53A9197E28 /* DebugBundleSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A7A813756C5E6028BD0681 /* DebugBundleSummary.swift */; };
 		C37E925F16C0B8A02C9B5C86 /* ProjectsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8227A92F5BB1E709F9EF869 /* ProjectsSettingsView.swift */; };
 		C3FC5F40CE66B432F8EDFD9A /* DiagnosticJournalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821DF3FA93123348B34A56A9 /* DiagnosticJournalTests.swift */; };
 		C4854D31744FF0E11A0CDAFC /* EchoFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C4D9C6F84F52ADCF106FDFF /* EchoFilter.swift */; };
@@ -790,6 +793,7 @@
 		7FD1BE1B4193A86811F3EB0F /* LibrarySearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySearch.swift; sourceTree = "<group>"; };
 		7FDC46941F2E8D54F7B097FB /* ProcessDiagnosticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessDiagnosticsTests.swift; sourceTree = "<group>"; };
 		821DF3FA93123348B34A56A9 /* DiagnosticJournalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticJournalTests.swift; sourceTree = "<group>"; };
+		82A7A813756C5E6028BD0681 /* DebugBundleSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugBundleSummary.swift; sourceTree = "<group>"; };
 		82EF5C65B62A8FF39477370C /* Still-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Still-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		840972BBCBE5E69B9D293B28 /* MixedMediaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixedMediaTests.swift; sourceTree = "<group>"; };
 		84CD5DFD225CF95E36956740 /* ProjectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectTests.swift; sourceTree = "<group>"; };
@@ -951,6 +955,7 @@
 		EAF5FCBA220130E195D72217 /* RetentionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetentionTests.swift; sourceTree = "<group>"; };
 		EC2472761397A7D3DF2CDC89 /* AccountKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountKeys.swift; sourceTree = "<group>"; };
 		EC529614DC081213A880FEB2 /* VocabularyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTests.swift; sourceTree = "<group>"; };
+		ECC1507057EE9D1EC6FA0D06 /* DebugBundleSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugBundleSummaryTests.swift; sourceTree = "<group>"; };
 		EE823CE690788A4FDA810317 /* VoiceProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceProfileTests.swift; sourceTree = "<group>"; };
 		EF41D12201331C2D9D44A76F /* CloudKitBugReportTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitBugReportTransport.swift; sourceTree = "<group>"; };
 		EF8C0AA902FB42B0FDD7C475 /* SetupFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFlowTests.swift; sourceTree = "<group>"; };
@@ -1110,6 +1115,7 @@
 				8F1FF4439F538D26E2FF41D9 /* BugReportTests.swift */,
 				C1F0164B1B019A431B7CDAE6 /* CallDetectorTests.swift */,
 				5B6B476449F16529A7AFEBE1 /* CloudKitSyncTransportTests.swift */,
+				ECC1507057EE9D1EC6FA0D06 /* DebugBundleSummaryTests.swift */,
 				B41DDA183DB851E6DB8C8A7C /* DetailFallbackTests.swift */,
 				F7C380C8E4ACCE707410A957 /* DeveloperDiagnosticsTests.swift */,
 				821DF3FA93123348B34A56A9 /* DiagnosticJournalTests.swift */,
@@ -1509,6 +1515,7 @@
 				23C70F43111C09C0DFBB32ED /* CrashMarker.swift */,
 				AB3C843548886284BD30320D /* DebugBundle.swift */,
 				B255049359ED9E60C078D54A /* DebugBundleStore.swift */,
+				82A7A813756C5E6028BD0681 /* DebugBundleSummary.swift */,
 				153761C9EFD8715F508F3C03 /* DebugStateRegistry.swift */,
 				D32C64E1496EA6F2CB0250FF /* DeveloperDiagnostics.swift */,
 				AF441189E2401CB50C001921 /* DevLog.swift */,
@@ -2005,6 +2012,7 @@
 				1F5EACC7D640F6253E159111 /* DashboardView.swift in Sources */,
 				104B797244667EC77E55ADE2 /* DebugBundle.swift in Sources */,
 				92513D93BA2C5F77088C37A5 /* DebugBundleStore.swift in Sources */,
+				BAE6B28BE512F98B1B74361B /* DebugBundleSummary.swift in Sources */,
 				D3630192201E74914CE60DE1 /* DebugBundleView.swift in Sources */,
 				6A7EE4D94BE7DA0505F00BF2 /* DebugStateRegistry.swift in Sources */,
 				16E1C5F7D19E04A85E4D6DF1 /* DetailFallback.swift in Sources */,
@@ -2206,6 +2214,7 @@
 				738B7E456A1B245B341A05F9 /* BugReportTests.swift in Sources */,
 				EE9D8D7138F4D9E7041D5BB4 /* CallDetectorTests.swift in Sources */,
 				1617D328EC7640C0ADB9FBAD /* CloudKitSyncTransportTests.swift in Sources */,
+				22C6B692F0403D3945609BA1 /* DebugBundleSummaryTests.swift in Sources */,
 				F9BCE9F02409E23C8184D56B /* DetailFallbackTests.swift in Sources */,
 				D3B6ABFBE3725CFADE3C9123 /* DeveloperDiagnosticsTests.swift in Sources */,
 				C3FC5F40CE66B432F8EDFD9A /* DiagnosticJournalTests.swift in Sources */,
@@ -2354,6 +2363,7 @@
 				6BA879F960DEC668B61DD1BB /* DashboardView.swift in Sources */,
 				2EBC27B73D3CD5BBE5CA420C /* DebugBundle.swift in Sources */,
 				791A5528D8CED0BA2DE9B0A5 /* DebugBundleStore.swift in Sources */,
+				C2B2CA5A9FC68D53A9197E28 /* DebugBundleSummary.swift in Sources */,
 				F21CF1263CAEB209056FCD3F /* DebugBundleView.swift in Sources */,
 				2B40F37CD471C1C29C6079B9 /* DebugStateRegistry.swift in Sources */,
 				3FFB155964F438FA5EEC2E5D /* DetailFallback.swift in Sources */,

@@ -194,3 +194,9 @@ Deployment target is now iOS/macOS 26.
 - Joining re-seals local audio on the main actor once; watch for a pause on a device with a big library.
 - The Obsidian vault moved to `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Obsidian/`.
 - Still open from `bugs 19 oct report.md`: titles from location address, generated summary with who said what, owners on decisions/action items, remove Proposed Tasks, speakers UI, Teams speaker names, freeze while scrolling.
+
+## Debug bundle v2 and bug reports — 2026-10-25/26
+- Collectors: memory breakdown, top threads, cooperative-pool wait, MLX memory, live objects, memory pressure (`ProcessProbe`, `MemoryPressureMonitor`, `MLXMemoryProbe`); hang stacks sampled from 250 ms (`StackSampler`, `MainThreadWatchdog`); signal-safe crash marker read back next launch (`CrashMarker`).
+- Logging in Audio (per-track `audio.stats`, device/route/config changes, SCStream delegate), call detection decisions, every sync step with CloudKit codes, model downloads, MCP, import; `state.json` via `DebugStateRegistry`.
+- Report a Problem: note, image attachments, markers (⌃⌥⌘D, menu bar, shake, 2 s hang), saved bundles (Mac Downloads), Submit through private iCloud zone `BugReports` to the collecting Mac → `~/Downloads/Still Bug Reports/`; `summary.md`; `bin/debug-bundle.sh`, `bin/bug-reports.sh`. Doc: `docs/debug-bundle.md`.
+- Published privacy page (anq-no-one/still-app) needs regenerating from `docs/privacy-policy.md` for the bug-report paragraph.
