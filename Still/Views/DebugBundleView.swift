@@ -488,6 +488,25 @@ struct ProblemReportContent: View {
                 recordingID: request.recordingID
             )
             .id(request.id)
+        } else if diagnostics.developer.channel == .unknown {
+            ContentUnavailableView {
+                Label {
+                    Text(verbatim: "Checking This Build")
+                } icon: {
+                    ProgressView()
+                }
+            } description: {
+                Text(verbatim: "Still is asking the App Store whether this is a TestFlight build. Report a Problem opens here as soon as it answers.")
+            } actions: {
+                Button(String("Ask Again")) { Task { await diagnostics.developer.resolveAgainIfUnknown() } }
+            }
+            .task { await diagnostics.developer.resolveAgainIfUnknown() }
+        } else {
+            ContentUnavailableView {
+                Label(String("Only in TestFlight Builds"), systemImage: "ladybug")
+            } description: {
+                Text(verbatim: "This build does not collect developer diagnostics.")
+            }
         }
     }
 }

@@ -3,10 +3,12 @@
 Debug and TestFlight builds collect a developer log, hang stacks, crash notes and resource samples,
 and offer **Report a Problem** (ladybug in the Library toolbar, on each recording, Settings ›
 Diagnostics; on Mac also the menu bar and ⌃⌥⌘D; on iPhone and iPad a shake). The App Store build
-collects none of it and deletes what a beta left; the channel comes from `AppTransaction.environment`
-at run time (`BuildChannel.swift`), because TestFlight and the App Store ship the same binary. When
-StoreKit cannot answer at launch the channel stays unknown: records are held in memory, nothing is
-written or deleted, and the app asks again when it becomes active or Settings › Diagnostics opens.
+collects none of it and deletes what a beta left. TestFlight and the App Store ship the same binary,
+so the channel is read at run time (`BuildChannel.swift`): first from the environment attribute of
+the store receipt installed beside the app (`ProductionSandbox` or `Production`, offline), then from
+`AppTransaction.environment`, which may need Apple's servers. When neither answers the channel stays
+unknown: records are held in memory, nothing is written or deleted, Report a Problem says it is
+checking, and the app asks again when it becomes active or Settings › Diagnostics opens.
 
 ## Report a Problem
 

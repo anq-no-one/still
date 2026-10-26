@@ -419,6 +419,46 @@ struct AITraceTests {
     }
 }
 
+struct ReceiptEnvironmentTests {
+    private func receipt(environment: String) -> Data {
+        let value = Array(environment.utf8)
+        return Data([0x31, 0x82, 0x01, 0x00, 0x30, UInt8(value.count + 10), 0x02, 0x01, 0x00, 0x02, 0x01, 0x01, 0x04, UInt8(value.count + 2), 0x0C, UInt8(value.count)] + value + [0x30, 0x00])
+    }
+
+    @Test
+    func aSandboxReceiptMeansTestFlight() {
+        #expect(ReceiptEnvironment.channel(receipt: receipt(environment: "ProductionSandbox")) == .testFlight)
+    }
+
+    @Test
+    func aProductionReceiptMeansTheAppStore() {
+        #expect(ReceiptEnvironment.channel(receipt: receipt(environment: "Production")) == .appStore)
+    }
+
+    @Test
+    func theEnvironmentNameOutsideItsAttributeIsIgnored() {
+        let receipt = Data([0x0C, 0x11] + Array("ProductionSandbox".utf8))
+
+        #expect(ReceiptEnvironment.channel(receipt: receipt) == nil)
+    }
+
+    @Test
+    func aReceiptTheStoreNamedSandboxMeansTestFlightEvenWhenUnreadable() throws {
+        let scratch = try Scratch()
+        let sandbox = scratch.directory.appending(path: "sandboxReceipt")
+        try Data([0x30, 0x00]).write(to: sandbox)
+
+        #expect(ReceiptEnvironment.channel(receipts: [scratch.directory.appending(path: "missing"), sandbox]) == .testFlight)
+    }
+
+    @Test
+    func withoutAReceiptTheChannelIsLeftToStoreKit() throws {
+        let scratch = try Scratch()
+
+        #expect(ReceiptEnvironment.channel(receipts: [scratch.directory.appending(path: "receipt")]) == nil)
+    }
+}
+
 private actor Answers {
     private var remaining: [BuildChannel]
 
