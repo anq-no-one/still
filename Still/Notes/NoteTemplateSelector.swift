@@ -5,8 +5,6 @@ enum NoteTemplateSelector {
     static let lectureSeconds: TimeInterval = 900
     static let interviewQuestionRatio = 0.15
 
-    /// Deterministic so the same recording always opens in the same shape and
-    /// the choice can be explained without a model.
     static func template(
         segments: [TranscriptSegment],
         duration: TimeInterval,
@@ -14,11 +12,11 @@ enum NoteTemplateSelector {
     ) -> NoteTemplate {
         guard !segments.isEmpty else { return .personalNote }
 
-        if questionRatio(in: segments) >= interviewQuestionRatio {
-            return .interview
-        }
         if tracks.contains(.system) {
             return .meeting
+        }
+        if questionRatio(in: segments) >= interviewQuestionRatio {
+            return .interview
         }
         if duration <= shortRecordingSeconds {
             return .personalNote

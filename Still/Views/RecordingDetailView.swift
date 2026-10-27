@@ -293,14 +293,18 @@ struct RecordingDetailView: View {
         )
     }
 
+    private func speakerNames(_ item: NoteItem) -> [String] {
+        item.speakerNames(segments: editor.recording.segments, speakers: editor.recording.speakers)
+    }
+
     @ViewBuilder
     private var noteView: some View {
         VStack(alignment: .leading, spacing: 18) {
             noteActions
 
-            NoteSectionView(title: "Summary", items: editor.note.summary)
-            NoteSectionView(title: "Decisions", items: editor.note.decisions)
-            NoteSectionView(title: "Action Items", items: editor.note.actions)
+            NoteSectionView(title: "Summary", items: editor.note.summary, speakerNames: speakerNames)
+            NoteSectionView(title: "Decisions", items: editor.note.decisions, speakerNames: speakerNames)
+            NoteSectionView(title: "Action Items", items: editor.note.actions, speakerNames: speakerNames)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("Your Notes")
@@ -316,22 +320,33 @@ struct RecordingDetailView: View {
     }
 
     private var noteActions: some View {
-        HStack {
-            Spacer()
-            Button(copiedNoteTitle, systemImage: copiedNote ? "checkmark" : "doc.on.doc") {
-                NoteClipboard.copy(RecordingDocument.plainText(for: editor.recording))
-                copiedNote = true
+        ViewThatFits(in: .horizontal) {
+            HStack {
+                Spacer()
+                noteActionButtons
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                noteActionButtons
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    @ViewBuilder
+    private var noteActionButtons: some View {
+        Button(copiedNoteTitle, systemImage: copiedNote ? "checkmark" : "doc.on.doc") {
+            NoteClipboard.copy(RecordingDocument.plainText(for: editor.recording))
+            copiedNote = true
+            confirmCopy()
+        }
+        .accessibilityLabel(Text("Copy the whole note as text"))
+        if !editor.note.isEmpty {
+            Button(copiedPromptTitle, systemImage: copiedPrompt ? "checkmark" : "sparkles") {
+                NoteClipboard.copy(AIAssistPrompt.prompt(note: editor.note, title: editor.recording.title, recordedAt: editor.recording.createdAt))
+                copiedPrompt = true
                 confirmCopy()
             }
-            .accessibilityLabel(Text("Copy the whole note as text"))
-            if !editor.note.isEmpty {
-                Button(copiedPromptTitle, systemImage: copiedPrompt ? "checkmark" : "sparkles") {
-                    NoteClipboard.copy(AIAssistPrompt.prompt(note: editor.note, title: editor.recording.title, recordedAt: editor.recording.createdAt))
-                    copiedPrompt = true
-                    confirmCopy()
-                }
-                .accessibilityLabel(Text("Copy a prompt for an external AI assistant"))
-            }
+            .accessibilityLabel(Text("Copy a prompt for an external AI assistant"))
         }
     }
 

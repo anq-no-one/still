@@ -164,7 +164,7 @@ struct StubNoteGenerator: NoteGenerator, @unchecked Sendable {
         self.build = build
     }
 
-    func note(template: NoteTemplate, segments: [TranscriptSegment]) async throws -> Note {
+    func note(template: NoteTemplate, segments: [TranscriptSegment], speakers _: [Speaker]) async throws -> Note {
         try build(template, segments)
     }
 }

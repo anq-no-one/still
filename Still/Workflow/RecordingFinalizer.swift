@@ -69,6 +69,7 @@ struct RecordingFinalizer {
             await AITrace.$stage.withValue("note") {
                 await noteBuilder.note(
                     segments: segments,
+                    speakers: transcription?.speakers ?? [],
                     duration: draft.duration,
                     tracks: library.tracks(forRecording: draft.id)
                 )

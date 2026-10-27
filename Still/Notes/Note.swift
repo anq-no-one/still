@@ -28,6 +28,28 @@ struct NoteItem: Identifiable, Codable, Equatable, Sendable {
         self.sourceSegmentIDs = sourceSegmentIDs
         self.isUserAuthored = isUserAuthored
     }
+
+    func speakerNames(segments: [TranscriptSegment], speakers: [Speaker]) -> [String] {
+        let cited = Set(sourceSegmentIDs)
+        let names = Dictionary(speakers.map { ($0.id, $0.name) }, uniquingKeysWith: { first, _ in first })
+        var ordered: [String] = []
+        for segment in segments where cited.contains(segment.id) {
+            guard let name = segment.speakerID.flatMap({ names[$0] }), !ordered.contains(name) else { continue }
+            ordered.append(name)
+        }
+        return ordered
+    }
+}
+
+struct NoteGeneration: Codable, Equatable, Sendable {
+    enum Source: String, Codable, Sendable {
+        case model
+        case extractive
+        case mixed
+    }
+
+    var source: Source
+    var problem: String?
 }
 
 struct Note: Codable, Equatable, Sendable {
@@ -35,21 +57,23 @@ struct Note: Codable, Equatable, Sendable {
     var summary: [NoteItem]
     var decisions: [NoteItem]
     var actions: [NoteItem]
-    /// Text the user wrote. Regenerating the note never touches it.
     var userText: String
+    var generation: NoteGeneration?
 
     init(
         template: NoteTemplate,
         summary: [NoteItem] = [],
         decisions: [NoteItem] = [],
         actions: [NoteItem] = [],
-        userText: String = ""
+        userText: String = "",
+        generation: NoteGeneration? = nil
     ) {
         self.template = template
         self.summary = summary
         self.decisions = decisions
         self.actions = actions
         self.userText = userText
+        self.generation = generation
     }
 
     var generatedItems: [NoteItem] {
@@ -62,8 +86,6 @@ struct Note: Codable, Equatable, Sendable {
 }
 
 enum NoteSchema {
-    /// A Note is valid only when every generated claim points at transcript
-    /// segments that exist. Anything else is ungrounded and gets rejected.
     static func isGrounded(_ note: Note, in segments: [TranscriptSegment]) -> Bool {
         let known = Set(segments.map(\.id))
 

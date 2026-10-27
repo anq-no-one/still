@@ -3,6 +3,7 @@ import SwiftUI
 struct NoteSectionView: View {
     let title: String
     let items: [NoteItem]
+    var speakerNames: (NoteItem) -> [String] = { _ in [] }
 
     var body: some View {
         if !items.isEmpty {
@@ -16,10 +17,19 @@ struct NoteSectionView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
-                        Text(item.text)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(item.text)
+                            let names = speakerNames(item)
+                            if !names.isEmpty {
+                                Text(names.formatted(.list(type: .and)))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .contentShape(.rect)
+                    .accessibilityElement(children: .combine)
                     .contextMenu {
                         Button("Copy", systemImage: "doc.on.doc") {
                             NoteClipboard.copy(item.text)

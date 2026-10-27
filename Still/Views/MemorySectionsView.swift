@@ -18,7 +18,6 @@ struct MemorySectionsView: View {
 
                 MemorySection(title: "Decisions", items: visible(.decision), review: review, edit: nil)
                 MemorySection(title: "Facts", items: visible(.fact), review: review, edit: nil)
-                MemorySection(title: "Proposed Tasks", items: visible(.task), review: review, edit: edit)
 
                 if let failure {
                     Label(failure, systemImage: "exclamationmark.triangle.fill")
@@ -57,10 +56,6 @@ struct MemorySectionsView: View {
 
     private func review(_ item: MemoryItem, _ review: MemoryReview) {
         perform { try library.review(item.id, inRecording: recordingID, as: review) }
-    }
-
-    private func edit(_ item: MemoryItem, _ text: String) {
-        perform { try library.edit(item.id, inRecording: recordingID, to: text) }
     }
 
     private func perform(_ change: () throws -> Void) {

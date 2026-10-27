@@ -27,8 +27,11 @@ enum RecordingDocument {
         if recording.segments.isEmpty {
             lines.append(recording.transcript)
         } else {
+            let names = Dictionary(recording.speakers.map { ($0.id, $0.name) }, uniquingKeysWith: { first, _ in first })
+            let speakers = Dictionary(recording.segments.map { ($0.id, $0.speakerID) }, uniquingKeysWith: { first, _ in first })
             for sentence in ExtractiveNoteGenerator.sentences(in: recording.segments) {
-                lines.append("- `\(sentence.start.recordingDurationText)` \(sentence.text)")
+                let name = sentence.sourceIDs.first.flatMap { speakers[$0] ?? nil }.flatMap { names[$0] }
+                lines.append("- `\(sentence.start.recordingDurationText)` " + (name.map { "**\($0):** " } ?? "") + sentence.text)
             }
         }
 
@@ -50,7 +53,8 @@ enum RecordingDocument {
         var lines = ["### \(title)", ""]
         for item in items {
             let stamp = time(of: item, in: recording).map { "`\($0.recordingDurationText)` " } ?? ""
-            lines.append("- \(stamp)\(item.text)")
+            let names = item.speakerNames(segments: recording.segments, speakers: recording.speakers)
+            lines.append("- \(stamp)\(item.text)" + (names.isEmpty ? "" : " — \(names.formatted(.list(type: .and)))"))
         }
         lines.append("")
         return lines
