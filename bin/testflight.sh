@@ -14,7 +14,7 @@ LOG="Artifacts/testflight.log"
 echo "-- TestFlight run started at $(date -u +%Y-%m-%dT%H:%M:%SZ) from commit $(git rev-parse --short HEAD)" | tee "$LOG"
 exec > >(tee -a "$LOG") 2>&1
 
-OP_ITEM="${STILL_OP_ASC_KEY_ITEM:-op://Personal/colouring - App Store Connect API}"
+OP_ITEM="${STILL_OP_ASC_KEY_ITEM:-op://Home/colouring - App Store Connect API}"
 
 op_read() {
   local value
@@ -22,13 +22,15 @@ op_read() {
     printf '%s' "$value"
     return 0
   fi
-  echo "!! Could not read $1"
-  echo "-- 1Password item names visible to this sign-in (titles only, no secrets):"
-  op item list --format json 2>/dev/null | python3 -c "
+  {
+    echo "!! Could not read $1"
+    echo "-- 1Password item names visible to this sign-in (titles only, no secrets):"
+    op item list --format json 2>/dev/null | python3 -c "
 import json,sys
 for item in json.load(sys.stdin):
     print('   ', item.get('vault',{}).get('name','?'), '/', item.get('title','?'))
 " || op item list || true
+  } >&2
   return 1
 }
 

@@ -3,7 +3,7 @@ require "tmpdir"
 
 default_platform(:ios)
 
-OP_ITEM = ENV.fetch("STILL_OP_ASC_KEY_ITEM", "op://Personal/colouring - App Store Connect API")
+OP_ITEM = ENV.fetch("STILL_OP_ASC_KEY_ITEM", "op://Home/colouring - App Store Connect API")
 ROOT = File.expand_path("..", __dir__)
 BUILD_DIR = File.join(ROOT, "Release", "build")
 
