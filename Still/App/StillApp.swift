@@ -281,8 +281,8 @@ struct StillApp: App {
             )
         }
         let memoryInstaller = installers.meetingMemory
-        let memoryExtractor = LocalModelExtractor(pack: memoryInstaller.pack, root: modelRoot)
         let detailsModel = LocalLanguageModel(directory: memoryInstaller.pack.installedDirectory(in: modelRoot))
+        let memoryExtractor = LocalModelExtractor(pack: memoryInstaller.pack, root: modelRoot, model: detailsModel)
         let makePreferredNoteBuilder: @MainActor @Sendable () -> GroundedNoteBuilder = {
             guard LocalModelExtractor.canRun, memoryInstaller.state == .installed else { return GroundedNoteBuilder() }
             return GroundedNoteBuilder(preferred: LocalModelNoteGenerator(model: detailsModel))

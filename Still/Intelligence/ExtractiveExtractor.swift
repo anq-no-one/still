@@ -16,12 +16,10 @@ struct ExtractiveExtractor: Extractor {
     func candidates(from segments: [ExtractionSegment], language: String?) async throws -> [ExtractionCandidate] {
         TranscriptSentence.sentences(in: segments).compactMap { sentence in
             let lowered = sentence.text.lowercased()
-            if Self.mentions(ExtractiveNoteGenerator.decisionCues, in: lowered),
-               ExtractiveNoteGenerator.isSubstantive(sentence.text, cues: ExtractiveNoteGenerator.decisionCues) {
+            if ExtractiveNoteGenerator.isDecision(sentence.text) {
                 return ExtractionCandidate(kind: .decision, text: sentence.text, citedSegmentIDs: sentence.segmentIDs)
             }
-            if Self.mentions(ExtractiveNoteGenerator.actionCues, in: lowered),
-               ExtractiveNoteGenerator.isSubstantive(sentence.text, cues: ExtractiveNoteGenerator.actionCues) {
+            if ExtractiveNoteGenerator.isAction(sentence.text) {
                 return ExtractionCandidate(
                     kind: .task,
                     text: sentence.text,
@@ -30,7 +28,7 @@ struct ExtractiveExtractor: Extractor {
                     due: Self.dueWords.first { lowered.contains($0) }
                 )
             }
-            if Self.mentions(Self.factCues, in: lowered) || sentence.text.contains(where: \.isNumber) {
+            if Self.mentions(Self.factCues, in: lowered) || sentence.text.contains(where: \.isNumber) || ExtractiveNoteGenerator.isAvailability(sentence.text) {
                 return ExtractionCandidate(kind: .fact, text: sentence.text, citedSegmentIDs: sentence.segmentIDs)
             }
             return nil

@@ -304,5 +304,7 @@ schemes:
     run:
       storeKitConfiguration: Still/Supporting/Still.storekit
     test:
+      environmentVariables:
+        STILL_REPLAY_CONFIG: "$(STILL_REPLAY_CONFIG)"
       targets:
         - StillTests

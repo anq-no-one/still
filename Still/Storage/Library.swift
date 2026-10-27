@@ -1024,7 +1024,7 @@ final class Library: RecordingLibrary {
             storedRecordings.append(recording)
             storedRecordings.sort { $0.createdAt > $1.createdAt }
         }
-        semanticIndex.update(recording)
+        semanticIndex.updateInBackground(recording)
     }
 }
 

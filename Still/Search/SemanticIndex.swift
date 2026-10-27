@@ -1,5 +1,7 @@
 import Foundation
+import Observation
 
+@Observable
 final class SemanticIndex {
     struct Match {
         let recordingID: UUID
@@ -9,17 +11,31 @@ final class SemanticIndex {
         let score: Float
     }
 
-    private struct Entry {
+    private struct Entry: Sendable {
         let segmentID: UUID
         let time: TimeInterval
         let text: String
         let vector: [Float]
     }
 
+    private struct Input: Equatable, Sendable {
+        let segmentID: UUID
+        let time: TimeInterval
+        let text: String
+
+        init(_ segment: TranscriptSegment) {
+            segmentID = segment.id
+            time = segment.start
+            text = segment.displayText
+        }
+    }
+
+    @ObservationIgnored private var inputsByRecording: [UUID: [Input]] = [:]
+    @ObservationIgnored private var pendingUpdates: [UUID: Task<Void, Never>] = [:]
     private let engine: EmbeddingEngine?
     private var entriesByRecording: [UUID: [Entry]] = [:]
-    private var removedDuringRebuild: Set<UUID> = []
-    private var isRebuilding = false
+    @ObservationIgnored private var removedDuringRebuild: Set<UUID> = []
+    @ObservationIgnored private var isRebuilding = false
 
     init(engine: EmbeddingEngine?) {
         self.engine = engine
@@ -31,6 +47,9 @@ final class SemanticIndex {
 
     func rebuild(_ recordings: [Recording]) {
         entriesByRecording.removeAll()
+        inputsByRecording.removeAll()
+        for task in pendingUpdates.values { task.cancel() }
+        pendingUpdates.removeAll()
         for recording in recordings where !recording.isDeleted {
             update(recording)
         }
@@ -43,6 +62,9 @@ final class SemanticIndex {
 
         isRebuilding = true
         let live = recordings.filter { !$0.isDeleted }
+        for recording in live where inputsByRecording[recording.id] == nil {
+            inputsByRecording[recording.id] = recording.segments.map(Input.init)
+        }
         return Task { @MainActor in
             let built = await Task.detached(priority: .utility) {
                 Perf.measure("semantic.rebuild", ["recordings": String(live.count)]) {
@@ -65,13 +87,48 @@ final class SemanticIndex {
         }
 
         guard let engine else { return }
+        let inputs = recording.segments.map(Input.init)
+        guard inputsByRecording[recording.id] != inputs else { return }
+        pendingUpdates.removeValue(forKey: recording.id)?.cancel()
+        inputsByRecording[recording.id] = inputs
 
         entriesByRecording[recording.id] = Perf.measure("semantic.update", ["recordingID": recording.id.uuidString, "segments": String(recording.segments.count)]) {
             Self.entries(for: recording, engine: engine)
         }
     }
 
+    @MainActor
+    @discardableResult
+    func updateInBackground(_ recording: Recording) -> Task<Void, Never> {
+        guard !recording.isDeleted else {
+            remove(recording.id)
+            return Task {}
+        }
+        guard let engine else { return Task {} }
+        let inputs = recording.segments.map(Input.init)
+        guard inputsByRecording[recording.id] != inputs else {
+            return pendingUpdates[recording.id] ?? Task {}
+        }
+        pendingUpdates.removeValue(forKey: recording.id)?.cancel()
+        inputsByRecording[recording.id] = inputs
+        let task = Task { @MainActor in
+            guard !Task.isCancelled else { return }
+            let entries = await Task.detached(priority: .utility) {
+                Perf.measure("semantic.update", ["recordingID": recording.id.uuidString, "segments": String(recording.segments.count)]) {
+                    Self.entries(for: recording, engine: engine)
+                }
+            }.value
+            guard !Task.isCancelled, inputsByRecording[recording.id] == inputs else { return }
+            entriesByRecording[recording.id] = entries
+            pendingUpdates.removeValue(forKey: recording.id)
+        }
+        pendingUpdates[recording.id] = task
+        return task
+    }
+
     func remove(_ recordingID: UUID) {
+        inputsByRecording.removeValue(forKey: recordingID)
+        pendingUpdates.removeValue(forKey: recordingID)?.cancel()
         entriesByRecording.removeValue(forKey: recordingID)
         if isRebuilding {
             removedDuringRebuild.insert(recordingID)
