@@ -4,6 +4,7 @@ import Foundation
 struct MeetingContext: Equatable, Sendable {
     let title: String
     let participants: [String]
+    var isAllDay = false
 }
 
 @MainActor
@@ -28,7 +29,7 @@ struct CalendarContext {
     func suggestion(at date: Date) async -> MeetingContext? {
         guard await source.hasAccess() else { return nil }
 
-        return await source.events(around: date).first
+        return await source.events(around: date).first { !$0.isAllDay }
     }
 }
 
@@ -54,7 +55,8 @@ struct EventKitCalendarSource: CalendarSource {
         return store.events(matching: predicate).map { event in
             MeetingContext(
                 title: event.title ?? "",
-                participants: (event.attendees ?? []).filter { !$0.isCurrentUser }.compactMap(\.name)
+                participants: (event.attendees ?? []).filter { !$0.isCurrentUser }.compactMap(\.name),
+                isAllDay: event.isAllDay
             )
         }
     }

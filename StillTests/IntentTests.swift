@@ -76,6 +76,22 @@ struct CalendarContextTests {
     }
 
     @Test
+    func anAllDayEventDoesNotNameAnAdHocCall() async {
+        let allDay = MeetingContext(title: "Home office, Main Street 50", participants: [], isAllDay: true)
+        let source = FakeCalendarSource(hasAccess: true, events: [allDay])
+
+        #expect(await CalendarContext(source: source).suggestion(at: .now) == nil)
+    }
+
+    @Test
+    func aTimedMeetingWinsOverAnAllDayEvent() async {
+        let allDay = MeetingContext(title: "Home office, Main Street 50", participants: [], isAllDay: true)
+        let source = FakeCalendarSource(hasAccess: true, events: [allDay, meeting])
+
+        #expect(await CalendarContext(source: source).suggestion(at: .now) == meeting)
+    }
+
+    @Test
     func suggestsNothingWhenTheCalendarIsEmpty() async {
         let source = FakeCalendarSource(hasAccess: true, events: [])
 
