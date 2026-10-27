@@ -6,6 +6,7 @@ enum SetupStep: String, Codable, CaseIterable, Sendable {
     case microphone
     case systemAudio
     case calendar
+    case callNames
     case transcription
 }
 
@@ -26,9 +27,11 @@ protocol SetupPermissions: AnyObject {
     var microphone: PermissionState { get }
     var systemAudio: PermissionState { get }
     var calendar: PermissionState { get }
+    var callNames: PermissionState { get }
     func requestMicrophone() async
     func requestSystemAudio()
     func requestCalendar() async
+    func requestCallNames()
 }
 
 @MainActor
@@ -51,7 +54,7 @@ final class SetupFlow {
         self.store = store
         self.permissions = permissions
         self.isTranscriptionReady = isTranscriptionReady
-        steps = SetupStep.allCases.filter { includesSystemAudio || $0 != .systemAudio }
+        steps = SetupStep.allCases.filter { includesSystemAudio || ($0 != .systemAudio && $0 != .callNames) }
         acknowledged = store.completedSteps()
     }
 
@@ -99,6 +102,15 @@ final class SetupFlow {
         return permissions.calendar
     }
 
+    var asksForCallNames: Bool {
+        steps.contains(.callNames)
+    }
+
+    var callNames: PermissionState {
+        _ = revision
+        return permissions.callNames
+    }
+
     func acknowledgePrivacy() {
         acknowledged.insert(.privacy)
         store.markCompleted(.privacy)
@@ -126,6 +138,19 @@ final class SetupFlow {
         refresh()
     }
 
+    func requestCallNames() {
+        permissions.requestCallNames()
+        acknowledged.insert(.callNames)
+        store.markCompleted(.callNames)
+        refresh()
+    }
+
+    func skipCallNames() {
+        acknowledged.insert(.callNames)
+        store.markCompleted(.callNames)
+        refresh()
+    }
+
     func refresh() {
         revision += 1
     }
@@ -136,6 +161,7 @@ final class SetupFlow {
         case .microphone: permissions.microphone == .granted
         case .systemAudio: permissions.systemAudio == .granted
         case .calendar: permissions.calendar != .notAsked || acknowledged.contains(.calendar)
+        case .callNames: permissions.callNames == .granted || acknowledged.contains(.callNames)
         case .transcription: isTranscriptionReady()
         }
     }

@@ -3,6 +3,7 @@ import Foundation
 struct TileObservation: Equatable, Sendable {
     let offset: TimeInterval
     let names: [String]
+    var activeSpeakerNames: [String] = []
 }
 
 protocol TileTextRecognizer: Sendable {
@@ -11,7 +12,7 @@ protocol TileTextRecognizer: Sendable {
 
 enum TileCueBuilder {
     static let minimumFrames = 2
-    static let maximumGap: TimeInterval = 45
+    static let maximumGap: TimeInterval = 1.5
 
     private struct Run {
         var name: String
@@ -24,15 +25,17 @@ enum TileCueBuilder {
         var open: [String: Run] = [:]
         var finished: [SpeakerCue] = []
         for observation in observations.sorted(by: { $0.offset < $1.offset }) {
-            let present = Set(observation.names.map(VoiceProfiles.key(for:)).filter { !$0.isEmpty })
-            for key in open.keys where !present.contains(key) {
-                if observation.offset - (open[key]?.last ?? 0) > maximumGap {
-                    if let run = open.removeValue(forKey: key), run.frames >= minimumFrames {
-                        finished.append(SpeakerCue(name: run.name, start: run.start, end: max(run.start, run.last)))
+            let present = Set(observation.activeSpeakerNames.map(VoiceProfiles.key(for:)).filter { !$0.isEmpty })
+            for key in Array(open.keys) {
+                guard let run = open[key] else { continue }
+                if !present.contains(key) || observation.offset - run.last > maximumGap {
+                    open.removeValue(forKey: key)
+                    if run.frames >= minimumFrames {
+                        finished.append(SpeakerCue(name: run.name, start: run.start, end: min(observation.offset, run.last + maximumGap)))
                     }
                 }
             }
-            for name in observation.names {
+            for name in observation.activeSpeakerNames {
                 let key = VoiceProfiles.key(for: name)
                 guard !key.isEmpty else { continue }
                 if open[key] != nil {
@@ -44,7 +47,7 @@ enum TileCueBuilder {
             }
         }
         for run in open.values where run.frames >= minimumFrames {
-            finished.append(SpeakerCue(name: run.name, start: run.start, end: max(run.start, end)))
+            finished.append(SpeakerCue(name: run.name, start: run.start, end: max(run.start, min(end, run.last + maximumGap))))
         }
         return finished.sorted { ($0.start, $0.name) < ($1.start, $1.name) }
     }

@@ -37,6 +37,16 @@ struct AccessSettingsView: View {
                 ) {
                     Task { await setup.requestCalendar() }
                 }
+                if setup.asksForCallNames {
+                    row(
+                        "Speaker Names on Calls",
+                        systemImage: "person.wave.2.fill",
+                        state: setup.callNames,
+                        missing: "Without it, Still cannot tell which Teams participant is speaking."
+                    ) {
+                        setup.requestCallNames()
+                    }
+                }
             } header: {
                 Text("Optional")
             }

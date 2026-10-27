@@ -29927,134 +29927,6 @@
         }
       }
     },
-    "Loading recording" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aufnahme wird geladen"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cargando grabación"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chargement de l’enregistrement"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Caricamento registrazione"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opname laden"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wczytywanie nagrania"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A carregar gravação"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Загрузка записи"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Läser in inspelning"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Завантаження запису"
-          }
-        }
-      }
-    },
-    "Loading Audio" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Audio wird geladen"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cargando audio"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chargement de l’audio"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Caricamento audio"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Audio laden"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wczytywanie dźwięku"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A carregar áudio"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Загрузка аудио"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Läser in ljud"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Завантаження аудіо"
-          }
-        }
-      }
-    },
     "Heard by name in the call" : {
       "localizations" : {
         "de" : {
@@ -30499,6 +30371,646 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вийти повністю"
+          }
+        }
+      }
+    },
+    "This device could not turn the recording into text." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Gerät konnte die Aufnahme nicht in Text umwandeln."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo no ha podido convertir la grabación en texto."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cet appareil n’a pas pu convertir l’enregistrement en texte."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo dispositivo non è riuscito a trasformare la registrazione in testo."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit apparaat kon de opname niet omzetten in tekst."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To urządzenie nie mogło zamienić nagrania na tekst."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo não conseguiu converter a gravação em texto."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это устройство не смогло превратить запись в текст."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Den här enheten kunde inte omvandla inspelningen till text."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей пристрій не зміг перетворити запис на текст."
+          }
+        }
+      }
+    },
+    "Show more of the transcript" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehr vom Transkript anzeigen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar más de la transcripción"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher plus de la transcription"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra altra parte della trascrizione"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meer van het transcript tonen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokaż więcej transkrypcji"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar mais da transcrição"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать больше расшифровки"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa mer av transkriptionen"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показати більше розшифровки"
+          }
+        }
+      }
+    },
+    "Loading transcript…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transkript wird geladen …"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando transcripción…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement de la transcription…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caricamento trascrizione…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcript laden…"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wczytywanie transkrypcji…"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A carregar a transcrição…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Загрузка расшифровки…"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Läser in transkription…"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завантаження розшифровки…"
+          }
+        }
+      }
+    },
+    "%@, said by %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, gesagt von %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, dicho por %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, dit par %2$@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, detto da %2$@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, gezegd door %2$@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, powiedział(a) %2$@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, dito por %2$@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ — сказал(а) %2$@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, sagt av %2$@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ — сказав(ла) %2$@"
+          }
+        }
+      }
+    },
+    "Join your other devices' Still Library" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Still-Mediathek deiner anderen Geräte beitreten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unirse a la biblioteca de Still de tus otros dispositivos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rejoindre la bibliothèque Still de vos autres appareils"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unisciti alla libreria di Still degli altri tuoi dispositivi"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deelnemen aan de Still-bibliotheek van je andere apparaten"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dołącz do biblioteki Still z innych urządzeń"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juntar-se à biblioteca do Still dos seus outros dispositivos"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключиться к медиатеке Still на других ваших устройствах"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gå med i Still-biblioteket på dina andra enheter"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приєднатися до медіатеки Still на інших ваших пристроях"
+          }
+        }
+      }
+    },
+    "During a Microsoft Teams call, Still reads which participant Teams marks as speaking and suggests that name for the matching voice. Nothing is photographed, and the names never leave this Mac. Needs Accessibility access, which you can allow in Settings → Access. Turn this off to rely on calendar, voice and manual names only." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während eines Microsoft Teams-Anrufs liest Still, welche Person Teams als sprechend markiert, und schlägt diesen Namen für die passende Stimme vor. Es werden keine Bilder aufgenommen, und die Namen verlassen diesen Mac nie. Erfordert Zugriff auf die Bedienungshilfen, den du unter Einstellungen → Zugriff erlauben kannst. Schalte dies aus, um nur Kalender, Stimme und manuelle Namen zu verwenden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durante una llamada de Microsoft Teams, Still lee qué participante marca Teams como hablando y sugiere ese nombre para la voz correspondiente. No se toma ninguna imagen y los nombres nunca salen de este Mac. Requiere acceso de Accesibilidad, que puedes permitir en Ajustes → Acceso. Desactívalo para usar solo el calendario, la voz y los nombres manuales."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pendant un appel Microsoft Teams, Still lit quel participant Teams signale comme en train de parler et propose ce nom pour la voix correspondante. Aucune image n’est prise et les noms ne quittent jamais ce Mac. Nécessite l’accès Accessibilité, que vous pouvez autoriser dans Réglages → Accès. Désactivez cette option pour vous fier uniquement au calendrier, à la voix et aux noms saisis."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durante una chiamata Microsoft Teams, Still legge quale partecipante Teams indica come in conversazione e suggerisce quel nome per la voce corrispondente. Non viene scattata alcuna immagine e i nomi non lasciano mai questo Mac. Richiede l’accesso ad Accessibilità, che puoi consentire in Impostazioni → Accesso. Disattiva questa opzione per affidarti solo a calendario, voce e nomi inseriti a mano."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tijdens een Microsoft Teams-gesprek leest Still welke deelnemer Teams als sprekend markeert en stelt die naam voor bij de bijpassende stem. Er wordt niets gefotografeerd en de namen verlaten deze Mac nooit. Vereist toegang tot Toegankelijkheid, die je kunt toestaan via Instellingen → Toegang. Zet dit uit om alleen agenda, stem en handmatige namen te gebruiken."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podczas połączenia w Microsoft Teams Still odczytuje, którego uczestnika Teams oznacza jako mówiącego, i proponuje to imię dla pasującego głosu. Nic nie jest fotografowane, a imiona nigdy nie opuszczają tego Maca. Wymaga dostępu do funkcji Dostępność, na który możesz zezwolić w Ustawienia → Dostęp. Wyłącz to, aby korzystać tylko z kalendarza, głosu i ręcznie wpisanych imion."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durante uma chamada do Microsoft Teams, o Still lê qual o participante que o Teams marca como a falar e sugere esse nome para a voz correspondente. Nada é fotografado e os nomes nunca saem deste Mac. Requer acesso de Acessibilidade, que pode permitir em Definições → Acesso. Desative esta opção para usar apenas o calendário, a voz e nomes introduzidos manualmente."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Во время звонка в Microsoft Teams Still читает, кого из участников Teams отмечает говорящим, и предлагает это имя для подходящего голоса. Ничего не фотографируется, а имена никогда не покидают этот Mac. Нужен доступ к Универсальному доступу, который можно разрешить в Настройки → Доступ. Выключите, чтобы использовать только календарь, голос и имена, введённые вручную."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Under ett Microsoft Teams-samtal läser Still vilken deltagare Teams markerar som talande och föreslår det namnet för den matchande rösten. Inget fotograferas och namnen lämnar aldrig den här Macen. Kräver åtkomst till Hjälpmedel, som du kan tillåta i Inställningar → Åtkomst. Stäng av detta för att bara använda kalender, röst och manuellt angivna namn."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Під час дзвінка в Microsoft Teams Still зчитує, кого з учасників Teams позначає як того, хто говорить, і пропонує це ім’я для відповідного голосу. Нічого не фотографується, а імена ніколи не залишають цей Mac. Потрібен доступ до функції «Доступність», який можна надати в Параметри → Доступ. Вимкніть, щоб покладатися лише на календар, голос та імена, введені вручну."
+          }
+        }
+      }
+    },
+    "During a Microsoft Teams call, Still can read who Teams marks as speaking, so each line of the transcript carries the right name. macOS calls this Accessibility access. Still reads only the Teams meeting window and keeps the names on this device. This is optional, and you can turn it on later in Settings." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während eines Microsoft Teams-Anrufs kann Still lesen, wen Teams als sprechend markiert, damit jede Zeile des Transkripts den richtigen Namen trägt. macOS nennt das Zugriff auf die Bedienungshilfen. Still liest nur das Teams-Besprechungsfenster und behält die Namen auf diesem Gerät. Das ist optional, und du kannst es später in den Einstellungen aktivieren."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durante una llamada de Microsoft Teams, Still puede leer a quién marca Teams como hablando, para que cada línea de la transcripción lleve el nombre correcto. macOS lo llama acceso de Accesibilidad. Still solo lee la ventana de la reunión de Teams y guarda los nombres en este dispositivo. Es opcional y puedes activarlo más tarde en Ajustes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pendant un appel Microsoft Teams, Still peut lire qui Teams signale comme en train de parler, pour que chaque ligne de la transcription porte le bon nom. macOS appelle cela l’accès Accessibilité. Still lit uniquement la fenêtre de réunion Teams et garde les noms sur cet appareil. C’est facultatif, et vous pourrez l’activer plus tard dans les Réglages."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durante una chiamata Microsoft Teams, Still può leggere chi Teams indica come in conversazione, così ogni riga della trascrizione riporta il nome giusto. macOS lo chiama accesso ad Accessibilità. Still legge solo la finestra della riunione Teams e conserva i nomi su questo dispositivo. È facoltativo e puoi attivarlo più tardi in Impostazioni."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tijdens een Microsoft Teams-gesprek kan Still lezen wie Teams als sprekend markeert, zodat elke regel van het transcript de juiste naam krijgt. macOS noemt dit toegang tot Toegankelijkheid. Still leest alleen het Teams-vergadervenster en bewaart de namen op dit apparaat. Dit is optioneel en je kunt het later inschakelen in Instellingen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podczas połączenia w Microsoft Teams Still może odczytać, kogo Teams oznacza jako mówiącego, aby każdy wiersz transkrypcji miał właściwe imię. macOS nazywa to dostępem do funkcji Dostępność. Still czyta tylko okno spotkania Teams i przechowuje imiona na tym urządzeniu. To opcjonalne i możesz włączyć to później w Ustawieniach."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durante uma chamada do Microsoft Teams, o Still pode ler quem o Teams marca como a falar, para que cada linha da transcrição tenha o nome certo. O macOS chama a isto acesso de Acessibilidade. O Still lê apenas a janela da reunião do Teams e mantém os nomes neste dispositivo. É opcional e pode ativá-lo mais tarde nas Definições."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Во время звонка в Microsoft Teams Still может читать, кого Teams отмечает говорящим, чтобы у каждой строки расшифровки было правильное имя. В macOS это называется Универсальный доступ. Still читает только окно встречи Teams и хранит имена на этом устройстве. Это необязательно, включить можно позже в Настройках."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Under ett Microsoft Teams-samtal kan Still läsa vem Teams markerar som talande, så att varje rad i transkriptionen får rätt namn. I macOS kallas detta åtkomst till Hjälpmedel. Still läser bara Teams-mötesfönstret och behåller namnen på den här enheten. Det är valfritt och du kan slå på det senare i Inställningar."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Під час дзвінка в Microsoft Teams Still може зчитувати, кого Teams позначає як того, хто говорить, щоб кожен рядок розшифровки мав правильне ім’я. У macOS це називається доступом до функції «Доступність». Still читає лише вікно зустрічі Teams і зберігає імена на цьому пристрої. Це необов’язково, увімкнути можна пізніше в Параметрах."
+          }
+        }
+      }
+    },
+    "Name the People Speaking on Calls" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprecher in Anrufen benennen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombrar a quien habla en las llamadas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nommer les personnes qui parlent en appel"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dai un nome a chi parla nelle chiamate"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benoem wie er spreekt in gesprekken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nazwij osoby mówiące w połączeniach"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identificar quem fala nas chamadas"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Называть говорящих на звонках"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Namnge de som talar i samtal"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Називати тих, хто говорить на дзвінках"
+          }
+        }
+      }
+    },
+    "Speaker Names on Calls" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprechernamen in Anrufen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombres de los hablantes en llamadas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noms des intervenants en appel"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nomi di chi parla nelle chiamate"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprekersnamen in gesprekken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imiona mówiących w połączeniach"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nomes de quem fala nas chamadas"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Имена говорящих на звонках"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Talarnamn i samtal"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Імена тих, хто говорить на дзвінках"
+          }
+        }
+      }
+    },
+    "Without it, Still cannot tell which Teams participant is speaking." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne diesen Zugriff kann Still nicht erkennen, welche Teams-Person gerade spricht."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin él, Still no puede saber qué participante de Teams está hablando."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans cet accès, Still ne peut pas savoir quel participant Teams parle."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senza questo accesso, Still non può sapere quale partecipante di Teams sta parlando."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zonder deze toegang kan Still niet zien welke Teams-deelnemer spreekt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bez tego dostępu Still nie rozpozna, który uczestnik Teams mówi."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem este acesso, o Still não consegue saber que participante do Teams está a falar."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без этого доступа Still не может понять, кто из участников Teams говорит."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utan denna åtkomst kan Still inte avgöra vilken Teams-deltagare som talar."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без цього доступу Still не може визначити, хто з учасників Teams говорить."
           }
         }
       }

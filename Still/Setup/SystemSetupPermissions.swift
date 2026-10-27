@@ -11,6 +11,7 @@ import UIKit
 @MainActor
 final class SystemSetupPermissions: SetupPermissions {
     private static let askedForSystemAudioKey = "still.setup.askedForSystemAudio"
+    private static let askedForCallNamesKey = "still.setup.askedForCallNames"
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
@@ -45,6 +46,24 @@ final class SystemSetupPermissions: SetupPermissions {
         case .notDetermined: .notAsked
         default: .denied
         }
+    }
+
+    var callNames: PermissionState {
+        #if os(macOS)
+        if TeamsActiveSpeakerReader.hasAccess { return .granted }
+        return defaults.bool(forKey: Self.askedForCallNamesKey) ? .denied : .notAsked
+        #else
+        .granted
+        #endif
+    }
+
+    func requestCallNames() {
+        #if os(macOS)
+        if defaults.bool(forKey: Self.askedForCallNamesKey) || !TeamsActiveSpeakerReader.requestAccess() {
+            Self.openSettings(anchor: "Privacy_Accessibility")
+        }
+        defaults.set(true, forKey: Self.askedForCallNamesKey)
+        #endif
     }
 
     func requestCalendar() async {

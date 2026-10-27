@@ -43,9 +43,15 @@ enum TeamsMeetingWindow {
 }
 
 #if os(macOS)
+import AppKit
 import ScreenCaptureKit
 
 extension TeamsMeetingWindow {
+    @MainActor
+    static func processIdentifiers() -> [Int32] {
+        teamsBundleIDs.flatMap { NSRunningApplication.runningApplications(withBundleIdentifier: $0).map(\.processIdentifier) }
+    }
+
     static func fetchWindows() async throws -> [MeetingWindowInfo] {
         let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false)
         return content.windows.map { window in

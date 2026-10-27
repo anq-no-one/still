@@ -43,6 +43,8 @@ struct SetupView: View {
                 systemAudioStep
             case .calendar:
                 calendarStep
+            case .callNames:
+                callNamesStep
             case .transcription:
                 transcriptionStep
             case nil:
@@ -110,6 +112,18 @@ struct SetupView: View {
                 Task { await flow.requestCalendar() }
             }
             secondary("Not Now", action: flow.skipCalendar)
+                .keyboardShortcut(.cancelAction)
+        }
+    }
+
+    private var callNamesStep: some View {
+        step(
+            icon: "person.wave.2.fill",
+            title: "Name the People Speaking on Calls",
+            body: String(localized: "During a Microsoft Teams call, Still can read who Teams marks as speaking, so each line of the transcript carries the right name. macOS calls this Accessibility access. Still reads only the Teams meeting window and keeps the names on this device. This is optional, and you can turn it on later in Settings.")
+        ) {
+            primary("Allow", action: flow.requestCallNames)
+            secondary("Not Now", action: flow.skipCallNames)
                 .keyboardShortcut(.cancelAction)
         }
     }

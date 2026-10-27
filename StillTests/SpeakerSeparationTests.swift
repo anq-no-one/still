@@ -136,6 +136,21 @@ struct SpeakerSeparationTests {
     }
 
     @Test
+    func threeRemoteVoicesAreCheckedWithTheLargeMeetingModel() async throws {
+        let three = (0..<3).map { SpeakerTurn(speaker: $0, start: Double($0), end: Double($0) + 1) }
+        let four = (0..<4).map { SpeakerTurn(speaker: $0, start: Double($0), end: Double($0) + 1) }
+        let large = StubDiarizer(turns: four)
+
+        let turns = try await AutomaticSpeakerDiarizer(
+            smallMeeting: StubDiarizer(turns: three),
+            largeMeeting: large
+        ).turns(in: [], sampleRate: 16_000)
+
+        #expect(large.calls == 1)
+        #expect(turns == four)
+    }
+
+    @Test
     func aSmallMeetingStaysWithTheSmallMeetingModel() async throws {
         let two = [SpeakerTurn(speaker: 0, start: 0, end: 1), SpeakerTurn(speaker: 1, start: 1, end: 2)]
         let large = StubDiarizer(turns: [])
@@ -157,6 +172,30 @@ struct SpeakerSeparationTests {
         ).turns(in: [], sampleRate: 16_000)
 
         #expect(turns == four)
+    }
+
+    @Test
+    func aFailingSmallMeetingModelStillAllowsTheLargeModelToSeparateVoices() async throws {
+        let four = (0..<4).map { SpeakerTurn(speaker: $0, start: Double($0), end: Double($0) + 1) }
+
+        let turns = try await AutomaticSpeakerDiarizer(
+            smallMeeting: StubDiarizer(error: StubDiarizer.Failure()),
+            largeMeeting: StubDiarizer(turns: four)
+        ).turns(in: [], sampleRate: 16_000)
+
+        #expect(turns == four)
+    }
+
+    @Test
+    func aLargeModelThatLosesVoicesDoesNotEraseTheSmallModelResult() async throws {
+        let three = (0..<3).map { SpeakerTurn(speaker: $0, start: Double($0), end: Double($0) + 1) }
+
+        let turns = try await AutomaticSpeakerDiarizer(
+            smallMeeting: StubDiarizer(turns: three),
+            largeMeeting: StubDiarizer(turns: [])
+        ).turns(in: [], sampleRate: 16_000)
+
+        #expect(turns == three)
     }
 
     @Test

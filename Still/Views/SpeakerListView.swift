@@ -11,7 +11,7 @@ struct SpeakerListView: View {
     var setRemembersVoice: (Speaker, Bool) -> Void = { _, _ in }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 18) {
             Text("Speakers")
                 .font(.headline)
 
@@ -72,9 +72,6 @@ private struct SpeakerRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             field
-            if !speaker.isYou, !mergeTargets.isEmpty {
-                mergeControl
-            }
             if let suggested = speaker.suggestedName {
                 suggestedName(suggested)
             }
@@ -95,6 +92,20 @@ private struct SpeakerRow: View {
                         }
                     }
                 }
+            }
+        }
+        .contextMenu {
+            if !speaker.isYou {
+                mergeButtons
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var mergeButtons: some View {
+        ForEach(mergeTargets) { target in
+            Button("Merge into \(target.name)", systemImage: "arrow.triangle.merge") {
+                merge(target)
             }
         }
     }
@@ -123,22 +134,6 @@ private struct SpeakerRow: View {
         }
         .buttonStyle(.bordered)
         .controlSize(.small)
-    }
-
-    private var mergeControl: some View {
-        Menu {
-            ForEach(mergeTargets) { target in
-                Button("Merge into \(target.name)") {
-                    merge(target)
-                }
-            }
-        } label: {
-            Label("Merge", systemImage: "arrow.triangle.merge")
-                .font(.callout)
-        }
-        .menuStyle(.borderlessButton)
-        .controlSize(.small)
-        .accessibilityHint("Moves every line of \(speaker.name) to the speaker you pick and removes \(speaker.name)")
     }
 
     private var voiceMemory: some View {

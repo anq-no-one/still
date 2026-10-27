@@ -68,67 +68,70 @@ struct TeamsMeetingWindowTests {
 
 struct TileCueBuilderTests {
     @Test
-    func aNameSeenOnceIsNoise() {
+    func visibleNamesAreNotEvidenceOfActiveSpeech() {
         let observations = [
-            TileObservation(offset: 0, names: ["Dana Kim"]),
-            TileObservation(offset: 20, names: ["Ben Olsen"]),
-            TileObservation(offset: 40, names: ["Ben Olsen"]),
+            TileObservation(offset: 0, names: ["Dana Kim", "Type a message"]),
+            TileObservation(offset: 20, names: ["Dana Kim", "Type a message"]),
         ]
 
-        let cues = TileCueBuilder.cues(from: observations, endingAt: 60)
+        #expect(TileCueBuilder.cues(from: observations, endingAt: 40).isEmpty)
+    }
+
+    @Test
+    func anActiveNameSeenOnceIsNoise() {
+        let observations = [
+            TileObservation(offset: 0, names: [], activeSpeakerNames: ["Dana Kim"]),
+            TileObservation(offset: 0.5, names: [], activeSpeakerNames: ["Ben Olsen"]),
+            TileObservation(offset: 1, names: [], activeSpeakerNames: ["Ben Olsen"]),
+        ]
+
+        let cues = TileCueBuilder.cues(from: observations, endingAt: 1.5)
 
         #expect(cues.map(\.name) == ["Ben Olsen"])
     }
 
     @Test
-    func aSteadyNameSpansFromFirstSightToTheEnd() {
+    func activeSpeechEndsWhenTheNameIsNoLongerSpeaking() {
         let observations = [
-            TileObservation(offset: 10, names: ["Dana Kim"]),
-            TileObservation(offset: 30, names: ["Dana Kim", "Ben Olsen"]),
-            TileObservation(offset: 50, names: ["Dana Kim"]),
+            TileObservation(offset: 0, names: ["Dana Kim"], activeSpeakerNames: ["Dana Kim"]),
+            TileObservation(offset: 0.5, names: ["Dana Kim"], activeSpeakerNames: ["Dana Kim"]),
+            TileObservation(offset: 1, names: ["Dana Kim"]),
+            TileObservation(offset: 1.5, names: ["Dana Kim"]),
         ]
 
-        let cues = TileCueBuilder.cues(from: observations, endingAt: 70)
-
-        let dana = cues.first { $0.name == "Dana Kim" }
-        #expect(dana?.start == 10)
-        #expect(dana?.end == 70)
+        #expect(TileCueBuilder.cues(from: observations, endingAt: 20) == [
+            SpeakerCue(name: "Dana Kim", start: 0, end: 1),
+        ])
     }
 
     @Test
-    func aLongAbsenceSplitsTheCueInTwo() {
+    func missingObservationsDoNotStretchSpeechAcrossAGap() {
         let observations = [
-            TileObservation(offset: 0, names: ["Dana Kim"]),
-            TileObservation(offset: 20, names: ["Dana Kim"]),
-            TileObservation(offset: 40, names: ["Ben Olsen"]),
-            TileObservation(offset: 60, names: ["Ben Olsen"]),
-            TileObservation(offset: 80, names: ["Ben Olsen"]),
-            TileObservation(offset: 100, names: ["Dana Kim"]),
-            TileObservation(offset: 120, names: ["Dana Kim"]),
+            TileObservation(offset: 0, names: [], activeSpeakerNames: ["Dana Kim"]),
+            TileObservation(offset: 0.5, names: [], activeSpeakerNames: ["Dana Kim"]),
+            TileObservation(offset: 20, names: [], activeSpeakerNames: ["Dana Kim"]),
+            TileObservation(offset: 20.5, names: [], activeSpeakerNames: ["Dana Kim"]),
         ]
 
-        let cues = TileCueBuilder.cues(from: observations, endingAt: 140)
-        let dana = cues.filter { $0.name == "Dana Kim" }
-
-        #expect(dana.count == 2)
-        #expect(dana[0].end == 20)
-        #expect(dana[1].start == 100)
+        #expect(TileCueBuilder.cues(from: observations, endingAt: 40) == [
+            SpeakerCue(name: "Dana Kim", start: 0, end: 2),
+            SpeakerCue(name: "Dana Kim", start: 20, end: 22),
+        ])
     }
 
     @Test
-    func stubOCRCuesSuggestNamesThroughTheExistingMatcher() {
+    func activeSpeakerObservationsSuggestNamesThroughTheExistingMatcher() {
         let guests = Speaker.forTrack(.system)
         let transcription = TranscriptionResult(
             segments: [
-                TranscriptSegment(start: 0, end: 30, text: "Welcome", language: "en", confidence: 0.9).attributed(to: guests),
+                TranscriptSegment(start: 0, end: 4, text: "Welcome", language: "en", confidence: 0.9).attributed(to: guests),
             ],
             speakers: [Speaker.forTrack(.microphone), guests]
         )
-        let observations = [
-            TileObservation(offset: 0, names: ["Dana Kim"]),
-            TileObservation(offset: 20, names: ["Dana Kim"]),
-        ]
-        let cues = TileCueBuilder.cues(from: observations, endingAt: 30)
+        let observations = stride(from: 0.0, through: 3.5, by: 0.5).map {
+            TileObservation(offset: $0, names: [], activeSpeakerNames: ["Dana Kim"])
+        }
+        let cues = TileCueBuilder.cues(from: observations, endingAt: 4)
 
         let suggested = SpeakerCueMatcher.suggest(cues, for: transcription)
 

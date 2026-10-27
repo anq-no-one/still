@@ -84,6 +84,7 @@ struct SpeakerSeparation: Sendable {
                 in: transcription
             )
         } catch {
+            DevLog.error("speakers.separationFailed", error, ["fallback": "trackGroups"])
             return transcription
         }
     }
@@ -116,7 +117,16 @@ enum SpeakerAssignment {
         for voice in voicesBelowMinimum(turns, matches: matches, in: transcription) {
             matches = matches.filter { $0.value != voice }
         }
+        let beforeMerge = Set(matches.values).count
         matches = remappingNearIdenticalVoices(matches, voiceprints: voiceprints)
+        AITrace.record("speakers.assignment", [
+            "stage": "speakers",
+            "rawVoices": String(Set(turns.map(\.speaker)).count),
+            "matchedVoices": String(claimedBefore.count),
+            "prunedVoices": String(claimedBefore.count - beforeMerge),
+            "mergedVoices": String(beforeMerge - Set(matches.values).count),
+            "unassignedSegments": String(transcription.segments.filter { $0.speakerID == group.id && matches[$0.id] == nil }.count),
+        ])
         let pruned = claimedBefore.subtracting(matches.values).count > 0
 
         let order = transcription.segments.compactMap { matches[$0.id] }.uniqued()
@@ -176,6 +186,14 @@ enum SpeakerAssignment {
                 .sorted()
                 .compactMap { other in voiceprints[other].map { (other, $0) } }
                 .first { $0.1.distance(to: voiceprint) <= maximumMergeDistance }
+            if let twin {
+                AITrace.record("speakers.voiceMerged", [
+                    "stage": "speakers",
+                    "voice": String(voice),
+                    "into": String(twin.0),
+                    "distance": String(twin.1.distance(to: voiceprint)),
+                ])
+            }
             canonical[voice] = twin.flatMap { canonical[$0.0] } ?? voice
         }
         return matches.mapValues { canonical[$0] ?? $0 }
@@ -239,15 +257,40 @@ enum SpeakerNaming {
 
 struct AutomaticSpeakerDiarizer: SpeakerDiarizer {
     static let smallMeetingSeats = 4
+    static let largeMeetingThreshold = smallMeetingSeats - 1
 
     let smallMeeting: SpeakerDiarizer
     let largeMeeting: SpeakerDiarizer
 
     func turns(in samples: [Float], sampleRate: Int) async throws -> [SpeakerTurn] {
-        let small = try await smallMeeting.turns(in: samples, sampleRate: sampleRate)
-        guard Set(small.map(\.speaker)).count >= Self.smallMeetingSeats else { return small }
-
-        return (try? await largeMeeting.turns(in: samples, sampleRate: sampleRate)) ?? small
+        let small: [SpeakerTurn]
+        do {
+            small = try await smallMeeting.turns(in: samples, sampleRate: sampleRate)
+        } catch {
+            DevLog.error("speakers.smallModelFailed", error, ["fallback": "largeModel"])
+            return try await largeMeeting.turns(in: samples, sampleRate: sampleRate)
+        }
+        let smallVoices = Set(small.map(\.speaker)).count
+        guard smallVoices >= Self.largeMeetingThreshold else {
+            AITrace.record("speakers.modelSelected", ["stage": "speakers", "model": "small", "voices": String(smallVoices)])
+            return small
+        }
+        do {
+            let large = try await largeMeeting.turns(in: samples, sampleRate: sampleRate)
+            let largeVoices = Set(large.map(\.speaker)).count
+            let usesLarge = largeVoices >= smallVoices
+            AITrace.record("speakers.modelSelected", [
+                "stage": "speakers",
+                "model": usesLarge ? "large" : "small",
+                "smallVoices": String(smallVoices),
+                "largeVoices": String(largeVoices),
+                "reason": usesLarge ? "nearSmallModelCapacity" : "largeModelLostVoices",
+            ])
+            return usesLarge ? large : small
+        } catch {
+            DevLog.error("speakers.largeModelFailed", error, ["fallback": "smallModel", "voices": String(smallVoices)])
+            return small
+        }
     }
 }
 

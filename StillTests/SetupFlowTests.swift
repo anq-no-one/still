@@ -28,6 +28,9 @@ struct SetupFlowTests {
         #expect(flow.step == .calendar)
 
         await flow.requestCalendar()
+        #expect(flow.step == .callNames)
+
+        flow.requestCallNames()
         #expect(flow.step == .transcription)
 
         modelReady.set(true)
@@ -44,8 +47,25 @@ struct SetupFlowTests {
         flow.requestSystemAudio()
 
         await flow.requestCalendar()
+        flow.skipCallNames()
 
         #expect(flow.calendar == .denied)
+        #expect(flow.isComplete)
+    }
+
+    @Test
+    func declinedCallNamesStillLetTheUserRecord() async {
+        let permissions = FakeSetupPermissions()
+        let flow = makeFlow(permissions: permissions, isTranscriptionReady: { true })
+        flow.acknowledgePrivacy()
+        await flow.requestMicrophone()
+        flow.requestSystemAudio()
+        await flow.requestCalendar()
+        #expect(flow.step == .callNames)
+
+        flow.skipCallNames()
+
+        #expect(flow.callNames == .notAsked)
         #expect(flow.isComplete)
     }
 
@@ -56,9 +76,10 @@ struct SetupFlowTests {
         let phone = makeFlow(permissions: FakeSetupPermissions(), includesSystemAudio: false)
 
         #expect(mac.stepNumber == 1)
-        #expect(mac.stepCount == 5)
+        #expect(mac.stepCount == 6)
         #expect(phone.stepCount == 4)
         #expect(!phone.asksForSystemAudio)
+        #expect(!phone.asksForCallNames)
 
         mac.acknowledgePrivacy()
         #expect(mac.stepNumber == 2)
@@ -84,6 +105,7 @@ struct SetupFlowTests {
         await flow.requestMicrophone()
         flow.requestSystemAudio()
         flow.skipCalendar()
+        flow.skipCallNames()
         #expect(flow.isComplete)
 
         permissions.systemAudio = .denied
@@ -127,7 +149,7 @@ struct SetupFlowTests {
         flow.acknowledgePrivacy()
         flow.skipCalendar()
 
-        #expect(makeFlow(store: store, permissions: permissions).step == .transcription)
+        #expect(makeFlow(store: store, permissions: permissions).step == .callNames)
     }
 
     @Test
@@ -174,6 +196,7 @@ final class FakeSetupPermissions: SetupPermissions {
     var microphone: PermissionState = .notAsked
     var systemAudio: PermissionState = .notAsked
     var calendar: PermissionState = .notAsked
+    var callNames: PermissionState = .notAsked
     private let microphoneAnswer: PermissionState
     private let calendarAnswer: PermissionState
 
@@ -192,5 +215,9 @@ final class FakeSetupPermissions: SetupPermissions {
 
     func requestSystemAudio() {
         systemAudio = .granted
+    }
+
+    func requestCallNames() {
+        callNames = .granted
     }
 }

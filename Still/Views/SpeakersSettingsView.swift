@@ -17,7 +17,7 @@ struct SpeakersSettingsView: View {
             } header: {
                 Text("Meeting Window")
             } footer: {
-                Text("While a call app plays sound, Still photographs only the meeting window when someone is speaking. On-device text reading suggests names for that recording, then the photographs are deleted. They never leave this Mac. Needs the Screen Recording permission you already granted for call audio. Turn this off to rely on calendar, voice and manual names only.")
+                Text("During a Microsoft Teams call, Still reads which participant Teams marks as speaking and suggests that name for the matching voice. Nothing is photographed, and the names never leave this Mac. Needs Accessibility access, which you can allow in Settings → Access. Turn this off to rely on calendar, voice and manual names only.")
             }
             #endif
 

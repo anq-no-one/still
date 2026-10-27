@@ -31,7 +31,14 @@ struct SortformerSpeakerDiarizer: SpeakerDiarizer {
             samples,
             sourceSampleRate: sampleRate == config.sampleRate ? nil : Double(sampleRate)
         )
-        return SpeakerTurn.turns(in: timeline)
+        let turns = SpeakerTurn.turns(in: timeline)
+        AITrace.record("speakers.modelTurns", [
+            "stage": "speakers",
+            "model": model.lastPathComponent,
+            "turns": turns.map { "\($0.speaker)@\($0.start)-\($0.end)" }.joined(separator: ";"),
+            "voices": String(Set(turns.map(\.speaker)).count),
+        ])
+        return turns
     }
 }
 
@@ -44,7 +51,14 @@ struct LSEENDSpeakerDiarizer: SpeakerDiarizer {
             samples,
             sourceSampleRate: sampleRate == diarizer.targetSampleRate ? nil : Double(sampleRate)
         )
-        return SpeakerTurn.turns(in: timeline)
+        let turns = SpeakerTurn.turns(in: timeline)
+        AITrace.record("speakers.modelTurns", [
+            "stage": "speakers",
+            "model": model.lastPathComponent,
+            "turns": turns.map { "\($0.speaker)@\($0.start)-\($0.end)" }.joined(separator: ";"),
+            "voices": String(Set(turns.map(\.speaker)).count),
+        ])
+        return turns
     }
 }
 
